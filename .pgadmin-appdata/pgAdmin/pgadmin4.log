@@ -1,0 +1,136 @@
+2026-09-25 21:53:07,317: WARNING	pgadmin:	There are no saved passwords
+2026-09-25 21:53:09,576: ERROR	pgadmin:	<urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>
+Traceback (most recent call last):
+  File "urllib\request.py", line 1319, in do_open
+  File "http\client.py", line 1367, in request
+  File "http\client.py", line 1413, in _send_request
+  File "http\client.py", line 1362, in endheaders
+  File "http\client.py", line 1122, in _send_output
+  File "http\client.py", line 1066, in send
+  File "http\client.py", line 1501, in connect
+  File "http\client.py", line 1032, in connect
+  File "socket.py", line 868, in create_connection
+  File "socket.py", line 853, in create_connection
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\Alat Tempur\Fly Env\FlyEnv-Data\app\postgresql-18.6\pgsql\pgAdmin 4\web\pgadmin\misc\__init__.py", line 397, in upgrade_check
+    response = urlopen(url, data=data, timeout=5,
+                       context=context)
+  File "urllib\request.py", line 189, in urlopen
+  File "urllib\request.py", line 489, in open
+  File "urllib\request.py", line 506, in _open
+  File "urllib\request.py", line 466, in _call_chain
+  File "urllib\request.py", line 1367, in https_open
+  File "urllib\request.py", line 1322, in do_open
+urllib.error.URLError: <urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>
+2026-09-25 21:59:15,891: ERROR	pgadmin:	<urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>
+Traceback (most recent call last):
+  File "urllib\request.py", line 1319, in do_open
+  File "http\client.py", line 1367, in request
+  File "http\client.py", line 1413, in _send_request
+  File "http\client.py", line 1362, in endheaders
+  File "http\client.py", line 1122, in _send_output
+  File "http\client.py", line 1066, in send
+  File "http\client.py", line 1501, in connect
+  File "http\client.py", line 1032, in connect
+  File "socket.py", line 868, in create_connection
+  File "socket.py", line 853, in create_connection
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\Alat Tempur\Fly Env\FlyEnv-Data\app\postgresql-18.6\pgsql\pgAdmin 4\web\pgadmin\misc\__init__.py", line 397, in upgrade_check
+    response = urlopen(url, data=data, timeout=5,
+                       context=context)
+  File "urllib\request.py", line 189, in urlopen
+  File "urllib\request.py", line 489, in open
+  File "urllib\request.py", line 506, in _open
+  File "urllib\request.py", line 466, in _call_chain
+  File "urllib\request.py", line 1367, in https_open
+  File "urllib\request.py", line 1322, in do_open
+urllib.error.URLError: <urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>
+2026-09-26 00:42:47,078: ERROR	pgadmin:	<urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>
+Traceback (most recent call last):
+  File "urllib\request.py", line 1319, in do_open
+  File "http\client.py", line 1367, in request
+  File "http\client.py", line 1413, in _send_request
+  File "http\client.py", line 1362, in endheaders
+  File "http\client.py", line 1122, in _send_output
+  File "http\client.py", line 1066, in send
+  File "http\client.py", line 1501, in connect
+  File "http\client.py", line 1032, in connect
+  File "socket.py", line 868, in create_connection
+  File "socket.py", line 853, in create_connection
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\Alat Tempur\Fly Env\FlyEnv-Data\app\postgresql-18.6\pgsql\pgAdmin 4\web\pgadmin\misc\__init__.py", line 397, in upgrade_check
+    response = urlopen(url, data=data, timeout=5,
+                       context=context)
+  File "urllib\request.py", line 189, in urlopen
+  File "urllib\request.py", line 489, in open
+  File "urllib\request.py", line 506, in _open
+  File "urllib\request.py", line 466, in _call_chain
+  File "urllib\request.py", line 1367, in https_open
+  File "urllib\request.py", line 1322, in do_open
+urllib.error.URLError: <urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>
+2026-09-26 00:43:37,990: ERROR	pgadmin:	<urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>
+Traceback (most recent call last):
+  File "urllib\request.py", line 1319, in do_open
+  File "http\client.py", line 1367, in request
+  File "http\client.py", line 1413, in _send_request
+  File "http\client.py", line 1362, in endheaders
+  File "http\client.py", line 1122, in _send_output
+  File "http\client.py", line 1066, in send
+  File "http\client.py", line 1501, in connect
+  File "http\client.py", line 1032, in connect
+  File "socket.py", line 868, in create_connection
+  File "socket.py", line 853, in create_connection
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\Alat Tempur\Fly Env\FlyEnv-Data\app\postgresql-18.6\pgsql\pgAdmin 4\web\pgadmin\misc\__init__.py", line 397, in upgrade_check
+    response = urlopen(url, data=data, timeout=5,
+                       context=context)
+  File "urllib\request.py", line 189, in urlopen
+  File "urllib\request.py", line 489, in open
+  File "urllib\request.py", line 506, in _open
+  File "urllib\request.py", line 466, in _call_chain
+  File "urllib\request.py", line 1367, in https_open
+  File "urllib\request.py", line 1322, in do_open
+urllib.error.URLError: <urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>
+2026-09-26 00:56:39,917: ERROR	pgadmin:	<urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>
+Traceback (most recent call last):
+  File "urllib\request.py", line 1319, in do_open
+  File "http\client.py", line 1367, in request
+  File "http\client.py", line 1413, in _send_request
+  File "http\client.py", line 1362, in endheaders
+  File "http\client.py", line 1122, in _send_output
+  File "http\client.py", line 1066, in send
+  File "http\client.py", line 1501, in connect
+  File "http\client.py", line 1032, in connect
+  File "socket.py", line 868, in create_connection
+  File "socket.py", line 853, in create_connection
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\Alat Tempur\Fly Env\FlyEnv-Data\app\postgresql-18.6\pgsql\pgAdmin 4\web\pgadmin\misc\__init__.py", line 397, in upgrade_check
+    response = urlopen(url, data=data, timeout=5,
+                       context=context)
+  File "urllib\request.py", line 189, in urlopen
+  File "urllib\request.py", line 489, in open
+  File "urllib\request.py", line 506, in _open
+  File "urllib\request.py", line 466, in _call_chain
+  File "urllib\request.py", line 1367, in https_open
+  File "urllib\request.py", line 1322, in do_open
+urllib.error.URLError: <urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>
