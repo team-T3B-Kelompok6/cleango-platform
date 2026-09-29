@@ -1,4 +1,50 @@
-# CleanGo Backend API / RPC
+# CleanGo Backend REST API / RPC
+
+## Kontrak REST fase 2–9
+
+Base URL lokal: `http://127.0.0.1:3000/api/v1`. Endpoint berlabel **Bearer**
+membutuhkan header `Authorization: Bearer <access_token>` dari Supabase Auth.
+
+| Method | URL | Auth | Body / Query | Error utama |
+|---|---|---|---|---|
+| POST | `/auth/register` | Public | `email`, `password`, `fullName`, `phone?` | `VALIDATION_ERROR`, `AUTH_ERROR` |
+| POST | `/auth/login` | Public | `email`, `password` | `INVALID_CREDENTIALS` |
+| POST | `/auth/forgot-password` | Public | `email` | `VALIDATION_ERROR` |
+| POST | `/auth/logout` | Bearer | - | `INVALID_TOKEN` |
+| GET | `/auth/me` | Bearer | - | `PROFILE_NOT_FOUND` |
+| GET | `/categories` | Public | - | `INTERNAL_SERVER_ERROR` |
+| GET | `/services` | Public | `page?`, `limit?`, `search?`, `categoryId?` | `VALIDATION_ERROR` |
+| GET | `/services/:id` | Public | - | `SERVICE_NOT_FOUND` |
+| GET | `/addresses` | Bearer | - | `INVALID_TOKEN` |
+| POST | `/addresses` | Bearer | alamat tanpa `userId` | `VALIDATION_ERROR` |
+| PATCH | `/addresses/:id` | Bearer | field alamat yang diubah | `ADDRESS_NOT_FOUND` |
+| DELETE | `/addresses/:id` | Bearer | - | `ADDRESS_NOT_FOUND` |
+| POST | `/bookings` | Bearer | `serviceId`, `addressId`, `bookingDate`, `bookingTime`, `notes?`, `promoCode?` | error service/alamat/promo |
+| GET | `/bookings` | Bearer | `page?`, `limit?`, `status?` | `VALIDATION_ERROR` |
+| GET | `/bookings/active` | Bearer | - | `INVALID_TOKEN` |
+| GET | `/bookings/:id` | Bearer | - | `BOOKING_NOT_FOUND` |
+| POST | `/bookings/:id/cancel` | Bearer | - | `BOOKING_NOT_FOUND`, `INVALID_STATUS_TRANSITION` |
+
+Contoh create booking (Flutter/Dio mengirim JSON yang sama):
+
+```json
+{
+  "serviceId": "<uuid>",
+  "addressId": "<uuid>",
+  "bookingDate": "2026-10-01",
+  "bookingTime": "09:00",
+  "notes": "Mohon bawa alat lengkap",
+  "promoCode": "HEMAT10"
+}
+```
+
+Field `customerId`, harga, discount, total, status, dan cleaner ditolak/tidak
+diterima dari frontend. Identity selalu berasal dari Bearer token; harga dan
+jadwal dihitung oleh RPC transactional.
+
+Response tunggal memakai `{ success, message, data }`. Response list memakai
+`{ success, message, data, meta: { page, limit, total, totalPages } }`. Error
+memakai `{ success: false, error: { code, message, details? } }`.
 
 Semua contoh memakai Supabase JS. JWT customer/admin dikirim oleh Supabase
 client; jangan mengirim `user_id`, role, harga, total, status, atau cleaner dari

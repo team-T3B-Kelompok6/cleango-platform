@@ -14,6 +14,11 @@ Fase 1–9 sudah diimplementasikan:
 - RPC `assign_cleaner` dengan proteksi bentrok jadwal memakai `tstzrange` dan
   `EXCLUDE USING gist`;
 - smoke test transaksi dan validasi migration dari database kosong.
+- REST API Express.js + TypeScript dengan alur
+  `route -> middleware -> controller -> service -> repository -> Supabase`;
+- Auth, katalog kategori/service, alamat customer, dan booking customer;
+- validasi Zod, Bearer-token verification, Helmet, CORS, rate limit, error
+  envelope konsisten, TypeScript strict, build, dan HTTP smoke tests.
 
 Fase 10–20 (status transition, Realtime, payment, review, support, location,
 ETA/risk, reporting, chatbot, seed lengkap, dan test suite penuh) tercatat di
@@ -22,6 +27,10 @@ ETA/risk, reporting, chatbot, seed lengkap, dan test suite penuh) tercatat di
 ## Struktur
 
 ```text
+src/
+  config/ controllers/ middlewares/ repositories/
+  routes/ services/ types/ utils/ validators/
+tests/
 docs/
   API.md
   DATABASE.md
@@ -33,15 +42,57 @@ scripts/
   setup-flyenv.ps1
 supabase/
   local/000_flyenv_bootstrap.sql
-  migrations/001_...sql sampai 017_...sql
+  migrations/001_...sql sampai 018_...sql
+  seed.sql
   tests/phase_1_9_smoke.sql
 ```
 
 ## Requirements
 
+- Node.js 20+
 - PostgreSQL 15+ atau Supabase lokal/cloud
 - Supabase CLI untuk local stack Supabase
 - `psql` untuk menjalankan smoke test langsung
+
+## Menjalankan REST API
+
+Salin `.env.example` menjadi `.env`, lalu isi URL dan key project Supabase.
+`SUPABASE_SECRET_KEY` (atau legacy `SUPABASE_SERVICE_ROLE_KEY`) wajib tetap
+berada di backend dan tidak boleh masuk ke aplikasi mobile/web.
+
+```powershell
+npm install
+npm run dev
+```
+
+API tersedia di `http://127.0.0.1:3000`, health check di `/health`, dan seluruh
+resource API memakai prefix `/api/v1`.
+
+Endpoint fase 2–9:
+
+- `POST /api/v1/auth/register`, `/login`, `/forgot-password`, `/logout`
+- `GET /api/v1/auth/me`
+- `GET /api/v1/categories`
+- `GET /api/v1/services`, `/api/v1/services/:id`
+- `GET|POST /api/v1/addresses`
+- `GET|PATCH|DELETE /api/v1/addresses/:id`
+- `GET|POST /api/v1/bookings`
+- `GET /api/v1/bookings/active`
+- `GET /api/v1/bookings/:id`
+- `POST /api/v1/bookings/:id/cancel`
+
+Verifikasi proyek:
+
+```powershell
+npm run typecheck
+npm run build
+npm test
+```
+
+FlyEnv PostgreSQL biasa tidak menyediakan Supabase Auth/PostgREST. Database
+FlyEnv tetap berguna untuk migration dan SQL smoke test, sedangkan endpoint
+REST ini membutuhkan project Supabase lokal penuh atau Supabase Cloud agar
+Auth dan Data API tersedia.
 
 ## Supabase lokal
 
@@ -56,6 +107,7 @@ menjalankan migration secara acak. Untuk menguji RPC setelah reset:
 
 ```bash
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/tests/phase_1_9_smoke.sql
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/seed.sql
 ```
 
 `phase_1_9_smoke.sql` memakai compatibility table `auth.users` milik FlyEnv.
