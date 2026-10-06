@@ -1,42 +1,42 @@
 import 'dotenv/config';
-import { z } from 'zod';
 
-const envSchema = z.object({
-  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  PORT: z.coerce.number().int().positive().max(65_535).default(3000),
-  SUPABASE_URL: z.string().url().optional(),
-  SUPABASE_ANON_KEY: z.string().min(1).optional(),
-  SUPABASE_SECRET_KEY: z.string().min(1).optional(),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
-  AI_PROVIDER: z.string().default('rule_based'),
-  AI_API_KEY: z.string().optional(),
-  CORS_ORIGIN: z.string().default('http://localhost:3000,http://localhost:5173'),
-});
-
-export type AppEnv = z.infer<typeof envSchema>;
+export interface AppEnv {
+  NODE_ENV: 'development' | 'test' | 'production';
+  PORT: number;
+  DB_HOST: string;
+  DB_PORT: number;
+  DB_USER: string;
+  DB_PASSWORD: string;
+  DB_NAME: string;
+  FRONTEND_ORIGIN: string;
+  JWT_SECRET: string;
+}
 
 let cachedEnv: AppEnv | undefined;
 
 export function getEnv(): AppEnv {
-  cachedEnv ??= envSchema.parse(process.env);
-  return cachedEnv;
-}
-
-interface SupabaseEnv {
-  SUPABASE_URL: string;
-  SUPABASE_ANON_KEY: string;
-  SUPABASE_SERVER_KEY: string;
-}
-
-export function requireSupabaseEnv(): SupabaseEnv {
-  const env = getEnv();
-  const serverKey = env.SUPABASE_SECRET_KEY ?? env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!env.SUPABASE_URL || !env.SUPABASE_ANON_KEY || !serverKey) {
-    throw new Error('Supabase environment variables are not configured');
+  if (cachedEnv) return cachedEnv;
+  const nodeEnv = process.env.NODE_ENV ?? 'development';
+  if (!['development', 'test', 'production'].includes(nodeEnv)) {
+    throw new Error('NODE_ENV tidak valid');
   }
-  return {
-    SUPABASE_URL: env.SUPABASE_URL,
-    SUPABASE_ANON_KEY: env.SUPABASE_ANON_KEY,
-    SUPABASE_SERVER_KEY: serverKey,
+  const port = Number(process.env.PORT ?? 3001);
+  const dbPort = Number(process.env.DB_PORT ?? 3306);
+  if (!Number.isInteger(port) || port <= 0 || port > 65535) throw new Error('PORT tidak valid');
+  if (!Number.isInteger(dbPort) || dbPort <= 0 || dbPort > 65535) throw new Error('DB_PORT tidak valid');
+  const jwtSecret = process.env.JWT_SECRET ?? (nodeEnv === 'production' ? '' : 'cleango-development-only');
+  if (!jwtSecret) throw new Error('JWT_SECRET wajib diisi pada production');
+
+  cachedEnv = {
+    NODE_ENV: nodeEnv as AppEnv['NODE_ENV'],
+    PORT: port,
+    DB_HOST: process.env.DB_HOST ?? '127.0.0.1',
+    DB_PORT: dbPort,
+    DB_USER: process.env.DB_USER ?? 'root',
+    DB_PASSWORD: process.env.DB_PASSWORD ?? '',
+    DB_NAME: process.env.DB_NAME ?? 'cleango',
+    FRONTEND_ORIGIN: process.env.FRONTEND_ORIGIN ?? 'http://localhost:3000',
+    JWT_SECRET: jwtSecret,
   };
+  return cachedEnv;
 }

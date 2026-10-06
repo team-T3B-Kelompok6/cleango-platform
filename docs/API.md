@@ -1,156 +1,42 @@
-# CleanGo Backend REST API / RPC
+# CleanGo REST API
 
-## Kontrak REST fase 2–9
+Base URL lokal: `http://127.0.0.1:3001`.
 
-Base URL lokal: `http://127.0.0.1:3000/api/v1`. Endpoint berlabel **Bearer**
-membutuhkan header `Authorization: Bearer <access_token>` dari Supabase Auth.
+Error JSON: `{ "message": "Pesan error", "code": "APP_ERROR" }`.
 
-| Method | URL | Auth | Body / Query | Error utama |
-|---|---|---|---|---|
-| POST | `/auth/register` | Public | `email`, `password`, `fullName`, `phone?` | `VALIDATION_ERROR`, `AUTH_ERROR` |
-| POST | `/auth/login` | Public | `email`, `password` | `INVALID_CREDENTIALS` |
-| POST | `/auth/forgot-password` | Public | `email` | `VALIDATION_ERROR` |
-| POST | `/auth/logout` | Bearer | - | `INVALID_TOKEN` |
-| GET | `/auth/me` | Bearer | - | `PROFILE_NOT_FOUND` |
-| GET | `/categories` | Public | - | `INTERNAL_SERVER_ERROR` |
-| GET | `/services` | Public | `page?`, `limit?`, `search?`, `categoryId?` | `VALIDATION_ERROR` |
-| GET | `/services/:id` | Public | - | `SERVICE_NOT_FOUND` |
-| GET | `/addresses` | Bearer | - | `INVALID_TOKEN` |
-| POST | `/addresses` | Bearer | alamat tanpa `userId` | `VALIDATION_ERROR` |
-| PATCH | `/addresses/:id` | Bearer | field alamat yang diubah | `ADDRESS_NOT_FOUND` |
-| DELETE | `/addresses/:id` | Bearer | - | `ADDRESS_NOT_FOUND` |
-| POST | `/bookings` | Bearer | `serviceId`, `addressId`, `bookingDate`, `bookingTime`, `notes?`, `promoCode?` | error service/alamat/promo |
-| GET | `/bookings` | Bearer | `page?`, `limit?`, `status?` | `VALIDATION_ERROR` |
-| GET | `/bookings/active` | Bearer | - | `INVALID_TOKEN` |
-| GET | `/bookings/:id` | Bearer | - | `BOOKING_NOT_FOUND` |
-| POST | `/bookings/:id/cancel` | Bearer | - | `BOOKING_NOT_FOUND`, `INVALID_STATUS_TRANSITION` |
+## Authentication
 
-Contoh create booking (Flutter/Dio mengirim JSON yang sama):
+- `POST /api/customer/auth/register`
+- `POST /api/customer/auth/login`
+- `GET /api/customer/auth/me` — Bearer token
+- `POST /api/admin/auth/login`
+- `GET /api/admin/auth/me` — Bearer token admin
 
-```json
-{
-  "serviceId": "<uuid>",
-  "addressId": "<uuid>",
-  "bookingDate": "2026-10-01",
-  "bookingTime": "09:00",
-  "notes": "Mohon bawa alat lengkap",
-  "promoCode": "HEMAT10"
-}
-```
+## Customer catalog
 
-Field `customerId`, harga, discount, total, status, dan cleaner ditolak/tidak
-diterima dari frontend. Identity selalu berasal dari Bearer token; harga dan
-jadwal dihitung oleh RPC transactional.
+- `GET /api/customer/categories`
+- `GET /api/customer/categories/:id`
+- `GET /api/customer/services?search=&category=`
+- `GET /api/customer/services/:id`
 
-Response tunggal memakai `{ success, message, data }`. Response list memakai
-`{ success, message, data, meta: { page, limit, total, totalPages } }`. Error
-memakai `{ success: false, error: { code, message, details? } }`.
+Hanya data aktif yang dikembalikan.
 
-Semua contoh memakai Supabase JS. JWT customer/admin dikirim oleh Supabase
-client; jangan mengirim `user_id`, role, harga, total, status, atau cleaner dari
-input customer.
+## Admin categories
 
-## RPC tersedia (Fase 1–9)
+- `GET /api/admin/categories`
+- `GET /api/admin/categories/:id`
+- `POST /api/admin/categories`
+- `PATCH /api/admin/categories/:id`
+- `DELETE /api/admin/categories/:id`
 
-### `create_booking`
+## Admin services
 
-Membuat booking secara transactional. Hanya user `authenticated`; identitas
-diambil dari `auth.uid()`. Harga dan durasi diambil dari `services`, promo
-divalidasi dan dihitung di database, booking code dibuat dengan counter yang
-aman terhadap race, lalu history `pending` dibuat.
+- `GET /api/admin/services?search=&category=`
+- `GET /api/admin/services/:id`
+- `POST /api/admin/services`
+- `PATCH /api/admin/services/:id`
+- `DELETE /api/admin/services/:id`
 
-| Field | Type | Wajib | Keterangan |
-|---|---|---:|---|
-| `p_service_id` | uuid | ya | Layanan aktif |
-| `p_address_id` | uuid | ya | Alamat milik user |
-| `p_booking_date` | date | ya | Tanggal lokal Asia/Jakarta |
-| `p_booking_time` | time | ya | Jam lokal Asia/Jakarta |
-| `p_notes` | text | tidak | Catatan customer |
-| `p_promo_code` | text | tidak | Kode promo, case-insensitive |
-
-Output: satu row lengkap `bookings`, termasuk `booking_code`, `subtotal`,
-`discount_amount`, `total_price`, waktu terjadwal, dan status `pending`.
-
-Possible errors: `AUTH_REQUIRED`, `PROFILE_NOT_FOUND`, `SERVICE_NOT_FOUND`,
-`SERVICE_INACTIVE`, `ADDRESS_NOT_FOUND`, `ADDRESS_NOT_OWNED`,
-`INVALID_BOOKING_SCHEDULE`, `PROMO_NOT_FOUND`, `PROMO_EXPIRED`,
-`PROMO_INVALID`, `PROMO_ALREADY_USED`, `PROMO_USAGE_LIMIT_REACHED`.
-
-```ts
-const { data, error } = await supabase.rpc('create_booking', {
-  p_service_id: serviceId,
-  p_address_id: addressId,
-  p_booking_date: '2026-10-10',
-  p_booking_time: '09:00:00',
-  p_notes: 'Mohon bawa alat lengkap',
-  p_promo_code: 'HEMAT10'
-})
-```
-
-```json
-{
-  "booking_code": "CG-20260926-0001",
-  "subtotal": 150000,
-  "discount_amount": 15000,
-  "total_price": 135000,
-  "status": "pending"
-}
-```
-
-### `assign_cleaner`
-
-Menugaskan cleaner aktif ke booking berstatus `confirmed`. Hanya admin. Fungsi
-mengunci booking dan cleaner, membuat schedule, mengubah status menjadi
-`cleaner_assigned`, menulis history, dan membuat notification. Konflik waktu
-tetap ditolak oleh exclusion constraint walaupun ada request paralel.
-
-| Field | Type | Wajib |
-|---|---|---:|
-| `p_booking_id` | uuid | ya |
-| `p_cleaner_id` | uuid | ya |
-
-Output: row `bookings` setelah assignment.
-
-Possible errors: `AUTH_REQUIRED`, `FORBIDDEN`, `BOOKING_NOT_FOUND`,
-`INVALID_BOOKING_STATUS`, `CLEANER_NOT_FOUND`, `CLEANER_NOT_ACTIVE`,
-`CLEANER_SCHEDULE_CONFLICT`.
-
-```ts
-const { data, error } = await supabase.rpc('assign_cleaner', {
-  p_booking_id: bookingId,
-  p_cleaner_id: cleanerId
-})
-```
-
-## Query langsung yang tersedia
-
-Customer authenticated dapat membaca catalog aktif, profile/alamat/booking,
-history, payment, notification, promo usage, ETA, support request, dan lokasi
-aktif miliknya sesuai RLS. Admin mendapat akses baca lintas user dan CRUD
-catalog sesuai policy. Insert/update langsung ke booking, schedule, history,
-promo usage, dan notification tidak diberikan kepada client.
-
-```ts
-const { data } = await supabase
-  .from('bookings')
-  .select('*, services(*), booking_status_history(*)')
-  .order('created_at', { ascending: false })
-```
-
-RLS otomatis membatasi hasil customer ke booking miliknya.
-
-## RPC roadmap (belum diimplementasikan)
-
-| RPC | Fase | Tujuan |
-|---|---:|---|
-| `update_booking_status` | 10 | Transition, history, notification, cleaner state |
-| Realtime publications | 11 | Booking/history/notification/location events |
-| `validate_promo`, payment operation | 12 | Promo reusable dan pembayaran mock/manual |
-| `create_review` | 13 | Review completed booking dan rating cleaner |
-| `create_support_request` | 14 | Bantuan untuk booking sendiri |
-| `update_cleaner_location`, `get_latest_cleaner_location` | 15 | Lokasi active booking |
-| `calculate_eta` | 16 | ETA rule-based/provider abstraction |
-| `evaluate_booking_risk` | 17 | Delay/no-show rule-based |
-| `get_admin_dashboard_summary` | 18 | Dashboard/reporting |
-| AI endpoint server-side | 19 | Chatbot dengan scoped customer context |
-| `get_my_bookings`, `get_my_active_booking`, `get_booking_detail`, `mark_notification_as_read` | 20 | API convenience dan final hardening |
+Admin endpoint membutuhkan Bearer token dengan role admin. Controller
+memvalidasi nama, harga `>= 0`, durasi `> 0`, kategori, ID, query, dan boolean.
+Semua SQL hanya berada pada model dan memakai placeholder `?`.

@@ -1,10 +1,13 @@
-import type { User } from '@supabase/supabase-js';
+import type { UserRole } from '../model/user.model.js';
 
 declare global {
   namespace Express {
     interface Request {
-      authUser?: User;
-      accessToken?: string;
+      user?: {
+        id: number;
+        email: string;
+        role: UserRole;
+      };
     }
   }
 }
