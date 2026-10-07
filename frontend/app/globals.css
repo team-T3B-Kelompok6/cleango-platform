@@ -1,0 +1,81 @@
+:root {
+  --background: #f4f6f8;
+  --surface: #ffffff;
+  --foreground: #17202a;
+  --muted: #5d6d7e;
+  --accent: #2563eb;
+  --radius: 1rem;
+  --space-sm: 0.75rem;
+  --space-md: 1.25rem;
+  --space-lg: 2rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+a {
+  font: inherit;
+}
+
+a {
+  color: var(--accent);
+}
+
+.page-shell {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: var(--space-md);
+}
+
+.starter-card {
+  width: min(100%, 42rem);
+  padding: clamp(var(--space-md), 5vw, 3rem);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 1rem 3rem rgb(15 23 42 / 8%);
+}
+
+.starter-card h1 {
+  margin: 0 0 var(--space-md);
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  line-height: 1.05;
+}
+
+.starter-card p {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.starter-card button {
+  cursor: pointer;
+  border: 0;
+  border-radius: 0.5rem;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--accent);
+  color: white;
+}
+
+.eyebrow {
+  margin-top: 0;
+  color: var(--accent) !important;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
