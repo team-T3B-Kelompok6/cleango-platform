@@ -1,5 +1,6 @@
 node_modules/
 .npm-cache*/
+dist/
 .next/
 out/
 coverage/
@@ -8,6 +9,6 @@ coverage/
 .env.*.local
 !.env.example
 *.log
+.pgadmin-appdata/
 .DS_Store
 Thumbs.db
-

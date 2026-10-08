@@ -1,50 +1,58 @@
-# Express + Next.js Starter
+# CleanGo Platform
 
-Fondasi satu repositori untuk backend Express.js dan frontend Next.js App Router. Proyek ini masih berupa setup awal: belum ada slicing UI, resource bisnis, integrasi mobile, tabel, atau seed database.
+Monorepo CleanGo untuk backend Express + TypeScript dan frontend Next.js.
 
 ## Prasyarat
 
-- Node.js 20.9 atau lebih baru (disarankan versi LTS)
+- Node.js 20+
 - npm
-- MariaDB atau MySQL hanya diperlukan saat fitur database mulai dibuat
+- MySQL 8+ atau MariaDB 10.6+
 
 ## Instalasi
 
-```bash
-npm install
-```
-
-Salin konfigurasi contoh bila ingin menjalankan masing-masing aplikasi:
-
 ```powershell
+npm install
 Copy-Item backend/.env.example backend/.env
 Copy-Item frontend/.env.example frontend/.env.local
 ```
 
-Jalankan backend dan frontend pada dua terminal terpisah:
+Jalankan aplikasi pada terminal terpisah:
 
-```bash
+```powershell
 npm run dev:backend
 npm run dev:frontend
 ```
 
-- Backend: http://localhost:3001
-- Health check: http://localhost:3001/api/health
-- Frontend: http://localhost:3000
+- Backend: `http://127.0.0.1:3001`
+- Health check: `GET http://127.0.0.1:3001/health`
+- Frontend: `http://localhost:3000`
 
-Backend tidak membuka koneksi database saat startup. Karena itu, setup dapat dijalankan sebelum MariaDB atau MySQL dipilih dan disiapkan.
+## Database backend
+
+1. Jalankan MySQL/MariaDB dari FlyEnv.
+2. Import `backend/database.sql` melalui phpMyAdmin.
+3. Sesuaikan kredensial pada `backend/.env`.
+
+Jangan commit file `.env`. Gunakan nilai `JWT_SECRET` yang panjang dan acak di
+luar lingkungan lokal.
 
 ## Struktur
 
 ```text
 backend/
-  server.js
+  server.ts
   database.sql
   src/
+    app.ts
+    config/
     controller/
     lib/
+    middleware/
     model/
     routes/
+    types/
+  docs/
+  tests/
 frontend/
   app/
   components/
@@ -53,11 +61,34 @@ frontend/
   types/
 ```
 
-## Batas setup saat ini
+Backend mengikuti alur `Route → Controller → Model → MySQL`.
 
-- `database.sql` sengaja belum memiliki tabel maupun data awal.
-- Pool `mysql2` kompatibel dengan MariaDB dan MySQL.
-- API baru menyediakan health check; endpoint resource dibuat setelah model data disepakati.
-- Frontend baru berisi halaman starter berbasis React Server Component.
-- Belum ada koneksi ke aplikasi mobile.
+## Endpoint backend
 
+Customer/public:
+
+- `POST /api/customer/auth/register`
+- `POST /api/customer/auth/login`
+- `GET /api/customer/auth/me`
+- `GET /api/customer/categories`
+- `GET /api/customer/categories/:id`
+- `GET /api/customer/services?search=&category=`
+- `GET /api/customer/services/:id`
+
+Admin:
+
+- `POST /api/admin/auth/login`
+- `GET /api/admin/auth/me`
+- CRUD `/api/admin/categories`
+- CRUD `/api/admin/services`
+
+Endpoint admin selain login membutuhkan header `Authorization: Bearer <token>`.
+Kontrak API selengkapnya tersedia di `backend/docs/API.md`.
+
+## Verifikasi backend
+
+```powershell
+npm run typecheck --workspace backend
+npm test --workspace backend
+npm run build --workspace backend
+```
