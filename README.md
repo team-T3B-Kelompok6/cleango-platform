@@ -1,7 +1,11 @@
-# CleanGo Backend
+# CleanGo Express + Next.js
 
-REST API CleanGo untuk customer dan admin. Runtime aktif menggunakan Express,
-TypeScript, MariaDB/MySQL, `mysql2/promise`, raw SQL, JWT, dan bcrypt.
+Repositori tugas terdiri dari folder `backend/` dan `frontend/`. Bagian yang
+saat ini dikerjakan adalah REST API CleanGo pada `backend/`; folder `frontend/`
+sengaja masih kosong karena menjadi tanggung jawab anggota frontend.
+
+Backend menggunakan Express, TypeScript, MariaDB/MySQL, `mysql2/promise`, raw
+SQL, JWT, dan bcrypt.
 
 ## Requirement
 
@@ -12,9 +16,10 @@ TypeScript, MariaDB/MySQL, `mysql2/promise`, raw SQL, JWT, dan bcrypt.
 ## Setup dari nol
 
 1. Jalankan MySQL/MariaDB dari FlyEnv.
-2. Import `database.sql` menggunakan database manager FlyEnv atau MySQL client.
-3. Salin `.env.example` menjadi `.env`, lalu sesuaikan kredensial database.
-4. Install dan jalankan aplikasi:
+2. Import `backend/database.sql` menggunakan database manager FlyEnv atau MySQL client.
+3. Masuk ke folder `backend/`.
+4. Salin `.env.example` menjadi `.env`, lalu sesuaikan kredensial database.
+5. Install dan jalankan aplikasi:
 
 ```powershell
 npm install
@@ -49,20 +54,23 @@ Jangan commit `.env`. Gunakan secret JWT yang panjang dan acak di luar lokal.
 ## Struktur runtime
 
 ```text
-server.ts
-database.sql
-src/
-  app.ts
-  config/env.ts
-  lib/                 pool, logger, JWT, AppError
-  middleware/          auth, admin, 404, error
-  model/               satu-satunya lokasi SQL
-  controller/customer/ validasi dan response customer
-  controller/admin/    validasi dan response admin
-  routes/customer/     mapping endpoint customer
-  routes/admin/        mapping endpoint admin
-  types/
-docs/
+express-next-app/
+  backend/
+    server.ts
+    database.sql
+    src/
+      app.ts
+      config/env.ts
+      lib/                 pool, logger, JWT, AppError
+      middleware/          auth, admin, 404, error
+      model/               satu-satunya lokasi SQL
+      controller/customer/ validasi dan response customer
+      controller/admin/    validasi dan response admin
+      routes/customer/     mapping endpoint customer
+      routes/admin/        mapping endpoint admin
+      types/
+    docs/
+  frontend/                 masih kosong
 ```
 
 Alur wajib aplikasi adalah `Route → Controller → Model → MySQL`.
@@ -122,5 +130,5 @@ Response sukses menggunakan status `201`; validasi gagal `400`; token tidak
 valid `401`; bukan admin `403`; data tidak ditemukan `404`; dan error internal
 `500`.
 
-Kontrak rinci tersedia di `docs/API.md`. Keputusan refactor dan batas fase ada
-di `docs/REFACTOR_ANALYSIS.md`.
+Kontrak rinci tersedia di `backend/docs/API.md`. Keputusan refactor dan batas
+fase ada di `backend/docs/REFACTOR_ANALYSIS.md`.
