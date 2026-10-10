@@ -6,11 +6,15 @@ Error JSON: `{ "message": "Pesan error", "code": "APP_ERROR" }`.
 
 ## Authentication
 
+- `POST /api/auth/login` — kontrak login frontend admin (`username`, `password`, `remember`)
 - `POST /api/customer/auth/register`
 - `POST /api/customer/auth/login`
 - `GET /api/customer/auth/me` — Bearer token
 - `POST /api/admin/auth/login`
 - `GET /api/admin/auth/me` — Bearer token admin
+
+Akun dummy lokal dari `database.sql`: `admin@cleango.id` / `321321`.
+Password disimpan sebagai hash bcrypt.
 
 ## Customer catalog
 

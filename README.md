@@ -33,6 +33,9 @@ npm run dev:frontend
 2. Import `backend/database.sql` melalui phpMyAdmin.
 3. Sesuaikan kredensial pada `backend/.env`.
 
+Akun admin dummy lokal: `admin@cleango.id` / `321321`. Password tersimpan
+sebagai hash bcrypt di database, bukan teks biasa.
+
 Jangan commit file `.env`. Gunakan nilai `JWT_SECRET` yang panjang dan acak di
 luar lingkungan lokal.
 
@@ -77,6 +80,7 @@ Customer/public:
 
 Admin:
 
+- `POST /api/auth/login` (kontrak login frontend admin)
 - `POST /api/admin/auth/login`
 - `GET /api/admin/auth/me`
 - CRUD `/api/admin/categories`
