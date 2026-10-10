@@ -1,26 +1,28 @@
 {
-  "name": "frontend",
-  "version": "1.0.0",
+  "name": "cleango-frontend",
   "private": true,
+  "version": "1.0.0",
   "scripts": {
-    "dev": "next dev",
-    "build": "tsc --noEmit && next build",
-    "start": "next start",
-    "lint": "eslint ."
+    "dev": "next dev --hostname 127.0.0.1",
+    "build": "next build",
+    "start": "next start --hostname 127.0.0.1",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write app components lib types next.config.ts package.json tsconfig.json",
+    "format:check": "prettier --check app components lib types next.config.ts package.json tsconfig.json"
   },
   "dependencies": {
+    "leaflet": "^1.9.4",
     "next": "16.4.0",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
-    "server-only": "^0.0.1"
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "server-only": "0.0.1"
   },
   "devDependencies": {
-    "@types/node": "^24.7.0",
+    "@types/leaflet": "^1.9.22",
+    "@types/node": "^24.0.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
-    "eslint": "^9.39.5",
-    "eslint-config-next": "16.4.0",
-    "typescript": "^5.9.3"
+    "prettier": "^3.9.9",
+    "typescript": "~5.9.3"
   }
 }
-

@@ -1,0 +1,285 @@
+{
+  "report": [
+    {
+      "route": "/",
+      "title": "Dashboard Utama | Cleango",
+      "width": {
+        "viewport": 1280,
+        "document": 1265
+      }
+    },
+    {
+      "route": "/pesanan",
+      "title": "Kelola Pesanan | Cleango",
+      "width": {
+        "viewport": 1280,
+        "document": 1265
+      }
+    },
+    {
+      "route": "/jadwal",
+      "title": "Kelola Jadwal | Cleango",
+      "width": {
+        "viewport": 1280,
+        "document": 1265
+      }
+    },
+    {
+      "route": "/layanan",
+      "title": "Kelola Layanan | Cleango",
+      "width": {
+        "viewport": 1280,
+        "document": 1265
+      }
+    },
+    {
+      "route": "/faq",
+      "title": "Kelola FAQ | Cleango",
+      "width": {
+        "viewport": 1280,
+        "document": 1265
+      }
+    },
+    {
+      "route": "/petugas",
+      "title": "Kelola Data Petugas | Cleango",
+      "width": {
+        "viewport": 1280,
+        "document": 1265
+      }
+    },
+    {
+      "route": "/customer",
+      "title": "Kelola Data Customer | Cleango",
+      "width": {
+        "viewport": 1280,
+        "document": 1265
+      }
+    },
+    {
+      "route": "/laporan",
+      "title": "Laporan Keuangan & Operasional | Cleango",
+      "width": {
+        "viewport": 1280,
+        "document": 1265
+      }
+    },
+    {
+      "route": "/",
+      "screen": {
+        "width": 360,
+        "height": 800
+      },
+      "viewport": 360,
+      "document": 345
+    },
+    {
+      "route": "/pesanan",
+      "screen": {
+        "width": 360,
+        "height": 800
+      },
+      "viewport": 360,
+      "document": 345
+    },
+    {
+      "route": "/jadwal",
+      "screen": {
+        "width": 360,
+        "height": 800
+      },
+      "viewport": 360,
+      "document": 345
+    },
+    {
+      "route": "/layanan",
+      "screen": {
+        "width": 360,
+        "height": 800
+      },
+      "viewport": 360,
+      "document": 345
+    },
+    {
+      "route": "/faq",
+      "screen": {
+        "width": 360,
+        "height": 800
+      },
+      "viewport": 360,
+      "document": 345
+    },
+    {
+      "route": "/petugas",
+      "screen": {
+        "width": 360,
+        "height": 800
+      },
+      "viewport": 360,
+      "document": 345
+    },
+    {
+      "route": "/customer",
+      "screen": {
+        "width": 360,
+        "height": 800
+      },
+      "viewport": 360,
+      "document": 345
+    },
+    {
+      "route": "/laporan",
+      "screen": {
+        "width": 360,
+        "height": 800
+      },
+      "viewport": 360,
+      "document": 345
+    },
+    {
+      "route": "/",
+      "screen": {
+        "width": 768,
+        "height": 1024
+      },
+      "viewport": 768,
+      "document": 753
+    },
+    {
+      "route": "/pesanan",
+      "screen": {
+        "width": 768,
+        "height": 1024
+      },
+      "viewport": 768,
+      "document": 753
+    },
+    {
+      "route": "/jadwal",
+      "screen": {
+        "width": 768,
+        "height": 1024
+      },
+      "viewport": 768,
+      "document": 753
+    },
+    {
+      "route": "/layanan",
+      "screen": {
+        "width": 768,
+        "height": 1024
+      },
+      "viewport": 768,
+      "document": 753
+    },
+    {
+      "route": "/faq",
+      "screen": {
+        "width": 768,
+        "height": 1024
+      },
+      "viewport": 768,
+      "document": 755
+    },
+    {
+      "route": "/petugas",
+      "screen": {
+        "width": 768,
+        "height": 1024
+      },
+      "viewport": 768,
+      "document": 753
+    },
+    {
+      "route": "/customer",
+      "screen": {
+        "width": 768,
+        "height": 1024
+      },
+      "viewport": 768,
+      "document": 753
+    },
+    {
+      "route": "/laporan",
+      "screen": {
+        "width": 768,
+        "height": 1024
+      },
+      "viewport": 768,
+      "document": 753
+    },
+    {
+      "route": "/",
+      "screen": {
+        "width": 800,
+        "height": 360
+      },
+      "viewport": 800,
+      "document": 785
+    },
+    {
+      "route": "/pesanan",
+      "screen": {
+        "width": 800,
+        "height": 360
+      },
+      "viewport": 800,
+      "document": 785
+    },
+    {
+      "route": "/jadwal",
+      "screen": {
+        "width": 800,
+        "height": 360
+      },
+      "viewport": 800,
+      "document": 785
+    },
+    {
+      "route": "/layanan",
+      "screen": {
+        "width": 800,
+        "height": 360
+      },
+      "viewport": 800,
+      "document": 785
+    },
+    {
+      "route": "/faq",
+      "screen": {
+        "width": 800,
+        "height": 360
+      },
+      "viewport": 800,
+      "document": 785
+    },
+    {
+      "route": "/petugas",
+      "screen": {
+        "width": 800,
+        "height": 360
+      },
+      "viewport": 800,
+      "document": 785
+    },
+    {
+      "route": "/customer",
+      "screen": {
+        "width": 800,
+        "height": 360
+      },
+      "viewport": 800,
+      "document": 785
+    },
+    {
+      "route": "/laporan",
+      "screen": {
+        "width": 800,
+        "height": 360
+      },
+      "viewport": 800,
+      "document": 785
+    }
+  ],
+  "errors": []
+}

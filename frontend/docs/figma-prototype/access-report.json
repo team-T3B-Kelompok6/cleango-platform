@@ -1,0 +1,83 @@
+[
+  {
+    "name": "dashboard",
+    "requestedNode": "327-2",
+    "status": 200,
+    "url": "https://www.figma.com/proto/ymMzgCxXWLUncDBzi1e4Oq/Cleango?node-id=327-2&starting-point-node-id=327-2",
+    "title": "Cleango - CleanGo_Dashboard",
+    "canvas": 1,
+    "screenshot": "dashboard.png"
+  },
+  {
+    "name": "pesanan",
+    "requestedNode": "329-2",
+    "status": 200,
+    "url": "https://www.figma.com/proto/ymMzgCxXWLUncDBzi1e4Oq/Cleango?node-id=329-2&starting-point-node-id=329-2",
+    "title": "Cleango - CleanGo_Dashboard",
+    "canvas": 1,
+    "screenshot": "pesanan.png"
+  },
+  {
+    "name": "login",
+    "requestedNode": "328-2",
+    "status": 200,
+    "url": "https://www.figma.com/proto/ymMzgCxXWLUncDBzi1e4Oq/Cleango?node-id=328-2&starting-point-node-id=328-2",
+    "title": "Cleango - CleanGo_Dashboard",
+    "canvas": 1,
+    "screenshot": "login.png"
+  },
+  {
+    "name": "petugas",
+    "requestedNode": "332-2",
+    "status": 200,
+    "url": "https://www.figma.com/proto/ymMzgCxXWLUncDBzi1e4Oq/Cleango?node-id=332-2&starting-point-node-id=332-2",
+    "title": "Cleango - CleanGo_Dashboard",
+    "canvas": 1,
+    "screenshot": "petugas.png"
+  },
+  {
+    "name": "jadwal",
+    "requestedNode": "330-2",
+    "status": 200,
+    "url": "https://www.figma.com/proto/ymMzgCxXWLUncDBzi1e4Oq/Cleango?node-id=330-2&starting-point-node-id=330-2",
+    "title": "Cleango - CleanGo_Dashboard",
+    "canvas": 1,
+    "screenshot": "jadwal.png"
+  },
+  {
+    "name": "layanan",
+    "requestedNode": "331-2",
+    "status": 200,
+    "url": "https://www.figma.com/proto/ymMzgCxXWLUncDBzi1e4Oq/Cleango?node-id=331-2&starting-point-node-id=331-2",
+    "title": "Cleango - CleanGo_Dashboard",
+    "canvas": 1,
+    "screenshot": "layanan.png"
+  },
+  {
+    "name": "faq",
+    "requestedNode": "548-58",
+    "status": 200,
+    "url": "https://www.figma.com/proto/ymMzgCxXWLUncDBzi1e4Oq/Cleango?node-id=548-58&starting-point-node-id=548-58",
+    "title": "Cleango - CleanGo_Dashboard",
+    "canvas": 1,
+    "screenshot": "faq.png"
+  },
+  {
+    "name": "customer",
+    "requestedNode": "333-2",
+    "status": 200,
+    "url": "https://www.figma.com/proto/ymMzgCxXWLUncDBzi1e4Oq/Cleango?node-id=333-2&starting-point-node-id=333-2",
+    "title": "Cleango - CleanGo_Dashboard",
+    "canvas": 1,
+    "screenshot": "customer.png"
+  },
+  {
+    "name": "laporan",
+    "requestedNode": "334-2",
+    "status": 200,
+    "url": "https://www.figma.com/proto/ymMzgCxXWLUncDBzi1e4Oq/Cleango?node-id=334-2&starting-point-node-id=334-2",
+    "title": "Cleango - CleanGo_Dashboard",
+    "canvas": 1,
+    "screenshot": "laporan.png"
+  }
+]

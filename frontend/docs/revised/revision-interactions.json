@@ -1,0 +1,1257 @@
+{
+  "findings": [
+    {
+      "name": "Staff status filter and linked assignment history",
+      "value": true
+    },
+    {
+      "name": "Customer statistics and linked order history",
+      "value": true
+    },
+    {
+      "name": "Report period and all four report tabs retain layout and query",
+      "value": true
+    },
+    {
+      "name": "FAQ edit and delete actions work while answer is collapsed",
+      "value": true
+    },
+    {
+      "name": "Date and notification dropdown motion, Escape and read filter",
+      "value": true
+    },
+    {
+      "name": "Account menu opens and dismisses",
+      "value": true
+    },
+    {
+      "name": "Modal Escape returns keyboard focus to trigger",
+      "value": true
+    },
+    {
+      "name": "Optional staff and payment fields render from API, not hardcoded",
+      "value": true
+    },
+    {
+      "name": "Local SVG metadata and rendered image slots load on all nine pages",
+      "value": true
+    }
+  ],
+  "errors": [],
+  "assets": [
+    {
+      "name": "15c3c.svg",
+      "bytes": 339,
+      "width": "15",
+      "height": "15",
+      "viewBox": "0 0 15 15"
+    },
+    {
+      "name": "2b48d.svg",
+      "bytes": 1533,
+      "width": "19",
+      "height": "19",
+      "viewBox": "0 0 19 19"
+    },
+    {
+      "name": "35f4f.svg",
+      "bytes": 339,
+      "width": "15",
+      "height": "15",
+      "viewBox": "0 0 15 15"
+    },
+    {
+      "name": "43d15.svg",
+      "bytes": 756,
+      "width": "20",
+      "height": "20",
+      "viewBox": "0 0 20 20"
+    },
+    {
+      "name": "562bc.svg",
+      "bytes": 343,
+      "width": "17",
+      "height": "17",
+      "viewBox": "0 0 17 17"
+    },
+    {
+      "name": "56a73.svg",
+      "bytes": 1479,
+      "width": "17",
+      "height": "17",
+      "viewBox": "0 0 17 17"
+    },
+    {
+      "name": "59901.svg",
+      "bytes": 1674,
+      "width": "15",
+      "height": "15",
+      "viewBox": "0 0 15 15"
+    },
+    {
+      "name": "61e27.svg",
+      "bytes": 778,
+      "width": "20",
+      "height": "20",
+      "viewBox": "0 0 20 20"
+    },
+    {
+      "name": "6bc33.svg",
+      "bytes": 1769,
+      "width": "17",
+      "height": "17",
+      "viewBox": "0 0 17 17"
+    },
+    {
+      "name": "6de53.svg",
+      "bytes": 1160,
+      "width": "14",
+      "height": "14",
+      "viewBox": "0 0 14 14"
+    },
+    {
+      "name": "6e0a2.svg",
+      "bytes": 1469,
+      "width": "17",
+      "height": "17",
+      "viewBox": "0 0 17 17"
+    },
+    {
+      "name": "74c74.svg",
+      "bytes": 815,
+      "width": "17",
+      "height": "17",
+      "viewBox": "0 0 17 17"
+    },
+    {
+      "name": "8844d.svg",
+      "bytes": 619,
+      "width": "16",
+      "height": "16",
+      "viewBox": "0 0 16 16"
+    },
+    {
+      "name": "8bf6e.svg",
+      "bytes": 1922,
+      "width": "16.6667",
+      "height": "16.6667",
+      "viewBox": "0 0 16.6667 16.6667"
+    },
+    {
+      "name": "9bce3.svg",
+      "bytes": 1522,
+      "width": "17",
+      "height": "17",
+      "viewBox": "0 0 17 17"
+    },
+    {
+      "name": "a0a88.svg",
+      "bytes": 1440,
+      "width": "20",
+      "height": "20",
+      "viewBox": "0 0 20 20"
+    },
+    {
+      "name": "a7088.svg",
+      "bytes": 2163,
+      "width": "18",
+      "height": "18",
+      "viewBox": "0 0 18 18"
+    },
+    {
+      "name": "ae5bf.svg",
+      "bytes": 1201,
+      "width": "20",
+      "height": "20",
+      "viewBox": "0 0 20 20"
+    },
+    {
+      "name": "b9432.svg",
+      "bytes": 1299,
+      "width": "19",
+      "height": "19",
+      "viewBox": "0 0 19 19"
+    },
+    {
+      "name": "c64d8.svg",
+      "bytes": 1226,
+      "width": "17",
+      "height": "17",
+      "viewBox": "0 0 17 17"
+    },
+    {
+      "name": "d07f9.svg",
+      "bytes": 1184,
+      "width": "17",
+      "height": "17",
+      "viewBox": "0 0 17 17"
+    },
+    {
+      "name": "d0bcf.svg",
+      "bytes": 763,
+      "width": "16",
+      "height": "16",
+      "viewBox": "0 0 16 16"
+    },
+    {
+      "name": "e96ee.svg",
+      "bytes": 1163,
+      "width": "17",
+      "height": "17",
+      "viewBox": "0 0 17 17"
+    },
+    {
+      "name": "panda.svg",
+      "bytes": 883,
+      "width": "64",
+      "height": "64",
+      "viewBox": "0 0 64 64"
+    }
+  ],
+  "slots": [
+    {
+      "route": "/login",
+      "images": [
+        {
+          "src": "/assets/a7088.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/panda.svg",
+          "loaded": true,
+          "width": 40,
+          "height": 40,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/15c3c.svg",
+          "loaded": true,
+          "width": 14,
+          "height": 14,
+          "objectFit": "fill"
+        }
+      ]
+    },
+    {
+      "route": "/",
+      "images": [
+        {
+          "src": "/assets/a7088.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/9bce3.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/6e0a2.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/6bc33.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/c64d8.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/8bf6e.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/d07f9.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/74c74.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/56a73.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/e96ee.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/d0bcf.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/8844d.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/15c3c.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/59901.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/b9432.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/panda.svg",
+          "loaded": true,
+          "width": 26,
+          "height": 26,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/35f4f.svg",
+          "loaded": true,
+          "width": 12,
+          "height": 12,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/2b48d.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/a0a88.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/ae5bf.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/43d15.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/61e27.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/15c3c.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/c64d8.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/43d15.svg",
+          "loaded": true,
+          "width": 9.984375,
+          "height": 9.984375,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/562bc.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/ae5bf.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/43d15.svg",
+          "loaded": true,
+          "width": 9.984375,
+          "height": 9.984375,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/562bc.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/c64d8.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/43d15.svg",
+          "loaded": true,
+          "width": 9.984375,
+          "height": 9.984375,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/562bc.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/6de53.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        }
+      ]
+    },
+    {
+      "route": "/pesanan",
+      "images": []
+    },
+    {
+      "route": "/jadwal",
+      "images": [
+        {
+          "src": "/assets/a7088.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/9bce3.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/6e0a2.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/6bc33.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/c64d8.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/8bf6e.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/d07f9.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/74c74.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/56a73.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/e96ee.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/d0bcf.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/8844d.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/15c3c.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/59901.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/b9432.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/panda.svg",
+          "loaded": true,
+          "width": 26,
+          "height": 26,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/35f4f.svg",
+          "loaded": true,
+          "width": 12,
+          "height": 12,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/59901.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/6bc33.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/d07f9.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/43d15.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/43d15.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/43d15.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/6de53.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        }
+      ]
+    },
+    {
+      "route": "/layanan",
+      "images": [
+        {
+          "src": "/assets/a7088.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/9bce3.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/6e0a2.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/6bc33.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/c64d8.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/8bf6e.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/d07f9.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/74c74.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/56a73.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/e96ee.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/d0bcf.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/8844d.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/15c3c.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/59901.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/b9432.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/panda.svg",
+          "loaded": true,
+          "width": 26,
+          "height": 26,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/35f4f.svg",
+          "loaded": true,
+          "width": 12,
+          "height": 12,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/c64d8.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/a0a88.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/6de53.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        }
+      ]
+    },
+    {
+      "route": "/petugas",
+      "images": [
+        {
+          "src": "/assets/a7088.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/9bce3.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/6e0a2.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/6bc33.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/c64d8.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/8bf6e.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/d07f9.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/74c74.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/56a73.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/e96ee.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/d0bcf.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/8844d.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/15c3c.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/59901.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/b9432.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/panda.svg",
+          "loaded": true,
+          "width": 26,
+          "height": 26,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/35f4f.svg",
+          "loaded": true,
+          "width": 12,
+          "height": 12,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/d07f9.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/43d15.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/ae5bf.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/6de53.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        }
+      ]
+    },
+    {
+      "route": "/customer",
+      "images": [
+        {
+          "src": "/assets/a7088.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/9bce3.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/6e0a2.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/6bc33.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/c64d8.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/8bf6e.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/d07f9.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/74c74.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/56a73.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/e96ee.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/d0bcf.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/8844d.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/15c3c.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/59901.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/b9432.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/panda.svg",
+          "loaded": true,
+          "width": 26,
+          "height": 26,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/35f4f.svg",
+          "loaded": true,
+          "width": 12,
+          "height": 12,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/d07f9.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/43d15.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/ae5bf.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/6de53.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        }
+      ]
+    },
+    {
+      "route": "/laporan",
+      "images": [
+        {
+          "src": "/assets/a7088.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/9bce3.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/6e0a2.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/6bc33.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/c64d8.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/8bf6e.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/d07f9.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/74c74.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/56a73.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/e96ee.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/d0bcf.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/8844d.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/15c3c.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/59901.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/b9432.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/panda.svg",
+          "loaded": true,
+          "width": 26,
+          "height": 26,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/35f4f.svg",
+          "loaded": true,
+          "width": 12,
+          "height": 12,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/59901.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 19.99999237060547,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/d07f9.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/a0a88.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        },
+        {
+          "src": "/assets/6de53.svg",
+          "loaded": true,
+          "width": 20,
+          "height": 20,
+          "objectFit": "fill"
+        }
+      ]
+    },
+    {
+      "route": "/faq",
+      "images": []
+    }
+  ]
+}

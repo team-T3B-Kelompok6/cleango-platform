@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-08",
+  "environment": "Production Next; reduced motion; temporary API fixture; all OSM tiles intercepted; intentional 503 tile responses",
+  "findings": [
+    "Failed tiles expose retry while task details remain usable",
+    "Retry recovers the map after tiles become available",
+    "Reduced motion disables task detail animation",
+    "Desktop task actions fit fully above the fixed footer",
+    "Keyboard Tab does not focus the inert page outside the native modal",
+    "Simulation does not submit mutations to orders or API",
+    "Escape restores focus to the tracking trigger",
+    "Reopening discards local simulation state",
+    "Task detail link opens the existing server-rendered order route"
+  ],
+  "errors": []
+}

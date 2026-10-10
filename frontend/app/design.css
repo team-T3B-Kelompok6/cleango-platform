@@ -1,0 +1,705 @@
+/* Visual refinements checked page by page against the Cleango prototype.
+   Existing design tokens and components remain the source of shared values. */
+:root {
+  --design-text: var(--color-001);
+  --design-muted: var(--color-020);
+  --design-soft: var(--color-008);
+  --design-green: var(--color-003);
+  --design-border: var(--color-004);
+  --design-radius: var(--space-12);
+  --design-section-gap: var(--space-24);
+  --design-row-gap: var(--space-10);
+  --design-control-height: var(--space-40);
+  --design-metric-height: 10.333333rem;
+  --design-staff-height: 12.5rem;
+  --design-customer-height: 11.166667rem;
+  --design-chart-height: 19.166667rem;
+  --design-faq-action-offset: 3.583333rem;
+  --design-faq-height: 8.666667rem;
+  --design-faq-meta-inset: 5.833333rem;
+}
+
+/* Operational screens use quiet surfaces and reserve badges for statuses. */
+.nav-link.active {
+  box-shadow: none;
+}
+.metric-card {
+  border-radius: var(--space-10);
+  box-shadow: none;
+}
+.metric-card:hover {
+  box-shadow: none;
+  transform: none;
+}
+.metric-label {
+  font-size: var(--text-10);
+  font-weight: 600;
+}
+.metric-note {
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  font-size: var(--text-10);
+  line-height: 1.5;
+}
+
+/* 01 — Login. The password-recovery link is omitted by product decision. */
+.login-help-button {
+  font-size: var(--text-12);
+}
+.login-panda {
+  height: var(--space-34);
+  width: var(--space-40);
+}
+.login-intro .login-eyebrow {
+  font-size: var(--text-11);
+}
+.login-intro p {
+  font-size: var(--text-12);
+  line-height: 1.6;
+}
+.login-center .login-access {
+  font-size: var(--text-10);
+  margin-top: var(--space-20);
+}
+.login-center .login-card form {
+  margin-top: var(--space-24);
+  gap: var(--space-13);
+}
+.login-center .login-field label {
+  font-size: var(--text-10);
+  font-weight: 700;
+}
+.login-center .login-card input:not([type='checkbox']) {
+  font-size: var(--text-13);
+  color: var(--design-text);
+}
+.login-remember {
+  font-size: var(--text-10);
+  margin-block: var(--space-4);
+}
+.login-submit > .button {
+  font-size: var(--text-16);
+  gap: var(--space-10);
+  box-shadow: 0 var(--space-2) var(--space-6) var(--color-011);
+}
+.login-submit .icon {
+  filter: brightness(0) invert(1);
+}
+.login-tip p {
+  font-size: var(--text-11);
+}
+.login-center .login-copyright {
+  font-size: var(--text-10);
+  margin-top: var(--space-2);
+}
+
+/* Shared admin shell and 02 — Dashboard. */
+.page-title h1 {
+  font-size: var(--text-24);
+  line-height: 1.3;
+}
+.page-title p {
+  color: var(--design-muted);
+  font-size: var(--text-12);
+  line-height: 1.45;
+}
+.metric-card {
+  min-height: var(--design-metric-height);
+  padding: var(--space-16);
+}
+.metric-value span {
+  font-family: var(--font-body), sans-serif;
+}
+.global-search input {
+  font-size: var(--text-12);
+}
+.global-search > button {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  padding: 0;
+}
+.global-search:focus-within > button {
+  opacity: 1;
+  width: var(--space-20);
+}
+.profile > .icon {
+  margin-left: var(--space-10);
+  width: var(--space-12);
+  height: var(--space-12);
+}
+.account-popover {
+  inset: var(--space-65) var(--space-24) auto auto;
+  margin: 0;
+  width: min(23rem, calc(100vw - 2rem));
+  padding: var(--space-18);
+  border: 1px solid var(--design-border);
+  border-radius: var(--design-radius);
+  color: var(--design-text);
+  background: var(--color-007);
+  box-shadow: 0 var(--space-10) var(--space-32) var(--color-031);
+}
+.account-popover p {
+  margin: var(--space-6) 0 var(--space-16);
+  color: var(--design-muted);
+}
+.section-heading .text-link {
+  font-size: var(--text-16);
+  flex-shrink: 0;
+}
+.activity-list {
+  gap: var(--design-row-gap);
+}
+.activity-icon {
+  width: var(--space-40);
+  height: var(--space-40);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: var(--space-10);
+  background: var(--color-010);
+}
+.activity-copy > small {
+  display: block;
+  color: var(--design-muted);
+  font-size: var(--text-10);
+  margin-bottom: var(--space-3);
+}
+.activity-copy > .activity-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-14);
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-10);
+  color: var(--design-muted);
+}
+.activity-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.activity-meta .icon {
+  width: var(--space-10);
+  height: var(--space-10);
+}
+.admin-heading-actions > .button,
+.admin-heading-actions .admin-add,
+.admin-heading-actions .date-filter {
+  font-size: var(--text-16);
+  min-height: var(--design-control-height);
+}
+
+/* 03 — Orders: stable filtering and compact operational actions. */
+.resource-filter-bar {
+  margin: var(--design-section-gap) 0 var(--space-15);
+}
+.resource-filter-bar .next-filter {
+  margin: 0;
+  gap: 0;
+}
+.resource-filter-bar .order-tabs {
+  margin: 0;
+  background: var(--color-007);
+}
+.order-tabs button:not(.selected) {
+  color: var(--design-text);
+}
+.order-card-top {
+  gap: var(--space-8);
+}
+.order-id {
+  color: var(--design-text);
+  font-size: var(--text-11);
+  font-weight: 700;
+}
+.order-id:hover {
+  text-decoration: underline;
+}
+.order-time {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.order-time .ui-icon {
+  width: var(--space-9);
+  height: var(--space-9);
+}
+.order-more {
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  min-width: var(--space-28);
+  min-height: var(--space-28);
+  border-radius: var(--space-6);
+}
+.order-more:hover {
+  background: var(--color-010);
+}
+.order-more-menu {
+  border: 1px solid var(--design-border);
+  border-radius: var(--design-radius);
+  padding: var(--space-12);
+  background: var(--color-007);
+  color: var(--design-text);
+  box-shadow: 0 var(--space-10) var(--space-32) var(--color-031);
+}
+.order-info {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto;
+}
+.order-address {
+  min-width: 0;
+}
+.order-actions .assign-button .ui-icon {
+  width: var(--space-15);
+  height: var(--space-15);
+}
+
+/* 04 — Schedule: two-column shift sections with an actionable spare card. */
+.shift-section {
+  margin-top: var(--space-24);
+}
+.shift-heading {
+  justify-content: flex-start;
+  gap: var(--space-10);
+  margin-bottom: var(--space-12);
+}
+.shift-count {
+  padding: var(--space-3) var(--space-8);
+  border-radius: var(--space-20);
+  background: var(--color-010);
+  color: var(--design-text);
+  font-size: var(--text-9);
+}
+.shift-card {
+  padding: var(--space-16);
+  min-height: 13.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.shift-card h3 {
+  margin-top: var(--space-12);
+}
+.shift-card .shift-address {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-size: var(--text-10);
+  color: var(--design-soft);
+}
+.shift-address .ui-icon {
+  width: var(--space-12);
+  height: var(--space-12);
+}
+.shift-card-bottom {
+  width: 100%;
+  margin-top: auto;
+  padding-top: var(--space-12);
+}
+.empty-slot {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.empty-slot > .icon {
+  opacity: 0.7;
+}
+.empty-slot h3 {
+  color: var(--design-muted);
+}
+.empty-slot p {
+  font-size: var(--text-10);
+  color: var(--design-soft);
+  max-width: 22rem;
+}
+.empty-slot .button {
+  margin-top: var(--space-10);
+}
+
+/* 05 — Services: single-line chips and a compact price/action footer. */
+.figma-feature-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-8);
+}
+.figma-feature-list > span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-5);
+  min-height: var(--space-24);
+  padding: var(--space-4) var(--space-8);
+  border: 1px solid var(--design-border);
+  border-radius: var(--space-7);
+  color: var(--design-muted);
+  background: var(--color-002);
+  font-size: var(--text-9);
+  line-height: 1.4;
+}
+.figma-feature-list .ui-icon {
+  width: var(--space-12);
+  height: var(--space-12);
+  color: var(--color-023);
+}
+.figma-service-row {
+  min-height: 13rem;
+  padding: var(--space-12) var(--space-18);
+}
+.figma-service-top h3 {
+  font-size: var(--text-14);
+  line-height: 1.4;
+}
+.figma-kicker {
+  font-size: var(--text-9);
+  color: var(--design-muted);
+}
+.service-package {
+  display: inline-block;
+  padding: var(--space-3) var(--space-7);
+  color: var(--color-023);
+  background: var(--color-022);
+  border-radius: var(--space-5);
+}
+.figma-service-bottom {
+  margin-top: var(--space-12);
+  padding-top: var(--space-13);
+}
+.service-price {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-5);
+}
+.service-price strong {
+  font-size: var(--text-18);
+}
+.service-price small {
+  color: var(--design-muted);
+  font-size: var(--text-8);
+}
+.edit-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  color: var(--color-023);
+  font-size: var(--text-16);
+  font-weight: 700;
+  padding: var(--space-6) 0;
+}
+.edit-action .ui-icon {
+  width: var(--space-16);
+  height: var(--space-16);
+}
+.edit-action:hover {
+  color: var(--design-green);
+}
+.metric-icon > .ui-icon {
+  width: var(--space-20);
+  height: var(--space-20);
+  color: var(--tone);
+}
+
+/* 06 / 07 — Staff and customers. */
+.resource-staff .figma-person-row {
+  min-height: var(--design-staff-height);
+}
+.resource-customers .figma-person-row {
+  min-height: var(--design-customer-height);
+}
+.figma-person-row {
+  padding: var(--space-18);
+  gap: var(--space-18);
+}
+.figma-person-main h3 {
+  font-size: var(--text-14);
+  margin: var(--space-7) 0;
+  gap: var(--space-4);
+}
+.figma-person-main p {
+  font-size: var(--text-9);
+  margin-bottom: var(--space-12);
+}
+.figma-person-meta {
+  font-size: var(--text-9);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.figma-person-actions {
+  gap: var(--space-7);
+  flex-shrink: 0;
+}
+.figma-person-actions .edit-action {
+  font-size: var(--text-16);
+}
+.figma-person-actions .button {
+  font-size: var(--text-12);
+  padding: var(--space-7) var(--space-12);
+  min-height: var(--space-32);
+}
+.person-missing {
+  color: var(--design-soft);
+  font-size: var(--text-9);
+}
+.staff-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--color-039);
+  color: var(--color-038);
+  border-radius: var(--space-20);
+  padding: var(--space-2) var(--space-6);
+  font-size: var(--text-9);
+}
+.staff-rating .ui-icon {
+  width: var(--space-9);
+  height: var(--space-9);
+}
+.customer-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  color: var(--design-muted);
+  font-size: var(--text-9);
+}
+.customer-chips > span {
+  padding: var(--space-5) var(--space-7);
+  background: var(--color-002);
+  border-radius: var(--space-6);
+  overflow-wrap: anywhere;
+}
+.resource-customers .resource-filter-bar:has(.next-date-filter:empty) {
+  margin: var(--space-16) 0;
+}
+
+/* 08 — Reports. */
+.report-panels {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--space-16);
+  margin-top: var(--space-24);
+}
+.report-panels .admin-panel {
+  margin: 0;
+  padding: var(--space-18);
+}
+.report-panels h2 {
+  font-size: var(--text-14);
+}
+.finance-chart-caption {
+  color: var(--design-soft);
+  font-size: var(--text-10);
+}
+.report-panels .finance-chart {
+  height: var(--design-chart-height);
+  padding-top: var(--space-40);
+}
+.report-panels .finance-bar {
+  max-width: var(--space-46);
+  width: 60%;
+}
+.payment-list {
+  display: grid;
+  gap: var(--space-18);
+  margin-top: var(--space-24);
+}
+.payment-list label {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-8);
+  font-size: var(--text-10);
+}
+.payment-list progress {
+  width: 100%;
+  height: var(--space-7);
+  appearance: none;
+  display: block;
+  margin-top: var(--space-6);
+}
+.payment-list progress::-webkit-progress-bar {
+  background: var(--color-002);
+  border-radius: var(--space-20);
+}
+.payment-list progress::-webkit-progress-value {
+  background: var(--design-green);
+  border-radius: var(--space-20);
+}
+.payment-list progress::-moz-progress-bar {
+  background: var(--design-green);
+  border-radius: var(--space-20);
+}
+.report-payment-empty {
+  margin: var(--space-28) 0;
+  font-size: var(--text-11);
+  color: var(--design-muted);
+  line-height: 1.7;
+}
+.report-tabs {
+  margin: var(--space-16) 0;
+}
+.report-tabs a {
+  padding: var(--space-10) var(--space-14);
+  font-size: var(--text-10);
+  font-weight: 700;
+  white-space: nowrap;
+  border-radius: var(--space-7);
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+.report-tabs a[aria-current] {
+  color: var(--color-007);
+  background: var(--color-095);
+}
+.report-tabs a:hover {
+  transform: translateY(-1px);
+}
+.report-period label {
+  display: grid;
+  gap: var(--space-8);
+  font-size: var(--text-12);
+}
+.report-period input {
+  border: 1px solid var(--design-border);
+  border-radius: var(--space-8);
+  padding: var(--space-10);
+  width: 100%;
+}
+.report-period .button {
+  margin-top: var(--space-12);
+}
+.finance-order-row h3 {
+  font-size: var(--text-12);
+}
+.finance-order-row small,
+.finance-order-row p {
+  font-size: var(--text-9);
+  color: var(--design-muted);
+}
+.finance-order-row > strong {
+  color: var(--color-023);
+  font-size: var(--text-12);
+}
+.report-panels + .report-tabs {
+  min-width: 0;
+  overflow: auto;
+}
+
+/* 09 — FAQ: actions remain available while the answer is collapsed. */
+.faq-most-read {
+  font-size: var(--text-18) !important;
+  line-height: 1.4;
+}
+.faq-design-row {
+  position: relative;
+  min-height: var(--design-faq-height);
+}
+.faq-header-actions {
+  position: absolute;
+  display: flex;
+  gap: var(--space-4);
+  right: var(--design-faq-action-offset);
+  top: var(--space-17);
+  z-index: 1;
+}
+.icon-action {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: var(--space-28);
+  height: var(--space-28);
+  border-radius: var(--space-6);
+  font-size: 0;
+  color: var(--design-muted);
+}
+.icon-action:hover {
+  background: var(--color-010);
+  color: var(--color-023);
+}
+.icon-action .ui-icon {
+  width: var(--space-16);
+  height: var(--space-16);
+}
+.faq-row-meta {
+  padding-right: var(--design-faq-meta-inset);
+}
+.faq-row-meta small {
+  font-size: var(--text-10);
+}
+.faq-design-row summary strong {
+  font-size: var(--text-16);
+}
+.faq-filter-bar .order-tabs .selected {
+  background: var(--design-green);
+}
+@media (prefers-reduced-motion: reduce) {
+  .account-popover:popover-open,
+  .order-more-menu:popover-open {
+    animation: none;
+  }
+  .report-tabs a,
+  .faq-design-row summary > .icon {
+    transition: none;
+  }
+}
+.faq-design-row details[open] summary > .icon {
+  transform: rotate(180deg);
+}
+.faq-design-row summary > .icon {
+  transition: transform 0.2s ease;
+}
+.account-popover:popover-open,
+.order-more-menu:popover-open {
+  animation: admin-content-in 0.22s ease both;
+}
+
+@media (max-width: 700px) {
+  .report-panels {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .figma-person-actions .edit-action {
+    font-size: var(--text-13);
+  }
+  .figma-person-actions .button {
+    font-size: var(--text-11);
+  }
+  .faq-design-row summary strong {
+    font-size: var(--text-14);
+  }
+  .figma-service-bottom {
+    flex-wrap: wrap;
+    gap: var(--space-12);
+  }
+  .figma-row-actions {
+    flex-wrap: wrap;
+  }
+  .edit-action {
+    font-size: var(--text-13);
+  }
+  .order-info {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .order-address {
+    grid-column: 1 / -1;
+  }
+  .order-info > strong {
+    justify-self: end;
+  }
+  .section-heading .text-link {
+    font-size: var(--text-12);
+    white-space: normal;
+    flex-shrink: 1;
+  }
+  .activity-copy > .activity-meta {
+    gap: var(--space-4);
+  }
+  .login-center .login-card {
+    padding: var(--space-27) var(--space-22);
+  }
+  .login-center .login-copyright {
+    margin-top: var(--space-10);
+  }
+}
