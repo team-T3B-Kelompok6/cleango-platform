@@ -1,0 +1,125 @@
+{
+  "findings": [
+    {
+      "name": "Order tabs keep identical page width",
+      "value": [
+        {
+          "left": 248,
+          "width": 1017
+        },
+        {
+          "left": 248,
+          "width": 1017
+        },
+        {
+          "left": 248,
+          "width": 1017
+        },
+        {
+          "left": 248,
+          "width": 1017
+        }
+      ]
+    },
+    {
+      "name": "Date filtering and empty state",
+      "value": true
+    },
+    {
+      "name": "Order footer stays fixed during scrolling",
+      "value": {
+        "before": {
+          "x": 253.5,
+          "y": 704.03125,
+          "width": 758,
+          "height": 64.96875
+        },
+        "after": {
+          "x": 253.5,
+          "y": 704.03125,
+          "width": 758,
+          "height": 64.96875
+        }
+      }
+    },
+    {
+      "name": "Detail wider; same height as assignment",
+      "value": {
+        "detail": {
+          "x": 252.5,
+          "y": 50,
+          "width": 760,
+          "height": 720
+        },
+        "assignment": {
+          "x": 362.5,
+          "y": 50,
+          "width": 540,
+          "height": 720
+        }
+      }
+    },
+    {
+      "name": "Assignment server field validation",
+      "value": true
+    },
+    {
+      "name": "Assignment PATCH and revalidation",
+      "value": true
+    },
+    {
+      "name": "SOP tabs equal size and summary wheel does not scroll",
+      "value": true
+    },
+    {
+      "name": "Server validation for negative price",
+      "value": true
+    },
+    {
+      "name": "POST service redirects to [id], persists in API across reload",
+      "value": true
+    },
+    {
+      "name": "PATCH service and revalidate list",
+      "value": true
+    },
+    {
+      "name": "FAQ POST and DELETE through Server Actions",
+      "value": true
+    },
+    {
+      "name": "API 400 field errors shown in useActionState",
+      "value": true
+    },
+    {
+      "name": "Missing record renders notFound",
+      "value": true
+    },
+    {
+      "name": "API empty array renders empty state",
+      "value": true
+    },
+    {
+      "name": "API 503 renders error boundary",
+      "value": true
+    },
+    {
+      "name": "CSV export fetches API records",
+      "value": true
+    },
+    {
+      "name": "Mobile navigation opens and navigates",
+      "value": true
+    },
+    {
+      "name": "Protected route redirects unauthenticated visitor",
+      "value": true
+    }
+  ],
+  "consoleErrors": [
+    {
+      "message": "Error: Minified React error #441; visit https://react.dev/errors/441 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "expectedError": true
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+
+> cleango-frontend@1.0.0 build
+> next build
+
+▲ Next.js 16.4.0 (Turbopack)
+- Environments: .env.local
+✓ Running next.config.ts took 28ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 319ms
+  Running TypeScript ...
+  Finished TypeScript in 1230ms ...
+  Collecting page data using 11 workers ...
+  Generating static pages using 11 workers (0/2) ...
+✓ Generating static pages using 11 workers (2/2) in 112ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ƒ /customer
+├ ƒ /customer/[id]
+├ ƒ /customer/new
+├ ƒ /faq
+├ ƒ /faq/[id]
+├ ƒ /faq/new
+├ ƒ /jadwal
+├ ƒ /jadwal/[id]
+├ ƒ /jadwal/new
+├ ƒ /laporan
+├ ƒ /laporan/export
+├ ƒ /layanan
+├ ƒ /layanan/[id]
+├ ƒ /layanan/new
+├ ƒ /login
+├ ƒ /pesanan
+├ ƒ /pesanan/[id]
+├ ƒ /pesanan/new
+├ ƒ /petugas
+├ ƒ /petugas/[id]
+└ ƒ /petugas/new
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand

@@ -1,0 +1,335 @@
+{
+  "date": "2026-10-08",
+  "environment": "Next.js production build with temporary HTTP fixture outside app",
+  "report": [
+    {
+      "name": "login",
+      "width": 1280,
+      "height": 820,
+      "bounds": {
+        "viewport": 1280,
+        "document": 1265,
+        "font": "\"DM Sans\", \"DM Sans Fallback\", sans-serif"
+      }
+    },
+    {
+      "name": "login",
+      "width": 768,
+      "height": 1024,
+      "bounds": {
+        "viewport": 768,
+        "document": 753,
+        "font": "\"DM Sans\", \"DM Sans Fallback\", sans-serif"
+      }
+    },
+    {
+      "name": "login",
+      "width": 360,
+      "height": 800,
+      "bounds": {
+        "viewport": 360,
+        "document": 345,
+        "font": "\"DM Sans\", \"DM Sans Fallback\", sans-serif"
+      }
+    },
+    {
+      "name": "login",
+      "width": 800,
+      "height": 360,
+      "bounds": {
+        "viewport": 800,
+        "document": 785,
+        "font": "\"DM Sans\", \"DM Sans Fallback\", sans-serif"
+      }
+    },
+    {
+      "name": "dashboard",
+      "width": 1280,
+      "height": 820,
+      "bounds": {
+        "viewport": 1280,
+        "document": 1265
+      }
+    },
+    {
+      "name": "dashboard",
+      "width": 768,
+      "height": 1024,
+      "bounds": {
+        "viewport": 768,
+        "document": 753
+      }
+    },
+    {
+      "name": "dashboard",
+      "width": 360,
+      "height": 800,
+      "bounds": {
+        "viewport": 360,
+        "document": 345
+      }
+    },
+    {
+      "name": "dashboard",
+      "width": 800,
+      "height": 360,
+      "bounds": {
+        "viewport": 800,
+        "document": 785
+      }
+    },
+    {
+      "name": "pesanan",
+      "width": 1280,
+      "height": 820,
+      "bounds": {
+        "viewport": 1280,
+        "document": 1265
+      }
+    },
+    {
+      "name": "pesanan",
+      "width": 768,
+      "height": 1024,
+      "bounds": {
+        "viewport": 768,
+        "document": 753
+      }
+    },
+    {
+      "name": "pesanan",
+      "width": 360,
+      "height": 800,
+      "bounds": {
+        "viewport": 360,
+        "document": 345
+      }
+    },
+    {
+      "name": "pesanan",
+      "width": 800,
+      "height": 360,
+      "bounds": {
+        "viewport": 800,
+        "document": 785
+      }
+    },
+    {
+      "name": "jadwal",
+      "width": 1280,
+      "height": 820,
+      "bounds": {
+        "viewport": 1280,
+        "document": 1265
+      }
+    },
+    {
+      "name": "jadwal",
+      "width": 768,
+      "height": 1024,
+      "bounds": {
+        "viewport": 768,
+        "document": 753
+      }
+    },
+    {
+      "name": "jadwal",
+      "width": 360,
+      "height": 800,
+      "bounds": {
+        "viewport": 360,
+        "document": 345
+      }
+    },
+    {
+      "name": "jadwal",
+      "width": 800,
+      "height": 360,
+      "bounds": {
+        "viewport": 800,
+        "document": 785
+      }
+    },
+    {
+      "name": "layanan",
+      "width": 1280,
+      "height": 820,
+      "bounds": {
+        "viewport": 1280,
+        "document": 1265
+      }
+    },
+    {
+      "name": "layanan",
+      "width": 768,
+      "height": 1024,
+      "bounds": {
+        "viewport": 768,
+        "document": 753
+      }
+    },
+    {
+      "name": "layanan",
+      "width": 360,
+      "height": 800,
+      "bounds": {
+        "viewport": 360,
+        "document": 345
+      }
+    },
+    {
+      "name": "layanan",
+      "width": 800,
+      "height": 360,
+      "bounds": {
+        "viewport": 800,
+        "document": 785
+      }
+    },
+    {
+      "name": "petugas",
+      "width": 1280,
+      "height": 820,
+      "bounds": {
+        "viewport": 1280,
+        "document": 1265
+      }
+    },
+    {
+      "name": "petugas",
+      "width": 768,
+      "height": 1024,
+      "bounds": {
+        "viewport": 768,
+        "document": 753
+      }
+    },
+    {
+      "name": "petugas",
+      "width": 360,
+      "height": 800,
+      "bounds": {
+        "viewport": 360,
+        "document": 345
+      }
+    },
+    {
+      "name": "petugas",
+      "width": 800,
+      "height": 360,
+      "bounds": {
+        "viewport": 800,
+        "document": 785
+      }
+    },
+    {
+      "name": "customer",
+      "width": 1280,
+      "height": 820,
+      "bounds": {
+        "viewport": 1280,
+        "document": 1265
+      }
+    },
+    {
+      "name": "customer",
+      "width": 768,
+      "height": 1024,
+      "bounds": {
+        "viewport": 768,
+        "document": 753
+      }
+    },
+    {
+      "name": "customer",
+      "width": 360,
+      "height": 800,
+      "bounds": {
+        "viewport": 360,
+        "document": 345
+      }
+    },
+    {
+      "name": "customer",
+      "width": 800,
+      "height": 360,
+      "bounds": {
+        "viewport": 800,
+        "document": 785
+      }
+    },
+    {
+      "name": "laporan",
+      "width": 1280,
+      "height": 820,
+      "bounds": {
+        "viewport": 1280,
+        "document": 1265
+      }
+    },
+    {
+      "name": "laporan",
+      "width": 768,
+      "height": 1024,
+      "bounds": {
+        "viewport": 768,
+        "document": 753
+      }
+    },
+    {
+      "name": "laporan",
+      "width": 360,
+      "height": 800,
+      "bounds": {
+        "viewport": 360,
+        "document": 345
+      }
+    },
+    {
+      "name": "laporan",
+      "width": 800,
+      "height": 360,
+      "bounds": {
+        "viewport": 800,
+        "document": 785
+      }
+    },
+    {
+      "name": "faq",
+      "width": 1280,
+      "height": 820,
+      "bounds": {
+        "viewport": 1280,
+        "document": 1265
+      }
+    },
+    {
+      "name": "faq",
+      "width": 768,
+      "height": 1024,
+      "bounds": {
+        "viewport": 768,
+        "document": 755
+      }
+    },
+    {
+      "name": "faq",
+      "width": 360,
+      "height": 800,
+      "bounds": {
+        "viewport": 360,
+        "document": 345
+      }
+    },
+    {
+      "name": "faq",
+      "width": 800,
+      "height": 360,
+      "bounds": {
+        "viewport": 800,
+        "document": 785
+      }
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,281 @@
+/* Layout refinements after the original Cleango design styles. */
+.login-submit > .button {
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+}
+.login-panda {
+  display: grid;
+  place-items: center;
+}
+.notification-popover {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 7rem);
+}
+.notification-body {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.notification-item {
+  padding: var(--space-15) var(--space-21);
+  border-bottom: 1px solid var(--border);
+  line-height: 1.6;
+}
+.notification-item:hover {
+  background: var(--color-156);
+}
+.notification-popover > .modal-footer {
+  flex-shrink: 0;
+  background: var(--surface);
+}
+.next-form .form-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7-2);
+  min-width: 0;
+}
+.next-form .form-grid > div > label {
+  color: var(--color-126);
+  font-weight: 600;
+}
+.next-form .form-grid > .full-width {
+  grid-column: 1/-1;
+}
+.modal[open]:not(.sop-dialog) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.modal:not(.sop-dialog) > .modal-header {
+  flex-shrink: 0;
+}
+.modal:not(.sop-dialog) > .next-form {
+  flex: 1;
+  min-height: 0;
+}
+.modal:not(.sop-dialog) .next-form > .modal-body {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  overflow-y: auto;
+}
+.modal:not(.sop-dialog) > .modal-body {
+  overflow-y: auto;
+  min-height: 0;
+}
+.modal .next-form > .modal-footer {
+  background: var(--surface);
+  flex-shrink: 0;
+}
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+.next-filter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-18);
+  margin-top: var(--space-18);
+  margin-bottom: var(--space-18);
+}
+.next-filter .date-filter-anchor {
+  align-self: flex-end;
+}
+.global-search {
+  width: min(32.5rem, 100%);
+  min-width: 0;
+}
+.order-list {
+  min-width: 0;
+}
+.record-detail {
+  line-height: 1.7;
+}
+.record-detail dd {
+  white-space: pre-line;
+}
+.admin-heading-actions form {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+}
+.admin-heading-actions input {
+  padding: var(--space-7-8);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+}
+.faq-design-row {
+  min-width: 0;
+}
+.faq-design-row strong,
+.figma-person-main p,
+.figma-service-top h3 {
+  overflow-wrap: anywhere;
+}
+.finance-metrics .metric-value {
+  overflow-wrap: anywhere;
+}
+.mobile-nav-panel .nav-link.active {
+  color: var(--color-007);
+}
+@media (max-width: 700px) {
+  .header {
+    padding: 0 var(--space-15);
+    gap: var(--space-12);
+  }
+  .header .mobile-toggle {
+    display: block;
+  }
+  .header-right {
+    margin-left: auto;
+    gap: var(--space-9);
+  }
+  .global-search {
+    display: none;
+  }
+  .page-title {
+    flex-wrap: wrap;
+  }
+  .next-filter .date-filter-anchor {
+    align-self: flex-start;
+  }
+  .order-actions {
+    flex-wrap: wrap;
+  }
+  .order-info {
+    flex-wrap: wrap;
+  }
+  .order-info > span {
+    flex-basis: 100%;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .order-card-top {
+    flex-wrap: wrap;
+  }
+  .notification-popover {
+    right: -5rem;
+    width: min(35rem, calc(100vw - 2rem));
+  }
+  .date-popover {
+    width: min(29rem, calc(100vw - 3rem));
+  }
+  .record-page .page-title .button {
+    width: 100%;
+    justify-content: center;
+  }
+  .finance-order-row {
+    flex-wrap: wrap;
+    gap: var(--space-12);
+  }
+}
+
+.staff-fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.staff-fieldset legend {
+  font-weight: 600;
+  color: var(--color-126);
+  margin-bottom: var(--space-9-6);
+}
+.compact-staff {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-9);
+}
+.compact-staff label {
+  display: flex;
+  gap: var(--space-8-4);
+  align-items: center;
+  padding: var(--space-12);
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: var(--color-067);
+}
+.compact-staff input {
+  width: auto;
+  accent-color: var(--green);
+}
+.assignment-summary {
+  padding: var(--space-18) var(--space-24);
+  border-bottom: 1px solid var(--border);
+  background: var(--color-067);
+  flex-shrink: 0;
+}
+.assignment-summary p {
+  color: var(--muted);
+  margin-top: var(--space-6);
+}
+.modal.order-form-dialog > .next-form {
+  flex: 1;
+}
+.mobile-search {
+  display: none;
+}
+.next-filter[aria-busy='true'] .order-tabs {
+  opacity: 0.65;
+}
+@media (max-width: 700px) {
+  .mobile-search.global-search {
+    display: flex;
+    width: 100%;
+    margin-bottom: var(--space-18);
+  }
+  .compact-staff {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mobile-toggle {
+  padding: var(--space-9);
+  border-radius: 0.65rem;
+  color: var(--text);
+}
+.mobile-toggle:hover {
+  background: var(--surface-soft);
+}
+
+.next-date-filter {
+  position: relative;
+}
+.admin-heading-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+.faq-filter-bar .next-filter {
+  min-width: 0;
+  flex: 1;
+  margin: 0;
+  gap: 0;
+}
+.faq-in-page-search {
+  margin: 0;
+}
+.faq-filter-bar .order-tabs {
+  margin: 0;
+}
+@media (max-width: 700px) {
+  .admin-heading-actions {
+    width: 100%;
+  }
+  .admin-heading-actions > .admin-add {
+    flex: 1;
+  }
+  .next-date-filter .date-popover {
+    left: 0;
+    right: auto;
+  }
+  .faq-filter-bar .next-filter {
+    width: 100%;
+    flex-basis: 100%;
+  }
+}

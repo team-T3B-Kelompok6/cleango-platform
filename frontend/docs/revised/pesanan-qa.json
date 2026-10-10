@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-08",
+  "environment": "Next.js dev with temporary HTTP fixture outside app",
+  "report": [
+    {
+      "name": "pesanan",
+      "width": 1280,
+      "height": 820,
+      "bounds": {
+        "viewport": 1280,
+        "document": 1265
+      }
+    },
+    {
+      "name": "pesanan",
+      "width": 768,
+      "height": 1024,
+      "bounds": {
+        "viewport": 768,
+        "document": 753
+      }
+    },
+    {
+      "name": "pesanan",
+      "width": 360,
+      "height": 800,
+      "bounds": {
+        "viewport": 360,
+        "document": 345
+      }
+    },
+    {
+      "name": "pesanan",
+      "width": 800,
+      "height": 360,
+      "bounds": {
+        "viewport": 800,
+        "document": 785
+      }
+    }
+  ],
+  "errors": []
+}
