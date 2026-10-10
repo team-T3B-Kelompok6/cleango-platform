@@ -435,6 +435,18 @@ CREATE TABLE IF NOT EXISTS admin_audit_logs (
 ) ENGINE=InnoDB;
 
 -- Initial master data. These inserts are safe to run more than once.
+-- Dummy admin for local development: admin@cleango.id / 321321
+-- The password is stored as a bcrypt hash, never as plain text.
+INSERT INTO users (name, email, password_hash, role, is_active) VALUES
+  ('CleanGo Admin', 'admin@cleango.id',
+   '$2b$12$Q9y1zdGchHC.UCIv4vLF3.U/HNDQph43Zdnttu8YXeYb19z0e3Wgm',
+   'admin', TRUE)
+ON DUPLICATE KEY UPDATE
+  name = VALUES(name),
+  password_hash = VALUES(password_hash),
+  role = VALUES(role),
+  is_active = VALUES(is_active);
+
 INSERT INTO service_categories (name, description, is_active) VALUES
   ('Rumah', 'Layanan kebersihan rumah', TRUE),
   ('Kamar dan Kos', 'Layanan kebersihan kamar atau tempat kos', TRUE),

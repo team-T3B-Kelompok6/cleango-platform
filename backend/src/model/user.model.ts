@@ -10,6 +10,7 @@ export interface User extends RowDataPacket {
   passwordHash: string;
   phone: string | null;
   role: UserRole;
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -17,6 +18,7 @@ export interface User extends RowDataPacket {
 export async function findUserByEmail(email: string): Promise<User | null> {
   const [rows] = await pool.query<User[]>(
     `SELECT id, name, email, password_hash AS passwordHash, phone, role,
+            is_active AS isActive,
             created_at AS createdAt, updated_at AS updatedAt
      FROM users WHERE email = ? LIMIT 1`,
     [email],
@@ -27,6 +29,7 @@ export async function findUserByEmail(email: string): Promise<User | null> {
 export async function findUserById(id: number): Promise<User | null> {
   const [rows] = await pool.query<User[]>(
     `SELECT id, name, email, password_hash AS passwordHash, phone, role,
+            is_active AS isActive,
             created_at AS createdAt, updated_at AS updatedAt
      FROM users WHERE id = ? LIMIT 1`,
     [id],

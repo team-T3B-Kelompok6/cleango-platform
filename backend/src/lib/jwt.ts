@@ -8,11 +8,13 @@ export interface TokenPayload {
   role: UserRole;
 }
 
+export const ACCESS_TOKEN_EXPIRES_IN_SECONDS = 7 * 24 * 60 * 60;
+
 export function createAccessToken(user: User): string {
   return jwt.sign(
     { id: user.id, email: user.email, role: user.role } satisfies TokenPayload,
     getEnv().JWT_SECRET,
-    { expiresIn: '7d' },
+    { expiresIn: ACCESS_TOKEN_EXPIRES_IN_SECONDS },
   );
 }
 
