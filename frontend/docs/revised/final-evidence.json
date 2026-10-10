@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-08",
+  "framework": "Next.js App Router / RSC",
+  "pages": 9,
+  "viewportChecks": 36,
+  "flowChecks": 18,
+  "additionalInteractionChecks": 9,
+  "missingCssVariables": [],
+  "documentationLinks": 69,
+  "normalConsoleErrors": 0,
+  "backendIntegration": "pending team Express API",
+  "figmaLayerVerification": "limited by MCP quota"
+}

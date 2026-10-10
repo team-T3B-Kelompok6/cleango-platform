@@ -1,0 +1,167 @@
+{
+  "date": "2026-10-08",
+  "environment": "Production Next.js + external HTTP fixture; map tiles mocked only during automated QA",
+  "findings": [
+    {
+      "name": "Tracking opens with five selectable demo people and map markers",
+      "value": true
+    },
+    {
+      "name": "Stale location shown explicitly",
+      "value": true
+    },
+    {
+      "name": "Search, status filter, empty state and reset",
+      "value": true
+    },
+    {
+      "name": "Simulation starts, advances timeline and pauses",
+      "value": true
+    },
+    {
+      "name": "Simulation completes and stops automatically",
+      "value": true
+    },
+    {
+      "name": "Simulation reset returns to initial task step",
+      "value": true
+    },
+    {
+      "name": "Rapid selection keeps selected map marker in view",
+      "value": true
+    },
+    {
+      "name": "Map marker selection updates person and task details",
+      "value": true
+    },
+    {
+      "name": "Tracking footer stays outside scrolling content",
+      "value": true
+    },
+    {
+      "name": "Contact link uses selected person",
+      "value": true
+    },
+    {
+      "name": "Tracking fits desktop, tablet, mobile and landscape",
+      "value": [
+        {
+          "width": 1280,
+          "height": 820,
+          "bounds": {
+            "viewport": 1280,
+            "width": 1056,
+            "height": 772,
+            "scroll": 1054,
+            "client": 1054,
+            "bodyScroll": 1265
+          }
+        },
+        {
+          "width": 768,
+          "height": 1024,
+          "bounds": {
+            "viewport": 768,
+            "width": 723,
+            "height": 780,
+            "scroll": 721,
+            "client": 721,
+            "bodyScroll": 753
+          }
+        },
+        {
+          "width": 360,
+          "height": 800,
+          "bounds": {
+            "viewport": 360,
+            "width": 315,
+            "height": 776,
+            "scroll": 313,
+            "client": 313,
+            "bodyScroll": 345
+          }
+        },
+        {
+          "width": 800,
+          "height": 360,
+          "bounds": {
+            "viewport": 800,
+            "width": 755,
+            "height": 312,
+            "scroll": 753,
+            "client": 753,
+            "bodyScroll": 785
+          }
+        }
+      ]
+    },
+    {
+      "name": "Escape dismisses dialog and map can reopen cleanly",
+      "value": true
+    },
+    {
+      "name": "Staff row preselects its person",
+      "value": true
+    },
+    {
+      "name": "Active order opens assigned person tracking",
+      "value": true
+    },
+    {
+      "name": "Staff detail exposes tracking",
+      "value": true
+    }
+  ],
+  "layouts": [
+    {
+      "width": 1280,
+      "height": 820,
+      "bounds": {
+        "viewport": 1280,
+        "width": 1056,
+        "height": 772,
+        "scroll": 1054,
+        "client": 1054,
+        "bodyScroll": 1265
+      }
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "bounds": {
+        "viewport": 768,
+        "width": 723,
+        "height": 780,
+        "scroll": 721,
+        "client": 721,
+        "bodyScroll": 753
+      }
+    },
+    {
+      "width": 360,
+      "height": 800,
+      "bounds": {
+        "viewport": 360,
+        "width": 315,
+        "height": 776,
+        "scroll": 313,
+        "client": 313,
+        "bodyScroll": 345
+      }
+    },
+    {
+      "width": 800,
+      "height": 360,
+      "bounds": {
+        "viewport": 800,
+        "width": 755,
+        "height": 312,
+        "scroll": 753,
+        "client": 753,
+        "bodyScroll": 785
+      }
+    }
+  ],
+  "errors": [],
+  "tileRequestsIntercepted": 22
+}
