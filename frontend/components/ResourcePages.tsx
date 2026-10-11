@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { list, detail } from '@/lib/api';
 import { resources, rupiah, valueText, shiftOf } from '@/lib/resources';
 import { Filters, SearchInput } from './Filters';
@@ -11,6 +12,8 @@ import { PeopleList } from './PeopleList';
 import { FaqList } from './FaqList';
 import { ScheduleList } from './ScheduleList';
 import { TrackingButton } from './tracking/TrackingButton';
+import { DeleteRecordButton } from './DeleteRecordButton';
+import { AssignmentFormServer } from './AssignmentFormServer';
 import type { Resource, RecordData, Search, Order } from '@/types';
 function query(search: Search, key: string) {
   const value = search[key];
@@ -26,6 +29,16 @@ export async function ResourceListPage({
 }) {
   const config = resources[resource];
   let records = await list(resource);
+  const today = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Jakarta',
+  }).format(new Date());
+  const dateCounts: Record<string, number> = {};
+  if (resource === 'orders' || resource === 'schedules') {
+    for (const record of records) {
+      const date = String(record.date);
+      dateCounts[date] = (dateCounts[date] ?? 0) + 1;
+    }
+  }
   if (resource === 'customers') {
     const orders = await list<Order>('orders');
     records = records.map((customer) => {
@@ -85,8 +98,9 @@ export async function ResourceListPage({
       label={label}
       title={'Detail & Ubah ' + config.singular}
       subtitle={'#' + item.id}
-      wide={resource === 'orders'}
+      wide={resource === 'orders' || resource === 'services'}
       dialogClass={resource === 'orders' ? 'order-form-dialog' : ''}
+      dialogIcon={resource === 'orders' ? 'edit' : undefined}
       className={
         resource === 'faqs'
           ? 'icon-action'
@@ -117,18 +131,24 @@ export async function ResourceListPage({
         <div className="admin-heading-actions">
           {resource === 'staff' && <TrackingButton />}
           {(resource === 'orders' || resource === 'schedules') && (
-            <Filters date />
+            <Filters date dateCounts={dateCounts} today={today} />
           )}
-          <DialogTrigger
-            label={'Tambah ' + config.singular + ' Baru'}
-            title={'Tambah ' + config.singular + ' Baru'}
-            className="button primary admin-add"
-            icon={resource === 'schedules' ? undefined : 'plus'}
-            wide={resource === 'orders'}
-            dialogClass={resource === 'orders' ? 'order-form-dialog' : ''}
-          >
-            <ResourceFormServer resource={resource} />
-          </DialogTrigger>
+          {config.canCreate && (
+            <DialogTrigger
+              label={'Tambah ' + config.singular + ' Baru'}
+              title={'Tambah ' + config.singular + ' Baru'}
+              className="button primary admin-add"
+              icon="plus"
+              wide={resource === 'services'}
+              subtitle={
+                resource === 'services'
+                  ? 'Atur detail paket, harga, dan fasilitas layanan.'
+                  : undefined
+              }
+            >
+              <ResourceFormServer resource={resource} />
+            </DialogTrigger>
+          )}
         </div>
       </div>
       {query(search, 'saved') && (
@@ -147,7 +167,15 @@ export async function ResourceListPage({
           resource === 'faqs' ? 'faq-filter-bar' : 'resource-filter-bar'
         }
       >
-        <Filters tabs={config.tabs} />
+        <Filters
+          tabs={
+            resource === 'staff' &&
+            (records.some((person) => person.status === 'Nonaktif') ||
+              tab === 'Nonaktif')
+              ? [...(config.tabs ?? []), 'Nonaktif']
+              : config.tabs
+          }
+        />
         <SearchInput mobile={resource !== 'faqs'} faq={resource === 'faqs'} />
       </div>
       <div
@@ -198,7 +226,11 @@ export async function ResourceListPage({
         {!shown.length && resource !== 'schedules' && (
           <div className="empty-state">
             <h3>Belum ada data yang sesuai</h3>
-            <p>Coba ubah pencarian/filter atau tambahkan data pertama.</p>
+            <p>
+              {config.canCreate
+                ? 'Coba ubah pencarian/filter atau tambahkan data pertama.'
+                : 'Coba ubah pencarian/filter. Data masuk dari aplikasi pelanggan.'}
+            </p>
             <Link className="button" href={config.path}>
               Reset filter
             </Link>
@@ -330,19 +362,42 @@ export async function ResourceDetailPage({
           )}
         </section>
       )}
-      <DialogTrigger
-        label={'Ubah ' + config.singular}
-        title={'Detail & Ubah ' + config.singular}
-        subtitle={'#' + id}
-        wide={resource === 'orders'}
-        dialogClass={resource === 'orders' ? 'order-form-dialog' : ''}
-      >
-        <ResourceFormServer resource={resource} record={record} />
-      </DialogTrigger>
+      <div className="record-actions">
+        {resource === 'orders' &&
+          ['Menunggu Assign', 'Menunggu Lokasi'].includes(
+            String(record.status),
+          ) && (
+            <DialogTrigger
+              label="Tugaskan Petugas"
+              title="Tugaskan Petugas"
+              subtitle={'#' + id}
+              className="button primary"
+              dialogClass="order-form-dialog"
+              icon="person"
+            >
+              <AssignmentFormServer order={record as Order} />
+            </DialogTrigger>
+          )}
+        <DialogTrigger
+          label={'Ubah ' + config.singular}
+          title={'Detail & Ubah ' + config.singular}
+          subtitle={'#' + id}
+          wide={resource === 'orders' || resource === 'services'}
+          dialogClass={resource === 'orders' ? 'order-form-dialog' : ''}
+        >
+          <ResourceFormServer resource={resource} record={record} />
+        </DialogTrigger>
+        <DeleteRecordButton
+          resource={resource}
+          record={record}
+          compact={false}
+        />
+      </div>
     </div>
   );
 }
 export async function ResourceNewPage({ resource }: { resource: Resource }) {
+  if (!resources[resource].canCreate) notFound();
   return (
     <section className="standalone-form">
       <div className="page-title">

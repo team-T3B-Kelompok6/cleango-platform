@@ -13,6 +13,7 @@ export function DialogTrigger({
   className = 'button',
   dialogClass = '',
   icon,
+  dialogIcon,
 }: {
   label: string;
   title: string;
@@ -22,6 +23,7 @@ export function DialogTrigger({
   className?: string;
   dialogClass?: string;
   icon?: UiIconName;
+  dialogIcon?: UiIconName;
 }) {
   const [open, setOpen] = useState(false);
   return (
@@ -36,6 +38,7 @@ export function DialogTrigger({
           subtitle={subtitle}
           wide={wide}
           className={dialogClass}
+          icon={dialogIcon ?? icon}
           onClose={() => setOpen(false)}
         >
           <CloseContext.Provider value={() => setOpen(false)}>

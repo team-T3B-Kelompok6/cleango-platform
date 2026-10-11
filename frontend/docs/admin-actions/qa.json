@@ -1,0 +1,850 @@
+{
+  "date": "2026-10-10",
+  "scope": "Frontend web admin only; API preview outside repository; no Express/database/mobile integration claim",
+  "summary": {
+    "interactionChecks": 23,
+    "interactionPassed": 23,
+    "layoutChecks": 24,
+    "layoutPassed": 24
+  },
+  "interactions": [
+    {
+      "resource": "services",
+      "action": "create/read",
+      "pass": true
+    },
+    {
+      "resource": "services",
+      "action": "update",
+      "pass": true
+    },
+    {
+      "resource": "services",
+      "action": "cancel-delete",
+      "pass": true
+    },
+    {
+      "resource": "services",
+      "action": "delete",
+      "pass": true
+    },
+    {
+      "resource": "faqs",
+      "action": "create/read",
+      "pass": true
+    },
+    {
+      "resource": "faqs",
+      "action": "update",
+      "pass": true
+    },
+    {
+      "resource": "faqs",
+      "action": "delete",
+      "pass": true
+    },
+    {
+      "resource": "staff",
+      "action": "create/read",
+      "pass": true
+    },
+    {
+      "resource": "staff",
+      "action": "update",
+      "pass": true
+    },
+    {
+      "resource": "staff",
+      "action": "delete",
+      "pass": true
+    },
+    {
+      "resource": "customers",
+      "action": "create/read",
+      "pass": true
+    },
+    {
+      "resource": "customers",
+      "action": "update",
+      "pass": true
+    },
+    {
+      "resource": "customers",
+      "action": "delete",
+      "pass": true
+    },
+    {
+      "resource": "orders",
+      "action": "read",
+      "pass": true
+    },
+    {
+      "resource": "orders",
+      "action": "assign",
+      "pass": true
+    },
+    {
+      "resource": "orders",
+      "action": "update",
+      "pass": true
+    },
+    {
+      "resource": "orders",
+      "action": "delete",
+      "pass": true
+    },
+    {
+      "resource": "schedules",
+      "action": "read",
+      "pass": true
+    },
+    {
+      "resource": "schedules",
+      "action": "update",
+      "pass": true
+    },
+    {
+      "resource": "schedules",
+      "action": "delete",
+      "pass": true
+    },
+    {
+      "resource": "orders",
+      "action": "create-route-removed",
+      "pass": true
+    },
+    {
+      "resource": "schedules",
+      "action": "create-route-removed",
+      "pass": true
+    },
+    {
+      "resource": "faqs",
+      "action": "delete-error-visible",
+      "pass": true
+    }
+  ],
+  "layouts": [
+    {
+      "page": "pesanan",
+      "viewport": [1280, 820],
+      "createButtons": [],
+      "deleteButtons": [
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        }
+      ],
+      "scrollWidth": 1265,
+      "width": 1280,
+      "pass": true
+    },
+    {
+      "page": "pesanan",
+      "viewport": [768, 1024],
+      "createButtons": [],
+      "deleteButtons": [
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        }
+      ],
+      "scrollWidth": 753,
+      "width": 768,
+      "pass": true
+    },
+    {
+      "page": "pesanan",
+      "viewport": [360, 800],
+      "createButtons": [],
+      "deleteButtons": [
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        }
+      ],
+      "scrollWidth": 345,
+      "width": 360,
+      "pass": true
+    },
+    {
+      "page": "pesanan",
+      "viewport": [800, 360],
+      "createButtons": [],
+      "deleteButtons": [
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        }
+      ],
+      "scrollWidth": 785,
+      "width": 800,
+      "pass": true
+    },
+    {
+      "page": "jadwal",
+      "viewport": [1280, 820],
+      "createButtons": [],
+      "deleteButtons": [
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        }
+      ],
+      "scrollWidth": 1265,
+      "width": 1280,
+      "pass": true
+    },
+    {
+      "page": "jadwal",
+      "viewport": [768, 1024],
+      "createButtons": [],
+      "deleteButtons": [
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        }
+      ],
+      "scrollWidth": 753,
+      "width": 768,
+      "pass": true
+    },
+    {
+      "page": "jadwal",
+      "viewport": [360, 800],
+      "createButtons": [],
+      "deleteButtons": [
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        }
+      ],
+      "scrollWidth": 345,
+      "width": 360,
+      "pass": true
+    },
+    {
+      "page": "jadwal",
+      "viewport": [800, 360],
+      "createButtons": [],
+      "deleteButtons": [
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        }
+      ],
+      "scrollWidth": 785,
+      "width": 800,
+      "pass": true
+    },
+    {
+      "page": "layanan",
+      "viewport": [1280, 820],
+      "createButtons": ["Tambah Layanan Baru"],
+      "deleteButtons": [
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        }
+      ],
+      "scrollWidth": 1265,
+      "width": 1280,
+      "pass": true
+    },
+    {
+      "page": "layanan",
+      "viewport": [768, 1024],
+      "createButtons": ["Tambah Layanan Baru"],
+      "deleteButtons": [
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        }
+      ],
+      "scrollWidth": 753,
+      "width": 768,
+      "pass": true
+    },
+    {
+      "page": "layanan",
+      "viewport": [360, 800],
+      "createButtons": ["Tambah Layanan Baru"],
+      "deleteButtons": [
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        }
+      ],
+      "scrollWidth": 345,
+      "width": 360,
+      "pass": true
+    },
+    {
+      "page": "layanan",
+      "viewport": [800, 360],
+      "createButtons": ["Tambah Layanan Baru"],
+      "deleteButtons": [
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        }
+      ],
+      "scrollWidth": 785,
+      "width": 800,
+      "pass": true
+    },
+    {
+      "page": "faq",
+      "viewport": [1280, 820],
+      "createButtons": ["Tambah FAQ Baru"],
+      "deleteButtons": [
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        }
+      ],
+      "scrollWidth": 1265,
+      "width": 1280,
+      "pass": true
+    },
+    {
+      "page": "faq",
+      "viewport": [768, 1024],
+      "createButtons": ["Tambah FAQ Baru"],
+      "deleteButtons": [
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        }
+      ],
+      "scrollWidth": 754,
+      "width": 768,
+      "pass": true
+    },
+    {
+      "page": "faq",
+      "viewport": [360, 800],
+      "createButtons": ["Tambah FAQ Baru"],
+      "deleteButtons": [
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        }
+      ],
+      "scrollWidth": 345,
+      "width": 360,
+      "pass": true
+    },
+    {
+      "page": "faq",
+      "viewport": [800, 360],
+      "createButtons": ["Tambah FAQ Baru"],
+      "deleteButtons": [
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        }
+      ],
+      "scrollWidth": 785,
+      "width": 800,
+      "pass": true
+    },
+    {
+      "page": "customer",
+      "viewport": [1280, 820],
+      "createButtons": ["Tambah Customer Baru"],
+      "deleteButtons": [
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        }
+      ],
+      "scrollWidth": 1265,
+      "width": 1280,
+      "pass": true
+    },
+    {
+      "page": "customer",
+      "viewport": [768, 1024],
+      "createButtons": ["Tambah Customer Baru"],
+      "deleteButtons": [
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        }
+      ],
+      "scrollWidth": 753,
+      "width": 768,
+      "pass": true
+    },
+    {
+      "page": "customer",
+      "viewport": [360, 800],
+      "createButtons": ["Tambah Customer Baru"],
+      "deleteButtons": [
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        }
+      ],
+      "scrollWidth": 345,
+      "width": 360,
+      "pass": true
+    },
+    {
+      "page": "customer",
+      "viewport": [800, 360],
+      "createButtons": ["Tambah Customer Baru"],
+      "deleteButtons": [
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        }
+      ],
+      "scrollWidth": 785,
+      "width": 800,
+      "pass": true
+    },
+    {
+      "page": "petugas",
+      "viewport": [1280, 820],
+      "createButtons": ["Tambah Petugas Baru"],
+      "deleteButtons": [
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        }
+      ],
+      "scrollWidth": 1265,
+      "width": 1280,
+      "pass": true
+    },
+    {
+      "page": "petugas",
+      "viewport": [768, 1024],
+      "createButtons": ["Tambah Petugas Baru"],
+      "deleteButtons": [
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        }
+      ],
+      "scrollWidth": 753,
+      "width": 768,
+      "pass": true
+    },
+    {
+      "page": "petugas",
+      "viewport": [360, 800],
+      "createButtons": ["Tambah Petugas Baru"],
+      "deleteButtons": [
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        }
+      ],
+      "scrollWidth": 345,
+      "width": 360,
+      "pass": true
+    },
+    {
+      "page": "petugas",
+      "viewport": [800, 360],
+      "createButtons": ["Tambah Petugas Baru"],
+      "deleteButtons": [
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        },
+        {
+          "font": "0px",
+          "height": 36,
+          "width": 36
+        }
+      ],
+      "scrollWidth": 785,
+      "width": 800,
+      "pass": true
+    }
+  ],
+  "browserMessages": []
+}

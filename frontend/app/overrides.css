@@ -43,6 +43,11 @@
 .next-form .form-grid > .full-width {
   grid-column: 1/-1;
 }
+.next-form .field-hint {
+  color: var(--design-muted);
+  font-size: var(--text-10);
+  line-height: 1.5;
+}
 .modal[open]:not(.sop-dialog) {
   display: flex;
   flex-direction: column;
@@ -52,8 +57,14 @@
   flex-shrink: 0;
 }
 .modal:not(.sop-dialog) > .next-form {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 0;
   flex: 1;
   min-height: 0;
+  min-width: 0;
 }
 .modal:not(.sop-dialog) .next-form > .modal-body {
   flex: 1;
@@ -97,13 +108,13 @@
 .record-detail dd {
   white-space: pre-line;
 }
-.admin-heading-actions form {
+.admin-heading-actions > form {
   display: flex;
   align-items: center;
   gap: var(--space-6);
   flex-wrap: wrap;
 }
-.admin-heading-actions input {
+.admin-heading-actions > form input {
   padding: var(--space-7-8);
   border: 1px solid var(--border);
   border-radius: 0.5rem;

@@ -3,3 +3,5 @@ dist/
 *.local
 *.tsbuildinfo
 .env
+AGENTS.md
+docs/agents/

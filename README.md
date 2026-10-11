@@ -1,48 +1,74 @@
-# Cleango Admin
+# CleanGo
 
-Frontend aktif menggunakan **Next.js App Router, React Server Components, dan TypeScript/TSX** sesuai ketentuan UTS. Lingkup pengerjaan pengguna adalah frontend; Express dan database menjadi bagian anggota backend.
+CleanGo adalah aplikasi pemesanan layanan kebersihan. Web admin digunakan untuk mengatur pesanan, jadwal kerja, layanan, petugas, pelanggan, FAQ, dan laporan.
+
+Frontend menggunakan Next.js, React, dan TypeScript. Backend menggunakan Express dengan MySQL/MariaDB dan masih dalam tahap pengembangan. Aplikasi mobile dikerjakan terpisah.
 
 ## Struktur proyek
 
 ```text
-code/
-├── CLEANGO-PRD.md                 # acuan produk, di luar folder kode
-├── cleango-vite-reference/        # arsip slicing lama, terpisah dari repo aktif
-└── web admin cleango/             # repositori kelompok
-    ├── AGENTS.md                  # panduan Codex dan konfigurasi skill
-    ├── backend/                  # bagian anggota backend
-    ├── frontend/                 # implementasi Next.js aktif
-    │   ├── app/
-    │   ├── components/
-    │   ├── lib/
-    │   ├── types/
-    │   ├── public/
-    │   └── docs/                 # kontrak API, hasil uji, audit desain
-    └── docs/agents/              # konfigurasi engineering skills
+cleango-platform/
+├── backend/       # REST API Express dan database
+├── frontend/      # Web admin Next.js
+│   ├── app/       # Halaman dan routing
+│   ├── components/
+│   ├── lib/       # Pemanggil API
+│   ├── types/
+│   ├── public/    # Aset gambar dan ikon
+│   └── docs/      # Kontrak API, screenshot, dan hasil pengujian
+└── README.md
 ```
 
-Folder node_modules, dist dan .next adalah hasil instalasi/build lokal yang diabaikan Git, bukan sumber frontend aktif. Arsip Vite berada di luar repositori dan tidak dihapus.
+PRD (`CLEANGO-PRD.md`) dan dokumen tugas (`soal-project-express-next.md`) disimpan di folder induk, di luar repositori kode.
 
 ## Menjalankan frontend
+
+Gunakan Node.js 22.12 atau lebih baru. Dari folder repositori:
 
 ```powershell
 cd frontend
 npm install
 Copy-Item .env.example .env.local
-# Isi API_URL dengan URL API tim, termasuk /api.
+```
+
+Isi alamat API tim di `.env.local`:
+
+```dotenv
+API_URL=http://127.0.0.1:4000/api
+```
+
+Lalu jalankan:
+
+```sh
 npm run dev
 ```
 
-Buka http://127.0.0.1:3000. Akun admin/admin perlu disediakan oleh backend. Tanpa API, login menampilkan pesan koneksi gagal.
+Buka [localhost:3000](http://localhost:3000). Login memerlukan API autentikasi yang sudah berjalan. Akun demo **admin / admin** perlu disediakan dalam seed backend.
 
-Dari root, gunakan npm run setup:frontend untuk memasang dependensi. npm run dev, build, typecheck, format dan format:check diteruskan ke frontend Next.js.
+## Menjalankan backend
 
-Panduan lengkap: [frontend/README.md](frontend/README.md). Kontrak integrasi: [API-CONTRACT.md](frontend/docs/API-CONTRACT.md). Urutan audit halaman dan batas verifikasi: [DESIGN-AUDIT.md](frontend/docs/DESIGN-AUDIT.md). PRD aktif: [../CLEANGO-PRD.md](../CLEANGO-PRD.md).
+Folder backend saat ini masih berupa setup awal dengan endpoint `/api/health`. Endpoint login dan data CleanGo belum tersedia.
 
-## Status
+```powershell
+cd backend
+npm install
+Copy-Item .env.example .env
+```
 
-Build, pemeriksaan TypeScript, responsif dan 18 uji alur frontend telah dicatat. Pengujian alur menggunakan fixture HTTP sementara di luar aplikasi; ini belum membuktikan integrasi Express/database. Revisi sembilan halaman terhadap prototype Figma selesai, memakai skill figma-design-to-code dan PRD. Bukti 36 pemeriksaan responsif serta 9 uji interaksi tambahan tersedia di frontend/docs/revised/. Verifikasi layer/aset terbaru masih terbatas oleh akses Figma MCP. Backend yang sudah ada tidak diubah pada penataan ini.
+Atur `PORT=4000` agar sesuai dengan contoh `API_URL` frontend, lalu isi pengaturan database di `.env`.
 
-Tim melengkapi API Express, database.sql, seed, dokumentasi backend, bukti perbandingan Figma, GitHub/Trello dan presentasi sebelum pengumpulan.
+```sh
+npm run dev
+```
 
-Tracking petugas tersedia sebagai **simulasi dummy** sesuai permintaan pengguna, melalui tombol Pantau Petugas di menu Petugas serta pesanan yang sudah ditugaskan. Panduan dan batas integrasinya: [TRACKING.md](frontend/docs/TRACKING.md). Simulasi ini terpisah dari data utama API dan belum menjadi pelacakan GPS aktual.
+Struktur tabel dan seed akan dilengkapi di `backend/database.sql` oleh bagian backend. Frontend dan backend dijalankan dari terminal terpisah.
+
+## Status pengerjaan
+
+Halaman frontend sudah mencakup login, dashboard, pesanan, jadwal, layanan, FAQ, customer, petugas, dan laporan. Pesanan serta jadwal dibuat melalui aplikasi pelanggan; admin dapat melihat, mengubah, dan menghapusnya. Penugasan petugas dilakukan dari menu pesanan.
+
+Integrasi API tim masih menunggu endpoint login dan data. Pengujian frontend sementara memakai API preview lokal. Tracking petugas juga masih simulasi dan belum menerima GPS dari aplikasi mobile.
+
+Desain mengikuti prototype [Figma CleanGo fix](https://www.figma.com/design/1lr9CMyydP3dI6axuKAUg6/CleanGo-fix?node-id=4002-7854) dan masih dapat berubah mengikuti desain final.
+
+Panduan frontend, strategi render, dan screenshot ada di [frontend/README.md](frontend/README.md). Daftar endpoint ada di [kontrak API](frontend/docs/API-CONTRACT.md).

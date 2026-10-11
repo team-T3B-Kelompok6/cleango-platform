@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-10",
+  "scope": "Header web admin saat scroll",
+  "checks": [
+    {
+      "viewport": [
+        1280,
+        820
+      ],
+      "headerHit": true,
+      "height": 72,
+      "scroll": 381.6000061035156,
+      "scrollWidth": 1265,
+      "top": 0,
+      "width": 1280,
+      "pass": true
+    },
+    {
+      "viewport": [
+        360,
+        800
+      ],
+      "headerHit": true,
+      "height": 66,
+      "scroll": 1059.199951171875,
+      "scrollWidth": 345,
+      "top": 0,
+      "width": 360,
+      "pass": true
+    },
+    {
+      "viewport": [
+        800,
+        360
+      ],
+      "headerHit": true,
+      "height": 72,
+      "scroll": 1000,
+      "scrollWidth": 785,
+      "top": 0,
+      "width": 800,
+      "pass": true
+    }
+  ],
+  "notificationAfterScroll": "Terlihat dan dapat ditutup; top 59.6, bottom 648.0 pada tinggi viewport 720",
+  "passed": true
+}

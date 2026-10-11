@@ -1,10 +1,8 @@
 import Link from 'next/link';
 import { valueText } from '@/lib/resources';
-import { deleteAction } from '@/app/actions';
 import { Icon } from './Icon';
 
-import { DialogTrigger } from './DialogTrigger';
-import { DeleteForm } from './Form';
+import { DeleteRecordButton } from './DeleteRecordButton';
 
 import type { RecordListProps } from './RecordListProps';
 export function FaqList({ shown, resource, config, edit }: RecordListProps) {
@@ -15,16 +13,7 @@ export function FaqList({ shown, resource, config, edit }: RecordListProps) {
           <article key={item.id} className="faq-design-row">
             <div className="faq-header-actions">
               {edit(item, 'Ubah FAQ')}
-              <DialogTrigger
-                label="Hapus FAQ"
-                title="Hapus FAQ"
-                icon="trash"
-                className="icon-action"
-              >
-                <DeleteForm
-                  action={deleteAction.bind(null, resource, item.id)}
-                />
-              </DialogTrigger>
+              <DeleteRecordButton resource={resource} record={item} />
             </div>
             <details>
               <summary>

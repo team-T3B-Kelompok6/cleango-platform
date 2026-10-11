@@ -69,6 +69,8 @@ export async function saveAction(
     data: Record<string, unknown> = {},
     values: Record<string, string | string[]> = {},
     errors: Record<string, string> = {};
+  if (id === null && !config.canCreate)
+    return { message: 'Data ini dibuat melalui aplikasi pelanggan.' };
   for (const field of config.fields) {
     const raw =
       field.kind === 'multiselect'
@@ -171,6 +173,13 @@ export async function deleteAction(
     return { message: error.message };
   }
   revalidatePath(resources[resource].path);
+  revalidatePath('/');
+  revalidatePath('/laporan');
+  revalidatePath('/jadwal');
+  revalidatePath('/pesanan');
+  revalidatePath('/customer');
+  revalidatePath('/petugas');
+  revalidatePath(resources[resource].path + '/' + encodeURIComponent(id));
   redirect(resources[resource].path + '?deleted=1');
 }
 

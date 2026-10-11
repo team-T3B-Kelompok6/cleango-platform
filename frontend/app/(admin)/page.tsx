@@ -136,9 +136,11 @@ export default async function Dashboard() {
         {!orders.length && (
           <div className="empty-state">
             <h3>Belum ada pesanan</h3>
-            <p>Tambahkan pesanan pertama untuk mulai mengelola operasional.</p>
-            <Link href="/pesanan/new" className="button primary">
-              Tambah pesanan
+            <p>
+              Pesanan akan muncul setelah pelanggan memesan melalui aplikasi.
+            </p>
+            <Link href="/pesanan" className="button primary">
+              Kelola pesanan
             </Link>
           </div>
         )}

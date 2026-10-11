@@ -11,11 +11,26 @@
 | POST   | `/auth/login`                                                         | `{ "accessToken": "...", "expiresIn": 3600 }` |
 | GET    | `/orders`, `/services`, `/staff`, `/customers`, `/faqs`, `/schedules` | `{ "data": [...] }`                           |
 | GET    | `/<resource>/:id`                                                     | `{ "data": { ... } }`                         |
-| POST   | `/<resource>`                                                         | 201, `{ "data": { ...record, "id": "..." } }` |
+| POST   | `/services`, `/staff`, `/customers`, `/faqs`                          | 201, `{ "data": { ...record, "id": "..." } }` |
 | PATCH  | `/<resource>/:id`                                                     | 200, `{ "data": { ...record } }`              |
-| DELETE | `/faqs/:id`                                                           | 200 JSON `{ "message": "Data dihapus." }`     |
+| DELETE | `/<resource>/:id`                                                     | 200 JSON `{ "message": "Data dihapus." }`     |
 
 Daftar saat ini diharapkan lengkap, belum menggunakan pagination API. Filter/search/pagination FAQ dihitung di RSC dari respons daftar. Untuk volume besar, sepakati query pagination server sebelum mengubah kontrak; jangan diam-diam mengembalikan hanya halaman pertama.
+
+## Aksi web admin
+
+| Menu     | Aksi                                         |
+| -------- | -------------------------------------------- |
+| Pesanan  | Assign petugas, read, update, delete         |
+| Jadwal   | Read, update, delete                         |
+| Layanan  | Create, read, update, delete                 |
+| FAQ      | Create, read, update, delete                 |
+| Customer | Read, update, delete; create manual tersedia |
+| Petugas  | Create, read, update, delete                 |
+
+Pesanan dan jadwal dibuat melalui aplikasi pelanggan, sehingga web admin tidak menyediakan form atau Server Action untuk membuat keduanya. Jalur `/pesanan/new` dan `/jadwal/new` tidak tersedia. Backend tetap harus memeriksa kewenangan create di endpointnya sendiri.
+
+DELETE selalu melalui dialog konfirmasi nama dan ID. Backend menentukan kebijakan data yang masih memiliki relasi atau transaksi. Jika penghapusan ditolak, kembalikan status 409 dengan `message` yang menjelaskan alasannya; frontend mempertahankan dialog dan menampilkan pesan tersebut. Penghapusan customer tidak diasumsikan menghapus akun atau seluruh pesanan, dan penghapusan petugas tidak diasumsikan menghapus riwayat penugasan.
 
 PATCH harus mendukung payload parsial. Penugasan memakai `PATCH /orders/:id` dengan `{ "staff": ["Nama Petugas"], "status": "Sedang Dikerjakan" }`. Tidak ada endpoint terpisah `/assignment` dalam implementasi sekarang. Backend memeriksa ketersediaan petugas secara atomik dan memperbarui relasi/status yang relevan. Sebaiknya nama tampilan unik untuk kontrak sementara ini; jika backend memilih ID petugas, ubah kontrak dan form frontend bersama sebelum integrasi.
 
@@ -42,8 +57,8 @@ Semua `id` berupa string. Harga berupa number rupiah, tanggal `YYYY-MM-DD`, bool
 
 Nilai enum:
 
-- Pesanan: `Menunggu Assign`, `Menunggu Lokasi`, `Sedang Dikerjakan`, `Selesai`.
-- Petugas: `Tersedia`, `Bertugas`, `Nonaktif`.
+- Pesanan: `Menunggu Assign`, `Menunggu Lokasi`, `Sedang Dikerjakan`, `Selesai`, `Batal`.
+- Petugas: `Tersedia`, `Bertugas`, `Masa Training`, `Nonaktif`.
 - Jadwal: `Terjadwal`, `Berlangsung`, `Selesai`.
 - Kategori layanan: `Rumah`, `Kantor`, `Sofa`, `AC`.
 - Kategori FAQ: `Layanan`, `Pembayaran`, `Jadwal`, `SOP`.
@@ -61,7 +76,7 @@ Field tambahan opsional untuk revisi desain:
 - `faqs.viewCount: number`, `updatedAt: string` tanggal ISO. Statistik pembaca/waktu tidak dipalsukan bila tidak tersedia.
 - `schedules.address: string`; jika tidak tersedia, baris menampilkan nama petugas dengan ikon orang.
 
-Field-field ini tidak diwajibkan dalam form CRUD dasar. PATCH parsial harus mempertahankan field lain. Petugas `Tersedia` ditampilkan sebagai “Siaga & Tersedia”, `Bertugas` sebagai “Sedang Bekerja”; nilai API tetap sesuai enum di atas. `Nonaktif` tidak dianggap masa training tanpa status khusus dari backend.
+Field-field ini tidak diwajibkan dalam form CRUD dasar. PATCH parsial harus mempertahankan field lain. Petugas `Tersedia` ditampilkan sebagai “Siaga & Tersedia”, `Bertugas` sebagai “Sedang Bekerja”; nilai API tetap sesuai enum di atas. `Masa Training` merupakan status tersendiri, bukan pengganti `Nonaktif`. Form penugasan hanya memilih petugas tersedia; form detail pesanan menawarkan petugas tersedia atau sedang bertugas. Petugas training/nonaktif tidak ditawarkan untuk penugasan baru, tetapi nama yang sudah tercatat pada pesanan tetap ditampilkan agar riwayat tidak hilang saat detail lain diubah. Tab Nonaktif muncul ketika ada data nonaktif atau filter Nonaktif sedang dibuka.
 
 ```json
 {

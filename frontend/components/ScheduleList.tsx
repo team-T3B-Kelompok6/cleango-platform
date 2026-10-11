@@ -5,8 +5,14 @@ import { Icon } from './Icon';
 
 import { Badge } from './StatusBadge';
 import { UiIcon } from './UiIcon';
+import { DeleteRecordButton } from './DeleteRecordButton';
 import type { Schedule } from '@/types';
 import type { RecordListProps } from './RecordListProps';
+const shiftHours: Record<string, string> = {
+  'Shift Pagi': '08.00–11.30 WIB',
+  'Shift Siang': '12.00–15.30 WIB',
+  'Shift Sore': '16.00–19.30 WIB',
+};
 export function ScheduleList({
   shown,
   resource,
@@ -23,7 +29,7 @@ export function ScheduleList({
               <div className="shift-heading">
                 <h2>
                   <i />
-                  {shift}
+                  {shift} <span>({shiftHours[shift]})</span>
                 </h2>
                 <small className="shift-count">
                   {
@@ -51,16 +57,22 @@ export function ScheduleList({
                           <span>
                             {schedule.date} · {schedule.time}
                           </span>
-                          <Link
-                            className="button"
-                            href={
-                              config.path +
-                              '/' +
-                              encodeURIComponent(schedule.id)
-                            }
-                          >
-                            Detail & Ubah
-                          </Link>
+                          <div className="shift-card-actions">
+                            <Link
+                              className="button"
+                              href={
+                                config.path +
+                                '/' +
+                                encodeURIComponent(schedule.id)
+                              }
+                            >
+                              Detail & Ubah
+                            </Link>
+                            <DeleteRecordButton
+                              resource={resource}
+                              record={schedule}
+                            />
+                          </div>
                         </div>
                       </article>
                     );
@@ -72,11 +84,11 @@ export function ScheduleList({
                 !shown.some((item) => shiftOf(String(item.time)) === shift) ? (
                   <article className="shift-card empty-slot">
                     <Icon name="clock" />
-                    <h3>Tambah jadwal pada shift ini</h3>
-                    <p>Atur waktu dan petugas untuk pengerjaan berikutnya.</p>
-                    <Link className="button" href={config.path + '/new'}>
-                      + Tambah Order ke Sini
-                    </Link>
+                    <h3>Belum ada jadwal tambahan</h3>
+                    <p>
+                      Jadwal pada shift ini mengikuti pesanan dari aplikasi
+                      pelanggan.
+                    </p>
                   </article>
                 ) : null}
               </div>

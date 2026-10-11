@@ -1,5 +1,5 @@
 'use client';
-import { UiIcon } from './UiIcon';
+import { UiIcon, type UiIconName } from './UiIcon';
 import { useEffect, useRef, useId, type ReactNode } from 'react';
 export function Modal({
   title,
@@ -8,6 +8,7 @@ export function Modal({
   children,
   wide = false,
   className = '',
+  icon,
 }: {
   title: string;
   subtitle?: string;
@@ -15,6 +16,7 @@ export function Modal({
   children: ReactNode;
   wide?: boolean;
   className?: string;
+  icon?: UiIconName;
 }) {
   const titleId = useId();
   const ref = useRef<HTMLDialogElement>(null);
@@ -41,9 +43,16 @@ export function Modal({
       }}
     >
       <div className="modal-header">
-        <div>
-          <h2 id={titleId}>{title}</h2>
-          {subtitle && <p>{subtitle}</p>}
+        <div className="modal-heading">
+          {icon && (
+            <span className="modal-heading-icon">
+              <UiIcon name={icon} />
+            </span>
+          )}
+          <div>
+            <h2 id={titleId}>{title}</h2>
+            {subtitle && <p>{subtitle}</p>}
+          </div>
         </div>
         <button
           className="close-button"
