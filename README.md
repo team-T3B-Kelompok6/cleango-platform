@@ -30,7 +30,7 @@ npm run dev:frontend
 ## Database backend
 
 1. Jalankan MySQL/MariaDB dari FlyEnv.
-2. Import `backend/database.sql` melalui phpMyAdmin.
+2. Jalankan `npm run db:setup --workspace backend` atau import `backend/database.sql` melalui phpMyAdmin.
 3. Sesuaikan kredensial pada `backend/.env`.
 
 Akun admin dummy lokal: `admin@cleango.id` / `321321`. Password tersimpan
@@ -85,6 +85,9 @@ Admin:
 - `GET /api/admin/auth/me`
 - CRUD `/api/admin/categories`
 - CRUD `/api/admin/services`
+- CRUD `/api/services` (kontrak web admin terbaru)
+- CRUD `/api/faqs`
+- CRUD `/api/staff`
 
 Endpoint admin selain login membutuhkan header `Authorization: Bearer <token>`.
 Kontrak API selengkapnya tersedia di `backend/docs/API.md`.

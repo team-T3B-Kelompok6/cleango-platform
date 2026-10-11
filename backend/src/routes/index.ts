@@ -2,8 +2,16 @@ import { Router } from 'express';
 import { adminRouter } from './admin/index.js';
 import { authRouter } from './auth.routes.js';
 import { customerRouter } from './customer/index.js';
+import { authenticate } from '../middleware/auth.middleware.js';
+import { requireAdmin } from '../middleware/admin.middleware.js';
+import { faqRouter } from './faq.routes.js';
+import { staffRouter } from './staff.routes.js';
+import { platformServiceRouter } from './service.routes.js';
 
 export const apiRouter = Router();
 apiRouter.use('/auth', authRouter);
 apiRouter.use('/customer', customerRouter);
 apiRouter.use('/admin', adminRouter);
+apiRouter.use('/services', authenticate, requireAdmin, platformServiceRouter);
+apiRouter.use('/faqs', authenticate, requireAdmin, faqRouter);
+apiRouter.use('/staff', authenticate, requireAdmin, staffRouter);

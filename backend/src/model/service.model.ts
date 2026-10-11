@@ -37,7 +37,9 @@ export interface ServiceFilters {
   activeOnly: boolean;
 }
 
-export async function findServices(filters: ServiceFilters): Promise<Service[]> {
+export async function findServices(
+  filters: ServiceFilters,
+): Promise<Service[]> {
   const [rows] = await pool.query<Service[]>(
     `SELECT s.id, s.category_id AS categoryId, c.name AS categoryName,
             s.name, s.description, s.price,
@@ -45,21 +47,26 @@ export async function findServices(filters: ServiceFilters): Promise<Service[]> 
             s.image_url AS imageUrl, s.is_active AS isActive,
             s.created_at AS createdAt, s.updated_at AS updatedAt
      FROM services s
-     INNER JOIN categories c ON c.id = s.category_id
+     INNER JOIN service_categories c ON c.id = s.category_id
      WHERE (? = 0 OR (s.is_active = 1 AND c.is_active = 1))
        AND (? IS NULL OR s.name LIKE CONCAT('%', ?, '%'))
        AND (? IS NULL OR s.category_id = ?)
      ORDER BY s.name ASC`,
     [
       filters.activeOnly ? 1 : 0,
-      filters.search, filters.search,
-      filters.categoryId, filters.categoryId,
+      filters.search,
+      filters.search,
+      filters.categoryId,
+      filters.categoryId,
     ],
   );
   return rows;
 }
 
-export async function findServiceById(id: number, activeOnly: boolean): Promise<Service | null> {
+export async function findServiceById(
+  id: number,
+  activeOnly: boolean,
+): Promise<Service | null> {
   const [rows] = await pool.query<Service[]>(
     `SELECT s.id, s.category_id AS categoryId, c.name AS categoryName,
             s.name, s.description, s.price,
@@ -67,7 +74,7 @@ export async function findServiceById(id: number, activeOnly: boolean): Promise<
             s.image_url AS imageUrl, s.is_active AS isActive,
             s.created_at AS createdAt, s.updated_at AS updatedAt
      FROM services s
-     INNER JOIN categories c ON c.id = s.category_id
+     INNER JOIN service_categories c ON c.id = s.category_id
      WHERE s.id = ? AND (? = 0 OR (s.is_active = 1 AND c.is_active = 1))
      LIMIT 1`,
     [id, activeOnly ? 1 : 0],
@@ -75,7 +82,9 @@ export async function findServiceById(id: number, activeOnly: boolean): Promise<
   return rows[0] ?? null;
 }
 
-export async function findServiceInclusions(serviceId: number): Promise<ServiceInclusion[]> {
+export async function findServiceInclusions(
+  serviceId: number,
+): Promise<ServiceInclusion[]> {
   const [rows] = await pool.query<ServiceInclusion[]>(
     `SELECT id, description, sort_order AS sortOrder
      FROM service_inclusions
@@ -87,13 +96,26 @@ export async function findServiceInclusions(serviceId: number): Promise<ServiceI
 }
 
 export async function insertService(input: ServiceInput): Promise<Service> {
+  const slug = `${
+    input.name
+      .toLowerCase()
+      .normalize('NFKD')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '') || 'layanan'
+  }-${Date.now().toString(36)}`;
   const [result] = await pool.execute<ResultSetHeader>(
     `INSERT INTO services
-       (category_id, name, description, price, duration_minutes, image_url, is_active)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+       (category_id, name, slug, description, price, duration_minutes, image_url, is_active)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     [
-      input.categoryId, input.name, input.description, input.price,
-      input.durationMinutes, input.imageUrl, input.isActive,
+      input.categoryId,
+      input.name,
+      slug,
+      input.description,
+      input.price,
+      input.durationMinutes,
+      input.imageUrl,
+      input.isActive,
     ],
   );
   const service = await findServiceById(result.insertId, false);
@@ -116,13 +138,20 @@ export async function updateServiceById(
        is_active = IF(?, ?, is_active)
      WHERE id = ?`,
     [
-      input.categoryId !== undefined, input.categoryId ?? 0,
-      input.name !== undefined, input.name ?? '',
-      input.description !== undefined, input.description ?? null,
-      input.price !== undefined, input.price ?? 0,
-      input.durationMinutes !== undefined, input.durationMinutes ?? 0,
-      input.imageUrl !== undefined, input.imageUrl ?? null,
-      input.isActive !== undefined, input.isActive ?? false,
+      input.categoryId !== undefined,
+      input.categoryId ?? 0,
+      input.name !== undefined,
+      input.name ?? '',
+      input.description !== undefined,
+      input.description ?? null,
+      input.price !== undefined,
+      input.price ?? 0,
+      input.durationMinutes !== undefined,
+      input.durationMinutes ?? 0,
+      input.imageUrl !== undefined,
+      input.imageUrl ?? null,
+      input.isActive !== undefined,
+      input.isActive ?? false,
       id,
     ],
   );
@@ -131,6 +160,9 @@ export async function updateServiceById(
 }
 
 export async function deleteServiceById(id: number): Promise<boolean> {
-  const [result] = await pool.execute<ResultSetHeader>('DELETE FROM services WHERE id = ?', [id]);
+  const [result] = await pool.execute<ResultSetHeader>(
+    'DELETE FROM services WHERE id = ?',
+    [id],
+  );
   return result.affectedRows > 0;
 }

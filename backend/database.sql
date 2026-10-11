@@ -67,6 +67,7 @@ CREATE TABLE IF NOT EXISTS services (
   description TEXT NULL,
   price DECIMAL(12,2) NOT NULL,
   duration_minutes SMALLINT UNSIGNED NOT NULL,
+  duration_label VARCHAR(80) NULL,
   image_url VARCHAR(500) NULL,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -96,6 +97,7 @@ CREATE TABLE IF NOT EXISTS cleaners (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(120) NOT NULL,
   phone VARCHAR(30) NOT NULL,
+  area VARCHAR(120) NOT NULL DEFAULT 'Malang',
   photo_url VARCHAR(500) NULL,
   status ENUM('available', 'busy', 'offline') NOT NULL DEFAULT 'offline',
   average_rating DECIMAL(3,2) NOT NULL DEFAULT 0.00,
@@ -458,55 +460,59 @@ ON DUPLICATE KEY UPDATE
   is_active = VALUES(is_active);
 
 INSERT INTO services (
-  category_id, name, slug, description, price, duration_minutes, is_active
+  category_id, name, slug, description, price, duration_minutes, duration_label, is_active
 )
 SELECT id, 'Basic Home Cleaning', 'basic-home-cleaning',
-       'Pembersihan rutin untuk area rumah', 100000.00, 120, TRUE
+       'Pembersihan rutin untuk area rumah', 100000.00, 120, '2 jam', TRUE
 FROM service_categories
 WHERE name = 'Rumah'
 ON DUPLICATE KEY UPDATE
   description = VALUES(description),
   price = VALUES(price),
   duration_minutes = VALUES(duration_minutes),
+  duration_label = VALUES(duration_label),
   is_active = VALUES(is_active);
 
 INSERT INTO services (
-  category_id, name, slug, description, price, duration_minutes, is_active
+  category_id, name, slug, description, price, duration_minutes, duration_label, is_active
 )
 SELECT id, 'Kost Room Cleaning', 'kost-room-cleaning',
-       'Pembersihan menyeluruh untuk kamar kos', 75000.00, 90, TRUE
+       'Pembersihan menyeluruh untuk kamar kos', 75000.00, 90, '1–2 jam', TRUE
 FROM service_categories
 WHERE name = 'Kamar dan Kos'
 ON DUPLICATE KEY UPDATE
   description = VALUES(description),
   price = VALUES(price),
   duration_minutes = VALUES(duration_minutes),
+  duration_label = VALUES(duration_label),
   is_active = VALUES(is_active);
 
 INSERT INTO services (
-  category_id, name, slug, description, price, duration_minutes, is_active
+  category_id, name, slug, description, price, duration_minutes, duration_label, is_active
 )
 SELECT id, 'Office Cleaning', 'office-cleaning',
-       'Pembersihan rutin untuk ruang kantor', 250000.00, 180, TRUE
+       'Pembersihan rutin untuk ruang kantor', 250000.00, 180, '3 jam', TRUE
 FROM service_categories
 WHERE name = 'Kantor'
 ON DUPLICATE KEY UPDATE
   description = VALUES(description),
   price = VALUES(price),
   duration_minutes = VALUES(duration_minutes),
+  duration_label = VALUES(duration_label),
   is_active = VALUES(is_active);
 
 INSERT INTO services (
-  category_id, name, slug, description, price, duration_minutes, is_active
+  category_id, name, slug, description, price, duration_minutes, duration_label, is_active
 )
 SELECT id, 'Sofa Cleaning', 'sofa-cleaning',
-       'Pembersihan sofa untuk membantu mengangkat debu dan noda', 150000.00, 120, TRUE
+       'Pembersihan sofa untuk membantu mengangkat debu dan noda', 150000.00, 120, '2 jam', TRUE
 FROM service_categories
 WHERE name = 'Sofa dan Kasur'
 ON DUPLICATE KEY UPDATE
   description = VALUES(description),
   price = VALUES(price),
   duration_minutes = VALUES(duration_minutes),
+  duration_label = VALUES(duration_label),
   is_active = VALUES(is_active);
 
 INSERT INTO service_inclusions (service_id, description, sort_order)
@@ -521,14 +527,22 @@ FROM services
 WHERE slug = 'basic-home-cleaning'
 ON DUPLICATE KEY UPDATE sort_order = VALUES(sort_order);
 
+INSERT INTO cleaners (name, phone, area, status, average_rating, is_active) VALUES
+  ('Budi Santoso', '081234567801', 'Malang Kota', 'available', 4.90, TRUE),
+  ('Siti Aminah', '081234567802', 'Lowokwaru', 'busy', 4.85, TRUE),
+  ('Andi Pratama', '081234567803', 'Blimbing', 'offline', 0.00, TRUE)
+ON DUPLICATE KEY UPDATE
+  name = VALUES(name), area = VALUES(area), status = VALUES(status), is_active = VALUES(is_active);
+
 INSERT INTO faqs (category, question, answer, sort_order, is_active) VALUES
-  ('Pemesanan', 'Bagaimana cara memesan layanan CleanGo?',
+  ('Layanan', 'Bagaimana cara memesan layanan CleanGo?',
    'Pilih layanan, tentukan jadwal dan alamat, lalu selesaikan checkout.', 1, TRUE),
-  ('Pesanan', 'Bagaimana cara melihat status pesanan?',
+  ('Jadwal', 'Bagaimana cara melihat status pesanan?',
    'Buka menu Pesanan untuk melihat tahapan status dan estimasi kedatangan cleaner.', 2, TRUE),
   ('Pembayaran', 'Metode pembayaran apa yang tersedia?',
    'CleanGo mendukung DANA, GoPay, QRIS, dan pembayaran tunai.', 3, TRUE)
 ON DUPLICATE KEY UPDATE
+  category = VALUES(category),
   answer = VALUES(answer),
   sort_order = VALUES(sort_order),
   is_active = VALUES(is_active);

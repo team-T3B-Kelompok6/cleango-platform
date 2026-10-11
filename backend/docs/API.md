@@ -44,3 +44,15 @@ Hanya data aktif yang dikembalikan.
 Admin endpoint membutuhkan Bearer token dengan role admin. Controller
 memvalidasi nama, harga `>= 0`, durasi `> 0`, kategori, ID, query, dan boolean.
 Semua SQL hanya berada pada model dan memakai placeholder `?`.
+
+## Web admin resources
+
+Seluruh endpoint berikut membutuhkan Bearer token admin dan menyediakan
+`GET` daftar, `GET /:id`, `POST`, `PATCH /:id`, serta `DELETE /:id`:
+
+- `/api/services` — layanan, harga, durasi, kategori, status, dan fasilitas
+- `/api/faqs` — pertanyaan, jawaban, kategori, dan status publikasi
+- `/api/staff` — nama petugas, nomor WhatsApp, wilayah, dan status kerja
+
+ID pada respons dikirim sebagai string agar sesuai dengan dynamic route Next.js.
+Validasi gagal memakai status `400` dengan `errors` per kolom.
