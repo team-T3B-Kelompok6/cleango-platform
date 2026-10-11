@@ -7,11 +7,13 @@ import { requireAdmin } from '../middleware/admin.middleware.js';
 import { faqRouter } from './faq.routes.js';
 import { staffRouter } from './staff.routes.js';
 import { platformServiceRouter } from './service.routes.js';
+import { orderRouter } from './order.routes.js';
 
 export const apiRouter = Router();
 apiRouter.use('/auth', authRouter);
 apiRouter.use('/customer', customerRouter);
 apiRouter.use('/admin', adminRouter);
+apiRouter.use('/orders', authenticate, requireAdmin, orderRouter);
 apiRouter.use('/services', authenticate, requireAdmin, platformServiceRouter);
 apiRouter.use('/faqs', authenticate, requireAdmin, faqRouter);
 apiRouter.use('/staff', authenticate, requireAdmin, staffRouter);

@@ -13,7 +13,7 @@ const authorized = (method: 'get' | 'post' | 'patch', path: string) =>
   request(app)[method](path).set('Authorization', `Bearer ${adminToken}`);
 
 describe('admin resource contracts', () => {
-  it.each(['/api/services', '/api/faqs', '/api/staff'])(
+  it.each(['/api/orders', '/api/services', '/api/faqs', '/api/staff'])(
     'protects %s with admin authentication',
     async (path) => {
       const response = await request(app).get(path);
@@ -59,11 +59,13 @@ describe('admin resource contracts', () => {
     expect(response.body.errors.status).toBe('Status petugas tidak valid.');
   });
 
-  it.each(['/api/services/bukan-id', '/api/faqs/0', '/api/staff/-1'])(
-    'rejects an invalid resource id at %s',
-    async (path) => {
-      const response = await authorized('get', path);
-      expect(response.status).toBe(400);
-    },
-  );
+  it.each([
+    '/api/orders/bukan-id',
+    '/api/services/bukan-id',
+    '/api/faqs/0',
+    '/api/staff/-1',
+  ])('rejects an invalid resource id at %s', async (path) => {
+    const response = await authorized('get', path);
+    expect(response.status).toBe(400);
+  });
 });

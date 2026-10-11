@@ -53,6 +53,7 @@ Seluruh endpoint berikut membutuhkan Bearer token admin dan menyediakan
 - `/api/services` — layanan, harga, durasi, kategori, status, dan fasilitas
 - `/api/faqs` — pertanyaan, jawaban, kategori, dan status publikasi
 - `/api/staff` — nama petugas, nomor WhatsApp, wilayah, dan status kerja
+- `GET /api/orders` dan `GET /api/orders/:id` — data pesanan untuk dashboard admin
 
 ID pada respons dikirim sebagai string agar sesuai dengan dynamic route Next.js.
 Validasi gagal memakai status `400` dengan `errors` per kolom.
