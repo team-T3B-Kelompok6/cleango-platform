@@ -85,4 +85,6 @@ export interface Field {
     | 'multiselect';
   required?: boolean;
   options?: string[];
+  placeholder?: string;
+  hint?: string;
 }

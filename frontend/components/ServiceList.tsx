@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { rupiah } from '@/lib/resources';
 
 import { UiIcon } from './UiIcon';
+import { DeleteRecordButton } from './DeleteRecordButton';
 
 import type { Service } from '@/types';
 import type { RecordListProps } from './RecordListProps';
@@ -52,6 +53,7 @@ export function ServiceList({
                   >
                     Detail Layanan
                   </Link>
+                  <DeleteRecordButton resource={resource} record={service} />
                 </div>
               </div>
             </article>

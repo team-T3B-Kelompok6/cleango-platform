@@ -1,6 +1,6 @@
 # Tracking petugas — preview simulasi
 
-Permintaan pengguna 8 Oktober 2026: tambahkan tracking dummy di web admin dulu, pertahankan gaya Cleango/Figma dengan tampilan yang lebih sederhana. Frontend memakai Next.js App Router/RSC; hanya dialog dan peta yang menjadi Client Components. Skill setup-matt-pocock-skills sudah dikonfigurasi melalui AGENTS.md dan docs/agents/, sedangkan referensi desain mengikuti figma-design-to-code.
+Tracking web admin memakai data contoh untuk mencoba tampilan peta dan progres tugas. Frontend menggunakan Next.js App Router/RSC; hanya dialog dan peta yang menjadi Client Components. Tampilan mengikuti gaya Cleango.
 
 ## Cara mencoba
 
@@ -34,4 +34,4 @@ Pengecualian dummy dicatat di PRD. Sebelum mengklaim fitur tracking memenuhi ket
 - [9 uji tambahan: kegagalan peta, retry, reduced motion, footer, keyboard dan state simulasi](tracking/extra-qa.json).
 - [Desktop](tracking/tracking-1280x820.png), [tablet](tracking/tracking-768x1024.png), [ponsel](tracking/tracking-360x800.png), [landscape](tracking/tracking-800x360.png).
 
-Desain dasar mengacu prototype petugas yang sudah tersimpan di figma-prototype/. Tracking merupakan tambahan UX, bukan frame Figma yang diklaim pixel-perfect. Akses konteks layer terbaru masih dibatasi quota MCP. Bayangan menu/statistik dan pill keterangan statistik disederhanakan agar halaman terasa lebih tenang; warna/font/susunan asli dipertahankan.
+Desain dasar mengacu pada prototype petugas di figma-prototype/. Tracking merupakan tambahan tampilan yang belum memiliki frame pembanding di Figma. Ukuran dan aset pada desain terbaru belum diperiksa seluruhnya. Warna, font, dan susunan halaman tetap mengikuti Cleango.

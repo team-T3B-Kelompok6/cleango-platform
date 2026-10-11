@@ -1,20 +1,30 @@
-# Cleango Frontend
+# Web Admin CleanGo
 
-Frontend admin Cleango menggunakan **Next.js 16.4 App Router, React 19, TypeScript/TSX**, mengikuti ketentuan UTS Express + Next.js. Lingkup pengerjaan pengguna adalah **frontend saja**. Express, database, seed akun dan penyimpanan menjadi tugas anggota backend.
+Web admin CleanGo untuk mengelola operasional layanan kebersihan. Dibuat dengan Next.js App Router, React, dan TypeScript.
 
-PRD aktif berada di [../../CLEANGO-PRD.md](../../CLEANGO-PRD.md), di luar folder kode. Arsip Vite berada di ../../cleango-vite-reference/. Panduan dan status audit per halaman: [DESIGN-AUDIT.md](docs/DESIGN-AUDIT.md).
+## Fitur
 
-## Menjalankan dari nol
+- Login dan logout admin.
+- Dashboard, aktivitas pesanan, notifikasi, dan panduan SOP.
+- Kelola pesanan: pencarian, filter status/tanggal, detail, perubahan data, penugasan petugas, dan hapus.
+- Kelola jadwal: lihat, ubah, dan hapus; jadwal berasal dari pesanan aplikasi pelanggan.
+- Kelola layanan, FAQ, dan petugas: tambah, lihat, ubah, dan hapus.
+- Kelola pelanggan: lihat, ubah, hapus, serta tambah manual bila diperlukan.
+- Laporan per periode dan ekspor CSV.
+- Simulasi tracking petugas dengan peta, status, dan progres tugas.
 
-Gunakan Node.js 22.12+ atau 24+.
+Pesanan dan jadwal dibuat dari aplikasi pelanggan, sehingga tidak tersedia tombol tambah pada kedua menu tersebut. Tracking masih menggunakan data contoh.
+
+## Menjalankan proyek
+
+Gunakan Node.js 22.12 atau lebih baru. Dari folder `frontend`:
 
 ```powershell
-cd "C:\Users\athlon\Documents\code\web admin cleango\frontend"
 npm install
 Copy-Item .env.example .env.local
 ```
 
-Isi `.env.local` dengan alamat API tim, termasuk prefix `/api`:
+Isi `.env.local` dengan alamat API, termasuk prefix `/api`:
 
 ```dotenv
 API_URL=http://127.0.0.1:3001/api
@@ -22,80 +32,81 @@ API_URL=http://127.0.0.1:3001/api
 
 ```sh
 npm run dev
-# http://127.0.0.1:3000
+```
+
+Buka [localhost:3000](http://localhost:3000). Pastikan backend Express berjalan di port 3001. Login memakai akun demo **admin@cleango.id / 321321**. Autentikasi dilakukan melalui server.
+
+Untuk build produksi dan pemeriksaan kode:
+
+```sh
 npm run typecheck
 npm run format:check
 npm run build
 npm run start
 ```
 
-Backend belum tersedia saat migrasi ini dikerjakan. Login dan operasi data baru dapat berjalan setelah API memenuhi [kontrak frontend](docs/API-CONTRACT.md). Data awal fitur utama dan autentikasi menggunakan API. Akun **admin / admin** perlu disediakan oleh anggota backend pada data seed. Tautan lupa kata sandi sudah dihapus. Tracking petugas memakai skenario dummy terpisah sesuai permintaan pengguna; lihat [panduan tracking](docs/TRACKING.md).
+## Struktur frontend
 
-Jika API belum dikonfigurasi/tidak dapat dihubungi, login menampilkan pesan gagal koneksi; halaman admin menampilkan error boundary. Build tetap dapat dijalankan tanpa API karena halaman admin dirender saat request.
+```text
+app/
+├── login/          # Halaman login
+├── (admin)/        # Dashboard dan halaman pengelolaan
+├── actions.ts      # Server Actions
+├── layout.tsx
+└── tokens.css      # Warna, ukuran teks, dan spacing
+components/         # Komponen tampilan dan interaksi
+lib/                # API dan konfigurasi resource
+types/              # Tipe data
+public/assets/      # Gambar dan ikon
+docs/               # Kontrak API dan bukti pengujian
+```
 
-## Implementasi
+Halaman dan layout menggunakan Server Components. Komponen client dipakai untuk dialog, filter, form interaktif, dan peta. URL API disimpan di environment server, dan token sesi menggunakan cookie HttpOnly.
 
-- `app/(admin)/`: dashboard, pesanan, jadwal, layanan, FAQ, customer, petugas, laporan. Setiap resource mempunyai daftar, `/new`, dan `/[id]`.
-- `app/login/page.tsx`: login; `app/actions.ts`: login/logout, tambah/ubah/hapus dan penugasan.
-- `lib/api.ts`: `server-only`, membaca `API_URL`, token cookie HttpOnly, memeriksa `res.ok`, timeout, deduplikasi pembacaan per render memakai React `cache`.
-- `lib/resources.ts` dan `types/`: konfigurasi field/status dan model JSON. Ini konfigurasi antarmuka, bukan data dummy.
-- `components/`: Client Component kecil untuk filter, popup, navigasi, form; komponen daftar dan penyusun form tetap di server.
-- `components/tracking/`, `lib/demo/tracking.ts`, `types/tracking.ts`: dialog, peta Leaflet dan skenario simulasi tracking. State lokal dibuang saat dialog ditutup; tidak mengubah data pesanan.
-- `app/tokens.css`: warna, ukuran teks dan spacing; `globals.css`, `admin.css`, `overrides.css`, `design.css`: slicing dan revisi visual responsif.
-- `next/font`: DM Sans dan Plus Jakarta Sans. Ikon SVG lokal memakai `next/image`. Panda memakai SVG, bukan emoji.
-
-Data awal diambil oleh async Server Components. Filter/search memakai query URL dan data difilter di server. Form memakai Server Actions, `useActionState`, `useFormStatus`, validasi server, `revalidatePath`, lalu `redirect`. `params` dynamic route di-await; HTTP 404 API memanggil `notFound()`. Tersedia `loading.tsx`, `error.tsx`, `not-found.tsx`, empty state dan status pending.
-
-Browser tidak memanggil Express langsung. RSC/Server Actions mengambil data antarserver, sehingga `API_URL` dan access token tidak perlu diekspos sebagai `NEXT_PUBLIC_*`. Backend wajib memeriksa token dan peran admin pada setiap endpoint.
+Font memakai `next/font`, gambar memakai `next/image`, dan warna serta spacing disimpan sebagai CSS variables. Panduan bentuk data dan respons error tersedia di [kontrak API](docs/API-CONTRACT.md).
 
 ## Strategi render
 
-| Halaman                                        | Strategi | Alasan                                                 |
-| ---------------------------------------------- | -------- | ------------------------------------------------------ |
-| `/login`                                       | SSR      | Memeriksa sesi dan memproses login server              |
-| `/`                                            | SSR      | Statistik dihitung dari data pesanan terkini           |
-| `/pesanan`, `/pesanan/new`, `/pesanan/[id]`    | SSR      | Status, filter dan penugasan berubah saat operasional  |
-| `/jadwal`, `/jadwal/new`, `/jadwal/[id]`       | SSR      | Jadwal dan pembagian shift dapat berubah               |
-| `/layanan`, `/layanan/new`, `/layanan/[id]`    | SSR      | Harga dan publikasi harus mencerminkan perubahan admin |
-| `/faq`, `/faq/new`, `/faq/[id]`                | SSR      | Pertanyaan dan status publikasi berubah melalui form   |
-| `/petugas`, `/petugas/new`, `/petugas/[id]`    | SSR      | Kontak/status dan ketersediaan petugas terkini         |
-| `/customer`, `/customer/new`, `/customer/[id]` | SSR      | Profil dan status pelanggan terkini                    |
-| `/laporan`, `/laporan/export`                  | SSR      | Periode dan ringkasan pesanan dari API                 |
-| `/_not-found`                                  | SSG      | Tampilan 404 bawaan tidak memerlukan data pribadi      |
+| Halaman                     | Strategi | Alasan                                        |
+| --------------------------- | -------- | --------------------------------------------- |
+| `/login`                    | SSR      | Memeriksa sesi dan memproses login            |
+| `/`                         | SSR      | Menampilkan statistik pesanan terkini         |
+| `/pesanan` dan detail/form  | SSR      | Status dan penugasan dapat berubah            |
+| `/jadwal` dan detail/form   | SSR      | Jadwal petugas dapat berubah                  |
+| `/layanan` dan detail/form  | SSR      | Harga dan publikasi mengikuti data terbaru    |
+| `/faq` dan detail/form      | SSR      | Daftar mengikuti perubahan pertanyaan         |
+| `/petugas` dan detail/form  | SSR      | Profil dan ketersediaan mengikuti API         |
+| `/customer` dan detail/form | SSR      | Profil dan riwayat mengikuti API              |
+| `/laporan` dan ekspor       | SSR      | Ringkasan mengikuti periode yang dipilih      |
+| `/_not-found`               | SSG      | Tampilan 404 bawaan tidak memerlukan data API |
 
-Halaman operasional memakai `dynamic = 'force-dynamic'` dan fetch `cache: 'no-store'`. SSG/ISR tidak dipaksakan pada halaman admin yang bersesi. Bukti build aktual tersedia di [log build](docs/build-output.txt) dan [gambar output build](docs/screenshots/build-output.png).
+Halaman admin memakai `dynamic = 'force-dynamic'` dan fetch `cache: 'no-store'`. Dynamic route `[id]` mengambil detail dari API; data yang tidak ditemukan ditangani dengan `notFound()`. Form menggunakan `useActionState` dan `useFormStatus` untuk pesan error dan status pengiriman.
 
-## Pemeriksaan
+## Pengujian
 
-Verifikasi menggunakan **fixture HTTP sementara di luar aplikasi**, karena Express milik kelompok belum dibuat. Fixture tidak termasuk frontend yang dikumpulkan dan tidak menjadi backend/database kelompok. Ini membuktikan perilaku frontend sesuai kontrak; belum membuktikan integrasi Express atau penyimpanan database.
+Build, TypeScript, dan format kode sudah lolos. Tampilan diuji pada desktop 1280px, tablet 768px, ponsel 360px, serta landscape 800×360. Pengujian meliputi login, CRUD, penugasan petugas, filter, dialog, dan kondisi kosong/error.
 
-- Semua menu diperiksa pada 1280×820, 768×1024, 360×800 dan landscape 800×360.
-- Login valid/tidak valid, routing, tab status, tanggal, popup dan lebar halaman diperiksa.
-- Hasil pengukuran dan uji alur terdapat pada [QA layout](docs/revised/login-dashboard-pesanan-jadwal-layanan-petugas-customer-laporan-faq-qa.json) dan [QA alur](docs/revised/flow-qa.json).
-- Uji ulang terhadap API Express nyata wajib dilakukan sebelum pengumpulan.
+CRUD layanan, FAQ, dan petugas telah diintegrasikan dengan Express dan MySQL/MariaDB lokal.
 
-Tracking diuji pada empat ukuran layar: memilih daftar/marker, pencarian/status, lokasi terlambat, simulasi mulai/jeda/reset, progres selesai, footer tetap, Escape dan akses dari pesanan/profil petugas. Bukti ada di [QA tracking](docs/tracking/qa.json) dan [build tracking](docs/tracking-build.txt). Tile peta diganti fixture SVG selama QA otomatis; tampilan normal memakai OpenStreetMap dengan atribusi. Data tracking berlabel Simulasi, bukan GPS aktual.
+- [Hasil build](docs/figma-fix/build.txt)
+- [Pengujian fitur admin](docs/admin-actions/README.md)
+- [Hasil pengecekan 11 Oktober 2026](docs/admin-actions/AUDIT-2026-10-11.md)
+- [Pengujian tracking](docs/tracking/qa.json)
 
-## Bukti tampilan dan pembandingan Figma
+## Desain dan screenshot
 
-Referensi: [prototype Figma Cleango](https://www.figma.com/proto/ymMzgCxXWLUncDBzi1e4Oq/Cleango?node-id=139-2). Prototype berhasil dibuka dan screenshot sembilan halaman sudah disimpan. [Audit per halaman](docs/DESIGN-AUDIT.md) mencatat perbedaan awal terhadap screenshot web dengan fixture. Revisi sembilan halaman sudah diterapkan satu per satu dengan skill figma-design-to-code, PRD dan tugas dosen. Layer/aset MCP masih dibatasi; tidak ada klaim pixel-perfect.
+Desain mengikuti prototype [Figma CleanGo fix](https://www.figma.com/design/1lr9CMyydP3dI6axuKAUg6/CleanGo-fix?node-id=4002-7854). Ukuran disesuaikan secara visual dan masih dapat berubah mengikuti desain final.
 
-| Halaman        | Figma prototype                                 | Web                                        |
-| -------------- | ----------------------------------------------- | ------------------------------------------ |
-| Login          | [Prototype](docs/figma-prototype/login.png)     | [Web](docs/revised/login-1280x820.png)     |
-| Dashboard      | [Prototype](docs/figma-prototype/dashboard.png) | [Web](docs/revised/dashboard-1280x820.png) |
-| Kelola pesanan | [Prototype](docs/figma-prototype/pesanan.png)   | [Web](docs/revised/pesanan-1280x820.png)   |
-| Jadwal         | [Prototype](docs/figma-prototype/jadwal.png)    | [Web](docs/revised/jadwal-1280x820.png)    |
-| Layanan        | [Prototype](docs/figma-prototype/layanan.png)   | [Web](docs/revised/layanan-1280x820.png)   |
-| Petugas        | [Prototype](docs/figma-prototype/petugas.png)   | [Web](docs/revised/petugas-1280x820.png)   |
-| Customer       | [Prototype](docs/figma-prototype/customer.png)  | [Web](docs/revised/customer-1280x820.png)  |
-| Laporan        | [Prototype](docs/figma-prototype/laporan.png)   | [Web](docs/revised/laporan-1280x820.png)   |
-| FAQ            | [Prototype](docs/figma-prototype/faq.png)       | [Web](docs/revised/faq-1280x820.png)       |
+| Halaman   | Prototype terbaru                     | Web                                                    |
+| --------- | ------------------------------------- | ------------------------------------------------------ |
+| Login     | [Figma](docs/figma-fix/login.jpg)     | [Screenshot](docs/figma-fix/result/login-1280.jpg)     |
+| Dashboard | [Figma](docs/figma-fix/dashboard.jpg) | [Screenshot](docs/figma-fix/result/dashboard-1280.jpg) |
+| Pesanan   | [Figma](docs/figma-fix/pesanan.jpg)   | [Screenshot](docs/figma-fix/result/pesanan-1280.jpg)   |
+| Jadwal    | [Figma](docs/figma-fix/jadwal.jpg)    | [Screenshot](docs/figma-fix/result/jadwal-1280.jpg)    |
+| Layanan   | [Figma](docs/figma-fix/layanan.jpg)   | [Screenshot](docs/figma-fix/result/layanan-1280.jpg)   |
+| Petugas   | [Figma](docs/figma-fix/petugas.jpg)   | [Screenshot](docs/figma-fix/result/petugas-1280.jpg)   |
+| Pelanggan | [Figma](docs/figma-fix/customer.jpg)  | [Screenshot](docs/figma-fix/result/customer-1280.jpg)  |
+| Laporan   | [Figma](docs/figma-fix/laporan.jpg)   | [Screenshot](docs/figma-fix/result/laporan-1280.jpg)   |
+| FAQ       | [Figma](docs/figma-fix/faq.jpg)       | [Screenshot](docs/figma-fix/result/faq-1280.jpg)       |
 
-Screenshot prototype masih memuat viewer dan beberapa frame panjang terpotong. Hasil revisi sudah diperiksa pada empat ukuran layar dengan fixture API. Pemeriksaan layer/token terbaru dan integrasi API Express nyata tetap diperlukan sebelum pengumpulan.
-
-## Pekerjaan tim yang masih diperlukan
-
-Anggota backend menyediakan Express, database SQL/seed, `.env.example`, petunjuk menjalankan backend dan kontrak API yang disepakati. Tim melengkapi screenshot pembandingan desain, repo GitHub public, PR per anggota, board Trello, data kelompok dan presentasi. Frontend ini tidak membuat undangan, mengunggah file atau menerbitkan repo atas nama tim.
-
-Dokumentasi teknis: [Server/Client Components](https://nextjs.org/docs/app/getting-started/server-and-client-components), [form Server Actions](https://nextjs.org/docs/app/guides/forms).
+Lihat [catatan desain](docs/figma-fix/README.md) untuk rincian tampilan dan [panduan tracking](docs/TRACKING.md) untuk penggunaan simulasi peta.

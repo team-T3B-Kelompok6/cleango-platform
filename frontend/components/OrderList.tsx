@@ -7,6 +7,7 @@ import { DialogTrigger } from './DialogTrigger';
 import { AssignmentFormServer } from './AssignmentFormServer';
 import { Badge } from './StatusBadge';
 import { TrackingButton } from './tracking/TrackingButton';
+import { DeleteRecordButton } from './DeleteRecordButton';
 import type { Order } from '@/types';
 import type { RecordListProps } from './RecordListProps';
 export function OrderList({ shown, resource, config, edit }: RecordListProps) {
@@ -79,7 +80,9 @@ export function OrderList({ shown, resource, config, edit }: RecordListProps) {
                         label="Pantau Petugas"
                       />
                     )}
-                  {order.status === 'Menunggu Assign' && (
+                  {['Menunggu Assign', 'Menunggu Lokasi'].includes(
+                    order.status,
+                  ) && (
                     <DialogTrigger
                       label="Tugaskan Petugas"
                       title="Tugaskan Petugas"
@@ -92,6 +95,7 @@ export function OrderList({ shown, resource, config, edit }: RecordListProps) {
                     </DialogTrigger>
                   )}
                   {edit(order)}
+                  <DeleteRecordButton resource={resource} record={order} />
                 </div>
               </div>
             </article>

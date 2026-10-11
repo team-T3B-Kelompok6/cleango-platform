@@ -1,26 +1,78 @@
 'use client';
 import { UiIcon } from './UiIcon';
-import { useState, useRef, useTransition } from 'react';
+import {
+  useState,
+  useRef,
+  useTransition,
+  useEffect,
+  type CSSProperties,
+} from 'react';
 import Form from 'next/form';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Icon } from './Icon';
 import { useOutsideDismiss } from './useOutsideDismiss';
+import { DateCalendar } from './DateCalendar';
+const validDate = (value: string | null) =>
+  value &&
+  /^\d{4}-\d{2}-\d{2}$/.test(value) &&
+  !Number.isNaN(Date.parse(value)) &&
+  new Date(value).toISOString().slice(0, 10) === value
+    ? value
+    : '';
 export function Filters({
   tabs = [],
   date = false,
+  dateCounts = {},
+  today = '',
 }: {
   tabs?: string[];
   date?: boolean;
+  dateCounts?: Record<string, number>;
+  today?: string;
 }) {
   const router = useRouter(),
     pathname = usePathname(),
     params = useSearchParams();
   const [open, setOpen] = useState(false),
-    [from, setFrom] = useState(params.get('from') ?? ''),
-    [to, setTo] = useState(params.get('to') ?? '');
+    [from, setFrom] = useState(validDate(params.get('from'))),
+    [to, setTo] = useState(validDate(params.get('to')));
   const [pending, startTransition] = useTransition();
+  const [placement, setPlacement] = useState({
+    above: false,
+    center: false,
+    room: 0,
+  });
   const ref = useRef<HTMLDivElement>(null);
   useOutsideDismiss(ref, open, () => setOpen(false));
+  useEffect(() => {
+    if (!open) return;
+    const measure = () => {
+      const anchor = ref.current?.getBoundingClientRect();
+      if (!anchor) return;
+      const below = window.innerHeight - anchor.bottom - 28;
+      const above = anchor.top - 28;
+      const center = Math.max(below, above) < 240;
+      const useAbove = below < 200 && above > below;
+      const room = Math.max(
+        140,
+        center ? window.innerHeight - 32 : useAbove ? above : below,
+      );
+      setPlacement((current) =>
+        current.above === useAbove &&
+        current.center === center &&
+        current.room === room
+          ? current
+          : { above: useAbove, center, room },
+      );
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    window.addEventListener('scroll', measure, true);
+    return () => {
+      window.removeEventListener('resize', measure);
+      window.removeEventListener('scroll', measure, true);
+    };
+  }, [open]);
   function apply(values: Record<string, string>) {
     const next = new URLSearchParams(params);
     for (const [k, v] of Object.entries(values))
@@ -34,8 +86,8 @@ export function Filters({
   }
   function toggle() {
     if (!open) {
-      setFrom(params.get('from') ?? '');
-      setTo(params.get('to') ?? '');
+      setFrom(validDate(params.get('from')));
+      setTo(validDate(params.get('to')));
     }
     setOpen(!open);
   }
@@ -59,6 +111,16 @@ export function Filters({
           </button>
           <div
             className="date-popover"
+            data-placement={
+              placement.center ? 'center' : placement.above ? 'above' : 'below'
+            }
+            style={
+              placement.room
+                ? ({
+                    '--date-popover-room': `${placement.room}px`,
+                  } as CSSProperties)
+                : undefined
+            }
             data-open={open}
             aria-hidden={!open}
             inert={!open}
@@ -66,9 +128,17 @@ export function Filters({
             aria-label="Filter tanggal"
           >
             <div className="modal-header">
-              <div>
-                <h2>Filter tanggal</h2>
-                <p>Pilih rentang tanggal pengerjaan.</p>
+              <div className="calendar-title">
+                <span className="calendar-summary-icon">
+                  <Icon name="calendar" />
+                </span>
+                <div>
+                  <h2>
+                    Pilih Tanggal{' '}
+                    {pathname === '/jadwal' ? 'Jadwal' : 'Pesanan'}
+                  </h2>
+                  <p>Kalender &amp; reservasi Cleango</p>
+                </div>
               </div>
               <button
                 className="close-button"
@@ -86,25 +156,24 @@ export function Filters({
                 setOpen(false);
               }}
             >
-              <div className="modal-body form-grid">
-                <label>
-                  Dari tanggal
-                  <input
-                    type="date"
-                    value={from}
-                    onChange={(event) => setFrom(event.target.value)}
-                  />
-                </label>
-                <label>
-                  Sampai tanggal
-                  <input
-                    type="date"
-                    min={from || undefined}
-                    value={to}
-                    onChange={(event) => setTo(event.target.value)}
-                  />
-                </label>
-              </div>
+              {open && (
+                <DateCalendar
+                  from={from}
+                  to={to}
+                  today={
+                    today ||
+                    new Intl.DateTimeFormat('en-CA', {
+                      timeZone: 'Asia/Jakarta',
+                    }).format(new Date())
+                  }
+                  counts={dateCounts}
+                  noun={pathname === '/jadwal' ? 'Jadwal' : 'Pesanan'}
+                  onChange={(start, end) => {
+                    setFrom(start);
+                    setTo(end);
+                  }}
+                />
+              )}
               <div className="modal-footer">
                 <button
                   className="button"
@@ -123,7 +192,8 @@ export function Filters({
                   type="submit"
                   disabled={!!(from && to && from > to)}
                 >
-                  Terapkan filter
+                  <UiIcon name="tick" />
+                  Pilih tanggal
                 </button>
               </div>
             </form>

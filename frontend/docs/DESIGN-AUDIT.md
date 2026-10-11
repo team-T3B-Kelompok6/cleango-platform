@@ -6,11 +6,11 @@ Referensi terbaru yang berhasil dibuka: [prototype Cleango](https://www.figma.co
 
 ## Status akses dan batas pemeriksaan
 
-Link prototype merender sembilan halaman dashboard admin. Bukti tangkapan layar tersimpan di figma-prototype/ dan hasil akses di [access-report.json](figma-prototype/access-report.json). Link Design/Dev Mode masih mendapat 403; get_design_context melalui plugin masih terkena batas panggilan Figma MCP Starter.
+Prototype menampilkan sembilan halaman dashboard admin. Screenshot tersimpan di figma-prototype/ dan hasil akses di [access-report.json](figma-prototype/access-report.json). Pemeriksaan saat itu memakai prototype; detail layer dan aset desain belum diperiksa seluruhnya.
 
-Revisi frontend sembilan halaman telah dilakukan berurutan memakai skill `figma-design-to-code`, PRD dan ketentuan dosen. Acuan visual adalah prototype yang berhasil dibuka, dengan komponen/token/aset SVG proyek yang sudah tersedia. Ini **pemeriksaan visual terhadap bagian yang terlihat**, bukan verifikasi pixel-perfect. Screenshot prototype mencakup viewer, margin hitam, banner cookie dan pesan browser; beberapa frame panjang terpotong di bawah viewport. Screenshot web terbaru ada di `revised/` dan diambil dari build produksi dengan fixture HTTP di luar aplikasi.
+Revisi sembilan halaman mengikuti PRD dan ketentuan tugas. Acuan visual memakai prototype serta komponen dan aset SVG yang sudah ada di proyek. Pemeriksaan terbatas pada bagian desain yang terlihat. Screenshot prototype masih memuat panel viewer dan beberapa halaman panjang terpotong. Screenshot web ada di `revised/`, menggunakan build produksi dengan API uji terpisah.
 
-Layer/token dan ekspor aset dari revisi terbaru belum dapat diakses melalui MCP. Screenshot desain hanya dipakai sebagai referensi, tidak menjadi aset implementasi. Ikon SVG asli proyek tetap lokal; tambahan ikon memakai komponen SVG. Panda SVG mengikuti larangan emoji dalam tugas dosen. Seluruh gambar yang terlihat diperiksa berhasil dimuat dan geometri rendernya dicatat di [QA interaksi/aset](revised/revision-interactions.json).
+Detail ukuran dan aset pada revisi terbaru masih perlu diperiksa. Screenshot desain dipakai sebagai referensi, bukan sebagai gambar antarmuka. Ikon memakai SVG lokal. Hasil pemeriksaan gambar dan interaksi ada di [QA interaksi/aset](revised/revision-interactions.json).
 
 ## Pembandingan awal dan urutan revisi
 
@@ -67,7 +67,7 @@ Pemeriksaan di atas memakai fixture sementara, **belum membuktikan integrasi Exp
 
 ## Tracking dummy dan penyederhanaan visual
 
-Permintaan pengguna berikutnya menambahkan preview tracking dummy serta polesan agar desain lebih natural. Konfigurasi setup-matt-pocock-skills di AGENTS.md/docs/agents/ tetap diikuti. Skill desain tetap figma-design-to-code, dengan prototype petugas sebagai acuan gaya; panggilan konteks node 332:2 masih terkena batas quota MCP.
+Tracking dummy ditambahkan untuk mencoba pemilihan petugas, peta, dan progres tugas. Gaya tampilan mengacu pada prototype petugas. Detail layer desain tracking belum tersedia untuk pembandingan.
 
 Tambahan tracking menggunakan dialog dua kolom, roster horizontal di layar kecil, peta Leaflet, status lokasi terlambat, detail tugas dan timeline. Footer tetap di luar body scroll; perpindahan pilihan/peta singkat dan mendukung reduced motion. Simulasi diberi label terlihat, tidak mengubah data pesanan/API. Warna/font/layout utama dipertahankan. Menu aktif tanpa glow, kartu statistik tanpa bayangan bergerak dan keterangan statistik tanpa pill dekoratif.
 

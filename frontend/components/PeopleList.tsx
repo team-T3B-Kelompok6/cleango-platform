@@ -3,6 +3,7 @@ import { valueText, rupiah } from '@/lib/resources';
 import { Badge } from './StatusBadge';
 import { UiIcon } from './UiIcon';
 import { TrackingButton } from './tracking/TrackingButton';
+import { DeleteRecordButton } from './DeleteRecordButton';
 
 import type { RecordListProps } from './RecordListProps';
 export function PeopleList({ shown, resource, config, edit }: RecordListProps) {
@@ -110,6 +111,7 @@ export function PeopleList({ shown, resource, config, edit }: RecordListProps) {
                   ? 'Lihat Detail & Jadwal'
                   : 'Lihat Detail'}
               </Link>
+              <DeleteRecordButton resource={resource} record={item} />
             </div>
           </article>
         ))}

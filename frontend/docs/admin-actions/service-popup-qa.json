@@ -1,0 +1,245 @@
+{
+  "date": "2026-10-10",
+  "checks": [
+    {
+      "test": "desktop",
+      "bodyScroll": 0,
+      "controlsInside": true,
+      "dialog": {
+        "bottom": 700,
+        "top": 20,
+        "width": 760
+      },
+      "footerBelow": true,
+      "footerInside": true,
+      "footerTop": 626.4249877929688,
+      "maxBodyScroll": 69,
+      "noHorizontalOverflow": true,
+      "viewport": [
+        1280,
+        720
+      ]
+    },
+    {
+      "test": "responsive",
+      "bodyScroll": 0,
+      "controlsInside": true,
+      "dialog": {
+        "bottom": 780,
+        "top": 20,
+        "width": 313
+      },
+      "footerBelow": true,
+      "footerInside": true,
+      "footerTop": 706.4249877929688,
+      "maxBodyScroll": 198,
+      "noHorizontalOverflow": true,
+      "viewport": [
+        360,
+        800
+      ]
+    },
+    {
+      "test": "responsive",
+      "bodyScroll": 0,
+      "controlsInside": true,
+      "dialog": {
+        "bottom": 886.2625274658203,
+        "top": 137.7375030517578,
+        "width": 721
+      },
+      "footerBelow": true,
+      "footerInside": true,
+      "footerTop": 812.6875,
+      "maxBodyScroll": 0,
+      "noHorizontalOverflow": true,
+      "viewport": [
+        768,
+        1024
+      ]
+    },
+    {
+      "test": "responsive",
+      "bodyScroll": 0,
+      "controlsInside": true,
+      "dialog": {
+        "bottom": 340,
+        "top": 20,
+        "width": 753
+      },
+      "footerBelow": true,
+      "footerInside": true,
+      "footerTop": 266.4250183105469,
+      "maxBodyScroll": 429,
+      "noHorizontalOverflow": true,
+      "viewport": [
+        800,
+        360
+      ]
+    },
+    {
+      "test": "mobile-scroll-to-last-field",
+      "bodyScroll": 198.3999938964844,
+      "controlsInside": true,
+      "dialog": {
+        "bottom": 780,
+        "top": 20,
+        "width": 313
+      },
+      "footerBelow": true,
+      "footerInside": true,
+      "footerTop": 706.4249877929688,
+      "maxBodyScroll": 198,
+      "noHorizontalOverflow": true,
+      "viewport": [
+        360,
+        800
+      ]
+    },
+    {
+      "test": "faq-add-regression",
+      "bodyScroll": 0,
+      "controlsInside": true,
+      "dialog": {
+        "bottom": 601.375,
+        "top": 118.625,
+        "width": 540
+      },
+      "footerBelow": true,
+      "footerInside": true,
+      "footerTop": 527.7999877929688,
+      "maxBodyScroll": 0,
+      "noHorizontalOverflow": true,
+      "viewport": [
+        1280,
+        720
+      ]
+    },
+    {
+      "test": "customer-add-regression",
+      "bodyScroll": 0,
+      "controlsInside": true,
+      "dialog": {
+        "bottom": 644.1625289916992,
+        "top": 75.82500457763672,
+        "width": 540
+      },
+      "footerBelow": true,
+      "footerInside": true,
+      "footerTop": 570.5875244140625,
+      "maxBodyScroll": 0,
+      "noHorizontalOverflow": true,
+      "viewport": [
+        1280,
+        720
+      ]
+    },
+    {
+      "test": "staff-add-regression",
+      "bodyScroll": 0,
+      "controlsInside": true,
+      "dialog": {
+        "bottom": 539.1750183105469,
+        "top": 180.8125,
+        "width": 540
+      },
+      "footerBelow": true,
+      "footerInside": true,
+      "footerTop": 465.6000061035156,
+      "maxBodyScroll": 0,
+      "noHorizontalOverflow": true,
+      "viewport": [
+        1280,
+        720
+      ]
+    },
+    {
+      "test": "order-detail-regression",
+      "bodyScroll": 0,
+      "controlsInside": true,
+      "dialog": {
+        "bottom": 700,
+        "top": 20,
+        "width": 760
+      },
+      "footerBelow": true,
+      "footerInside": true,
+      "footerTop": 634.4249877929688,
+      "maxBodyScroll": 324,
+      "noHorizontalOverflow": true,
+      "viewport": [
+        1280,
+        720
+      ]
+    },
+    {
+      "test": "order-assignment-regression",
+      "bodyScroll": 0,
+      "controlsInside": true,
+      "dialog": {
+        "bottom": 700,
+        "top": 20,
+        "width": 540
+      },
+      "footerBelow": true,
+      "footerInside": true,
+      "footerTop": 634.4249877929688,
+      "maxBodyScroll": 0,
+      "noHorizontalOverflow": true,
+      "viewport": [
+        1280,
+        720
+      ]
+    },
+    {
+      "test": "service-edit-regression",
+      "bodyScroll": 0,
+      "controlsInside": true,
+      "dialog": {
+        "bottom": 700,
+        "top": 20,
+        "width": 760
+      },
+      "footerBelow": true,
+      "footerInside": true,
+      "footerTop": 636.4249877929688,
+      "maxBodyScroll": 57,
+      "noHorizontalOverflow": true,
+      "viewport": [
+        1280,
+        720
+      ]
+    },
+    {
+      "test": "desktop-scroll-to-last-field",
+      "bodyScroll": 68.80000305175781,
+      "controlsInside": true,
+      "dialog": {
+        "bottom": 700,
+        "top": 20,
+        "width": 760
+      },
+      "footerBelow": true,
+      "footerInside": true,
+      "footerTop": 626.4249877929688,
+      "maxBodyScroll": 69,
+      "noHorizontalOverflow": true,
+      "viewport": [
+        1280,
+        720
+      ]
+    }
+  ],
+  "create": {
+    "via": "header popup at 360x800",
+    "saved": true,
+    "price": 125000,
+    "features": [
+      "Alat kebersihan",
+      "Cairan pembersih"
+    ],
+    "testRecordRemoved": true
+  },
+  "dataSource": "external local preview API",
+  "build": "passed"
+}

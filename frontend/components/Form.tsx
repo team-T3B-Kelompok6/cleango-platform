@@ -10,13 +10,15 @@ type FormAction = (state: FormState, form: FormData) => Promise<FormState>;
 export function SubmitButton({
   children,
   pendingLabel = 'Menyimpan…',
+  className = 'button primary',
 }: {
   children: ReactNode;
   pendingLabel?: string;
+  className?: string;
 }) {
   const { pending } = useFormStatus();
   return (
-    <button className="button primary" type="submit" disabled={pending}>
+    <button className={className} type="submit" disabled={pending}>
       {pending ? pendingLabel : children}
     </button>
   );
@@ -28,12 +30,14 @@ export function ResourceForm({
   action,
   cancelHref,
   submitLabel = 'Simpan perubahan',
+  intro,
 }: {
   fields: Field[];
   initial?: Partial<RecordData>;
   action: FormAction;
   cancelHref: string;
   submitLabel?: string;
+  intro?: ReactNode;
 }) {
   const formId = useId();
   const [state, formAction] = useActionState(action, {});
@@ -41,6 +45,7 @@ export function ResourceForm({
   return (
     <form action={formAction} className="next-form">
       <div className="modal-body manage-form">
+        {intro}
         <div className="form-grid">
           {fields.map((field) => {
             const value =
@@ -56,13 +61,17 @@ export function ResourceForm({
               : String(value);
             const inputId = formId + '-field-' + field.name;
             const errorId = inputId + '-error';
+            const hintId = inputId + '-hint';
             const error = state.errors?.[field.name];
             const props = {
               id: inputId,
               name: field.name,
               required: field.required,
               'aria-invalid': !!error,
-              'aria-describedby': error ? errorId : undefined,
+              'aria-describedby':
+                [field.hint && hintId, error && errorId]
+                  .filter(Boolean)
+                  .join(' ') || undefined,
             };
             return (
               <div
@@ -107,6 +116,7 @@ export function ResourceForm({
                         {...props}
                         defaultValue={text}
                         rows={3}
+                        placeholder={field.placeholder}
                         maxLength={3000}
                       />
                     ) : field.kind === 'select' || field.kind === 'boolean' ? (
@@ -127,6 +137,7 @@ export function ResourceForm({
                         key={text}
                         {...props}
                         type={field.kind ?? 'text'}
+                        placeholder={field.placeholder}
                         defaultValue={text}
                         min={field.kind === 'number' ? 0 : undefined}
                         step={field.kind === 'number' ? 1 : undefined}
@@ -134,6 +145,11 @@ export function ResourceForm({
                       />
                     )}
                   </>
+                )}
+                {field.hint && (
+                  <small className="field-hint" id={hintId}>
+                    {field.hint}
+                  </small>
                 )}
                 {error && (
                   <span className="field-error" id={errorId}>
@@ -166,14 +182,23 @@ export function ResourceForm({
   );
 }
 
-export function DeleteForm({ action }: { action: FormAction }) {
+export function DeleteForm({
+  action,
+  name,
+}: {
+  action: FormAction;
+  name: string;
+}) {
   const [state, formAction] = useActionState(action, {});
   const close = useDialogClose();
   return (
     <form action={formAction} className="next-form">
       <div className="modal-body">
+        <p>
+          Hapus <strong>{name}</strong> dari daftar?
+        </p>
         <p className="muted">
-          Hapus data ini dari daftar? Pastikan data sudah tidak diperlukan.
+          Pastikan data sudah tidak diperlukan sebelum menghapusnya.
         </p>
         {state.message && (
           <p role="alert" className="form-error">
@@ -187,7 +212,9 @@ export function DeleteForm({ action }: { action: FormAction }) {
             Batal
           </button>
         )}
-        <SubmitButton pendingLabel="Menghapus…">Hapus data</SubmitButton>
+        <SubmitButton pendingLabel="Menghapus…" className="button destructive">
+          Hapus data
+        </SubmitButton>
       </div>
     </form>
   );

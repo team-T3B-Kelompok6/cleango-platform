@@ -12,7 +12,12 @@ export function useOutsideDismiss(
       if (!anchor.current?.contains(event.target as Node)) onClose();
     };
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape') {
+        onClose();
+        anchor.current
+          ?.querySelector<HTMLButtonElement>('button[aria-expanded]')
+          ?.focus();
+      }
     };
 
     document.addEventListener('pointerdown', handlePointerDown);

@@ -1,0 +1,863 @@
+{
+  "date": "2026-10-11",
+  "scope": "Frontend with external preview API; no real Express/database integration claim",
+  "login": true,
+  "layoutChecks": [
+    {
+      "path": "pesanan",
+      "buttons": [
+        "Filter Tanggal",
+        "",
+        "Semua tanggal",
+        "Pilih tanggal",
+        "Semua Pesanan",
+        "Menunggu Assign",
+        "Sedang Dikerjakan",
+        "Selesai",
+        "Batal",
+        "",
+        "",
+        "Tugaskan Petugas",
+        "Detail & Ubah",
+        "Hapus Pesanan",
+        "",
+        "Pantau Petugas",
+        "Detail & Ubah",
+        "Hapus Pesanan",
+        "",
+        "Detail & Ubah",
+        "Hapus Pesanan",
+        "",
+        "Tugaskan Petugas",
+        "Detail & Ubah",
+        "Hapus Pesanan"
+      ],
+      "detailLinks": [
+        "/pesanan/CL-8923",
+        "/pesanan/CL-8923",
+        "/pesanan/CL-8919",
+        "/pesanan/CL-8919",
+        "/pesanan/CL-8918",
+        "/pesanan/CL-8918",
+        "/pesanan/CL-8915",
+        "/pesanan/CL-8915"
+      ],
+      "height": 820,
+      "overflow": false,
+      "title": "Kelola Pesanan",
+      "width": 1280
+    },
+    {
+      "path": "pesanan",
+      "buttons": [
+        "Filter Tanggal",
+        "",
+        "Semua tanggal",
+        "Pilih tanggal",
+        "Semua Pesanan",
+        "Menunggu Assign",
+        "Sedang Dikerjakan",
+        "Selesai",
+        "Batal",
+        "",
+        "",
+        "Tugaskan Petugas",
+        "Detail & Ubah",
+        "Hapus Pesanan",
+        "",
+        "Pantau Petugas",
+        "Detail & Ubah",
+        "Hapus Pesanan",
+        "",
+        "Detail & Ubah",
+        "Hapus Pesanan",
+        "",
+        "Tugaskan Petugas",
+        "Detail & Ubah",
+        "Hapus Pesanan"
+      ],
+      "detailLinks": [
+        "/pesanan/CL-8923",
+        "/pesanan/CL-8923",
+        "/pesanan/CL-8919",
+        "/pesanan/CL-8919",
+        "/pesanan/CL-8918",
+        "/pesanan/CL-8918",
+        "/pesanan/CL-8915",
+        "/pesanan/CL-8915"
+      ],
+      "height": 1024,
+      "overflow": false,
+      "title": "Kelola Pesanan",
+      "width": 768
+    },
+    {
+      "path": "pesanan",
+      "buttons": [
+        "Filter Tanggal",
+        "",
+        "Semua tanggal",
+        "Pilih tanggal",
+        "Semua Pesanan",
+        "Menunggu Assign",
+        "Sedang Dikerjakan",
+        "Selesai",
+        "Batal",
+        "",
+        "",
+        "Tugaskan Petugas",
+        "Detail & Ubah",
+        "Hapus Pesanan",
+        "",
+        "Pantau Petugas",
+        "Detail & Ubah",
+        "Hapus Pesanan",
+        "",
+        "Detail & Ubah",
+        "Hapus Pesanan",
+        "",
+        "Tugaskan Petugas",
+        "Detail & Ubah",
+        "Hapus Pesanan"
+      ],
+      "detailLinks": [
+        "/pesanan/CL-8923",
+        "/pesanan/CL-8923",
+        "/pesanan/CL-8919",
+        "/pesanan/CL-8919",
+        "/pesanan/CL-8918",
+        "/pesanan/CL-8918",
+        "/pesanan/CL-8915",
+        "/pesanan/CL-8915"
+      ],
+      "height": 800,
+      "overflow": false,
+      "title": "Kelola Pesanan",
+      "width": 360
+    },
+    {
+      "path": "pesanan",
+      "buttons": [
+        "Filter Tanggal",
+        "",
+        "Semua tanggal",
+        "Pilih tanggal",
+        "Semua Pesanan",
+        "Menunggu Assign",
+        "Sedang Dikerjakan",
+        "Selesai",
+        "Batal",
+        "",
+        "",
+        "Tugaskan Petugas",
+        "Detail & Ubah",
+        "Hapus Pesanan",
+        "",
+        "Pantau Petugas",
+        "Detail & Ubah",
+        "Hapus Pesanan",
+        "",
+        "Detail & Ubah",
+        "Hapus Pesanan",
+        "",
+        "Tugaskan Petugas",
+        "Detail & Ubah",
+        "Hapus Pesanan"
+      ],
+      "detailLinks": [
+        "/pesanan/CL-8923",
+        "/pesanan/CL-8923",
+        "/pesanan/CL-8919",
+        "/pesanan/CL-8919",
+        "/pesanan/CL-8918",
+        "/pesanan/CL-8918",
+        "/pesanan/CL-8915",
+        "/pesanan/CL-8915"
+      ],
+      "height": 360,
+      "overflow": false,
+      "title": "Kelola Pesanan",
+      "width": 800
+    },
+    {
+      "path": "jadwal",
+      "buttons": [
+        "Filter Tanggal",
+        "",
+        "Semua tanggal",
+        "Pilih tanggal",
+        "Semua Shift",
+        "Shift Pagi",
+        "Shift Siang",
+        "Shift Sore",
+        "",
+        "Hapus Jadwal",
+        "Hapus Jadwal",
+        "Hapus Jadwal",
+        "Hapus Jadwal"
+      ],
+      "detailLinks": [
+        "/jadwal/JD-01",
+        "/jadwal/JD-03",
+        "/jadwal/JD-02",
+        "/jadwal/JD-04"
+      ],
+      "height": 820,
+      "overflow": false,
+      "title": "Kelola Jadwal",
+      "width": 1280
+    },
+    {
+      "path": "jadwal",
+      "buttons": [
+        "Filter Tanggal",
+        "",
+        "Semua tanggal",
+        "Pilih tanggal",
+        "Semua Shift",
+        "Shift Pagi",
+        "Shift Siang",
+        "Shift Sore",
+        "",
+        "Hapus Jadwal",
+        "Hapus Jadwal",
+        "Hapus Jadwal",
+        "Hapus Jadwal"
+      ],
+      "detailLinks": [
+        "/jadwal/JD-01",
+        "/jadwal/JD-03",
+        "/jadwal/JD-02",
+        "/jadwal/JD-04"
+      ],
+      "height": 1024,
+      "overflow": false,
+      "title": "Kelola Jadwal",
+      "width": 768
+    },
+    {
+      "path": "jadwal",
+      "buttons": [
+        "Filter Tanggal",
+        "",
+        "Semua tanggal",
+        "Pilih tanggal",
+        "Semua Shift",
+        "Shift Pagi",
+        "Shift Siang",
+        "Shift Sore",
+        "",
+        "Hapus Jadwal",
+        "Hapus Jadwal",
+        "Hapus Jadwal",
+        "Hapus Jadwal"
+      ],
+      "detailLinks": [
+        "/jadwal/JD-01",
+        "/jadwal/JD-03",
+        "/jadwal/JD-02",
+        "/jadwal/JD-04"
+      ],
+      "height": 800,
+      "overflow": false,
+      "title": "Kelola Jadwal",
+      "width": 360
+    },
+    {
+      "path": "jadwal",
+      "buttons": [
+        "Filter Tanggal",
+        "",
+        "Semua tanggal",
+        "Pilih tanggal",
+        "Semua Shift",
+        "Shift Pagi",
+        "Shift Siang",
+        "Shift Sore",
+        "",
+        "Hapus Jadwal",
+        "Hapus Jadwal",
+        "Hapus Jadwal",
+        "Hapus Jadwal"
+      ],
+      "detailLinks": [
+        "/jadwal/JD-01",
+        "/jadwal/JD-03",
+        "/jadwal/JD-02",
+        "/jadwal/JD-04"
+      ],
+      "height": 360,
+      "overflow": false,
+      "title": "Kelola Jadwal",
+      "width": 800
+    },
+    {
+      "path": "layanan",
+      "buttons": [
+        "Tambah Layanan Baru",
+        "Semua Layanan",
+        "Rumah",
+        "Kantor",
+        "Sofa",
+        "AC",
+        "",
+        "Ubah Harga & Edit",
+        "Hapus Layanan",
+        "Ubah Harga & Edit",
+        "Hapus Layanan",
+        "Ubah Harga & Edit",
+        "Hapus Layanan"
+      ],
+      "detailLinks": [
+        "/layanan/SRV-01",
+        "/layanan/SRV-02",
+        "/layanan/SRV-03"
+      ],
+      "height": 820,
+      "overflow": false,
+      "title": "Kelola Layanan",
+      "width": 1280
+    },
+    {
+      "path": "layanan",
+      "buttons": [
+        "Tambah Layanan Baru",
+        "Semua Layanan",
+        "Rumah",
+        "Kantor",
+        "Sofa",
+        "AC",
+        "",
+        "Ubah Harga & Edit",
+        "Hapus Layanan",
+        "Ubah Harga & Edit",
+        "Hapus Layanan",
+        "Ubah Harga & Edit",
+        "Hapus Layanan"
+      ],
+      "detailLinks": [
+        "/layanan/SRV-01",
+        "/layanan/SRV-02",
+        "/layanan/SRV-03"
+      ],
+      "height": 1024,
+      "overflow": false,
+      "title": "Kelola Layanan",
+      "width": 768
+    },
+    {
+      "path": "layanan",
+      "buttons": [
+        "Tambah Layanan Baru",
+        "Semua Layanan",
+        "Rumah",
+        "Kantor",
+        "Sofa",
+        "AC",
+        "",
+        "Ubah Harga & Edit",
+        "Hapus Layanan",
+        "Ubah Harga & Edit",
+        "Hapus Layanan",
+        "Ubah Harga & Edit",
+        "Hapus Layanan"
+      ],
+      "detailLinks": [
+        "/layanan/SRV-01",
+        "/layanan/SRV-02",
+        "/layanan/SRV-03"
+      ],
+      "height": 800,
+      "overflow": false,
+      "title": "Kelola Layanan",
+      "width": 360
+    },
+    {
+      "path": "layanan",
+      "buttons": [
+        "Tambah Layanan Baru",
+        "Semua Layanan",
+        "Rumah",
+        "Kantor",
+        "Sofa",
+        "AC",
+        "",
+        "Ubah Harga & Edit",
+        "Hapus Layanan",
+        "Ubah Harga & Edit",
+        "Hapus Layanan",
+        "Ubah Harga & Edit",
+        "Hapus Layanan"
+      ],
+      "detailLinks": [
+        "/layanan/SRV-01",
+        "/layanan/SRV-02",
+        "/layanan/SRV-03"
+      ],
+      "height": 360,
+      "overflow": false,
+      "title": "Kelola Layanan",
+      "width": 800
+    },
+    {
+      "path": "faq",
+      "buttons": [
+        "Tambah FAQ Baru",
+        "Semua",
+        "Layanan",
+        "Pembayaran",
+        "Jadwal",
+        "SOP",
+        "",
+        "Ubah FAQ",
+        "Hapus FAQ",
+        "Ubah FAQ",
+        "Hapus FAQ",
+        "Ubah FAQ",
+        "Hapus FAQ",
+        "Ubah FAQ",
+        "Hapus FAQ"
+      ],
+      "detailLinks": [
+        "/faq/FAQ-01",
+        "/faq/FAQ-02",
+        "/faq/FAQ-03",
+        "/faq/FAQ-04"
+      ],
+      "height": 820,
+      "overflow": false,
+      "title": "Kelola FAQ",
+      "width": 1280
+    },
+    {
+      "path": "faq",
+      "buttons": [
+        "Tambah FAQ Baru",
+        "Semua",
+        "Layanan",
+        "Pembayaran",
+        "Jadwal",
+        "SOP",
+        "",
+        "Ubah FAQ",
+        "Hapus FAQ",
+        "Ubah FAQ",
+        "Hapus FAQ",
+        "Ubah FAQ",
+        "Hapus FAQ",
+        "Ubah FAQ",
+        "Hapus FAQ"
+      ],
+      "detailLinks": [
+        "/faq/FAQ-01",
+        "/faq/FAQ-02",
+        "/faq/FAQ-03",
+        "/faq/FAQ-04"
+      ],
+      "height": 1024,
+      "overflow": false,
+      "title": "Kelola FAQ",
+      "width": 768
+    },
+    {
+      "path": "faq",
+      "buttons": [
+        "Tambah FAQ Baru",
+        "Semua",
+        "Layanan",
+        "Pembayaran",
+        "Jadwal",
+        "SOP",
+        "",
+        "Ubah FAQ",
+        "Hapus FAQ",
+        "Ubah FAQ",
+        "Hapus FAQ",
+        "Ubah FAQ",
+        "Hapus FAQ",
+        "Ubah FAQ",
+        "Hapus FAQ"
+      ],
+      "detailLinks": [
+        "/faq/FAQ-01",
+        "/faq/FAQ-02",
+        "/faq/FAQ-03",
+        "/faq/FAQ-04"
+      ],
+      "height": 800,
+      "overflow": false,
+      "title": "Kelola FAQ",
+      "width": 360
+    },
+    {
+      "path": "faq",
+      "buttons": [
+        "Tambah FAQ Baru",
+        "Semua",
+        "Layanan",
+        "Pembayaran",
+        "Jadwal",
+        "SOP",
+        "",
+        "Ubah FAQ",
+        "Hapus FAQ",
+        "Ubah FAQ",
+        "Hapus FAQ",
+        "Ubah FAQ",
+        "Hapus FAQ",
+        "Ubah FAQ",
+        "Hapus FAQ"
+      ],
+      "detailLinks": [
+        "/faq/FAQ-01",
+        "/faq/FAQ-02",
+        "/faq/FAQ-03",
+        "/faq/FAQ-04"
+      ],
+      "height": 360,
+      "overflow": false,
+      "title": "Kelola FAQ",
+      "width": 800
+    },
+    {
+      "path": "customer",
+      "buttons": [
+        "Tambah Customer Baru",
+        "",
+        "Hapus Customer",
+        "Hapus Customer",
+        "Hapus Customer",
+        "Hapus Customer"
+      ],
+      "detailLinks": [
+        "/customer/CS-01",
+        "/customer/CS-02",
+        "/customer/CS-03",
+        "/customer/CS-04"
+      ],
+      "height": 820,
+      "overflow": false,
+      "title": "Kelola Data Customer",
+      "width": 1280
+    },
+    {
+      "path": "customer",
+      "buttons": [
+        "Tambah Customer Baru",
+        "",
+        "Hapus Customer",
+        "Hapus Customer",
+        "Hapus Customer",
+        "Hapus Customer"
+      ],
+      "detailLinks": [
+        "/customer/CS-01",
+        "/customer/CS-02",
+        "/customer/CS-03",
+        "/customer/CS-04"
+      ],
+      "height": 1024,
+      "overflow": false,
+      "title": "Kelola Data Customer",
+      "width": 768
+    },
+    {
+      "path": "customer",
+      "buttons": [
+        "Tambah Customer Baru",
+        "",
+        "Hapus Customer",
+        "Hapus Customer",
+        "Hapus Customer",
+        "Hapus Customer"
+      ],
+      "detailLinks": [
+        "/customer/CS-01",
+        "/customer/CS-02",
+        "/customer/CS-03",
+        "/customer/CS-04"
+      ],
+      "height": 800,
+      "overflow": false,
+      "title": "Kelola Data Customer",
+      "width": 360
+    },
+    {
+      "path": "customer",
+      "buttons": [
+        "Tambah Customer Baru",
+        "",
+        "Hapus Customer",
+        "Hapus Customer",
+        "Hapus Customer",
+        "Hapus Customer"
+      ],
+      "detailLinks": [
+        "/customer/CS-01",
+        "/customer/CS-02",
+        "/customer/CS-03",
+        "/customer/CS-04"
+      ],
+      "height": 360,
+      "overflow": false,
+      "title": "Kelola Data Customer",
+      "width": 800
+    },
+    {
+      "path": "petugas",
+      "buttons": [
+        "Pantau Petugas",
+        "Tambah Petugas Baru",
+        "Semua Petugas",
+        "Siaga & Tersedia",
+        "Sedang Bekerja",
+        "Masa Training",
+        "",
+        "Lihat lokasi",
+        "Edit Petugas",
+        "Hapus Petugas",
+        "Lihat lokasi",
+        "Edit Petugas",
+        "Hapus Petugas",
+        "Edit Petugas",
+        "Hapus Petugas",
+        "Edit Petugas",
+        "Hapus Petugas",
+        "Edit Petugas",
+        "Hapus Petugas"
+      ],
+      "detailLinks": [
+        "/petugas/PT-01",
+        "/petugas/PT-02",
+        "/petugas/PT-03",
+        "/petugas/PT-04",
+        "/petugas/PT-05"
+      ],
+      "height": 820,
+      "overflow": false,
+      "title": "Kelola Data Petugas",
+      "width": 1280
+    },
+    {
+      "path": "petugas",
+      "buttons": [
+        "Pantau Petugas",
+        "Tambah Petugas Baru",
+        "Semua Petugas",
+        "Siaga & Tersedia",
+        "Sedang Bekerja",
+        "Masa Training",
+        "",
+        "Lihat lokasi",
+        "Edit Petugas",
+        "Hapus Petugas",
+        "Lihat lokasi",
+        "Edit Petugas",
+        "Hapus Petugas",
+        "Edit Petugas",
+        "Hapus Petugas",
+        "Edit Petugas",
+        "Hapus Petugas",
+        "Edit Petugas",
+        "Hapus Petugas"
+      ],
+      "detailLinks": [
+        "/petugas/PT-01",
+        "/petugas/PT-02",
+        "/petugas/PT-03",
+        "/petugas/PT-04",
+        "/petugas/PT-05"
+      ],
+      "height": 1024,
+      "overflow": false,
+      "title": "Kelola Data Petugas",
+      "width": 768
+    },
+    {
+      "path": "petugas",
+      "buttons": [
+        "Pantau Petugas",
+        "Tambah Petugas Baru",
+        "Semua Petugas",
+        "Siaga & Tersedia",
+        "Sedang Bekerja",
+        "Masa Training",
+        "",
+        "Lihat lokasi",
+        "Edit Petugas",
+        "Hapus Petugas",
+        "Lihat lokasi",
+        "Edit Petugas",
+        "Hapus Petugas",
+        "Edit Petugas",
+        "Hapus Petugas",
+        "Edit Petugas",
+        "Hapus Petugas",
+        "Edit Petugas",
+        "Hapus Petugas"
+      ],
+      "detailLinks": [
+        "/petugas/PT-01",
+        "/petugas/PT-02",
+        "/petugas/PT-03",
+        "/petugas/PT-04",
+        "/petugas/PT-05"
+      ],
+      "height": 800,
+      "overflow": false,
+      "title": "Kelola Data Petugas",
+      "width": 360
+    },
+    {
+      "path": "petugas",
+      "buttons": [
+        "Pantau Petugas",
+        "Tambah Petugas Baru",
+        "Semua Petugas",
+        "Siaga & Tersedia",
+        "Sedang Bekerja",
+        "Masa Training",
+        "",
+        "Lihat lokasi",
+        "Edit Petugas",
+        "Hapus Petugas",
+        "Lihat lokasi",
+        "Edit Petugas",
+        "Hapus Petugas",
+        "Edit Petugas",
+        "Hapus Petugas",
+        "Edit Petugas",
+        "Hapus Petugas",
+        "Edit Petugas",
+        "Hapus Petugas"
+      ],
+      "detailLinks": [
+        "/petugas/PT-01",
+        "/petugas/PT-02",
+        "/petugas/PT-03",
+        "/petugas/PT-04",
+        "/petugas/PT-05"
+      ],
+      "height": 360,
+      "overflow": false,
+      "title": "Kelola Data Petugas",
+      "width": 800
+    }
+  ],
+  "dialogAndRouteChecks": [
+    {
+      "path": "pesanan",
+      "action": "read/edit",
+      "fields": 13,
+      "footerBelow": true,
+      "footerInside": true
+    },
+    {
+      "path": "pesanan",
+      "action": "delete-confirmation",
+      "confirm": true
+    },
+    {
+      "path": "jadwal",
+      "action": "read/edit",
+      "fields": 6,
+      "footerBelow": true,
+      "footerInside": true
+    },
+    {
+      "path": "jadwal",
+      "action": "delete-confirmation",
+      "confirm": true
+    },
+    {
+      "path": "layanan",
+      "action": "read/edit",
+      "fields": 7,
+      "footerBelow": true,
+      "footerInside": true
+    },
+    {
+      "path": "layanan",
+      "action": "delete-confirmation",
+      "confirm": true
+    },
+    {
+      "path": "faq",
+      "action": "read/edit",
+      "fields": 4,
+      "footerBelow": true,
+      "footerInside": true
+    },
+    {
+      "path": "faq",
+      "action": "delete-confirmation",
+      "confirm": true
+    },
+    {
+      "path": "customer",
+      "action": "read/edit",
+      "fields": 6,
+      "footerBelow": true,
+      "footerInside": true
+    },
+    {
+      "path": "customer",
+      "action": "delete-confirmation",
+      "confirm": true
+    },
+    {
+      "path": "petugas",
+      "action": "read/edit",
+      "fields": 4,
+      "footerBelow": true,
+      "footerInside": true
+    },
+    {
+      "path": "petugas",
+      "action": "delete-confirmation",
+      "confirm": true
+    },
+    {
+      "path": "layanan",
+      "action": "create-form",
+      "submitVisible": true
+    },
+    {
+      "path": "faq",
+      "action": "create-form",
+      "submitVisible": true
+    },
+    {
+      "path": "customer",
+      "action": "create-form",
+      "submitVisible": true
+    },
+    {
+      "path": "petugas",
+      "action": "create-form",
+      "submitVisible": true
+    },
+    {
+      "path": "pesanan",
+      "action": "assignment-empty-validation",
+      "pass": true
+    },
+    {
+      "path": "pesanan",
+      "action": "no-create-route",
+      "pageText": [
+        "Data atau halaman tidak ditemukan"
+      ]
+    },
+    {
+      "path": "jadwal",
+      "action": "no-create-route",
+      "pageText": [
+        "Data atau halaman tidak ditemukan"
+      ]
+    }
+  ],
+  "previousMutationEvidence": "qa.json dated 2026-10-10; mutations not repeated in this audit",
+  "build": "passed including TypeScript",
+  "format": "passed"
+}
