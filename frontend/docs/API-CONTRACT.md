@@ -1,8 +1,8 @@
 # Kontrak API untuk frontend Cleango
 
-**Status: kontrak yang diharapkan frontend; backend kelompok belum tersedia.** Dokumen ini diberikan ke anggota backend untuk disepakati. Jika kontrak backend berbeda, sesuaikan `lib/api.ts`, `types/`, `lib/resources.ts` dan Server Actions; jangan membuat fallback data dummy dalam komponen.
+**Status: diterapkan pada backend CleanGo untuk login serta CRUD layanan, FAQ, dan petugas.** Resource lain tetap harus mengikuti kontrak ini saat diimplementasikan; jangan membuat fallback data dummy dalam komponen.
 
-`API_URL` menunjuk base URL seperti `http://127.0.0.1:4000/api`. Seluruh endpoint mengembalikan JSON. Request data/mutasi memakai `Authorization: Bearer <accessToken>`. Login tidak memerlukan token. Backend memvalidasi token dan peran admin, bukan mempercayai cookie atau field dari frontend.
+`API_URL` menunjuk base URL `http://127.0.0.1:3001/api`. Seluruh endpoint mengembalikan JSON. Request data/mutasi memakai `Authorization: Bearer <accessToken>`. Login tidak memerlukan token. Backend memvalidasi token dan peran admin, bukan mempercayai cookie atau field dari frontend.
 
 ## Endpoint
 
@@ -37,10 +37,10 @@ PATCH harus mendukung payload parsial. Penugasan memakai `PATCH /orders/:id` den
 ## Login
 
 ```json
-{ "username": "admin", "password": "admin", "remember": true }
+{ "username": "admin@cleango.id", "password": "321321", "remember": true }
 ```
 
-Backend menyediakan akun demo **admin/admin** dalam seed dan memverifikasi password. Frontend menyimpan token sebagai cookie `cleango-session` HttpOnly, SameSite=Lax dan Secure pada produksi. `remember` mengatur cookie persisten maksimal 7 hari atau `expiresIn`, mana yang lebih pendek. Jika tidak dicentang, cookie sesi browser. API tetap menentukan kedaluwarsa token. Logout frontend menghapus cookie; jika backend mengharuskan revokasi token, tambahkan endpoint logout dan panggil dari `logoutAction`.
+Backend menyediakan akun demo **admin@cleango.id/321321** dalam seed dan memverifikasi password. Frontend menyimpan token sebagai cookie `cleango-session` HttpOnly, SameSite=Lax dan Secure pada produksi. `remember` mengatur cookie persisten maksimal 7 hari atau `expiresIn`, mana yang lebih pendek. Jika tidak dicentang, cookie sesi browser. API tetap menentukan kedaluwarsa token. Logout frontend menghapus cookie; jika backend mengharuskan revokasi token, tambahkan endpoint logout dan panggil dari `logoutAction`.
 
 ## Bentuk data
 

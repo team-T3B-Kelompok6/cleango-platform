@@ -1,74 +1,101 @@
-# CleanGo
+# CleanGo Platform
 
-CleanGo adalah aplikasi pemesanan layanan kebersihan. Web admin digunakan untuk mengatur pesanan, jadwal kerja, layanan, petugas, pelanggan, FAQ, dan laporan.
+Monorepo CleanGo untuk backend Express + TypeScript dan frontend Next.js.
 
-Frontend menggunakan Next.js, React, dan TypeScript. Backend menggunakan Express dengan MySQL/MariaDB dan masih dalam tahap pengembangan. Aplikasi mobile dikerjakan terpisah.
+## Prasyarat
 
-## Struktur proyek
+- Node.js 20+
+- npm
+- MySQL 8+ atau MariaDB 10.6+
+
+## Instalasi
+
+```powershell
+npm install
+Copy-Item backend/.env.example backend/.env
+Copy-Item frontend/.env.example frontend/.env.local
+```
+
+Jalankan aplikasi pada terminal terpisah:
+
+```powershell
+npm run dev:backend
+npm run dev:frontend
+```
+
+- Backend: `http://127.0.0.1:3001`
+- Health check: `GET http://127.0.0.1:3001/health`
+- Frontend: `http://localhost:3000`
+
+## Database backend
+
+1. Jalankan MySQL/MariaDB dari FlyEnv.
+2. Jalankan `npm run db:setup --workspace backend` atau import `backend/database.sql` melalui phpMyAdmin.
+3. Sesuaikan kredensial pada `backend/.env`.
+
+Akun admin dummy lokal: `admin@cleango.id` / `321321`. Password tersimpan
+sebagai hash bcrypt di database, bukan teks biasa.
+
+Jangan commit file `.env`. Gunakan nilai `JWT_SECRET` yang panjang dan acak di
+luar lingkungan lokal.
+
+## Struktur
 
 ```text
-cleango-platform/
-├── backend/       # REST API Express dan database
-├── frontend/      # Web admin Next.js
-│   ├── app/       # Halaman dan routing
-│   ├── components/
-│   ├── lib/       # Pemanggil API
-│   ├── types/
-│   ├── public/    # Aset gambar dan ikon
-│   └── docs/      # Kontrak API, screenshot, dan hasil pengujian
-└── README.md
+backend/
+  server.ts
+  database.sql
+  src/
+    app.ts
+    config/
+    controller/
+    lib/
+    middleware/
+    model/
+    routes/
+    types/
+  docs/
+  tests/
+frontend/
+  app/
+  components/
+  lib/
+  public/
+  types/
 ```
 
-PRD (`CLEANGO-PRD.md`) dan dokumen tugas (`soal-project-express-next.md`) disimpan di folder induk, di luar repositori kode.
+Backend mengikuti alur `Route → Controller → Model → MySQL`.
 
-## Menjalankan frontend
+## Endpoint backend
 
-Gunakan Node.js 22.12 atau lebih baru. Dari folder repositori:
+Customer/public:
+
+- `POST /api/customer/auth/register`
+- `POST /api/customer/auth/login`
+- `GET /api/customer/auth/me`
+- `GET /api/customer/categories`
+- `GET /api/customer/categories/:id`
+- `GET /api/customer/services?search=&category=`
+- `GET /api/customer/services/:id`
+
+Admin:
+
+- `POST /api/auth/login` (kontrak login frontend admin)
+- `POST /api/admin/auth/login`
+- `GET /api/admin/auth/me`
+- CRUD `/api/admin/categories`
+- CRUD `/api/admin/services`
+- CRUD `/api/services` (kontrak web admin terbaru)
+- CRUD `/api/faqs`
+- CRUD `/api/staff`
+
+Endpoint admin selain login membutuhkan header `Authorization: Bearer <token>`.
+Kontrak API selengkapnya tersedia di `backend/docs/API.md`.
+
+## Verifikasi backend
 
 ```powershell
-cd frontend
-npm install
-Copy-Item .env.example .env.local
+npm run typecheck --workspace backend
+npm test --workspace backend
+npm run build --workspace backend
 ```
-
-Isi alamat API tim di `.env.local`:
-
-```dotenv
-API_URL=http://127.0.0.1:4000/api
-```
-
-Lalu jalankan:
-
-```sh
-npm run dev
-```
-
-Buka [localhost:3000](http://localhost:3000). Login memerlukan API autentikasi yang sudah berjalan. Akun demo **admin / admin** perlu disediakan dalam seed backend.
-
-## Menjalankan backend
-
-Folder backend saat ini masih berupa setup awal dengan endpoint `/api/health`. Endpoint login dan data CleanGo belum tersedia.
-
-```powershell
-cd backend
-npm install
-Copy-Item .env.example .env
-```
-
-Atur `PORT=4000` agar sesuai dengan contoh `API_URL` frontend, lalu isi pengaturan database di `.env`.
-
-```sh
-npm run dev
-```
-
-Struktur tabel dan seed akan dilengkapi di `backend/database.sql` oleh bagian backend. Frontend dan backend dijalankan dari terminal terpisah.
-
-## Status pengerjaan
-
-Halaman frontend sudah mencakup login, dashboard, pesanan, jadwal, layanan, FAQ, customer, petugas, dan laporan. Pesanan serta jadwal dibuat melalui aplikasi pelanggan; admin dapat melihat, mengubah, dan menghapusnya. Penugasan petugas dilakukan dari menu pesanan.
-
-Integrasi API tim masih menunggu endpoint login dan data. Pengujian frontend sementara memakai API preview lokal. Tracking petugas juga masih simulasi dan belum menerima GPS dari aplikasi mobile.
-
-Desain mengikuti prototype [Figma CleanGo fix](https://www.figma.com/design/1lr9CMyydP3dI6axuKAUg6/CleanGo-fix?node-id=4002-7854) dan masih dapat berubah mengikuti desain final.
-
-Panduan frontend, strategi render, dan screenshot ada di [frontend/README.md](frontend/README.md). Daftar endpoint ada di [kontrak API](frontend/docs/API-CONTRACT.md).

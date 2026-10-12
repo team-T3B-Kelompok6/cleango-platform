@@ -27,14 +27,14 @@ Copy-Item .env.example .env.local
 Isi `.env.local` dengan alamat API, termasuk prefix `/api`:
 
 ```dotenv
-API_URL=http://127.0.0.1:4000/api
+API_URL=http://127.0.0.1:3001/api
 ```
 
 ```sh
 npm run dev
 ```
 
-Buka [localhost:3000](http://localhost:3000). Endpoint login dan data CleanGo masih menunggu backend tim. Login memerlukan API yang sudah berjalan dengan akun demo **admin / admin**. Autentikasi dilakukan melalui server.
+Buka [localhost:3000](http://localhost:3000). Pastikan backend Express berjalan di port 3001. Login memakai akun demo **admin@cleango.id / 321321**. Autentikasi dilakukan melalui server.
 
 Untuk build produksi dan pemeriksaan kode:
 
@@ -86,7 +86,7 @@ Halaman admin memakai `dynamic = 'force-dynamic'` dan fetch `cache: 'no-store'`.
 
 Build, TypeScript, dan format kode sudah lolos. Tampilan diuji pada desktop 1280px, tablet 768px, ponsel 360px, serta landscape 800×360. Pengujian meliputi login, CRUD, penugasan petugas, filter, dialog, dan kondisi kosong/error.
 
-Pengujian masih memakai API preview lokal. Integrasi dengan Express dan penyimpanan MySQL/MariaDB akan diuji setelah backend tersedia.
+CRUD layanan, FAQ, dan petugas telah diintegrasikan dengan Express dan MySQL/MariaDB lokal.
 
 - [Hasil build](docs/figma-fix/build.txt)
 - [Pengujian fitur admin](docs/admin-actions/README.md)
