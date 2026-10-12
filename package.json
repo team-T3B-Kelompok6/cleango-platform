@@ -1,20 +1,14 @@
 {
-  "name": "express-next-starter",
-  "version": "1.0.0",
+  "name": "cleango-platform",
   "private": true,
-  "workspaces": [
-    "backend",
-    "frontend"
-  ],
+  "version": "1.0.0",
   "scripts": {
-    "dev:backend": "npm run dev --workspace backend",
-    "dev:frontend": "npm run dev --workspace frontend",
-    "start:backend": "npm run start --workspace backend",
-    "build:frontend": "npm run build --workspace frontend",
-    "lint": "npm run lint --workspaces --if-present"
-  },
-  "devDependencies": {
-    "prettier": "^3.6.2"
+    "dev": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "preview": "npm --prefix frontend run start",
+    "typecheck": "npm --prefix frontend run typecheck",
+    "format": "npm --prefix frontend run format",
+    "format:check": "npm --prefix frontend run format:check",
+    "setup:frontend": "npm --prefix frontend install"
   }
 }
-

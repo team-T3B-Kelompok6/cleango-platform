@@ -1,0 +1,10 @@
+
+> cleango-frontend@1.0.0 typecheck
+> tsc --noEmit
+
+
+> cleango-frontend@1.0.0 format:check
+> prettier --check app components lib types next.config.ts package.json tsconfig.json
+
+Checking formatting...
+All matched files use Prettier code style!
