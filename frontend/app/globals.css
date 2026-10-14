@@ -158,7 +158,7 @@ h3 {
   background: var(--color-010);
 }
 .nav-link.active {
-  background: var(--green) !important;
+  background: var(--ui-accent);
   color: var(--color-007);
   box-shadow: 0 8px 16px var(--color-011);
 }
@@ -1442,7 +1442,7 @@ footer > span:first-child {
 /* The two reference dialogs use a clear header, quiet tabs, and restrained cards. */
 .modal.sop-dialog {
   width: min(960px, calc(100vw - 40px));
-  height: min(580px, calc(100dvh - 40px));
+  height: min(660px, calc(100dvh - 40px));
   border-radius: 16px;
   overflow: hidden;
 }

@@ -11,14 +11,16 @@ export function SubmitButton({
   children,
   pendingLabel = 'Menyimpan…',
   className = 'button primary',
+  disabled = false,
 }: {
   children: ReactNode;
   pendingLabel?: string;
   className?: string;
+  disabled?: boolean;
 }) {
   const { pending } = useFormStatus();
   return (
-    <button className={className} type="submit" disabled={pending}>
+    <button className={className} type="submit" disabled={pending || disabled}>
       {pending ? pendingLabel : children}
     </button>
   );

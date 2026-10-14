@@ -67,6 +67,8 @@ Struktur tabel dan seed akan dilengkapi di `backend/database.sql` oleh bagian ba
 
 Halaman frontend sudah mencakup login, dashboard, pesanan, jadwal, layanan, FAQ, customer, petugas, dan laporan. Pesanan serta jadwal dibuat melalui aplikasi pelanggan; admin dapat melihat, mengubah, dan menghapusnya. Penugasan petugas dilakukan dari menu pesanan.
 
+Kategori layanan dan FAQ dapat ditambahkan sendiri. Tombol Tambah Banner Promo berada di sebelah Tambah Layanan Baru. Gambar banner home mobile dikelola terpisah dari layanan melalui tab Promo beranda. Profil petugas menggunakan daftar keahlian.
+
 Integrasi API tim masih menunggu endpoint login dan data. Pengujian frontend sementara memakai API preview lokal. Tracking petugas juga masih simulasi dan belum menerima GPS dari aplikasi mobile.
 
 Desain mengikuti prototype [Figma CleanGo fix](https://www.figma.com/design/1lr9CMyydP3dI6axuKAUg6/CleanGo-fix?node-id=4002-7854) dan masih dapat berubah mengikuti desain final.

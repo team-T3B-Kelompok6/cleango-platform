@@ -7,6 +7,7 @@ import './overrides.css';
 import './design.css';
 import 'leaflet/dist/leaflet.css';
 import './tracking.css';
+import './management.css';
 const body = DM_Sans({
   subsets: ['latin'],
   variable: '--font-body',

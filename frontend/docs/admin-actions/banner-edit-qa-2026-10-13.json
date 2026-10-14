@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-13",
+  "environment": "API preview lokal",
+  "layout": [
+    {
+      "width": 1280,
+      "height": 900,
+      "bodyScroll": 584.7999877929688,
+      "dialogOverflow": 0,
+      "dialogWidth": 760,
+      "footerBottom": 879.1999893188477
+    },
+    {
+      "width": 360,
+      "height": 740,
+      "bodyScroll": 1076,
+      "dialogOverflow": 0,
+      "dialogWidth": 310.7875061035156,
+      "footerBottom": 719.1999893188477
+    },
+    {
+      "width": 800,
+      "height": 360,
+      "bodyScroll": 1121.5999755859375,
+      "dialogOverflow": 0,
+      "dialogWidth": 750.7875366210938,
+      "footerBottom": 339.2000198364258
+    }
+  ],
+  "flows": [
+    "Upload dari Ubah Layanan tersimpan setelah reload",
+    "Status dipertahankan setelah validasi gagal",
+    "Judul/status berubah tanpa mengganti URL foto",
+    "Banner tampil pada ringkasan dan detail layanan",
+    "File bukan gambar ditolak dan simpan dinonaktifkan",
+    "Ganti foto mengubah URL banner",
+    "Hapus banner menghilangkannya dari ringkasan"
+  ]
+}

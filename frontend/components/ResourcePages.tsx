@@ -14,6 +14,10 @@ import { ScheduleList } from './ScheduleList';
 import { TrackingButton } from './tracking/TrackingButton';
 import { DeleteRecordButton } from './DeleteRecordButton';
 import { AssignmentFormServer } from './AssignmentFormServer';
+import { listCategories } from '@/lib/categories';
+import { CategoryManager } from './CategoryManager';
+import { ServiceNavigation } from './PromotionsPage';
+import { AddBannerButton } from './AddBannerButton';
 import type { Resource, RecordData, Search, Order } from '@/types';
 function query(search: Search, key: string) {
   const value = search[key];
@@ -28,6 +32,10 @@ export async function ResourceListPage({
   search: Search;
 }) {
   const config = resources[resource];
+  const categories =
+    resource === 'services' || resource === 'faqs'
+      ? await listCategories(resource)
+      : [];
   let records = await list(resource);
   const today = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Jakarta',
@@ -96,21 +104,14 @@ export async function ResourceListPage({
   const edit = (item: RecordData, label = 'Detail & Ubah') => (
     <DialogTrigger
       label={label}
-      title={'Detail & Ubah ' + config.singular}
+      title={'Ubah ' + config.singular}
+      ariaLabel={'Ubah ' + config.singular + ' ' + item.id}
       subtitle={'#' + item.id}
-      wide={resource === 'orders' || resource === 'services'}
+      wide
       dialogClass={resource === 'orders' ? 'order-form-dialog' : ''}
-      dialogIcon={resource === 'orders' ? 'edit' : undefined}
-      className={
-        resource === 'faqs'
-          ? 'icon-action'
-          : resource === 'services' || resource === 'staff'
-            ? 'text-action edit-action'
-            : 'button'
-      }
-      icon={
-        ['services', 'staff', 'faqs'].includes(resource) ? 'edit' : undefined
-      }
+      dialogIcon="edit"
+      className="button edit-action"
+      icon="edit"
     >
       <ResourceFormServer resource={resource} record={item} />
     </DialogTrigger>
@@ -129,6 +130,7 @@ export async function ResourceListPage({
           <p>{config.description}</p>
         </div>
         <div className="admin-heading-actions">
+          {resource === 'services' && <AddBannerButton />}
           {resource === 'staff' && <TrackingButton />}
           {(resource === 'orders' || resource === 'schedules') && (
             <Filters date dateCounts={dateCounts} today={today} />
@@ -139,7 +141,7 @@ export async function ResourceListPage({
               title={'Tambah ' + config.singular + ' Baru'}
               className="button primary admin-add"
               icon="plus"
-              wide={resource === 'services'}
+              wide
               subtitle={
                 resource === 'services'
                   ? 'Atur detail paket, harga, dan fasilitas layanan.'
@@ -161,7 +163,12 @@ export async function ResourceListPage({
           Data berhasil dihapus.
         </p>
       )}
-      <Summary resource={resource} records={records} />
+      {resource === 'services' && <ServiceNavigation />}
+      <Summary
+        resource={resource}
+        records={records}
+        categoryNames={categories.map((category) => category.name)}
+      />
       <div
         className={
           resource === 'faqs' ? 'faq-filter-bar' : 'resource-filter-bar'
@@ -169,15 +176,26 @@ export async function ResourceListPage({
       >
         <Filters
           tabs={
-            resource === 'staff' &&
-            (records.some((person) => person.status === 'Nonaktif') ||
-              tab === 'Nonaktif')
-              ? [...(config.tabs ?? []), 'Nonaktif']
-              : config.tabs
+            resource === 'services' || resource === 'faqs'
+              ? [
+                  resource === 'services' ? 'Semua Layanan' : 'Semua',
+                  ...new Set([
+                    ...categories.map((category) => category.name),
+                    ...records.map((record) => String(record.category)),
+                  ]),
+                ]
+              : resource === 'staff' &&
+                  (records.some((person) => person.status === 'Nonaktif') ||
+                    tab === 'Nonaktif')
+                ? [...(config.tabs ?? []), 'Nonaktif']
+                : config.tabs
           }
         />
         <SearchInput mobile={resource !== 'faqs'} faq={resource === 'faqs'} />
       </div>
+      {(resource === 'services' || resource === 'faqs') && (
+        <CategoryManager resource={resource} count={categories.length} />
+      )}
       <div
         className={
           resource === 'orders'
@@ -382,7 +400,8 @@ export async function ResourceDetailPage({
           label={'Ubah ' + config.singular}
           title={'Detail & Ubah ' + config.singular}
           subtitle={'#' + id}
-          wide={resource === 'orders' || resource === 'services'}
+          wide
+          dialogIcon="edit"
           dialogClass={resource === 'orders' ? 'order-form-dialog' : ''}
         >
           <ResourceFormServer resource={resource} record={record} />

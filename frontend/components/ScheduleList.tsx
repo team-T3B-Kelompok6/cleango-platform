@@ -1,11 +1,10 @@
-import Link from 'next/link';
 import { shiftOf } from '@/lib/resources';
 
 import { Icon } from './Icon';
 
 import { Badge } from './StatusBadge';
 import { UiIcon } from './UiIcon';
-import { DeleteRecordButton } from './DeleteRecordButton';
+import { RecordActions } from './RecordActions';
 import type { Schedule } from '@/types';
 import type { RecordListProps } from './RecordListProps';
 const shiftHours: Record<string, string> = {
@@ -13,12 +12,7 @@ const shiftHours: Record<string, string> = {
   'Shift Siang': '12.00–15.30 WIB',
   'Shift Sore': '16.00–19.30 WIB',
 };
-export function ScheduleList({
-  shown,
-  resource,
-  tab,
-  config,
-}: RecordListProps) {
+export function ScheduleList({ shown, resource, tab, edit }: RecordListProps) {
   return (
     <>
       {resource === 'schedules' &&
@@ -57,22 +51,11 @@ export function ScheduleList({
                           <span>
                             {schedule.date} · {schedule.time}
                           </span>
-                          <div className="shift-card-actions">
-                            <Link
-                              className="button"
-                              href={
-                                config.path +
-                                '/' +
-                                encodeURIComponent(schedule.id)
-                              }
-                            >
-                              Detail & Ubah
-                            </Link>
-                            <DeleteRecordButton
-                              resource={resource}
-                              record={schedule}
-                            />
-                          </div>
+                          <RecordActions
+                            resource={resource}
+                            record={schedule}
+                            edit={edit}
+                          />
                         </div>
                       </article>
                     );

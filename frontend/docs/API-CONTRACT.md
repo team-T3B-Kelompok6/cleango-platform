@@ -50,7 +50,7 @@ Semua `id` berupa string. Harga berupa number rupiah, tanggal `YYYY-MM-DD`, bool
 | --------- | ----------------------------------------------------------------------------------------------------- |
 | orders    | `id`, `customer`, `address`, `service`, `price`, `date`, `time`, `staff: string[]`, `status`, `notes` |
 | services  | `id`, `name`, `category`, `duration`, `price`, `description`, `active: boolean`, `features: string[]` |
-| staff     | `id`, `name`, `area`, `phone`, `status`                                                               |
+| staff     | `id`, `name`, `skills: string[]`, `phone`, `status`                                                   |
 | customers | `id`, `name`, `phone`, `email`, `address`, `joined`, `active: boolean`                                |
 | faqs      | `id`, `category`, `question`, `answer`, `published: boolean`                                          |
 | schedules | `id`, `customer`, `service`, `date`, `time`, `staff: string`, `status`                                |
@@ -60,8 +60,7 @@ Nilai enum:
 - Pesanan: `Menunggu Assign`, `Menunggu Lokasi`, `Sedang Dikerjakan`, `Selesai`, `Batal`.
 - Petugas: `Tersedia`, `Bertugas`, `Masa Training`, `Nonaktif`.
 - Jadwal: `Terjadwal`, `Berlangsung`, `Selesai`.
-- Kategori layanan: `Rumah`, `Kantor`, `Sofa`, `AC`.
-- Kategori FAQ: `Layanan`, `Pembayaran`, `Jadwal`, `SOP`.
+- Kategori layanan dan FAQ mengikuti daftar `/categories`; nama kategori bukan enum tetap.
 
 `time` saat ini teks tampilan yang diawali jam, misalnya `13.30 WIB` atau `11.00–14.00 WIB`; shift ditentukan dari jam pertama (<12 pagi, <16 siang, sisanya sore). Backend memvalidasi format jam dan tanggal. Daftar orders diharapkan sudah diurutkan terbaru terlebih dahulu untuk aktivitas dashboard/notifikasi. Rekonsiliasi data jadwal/petugas dengan penugasan order menjadi tanggung jawab backend.
 
@@ -71,7 +70,7 @@ Field tambahan opsional untuk revisi desain:
 
 - `orders.customerId: string` untuk pencocokan pelanggan yang stabil; `paymentMethod: string`, `invoiceId: string` bila tersedia. Ringkasan tetap berdasarkan order selesai, bukan klaim pembayaran lunas.
 - `services.packageLabel: string`, `isFavorite: boolean`.
-- `staff.rating: number`, `skills: string[]`. Tanpa data rating tidak ada badge angka; keahlian kosong menampilkan keterangan.
+- `staff.rating: number`. Tanpa data rating tidak ada badge angka; keahlian (`skills`) diisi lewat form, satu per baris. `area` lama boleh dipertahankan di API, tetapi tidak lagi diedit oleh form petugas.
 - `customers.area: string`, `orderCount: number`, `totalSpent: number`. `totalSpent` adalah nilai order selesai. Jika agregat tidak tersedia, frontend menghitung dari orders: memakai customerId, lalu kecocokan nama persis untuk kontrak lama.
 - `faqs.viewCount: number`, `updatedAt: string` tanggal ISO. Statistik pembaca/waktu tidak dipalsukan bila tidak tersedia.
 - `schedules.address: string`; jika tidak tersedia, baris menampilkan nama petugas dengan ikon orang.
@@ -103,3 +102,38 @@ Notifikasi adalah ringkasan aktivitas pesanan dari respons orders; status dibaca
 - Pastikan penugasan tidak menerima petugas tidak tersedia dan tidak menimpa pembaruan bersamaan.
 - Berikan `database.sql`, `.env.example`, langkah menjalankan Express serta URL API ke anggota frontend.
 - Ulangi smoke test frontend terhadap API nyata, bukan fixture QA.
+
+## Kategori dan promo beranda (revisi 13 Oktober 2026)
+
+Kategori layanan dan FAQ dikelola terpisah. Endpoint baru:
+
+| Method | Path                                                 | Request / respons                                                                                                                                  |
+| ------ | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/categories?resource=services` atau `resource=faqs` | `{ "data": [{ "id": "CAT-01", "resource": "services", "name": "Rumah" }] }`                                                                        |
+| POST   | `/categories`                                        | JSON `{ "resource": "services", "name": "Perawatan taman" }`; 201 `{ "data": { "id": "...", "resource": "services", "name": "Perawatan taman" } }` |
+| POST   | `/uploads`                                           | Multipart `file` + `purpose=promotion`; 201 `{ "data": { "url": "https://.../banner.webp" } }`                                                     |
+
+Banner merupakan resource tersendiri. Tombol Tambah Banner Promo berada di sebelah Tambah Layanan Baru. Form hanya mengunggah gambar; tidak meminta judul, status tayang, voucher, atau tautan layanan.
+
+| Method | Path           | Respons                                   |
+| ------ | -------------- | ----------------------------------------- |
+| GET    | `/banners`     | `{ "data": [Banner] }`                    |
+| GET    | `/banners/:id` | `{ "data": Banner }`                      |
+| POST   | `/banners`     | 201 `{ "data": Banner }`                  |
+| PATCH  | `/banners/:id` | 200 `{ "data": Banner }`                  |
+| DELETE | `/banners/:id` | 200 JSON `{ "message": "Data dihapus." }` |
+
+```json
+{
+  "id": "BANNER-01",
+  "imageUrl": "https://cdn.example.com/banner.webp"
+}
+```
+
+POST/PATCH hanya mengirim `{ "imageUrl": "..." }`; ID dibuat backend. Gambar diunggah lewat `/uploads` terlebih dahulu. Ringkasan `/layanan?view=promos` membaca `/banners` dan menyediakan lihat, ganti gambar, serta hapus dengan konfirmasi. Edit tanpa gambar baru mempertahankan URL lama. Record layanan tidak memiliki field banner. Mobile menampilkan gambar secara pasif tanpa aksi navigasi; tulisan promo dibuat langsung di dalam gambar.
+
+Upload menerima JPG, PNG, atau WebP, maksimal 2 MB. Ukuran yang disarankan 1200 × 400 px; frontend menampilkan gambar utuh tanpa memotongnya. Backend memeriksa isi/MIME/ukuran berkas, menyimpan foto, dan mengembalikan URL HTTP(S) yang bisa dibaca aplikasi mobile. URL relatif juga diterima frontend, tetapi harus tersedia pada origin web admin; URL absolut lebih mudah dipakai bersama mobile. Upload tidak memakai header JSON, agar boundary multipart diatur otomatis.
+
+Backend membuat nama kategori unik per `resource` setelah trim/normalisasi spasi dan tanpa membedakan huruf besar-kecil, serta memvalidasi kategori layanan/FAQ yang dikirim. Kategori awal yang sudah digunakan harus disediakan dalam seed. Frontend mempertahankan kategori record lama saat edit.
+
+Penyimpanan kategori, promo, dan foto tetap perlu implementasi backend tim. Aplikasi mobile perlu menampilkan gambar banner yang disediakan backend; halaman mobile tidak termasuk pekerjaan web admin ini. Backend menyimpan gambar dan membersihkan upload yang tidak terpakai.

@@ -59,14 +59,14 @@ export default async function Dashboard() {
       </div>
       <div className="metrics-grid">
         <MetricCard
-          label="TOTAL PESANAN HARI INI"
+          label="Pesanan hari ini"
           value={dailyOrders.length}
           unit="Order"
           note="Pesanan terdaftar hari ini"
           icon="orders"
         />
         <MetricCard
-          label="SEDANG DIKERJAKAN"
+          label="Sedang dikerjakan"
           value={counts('Sedang Dikerjakan')}
           unit="Lokasi"
           note="Kru aktif di lapangan"
@@ -74,7 +74,7 @@ export default async function Dashboard() {
           tone="blue"
         />
         <MetricCard
-          label="MENUNGGU ASSIGN"
+          label="Menunggu petugas"
           value={counts('Menunggu Assign')}
           unit="Order"
           note="Perlu tindakan segera"
@@ -82,7 +82,7 @@ export default async function Dashboard() {
           tone="amber"
         />
         <MetricCard
-          label="SELESAI HARI INI"
+          label="Selesai hari ini"
           value={counts('Selesai')}
           unit="Selesai"
           note="Pengerjaan telah selesai"

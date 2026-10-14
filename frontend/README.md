@@ -9,6 +9,9 @@ Web admin CleanGo untuk mengelola operasional layanan kebersihan. Dibuat dengan 
 - Kelola pesanan: pencarian, filter status/tanggal, detail, perubahan data, penugasan petugas, dan hapus.
 - Kelola jadwal: lihat, ubah, dan hapus; jadwal berasal dari pesanan aplikasi pelanggan.
 - Kelola layanan, FAQ, dan petugas: tambah, lihat, ubah, dan hapus.
+- Tambah kategori layanan dan FAQ dari halaman pengelolaan.
+- Banner home aplikasi: tombol Tambah Banner Promo di sebelah Tambah Layanan Baru. Gambar dapat dilihat, diganti, dan dihapus dari tab Promo beranda; tulisan promo dibuat di dalam gambar.
+- Profil petugas dengan daftar keahlian.
 - Kelola pelanggan: lihat, ubah, hapus, serta tambah manual bila diperlukan.
 - Laporan per periode dan ekspor CSV.
 - Simulasi tracking petugas dengan peta, status, dan progres tugas.
@@ -58,6 +61,7 @@ components/         # Komponen tampilan dan interaksi
 lib/                # API dan konfigurasi resource
 types/              # Tipe data
 public/assets/      # Gambar dan ikon
+public/branding/    # Logo CleanGo
 docs/               # Kontrak API dan bukti pengujian
 ```
 
@@ -91,22 +95,25 @@ Pengujian masih memakai API preview lokal. Integrasi dengan Express dan penyimpa
 - [Hasil build](docs/figma-fix/build.txt)
 - [Pengujian fitur admin](docs/admin-actions/README.md)
 - [Hasil pengecekan 11 Oktober 2026](docs/admin-actions/AUDIT-2026-10-11.md)
+- [Revisi logo, kategori, promo, dan form 13 Oktober 2026](docs/admin-actions/REVISION-2026-10-13.md)
+- [Pemeriksaan tampilan seluruh halaman 14 Oktober 2026](docs/visual-audit-2026-10-13/AUDIT-2026-10-14.md)
+- [Penyesuaian font dan jarak teks 14 Oktober 2026](docs/typography-2026-10-14/README.md)
 - [Pengujian tracking](docs/tracking/qa.json)
 
 ## Desain dan screenshot
 
 Desain mengikuti prototype [Figma CleanGo fix](https://www.figma.com/design/1lr9CMyydP3dI6axuKAUg6/CleanGo-fix?node-id=4002-7854). Ukuran disesuaikan secara visual dan masih dapat berubah mengikuti desain final.
 
-| Halaman   | Prototype terbaru                     | Web                                                    |
-| --------- | ------------------------------------- | ------------------------------------------------------ |
-| Login     | [Figma](docs/figma-fix/login.jpg)     | [Screenshot](docs/figma-fix/result/login-1280.jpg)     |
-| Dashboard | [Figma](docs/figma-fix/dashboard.jpg) | [Screenshot](docs/figma-fix/result/dashboard-1280.jpg) |
-| Pesanan   | [Figma](docs/figma-fix/pesanan.jpg)   | [Screenshot](docs/figma-fix/result/pesanan-1280.jpg)   |
-| Jadwal    | [Figma](docs/figma-fix/jadwal.jpg)    | [Screenshot](docs/figma-fix/result/jadwal-1280.jpg)    |
-| Layanan   | [Figma](docs/figma-fix/layanan.jpg)   | [Screenshot](docs/figma-fix/result/layanan-1280.jpg)   |
-| Petugas   | [Figma](docs/figma-fix/petugas.jpg)   | [Screenshot](docs/figma-fix/result/petugas-1280.jpg)   |
-| Pelanggan | [Figma](docs/figma-fix/customer.jpg)  | [Screenshot](docs/figma-fix/result/customer-1280.jpg)  |
-| Laporan   | [Figma](docs/figma-fix/laporan.jpg)   | [Screenshot](docs/figma-fix/result/laporan-1280.jpg)   |
-| FAQ       | [Figma](docs/figma-fix/faq.jpg)       | [Screenshot](docs/figma-fix/result/faq-1280.jpg)       |
+| Halaman   | Prototype terbaru                     | Web                                                            |
+| --------- | ------------------------------------- | -------------------------------------------------------------- |
+| Login     | [Figma](docs/figma-fix/login.jpg)     | [Screenshot](docs/visual-audit-2026-10-13/login-after.png)     |
+| Dashboard | [Figma](docs/figma-fix/dashboard.jpg) | [Screenshot](docs/visual-audit-2026-10-13/dashboard-after.png) |
+| Pesanan   | [Figma](docs/figma-fix/pesanan.jpg)   | [Screenshot](docs/visual-audit-2026-10-13/pesanan-after.png)   |
+| Jadwal    | [Figma](docs/figma-fix/jadwal.jpg)    | [Screenshot](docs/visual-audit-2026-10-13/jadwal-after.png)    |
+| Layanan   | [Figma](docs/figma-fix/layanan.jpg)   | [Screenshot](docs/visual-audit-2026-10-13/layanan-after.png)   |
+| Petugas   | [Figma](docs/figma-fix/petugas.jpg)   | [Screenshot](docs/visual-audit-2026-10-13/petugas-after.png)   |
+| Pelanggan | [Figma](docs/figma-fix/customer.jpg)  | [Screenshot](docs/visual-audit-2026-10-13/customer-after.png)  |
+| Laporan   | [Figma](docs/figma-fix/laporan.jpg)   | [Screenshot](docs/visual-audit-2026-10-13/laporan-after.png)   |
+| FAQ       | [Figma](docs/figma-fix/faq.jpg)       | [Screenshot](docs/visual-audit-2026-10-13/faq-after.png)       |
 
 Lihat [catatan desain](docs/figma-fix/README.md) untuk rincian tampilan dan [panduan tracking](docs/TRACKING.md) untuk penggunaan simulasi peta.

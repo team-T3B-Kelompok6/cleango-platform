@@ -63,7 +63,6 @@ export const resources: Record<
     canCreate: true,
     description:
       'Atur daftar paket kebersihan, harga dasar layanan, estimasi durasi pengerjaan, dan status ketersediaan.',
-    tabs: ['Semua Layanan', 'Rumah', 'Kantor', 'Sofa', 'AC'],
     tabField: 'category',
     fields: [
       {
@@ -76,7 +75,6 @@ export const resources: Record<
         name: 'category',
         label: 'Kategori',
         kind: 'select',
-        options: ['Rumah', 'Kantor', 'Sofa', 'AC'],
         required: true,
       },
       {
@@ -111,6 +109,7 @@ export const resources: Record<
         kind: 'textarea',
         placeholder: 'Alat kebersihan\nCairan pembersih\nPetugas profesional',
         hint: 'Tulis satu fasilitas per baris. Bagian ini boleh dikosongkan.',
+        lines: true,
       },
     ],
   },
@@ -120,13 +119,21 @@ export const resources: Record<
     singular: 'Petugas',
     canCreate: true,
     description:
-      'Daftar, keahlian, kesiapan, area tugas, kontak, dan riwayat penugasan.',
+      'Kelola keahlian, kesiapan, kontak, dan riwayat penugasan petugas.',
     tabs: ['Semua Petugas', 'Tersedia', 'Bertugas', 'Masa Training'],
     tabField: 'status',
     fields: [
       { name: 'name', label: 'Nama petugas', required: true },
       { name: 'phone', label: 'Nomor WhatsApp', required: true },
-      { name: 'area', label: 'Wilayah kerja', required: true },
+      {
+        name: 'skills',
+        label: 'Keahlian petugas',
+        kind: 'textarea',
+        required: true,
+        lines: true,
+        placeholder: 'Deep cleaning\nCuci AC\nCuci sofa',
+        hint: 'Tulis satu keahlian per baris.',
+      },
       {
         name: 'status',
         label: 'Status',
@@ -163,14 +170,12 @@ export const resources: Record<
     canCreate: true,
     description:
       'Kelola daftar pertanyaan umum dan jawaban operasional Cleango.',
-    tabs: ['Semua', 'Layanan', 'Pembayaran', 'Jadwal', 'SOP'],
     tabField: 'category',
     fields: [
       {
         name: 'category',
         label: 'Kategori FAQ',
         kind: 'select',
-        options: ['Layanan', 'Pembayaran', 'Jadwal', 'SOP'],
         required: true,
       },
       { name: 'question', label: 'Pertanyaan FAQ', required: true },

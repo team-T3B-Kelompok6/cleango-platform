@@ -7,7 +7,7 @@ import { DialogTrigger } from './DialogTrigger';
 import { AssignmentFormServer } from './AssignmentFormServer';
 import { Badge } from './StatusBadge';
 import { TrackingButton } from './tracking/TrackingButton';
-import { DeleteRecordButton } from './DeleteRecordButton';
+import { RecordActions } from './RecordActions';
 import type { Order } from '@/types';
 import type { RecordListProps } from './RecordListProps';
 export function OrderList({ shown, resource, config, edit }: RecordListProps) {
@@ -72,7 +72,7 @@ export function OrderList({ shown, resource, config, edit }: RecordListProps) {
                   Petugas:{' '}
                   <span>{order.staff.join(' & ') || 'Belum Ditugaskan'}</span>
                 </p>
-                <div className="order-actions">
+                <RecordActions resource={resource} record={order} edit={edit}>
                   {order.staff.length > 0 &&
                     order.status === 'Sedang Dikerjakan' && (
                       <TrackingButton
@@ -94,9 +94,7 @@ export function OrderList({ shown, resource, config, edit }: RecordListProps) {
                       <AssignmentFormServer order={order} />
                     </DialogTrigger>
                   )}
-                  {edit(order)}
-                  <DeleteRecordButton resource={resource} record={order} />
-                </div>
+                </RecordActions>
               </div>
             </article>
           );
