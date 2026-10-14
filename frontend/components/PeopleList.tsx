@@ -1,17 +1,19 @@
-import Link from 'next/link';
 import { valueText, rupiah } from '@/lib/resources';
 import { Badge } from './StatusBadge';
 import { UiIcon } from './UiIcon';
 import { TrackingButton } from './tracking/TrackingButton';
-import { DeleteRecordButton } from './DeleteRecordButton';
+import { RecordActions } from './RecordActions';
 
 import type { RecordListProps } from './RecordListProps';
-export function PeopleList({ shown, resource, config, edit }: RecordListProps) {
+export function PeopleList({ shown, resource, edit }: RecordListProps) {
   return (
     <>
       {(resource === 'staff' || resource === 'customers') &&
         shown.map((item) => (
-          <article key={item.id} className="figma-person-row">
+          <article
+            key={item.id}
+            className="figma-person-row managed-person-row"
+          >
             <div className="figma-person-main">
               <span className="figma-person-meta">
                 #{item.id} ·{' '}
@@ -49,9 +51,8 @@ export function PeopleList({ shown, resource, config, edit }: RecordListProps) {
                 )}
               </h3>
               <p>
-                WhatsApp: {valueText(item.phone)} ·{' '}
-                {resource === 'staff' && 'Wilayah: '}
-                {valueText(resource === 'staff' ? item.area : item.email)}
+                WhatsApp: {valueText(item.phone)}
+                {resource === 'customers' && ' · ' + valueText(item.email)}
               </p>
               {resource === 'staff' ? (
                 <div className="figma-feature-list">
@@ -80,38 +81,29 @@ export function PeopleList({ shown, resource, config, edit }: RecordListProps) {
                 </div>
               )}
             </div>
-            <div className="figma-person-actions">
-              {resource === 'staff' && item.status === 'Bertugas' && (
-                <TrackingButton
-                  name={String(item.name)}
-                  label="Lihat lokasi"
-                  className="text-action tracking-location-action"
-                />
-              )}
-              {resource === 'staff' ? (
-                edit(item, 'Edit Petugas')
-              ) : (
-                <a
-                  className="button"
-                  href={
-                    'https://wa.me/' +
-                    String(item.phone).replace(/\D/g, '').replace(/^0/, '62')
-                  }
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Hubungi WhatsApp
-                </a>
-              )}
-              <Link
-                className={resource === 'staff' ? 'button' : 'button primary'}
-                href={config.path + '/' + encodeURIComponent(item.id)}
-              >
-                {resource === 'staff'
-                  ? 'Lihat Detail & Jadwal'
-                  : 'Lihat Detail'}
-              </Link>
-              <DeleteRecordButton resource={resource} record={item} />
+            <div className="managed-record-footer">
+              <RecordActions resource={resource} record={item} edit={edit}>
+                {resource === 'staff' && item.status === 'Bertugas' && (
+                  <TrackingButton
+                    name={String(item.name)}
+                    label="Lihat lokasi"
+                    className="button tracking-location-action"
+                  />
+                )}
+                {resource === 'customers' && (
+                  <a
+                    className="button"
+                    href={
+                      'https://wa.me/' +
+                      String(item.phone).replace(/\D/g, '').replace(/^0/, '62')
+                    }
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Hubungi WhatsApp
+                  </a>
+                )}
+              </RecordActions>
             </div>
           </article>
         ))}

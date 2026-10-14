@@ -1,0 +1,159 @@
+[
+  {
+    "page": "/",
+    "documentWidth": 1265,
+    "text": [
+      {
+        "font": "20px",
+        "height": 23,
+        "lineHeight": "23px",
+        "text": "cleango•"
+      },
+      {
+        "font": "11px",
+        "height": 33,
+        "lineHeight": "16.5px",
+        "text": "Layanan Kebersihan Jadi Mudah"
+      },
+      {
+        "font": "15px",
+        "height": 21,
+        "lineHeight": "21px",
+        "text": "Admin Operasional"
+      },
+      {
+        "font": "11px",
+        "height": 14.300000190734863,
+        "lineHeight": "14.3px",
+        "text": "SUPER ADMIN"
+      }
+    ],
+    "width": 1280,
+    "brandFinal": {
+      "captionHeight": 16.5,
+      "lineHeight": "16.5px",
+      "pageWidth": 1265,
+      "sidebarRight": 240,
+      "textRight": 226.98749923706055
+    }
+  },
+  {
+    "page": "/login",
+    "documentWidth": 1265,
+    "text": [
+      {
+        "font": "20px",
+        "height": 23,
+        "lineHeight": "23px",
+        "text": "cleango•"
+      },
+      {
+        "font": "11px",
+        "height": 16.5,
+        "lineHeight": "16.5px",
+        "text": "Layanan Kebersihan Jadi Mudah"
+      }
+    ],
+    "width": 1280
+  },
+  {
+    "page": "/",
+    "documentWidth": 753,
+    "text": [
+      {
+        "font": "20px",
+        "height": 23,
+        "lineHeight": "23px",
+        "text": "cleango•"
+      },
+      {
+        "font": "11px",
+        "height": 33,
+        "lineHeight": "16.5px",
+        "text": "Layanan Kebersihan Jadi Mudah"
+      },
+      {
+        "font": "15px",
+        "height": 21,
+        "lineHeight": "21px",
+        "text": "Admin Operasional"
+      },
+      {
+        "font": "11px",
+        "height": 14.300000190734863,
+        "lineHeight": "14.3px",
+        "text": "SUPER ADMIN"
+      }
+    ],
+    "width": 768
+  },
+  {
+    "page": "/login",
+    "documentWidth": 753,
+    "text": [
+      {
+        "font": "20px",
+        "height": 23,
+        "lineHeight": "23px",
+        "text": "cleango•"
+      },
+      {
+        "font": "11px",
+        "height": 16.5,
+        "lineHeight": "16.5px",
+        "text": "Layanan Kebersihan Jadi Mudah"
+      }
+    ],
+    "width": 768
+  },
+  {
+    "page": "/",
+    "documentWidth": 345,
+    "text": [
+      {
+        "font": "20px",
+        "height": 23,
+        "lineHeight": "23px",
+        "text": "cleango•"
+      },
+      {
+        "font": "11px",
+        "height": 16.5,
+        "lineHeight": "16.5px",
+        "text": "Layanan Kebersihan Jadi Mudah"
+      },
+      {
+        "font": "15px",
+        "height": 0,
+        "lineHeight": "21px",
+        "text": "Admin Operasional"
+      },
+      {
+        "font": "11px",
+        "height": 0,
+        "lineHeight": "14.3px",
+        "text": "SUPER ADMIN"
+      }
+    ],
+    "width": 360
+  },
+  {
+    "page": "/login",
+    "documentWidth": 345,
+    "text": [
+      {
+        "font": "20px",
+        "height": 23,
+        "lineHeight": "23px",
+        "text": "cleango•"
+      },
+      {
+        "font": "11px",
+        "height": 33,
+        "lineHeight": "16.5px",
+        "text": "Layanan Kebersihan Jadi Mudah"
+      }
+    ],
+    "width": 360
+  }
+]

@@ -1,17 +1,11 @@
-import Link from 'next/link';
 import { rupiah } from '@/lib/resources';
 
 import { UiIcon } from './UiIcon';
-import { DeleteRecordButton } from './DeleteRecordButton';
+import { RecordActions } from './RecordActions';
 
 import type { Service } from '@/types';
 import type { RecordListProps } from './RecordListProps';
-export function ServiceList({
-  shown,
-  resource,
-  config,
-  edit,
-}: RecordListProps) {
+export function ServiceList({ shown, resource, edit }: RecordListProps) {
   return (
     <>
       {resource === 'services' &&
@@ -45,16 +39,11 @@ export function ServiceList({
                   <strong>{rupiah(service.price)}</strong>
                   <small>/sekali pengerjaan</small>
                 </div>
-                <div className="figma-row-actions">
-                  {edit(service, 'Ubah Harga & Edit')}
-                  <Link
-                    className="button"
-                    href={config.path + '/' + encodeURIComponent(service.id)}
-                  >
-                    Detail Layanan
-                  </Link>
-                  <DeleteRecordButton resource={resource} record={service} />
-                </div>
+                <RecordActions
+                  resource={resource}
+                  record={service}
+                  edit={edit}
+                />
               </div>
             </article>
           );

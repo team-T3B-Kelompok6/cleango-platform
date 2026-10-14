@@ -4,8 +4,27 @@ import { saveAction } from '@/app/actions';
 import { ResourceForm } from './Form';
 import type { Resource, RecordData, Staff } from '@/types';
 import { Badge } from './StatusBadge';
+import { listCategories } from '@/lib/categories';
 async function fieldsFor(resource: Resource, record?: RecordData) {
   const fields = resources[resource].fields;
+  if (resource === 'services' || resource === 'faqs') {
+    const categories = await listCategories(resource);
+    const records = categories.length ? [] : await list(resource);
+    const names = [
+      ...new Set([
+        ...categories.map((category) => category.name),
+        ...records.flatMap((item) =>
+          typeof item.category === 'string' && item.category.trim()
+            ? [item.category]
+            : [],
+        ),
+        ...(record?.category ? [String(record.category)] : []),
+      ]),
+    ];
+    return fields.map((field) =>
+      field.name === 'category' ? { ...field, options: names } : field,
+    );
+  }
   if (resource !== 'orders') return fields;
   const staff = await list<Staff>('staff');
   const assigned = Array.isArray(record?.staff) ? record.staff : [];

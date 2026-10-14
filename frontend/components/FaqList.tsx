@@ -1,20 +1,15 @@
-import Link from 'next/link';
 import { valueText } from '@/lib/resources';
 import { Icon } from './Icon';
 
-import { DeleteRecordButton } from './DeleteRecordButton';
+import { RecordActions } from './RecordActions';
 
 import type { RecordListProps } from './RecordListProps';
-export function FaqList({ shown, resource, config, edit }: RecordListProps) {
+export function FaqList({ shown, resource, edit }: RecordListProps) {
   return (
     <>
       {resource === 'faqs' &&
         shown.map((item) => (
-          <article key={item.id} className="faq-design-row">
-            <div className="faq-header-actions">
-              {edit(item, 'Ubah FAQ')}
-              <DeleteRecordButton resource={resource} record={item} />
-            </div>
+          <article key={item.id} className="faq-design-row managed-faq-row">
             <details>
               <summary>
                 <span>
@@ -22,14 +17,14 @@ export function FaqList({ shown, resource, config, edit }: RecordListProps) {
                     <span
                       className={
                         'faq-category-tag ' +
-                        (
+                        ((
                           {
                             Layanan: 'green',
                             Jadwal: 'blue',
                             Pembayaran: 'amber',
                             SOP: 'purple',
                           } as Record<string, string>
-                        )[String(item.category)]
+                        )[String(item.category)] ?? 'green')
                       }
                     >
                       {valueText(item.category)}
@@ -50,15 +45,10 @@ export function FaqList({ shown, resource, config, edit }: RecordListProps) {
                 <Icon name="down" />
               </summary>
               <p>{valueText(item.answer)}</p>
-              <div className="figma-row-actions">
-                <Link
-                  className="button"
-                  href={config.path + '/' + encodeURIComponent(item.id)}
-                >
-                  Detail & Pratinjau
-                </Link>
-              </div>
             </details>
+            <div className="managed-record-footer">
+              <RecordActions resource={resource} record={item} edit={edit} />
+            </div>
           </article>
         ))}
     </>

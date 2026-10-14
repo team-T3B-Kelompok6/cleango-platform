@@ -1,0 +1,405 @@
+[
+  {
+    "page": "pesanan",
+    "dialog": [
+      {
+        "bodyScroll": {
+          "height": 541,
+          "total": 919
+        },
+        "bottom": 810,
+        "footer": {
+          "bottom": 809.1999893188477,
+          "top": 736.4249877929688
+        },
+        "left": 252.40000915527344,
+        "right": 1012.4000091552734,
+        "top": 90
+      }
+    ],
+    "height": 900,
+    "width": 1280
+  },
+  {
+    "page": "jadwal",
+    "dialog": [
+      {
+        "bodyScroll": {
+          "height": 306,
+          "total": 306
+        },
+        "bottom": 692.625,
+        "footer": {
+          "bottom": 691.8249893188477,
+          "top": 619.0499877929688
+        },
+        "left": 252.40000915527344,
+        "right": 1012.4000091552734,
+        "top": 207.375
+      }
+    ],
+    "height": 900,
+    "width": 1280
+  },
+  {
+    "page": "layanan",
+    "dialog": [
+      {
+        "bodyScroll": {
+          "height": 642,
+          "total": 642
+        },
+        "bottom": 860.2124900817871,
+        "footer": {
+          "bottom": 859.4125137329102,
+          "top": 786.6375122070312
+        },
+        "left": 252.40000915527344,
+        "right": 1012.4000091552734,
+        "top": 39.78750228881836
+      }
+    ],
+    "height": 900,
+    "width": 1280
+  },
+  {
+    "page": "faq",
+    "dialog": [
+      {
+        "bodyScroll": {
+          "height": 352,
+          "total": 352
+        },
+        "bottom": 715.625,
+        "footer": {
+          "bottom": 714.8249893188477,
+          "top": 642.0499877929688
+        },
+        "left": 252.40000915527344,
+        "right": 1012.4000091552734,
+        "top": 184.375
+      }
+    ],
+    "height": 900,
+    "width": 1280
+  },
+  {
+    "page": "customer",
+    "dialog": [
+      {
+        "bodyScroll": {
+          "height": 448,
+          "total": 448
+        },
+        "bottom": 763.6124877929688,
+        "footer": {
+          "bottom": 762.8125381469727,
+          "top": 690.0375366210938
+        },
+        "left": 252.40000915527344,
+        "right": 1012.4000091552734,
+        "top": 136.375
+      }
+    ],
+    "height": 900,
+    "width": 1280
+  },
+  {
+    "page": "petugas",
+    "dialog": [
+      {
+        "bodyScroll": {
+          "height": 381,
+          "total": 381
+        },
+        "bottom": 729.7250213623047,
+        "footer": {
+          "bottom": 728.9250259399414,
+          "top": 656.1500244140625
+        },
+        "left": 252.40000915527344,
+        "right": 1012.4000091552734,
+        "top": 170.27500915527344
+      }
+    ],
+    "height": 900,
+    "width": 1280
+  },
+  {
+    "page": "sop",
+    "height": 900,
+    "heightAvailable": 425,
+    "scrollHeight": 425,
+    "width": 1280,
+    "within": true,
+    "clientHeight": 425
+  },
+  {
+    "page": "pesanan",
+    "dialog": [
+      {
+        "bodyScroll": {
+          "height": 549,
+          "total": 1338
+        },
+        "bottom": 760,
+        "footer": {
+          "bottom": 759.1999893188477,
+          "top": 686.4249877929688
+        },
+        "left": 17,
+        "right": 327.7875061035156,
+        "top": 40
+      }
+    ],
+    "height": 800,
+    "width": 360
+  },
+  {
+    "page": "jadwal",
+    "dialog": [
+      {
+        "bodyScroll": {
+          "height": 568,
+          "total": 568
+        },
+        "bottom": 769.2000370025635,
+        "footer": {
+          "bottom": 768.4000015258789,
+          "top": 695.625
+        },
+        "left": 17,
+        "right": 327.7875061035156,
+        "top": 30.787500381469727
+      }
+    ],
+    "height": 800,
+    "width": 360
+  },
+  {
+    "page": "layanan",
+    "dialog": [
+      {
+        "bodyScroll": {
+          "height": 589,
+          "total": 854
+        },
+        "bottom": 780,
+        "footer": {
+          "bottom": 779.1999893188477,
+          "top": 706.4249877929688
+        },
+        "left": 17,
+        "right": 327.7875061035156,
+        "top": 20
+      }
+    ],
+    "height": 800,
+    "width": 360
+  },
+  {
+    "page": "faq",
+    "dialog": [
+      {
+        "bodyScroll": {
+          "height": 432,
+          "total": 432
+        },
+        "bottom": 701.4125289916992,
+        "footer": {
+          "bottom": 700.6125259399414,
+          "top": 627.8375244140625
+        },
+        "left": 17,
+        "right": 327.7875061035156,
+        "top": 98.57500457763672
+      }
+    ],
+    "height": 800,
+    "width": 360
+  },
+  {
+    "page": "customer",
+    "dialog": [
+      {
+        "bodyScroll": {
+          "height": 589,
+          "total": 619
+        },
+        "bottom": 780,
+        "footer": {
+          "bottom": 779.1999893188477,
+          "top": 706.4249877929688
+        },
+        "left": 17,
+        "right": 327.7875061035156,
+        "top": 20
+      }
+    ],
+    "height": 800,
+    "width": 360
+  },
+  {
+    "page": "petugas",
+    "dialog": [
+      {
+        "bodyScroll": {
+          "height": 463,
+          "total": 463
+        },
+        "bottom": 717.1124877929688,
+        "footer": {
+          "bottom": 716.3125381469727,
+          "top": 643.5375366210938
+        },
+        "left": 17,
+        "right": 327.7875061035156,
+        "top": 82.875
+      }
+    ],
+    "height": 800,
+    "width": 360
+  },
+  {
+    "page": "sop",
+    "height": 800,
+    "heightAvailable": 487,
+    "scrollHeight": 487,
+    "width": 360,
+    "within": true
+  },
+  {
+    "page": "pesanan",
+    "dialog": [
+      {
+        "bodyScroll": {
+          "height": 141,
+          "total": 919
+        },
+        "bottom": 340,
+        "footer": {
+          "bottom": 339.2000198364258,
+          "top": 266.4250183105469
+        },
+        "left": 17,
+        "right": 767.7875366210938,
+        "top": 20
+      }
+    ],
+    "height": 360,
+    "width": 800
+  },
+  {
+    "page": "jadwal",
+    "dialog": [
+      {
+        "bodyScroll": {
+          "height": 141,
+          "total": 306
+        },
+        "bottom": 340,
+        "footer": {
+          "bottom": 339.2000198364258,
+          "top": 266.4250183105469
+        },
+        "left": 17,
+        "right": 767.7875366210938,
+        "top": 20
+      }
+    ],
+    "height": 360,
+    "width": 800
+  },
+  {
+    "page": "layanan",
+    "dialog": [
+      {
+        "bodyScroll": {
+          "height": 141,
+          "total": 642
+        },
+        "bottom": 340,
+        "footer": {
+          "bottom": 339.2000198364258,
+          "top": 266.4250183105469
+        },
+        "left": 17,
+        "right": 767.7875366210938,
+        "top": 20
+      }
+    ],
+    "height": 360,
+    "width": 800
+  },
+  {
+    "page": "faq",
+    "dialog": [
+      {
+        "bodyScroll": {
+          "height": 141,
+          "total": 352
+        },
+        "bottom": 340,
+        "footer": {
+          "bottom": 339.2000198364258,
+          "top": 266.4250183105469
+        },
+        "left": 17,
+        "right": 767.7875366210938,
+        "top": 20
+      }
+    ],
+    "height": 360,
+    "width": 800
+  },
+  {
+    "page": "customer",
+    "dialog": [
+      {
+        "bodyScroll": {
+          "height": 141,
+          "total": 448
+        },
+        "bottom": 340,
+        "footer": {
+          "bottom": 339.2000198364258,
+          "top": 266.4250183105469
+        },
+        "left": 17,
+        "right": 767.7875366210938,
+        "top": 20
+      }
+    ],
+    "height": 360,
+    "width": 800
+  },
+  {
+    "page": "petugas",
+    "dialog": [
+      {
+        "bodyScroll": {
+          "height": 141,
+          "total": 381
+        },
+        "bottom": 340,
+        "footer": {
+          "bottom": 339.2000198364258,
+          "top": 266.4250183105469
+        },
+        "left": 17,
+        "right": 767.7875366210938,
+        "top": 20
+      }
+    ],
+    "height": 360,
+    "width": 800
+  },
+  {
+    "page": "sop",
+    "height": 360,
+    "heightAvailable": 85,
+    "scrollHeight": 85,
+    "width": 800,
+    "within": true
+  }
+]

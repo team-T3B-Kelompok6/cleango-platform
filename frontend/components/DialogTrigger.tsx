@@ -14,6 +14,7 @@ export function DialogTrigger({
   dialogClass = '',
   icon,
   dialogIcon,
+  ariaLabel,
 }: {
   label: string;
   title: string;
@@ -24,11 +25,17 @@ export function DialogTrigger({
   dialogClass?: string;
   icon?: UiIconName;
   dialogIcon?: UiIconName;
+  ariaLabel?: string;
 }) {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button className={className} type="button" onClick={() => setOpen(true)}>
+      <button
+        className={className}
+        aria-label={ariaLabel}
+        type="button"
+        onClick={() => setOpen(true)}
+      >
         {icon && <UiIcon name={icon} />}
         {label}
       </button>

@@ -110,14 +110,14 @@ export async function ReportView({ params }: { params: Search }) {
       </div>
       <div className="metrics-grid order-metrics finance-metrics">
         <MetricCard
-          label="TOTAL PENDAPATAN"
+          label="Pendapatan selesai"
           value={rupiah(total)}
           note="Pesanan selesai dalam periode"
           icon="services"
           uiIcon="wallet"
         />
         <MetricCard
-          label="PELANGGAN AKTIF"
+          label="Pelanggan aktif"
           value={new Set(visible.map((order) => order.customer)).size}
           unit="Customer"
           note="Pelanggan dengan pesanan selesai"
@@ -125,7 +125,7 @@ export async function ReportView({ params }: { params: Search }) {
           tone="blue"
         />
         <MetricCard
-          label="ORDER BERHASIL"
+          label="Pesanan selesai"
           value={visible.length}
           unit="Order"
           note="Pesanan selesai dalam periode"
@@ -200,8 +200,7 @@ export async function ReportView({ params }: { params: Search }) {
             </div>
           ) : (
             <p className="report-payment-empty">
-              Metode pembayaran belum tersedia. Ringkasan akan tampil setelah
-              informasi pembayaran diterima dari API.
+              Belum ada data metode pembayaran untuk periode ini.
             </p>
           )}
         </section>

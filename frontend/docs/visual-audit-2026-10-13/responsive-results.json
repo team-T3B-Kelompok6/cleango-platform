@@ -1,0 +1,322 @@
+[
+  {
+    "page": "dashboard",
+    "clippedMetricIcons": 0,
+    "documentWidth": 1265,
+    "height": 900,
+    "metricIcons": 4,
+    "width": 1280
+  },
+  {
+    "page": "pesanan",
+    "clippedMetricIcons": 0,
+    "documentWidth": 1265,
+    "height": 900,
+    "metricIcons": 3,
+    "width": 1280
+  },
+  {
+    "page": "jadwal",
+    "clippedMetricIcons": 0,
+    "documentWidth": 1265,
+    "height": 900,
+    "metricIcons": 3,
+    "width": 1280
+  },
+  {
+    "page": "layanan",
+    "clippedMetricIcons": 0,
+    "documentWidth": 1265,
+    "height": 900,
+    "metricIcons": 3,
+    "width": 1280
+  },
+  {
+    "page": "faq",
+    "clippedMetricIcons": 0,
+    "documentWidth": 1265,
+    "height": 900,
+    "metricIcons": 3,
+    "width": 1280
+  },
+  {
+    "page": "customer",
+    "clippedMetricIcons": 0,
+    "documentWidth": 1265,
+    "height": 900,
+    "metricIcons": 3,
+    "width": 1280
+  },
+  {
+    "page": "petugas",
+    "clippedMetricIcons": 0,
+    "documentWidth": 1265,
+    "height": 900,
+    "metricIcons": 3,
+    "width": 1280
+  },
+  {
+    "page": "laporan",
+    "clippedMetricIcons": 0,
+    "documentWidth": 1265,
+    "height": 900,
+    "metricIcons": 3,
+    "width": 1280
+  },
+  {
+    "page": "login",
+    "clippedMetricIcons": 0,
+    "documentWidth": 1265,
+    "height": 900,
+    "metricIcons": 0,
+    "width": 1280
+  },
+  {
+    "page": "banner",
+    "clippedMetricIcons": 0,
+    "documentWidth": 1265,
+    "height": 900,
+    "metricIcons": 0,
+    "width": 1280
+  },
+  {
+    "page": "dashboard",
+    "clippedMetricIcons": 0,
+    "documentWidth": 753,
+    "height": 1024,
+    "metricIcons": 4,
+    "width": 768
+  },
+  {
+    "page": "pesanan",
+    "clippedMetricIcons": 0,
+    "documentWidth": 753,
+    "height": 1024,
+    "metricIcons": 3,
+    "width": 768
+  },
+  {
+    "page": "jadwal",
+    "clippedMetricIcons": 0,
+    "documentWidth": 753,
+    "height": 1024,
+    "metricIcons": 3,
+    "width": 768
+  },
+  {
+    "page": "layanan",
+    "clippedMetricIcons": 0,
+    "documentWidth": 753,
+    "height": 1024,
+    "metricIcons": 3,
+    "width": 768
+  },
+  {
+    "page": "faq",
+    "clippedMetricIcons": 0,
+    "documentWidth": 753,
+    "height": 1024,
+    "metricIcons": 3,
+    "width": 768
+  },
+  {
+    "page": "customer",
+    "clippedMetricIcons": 0,
+    "documentWidth": 753,
+    "height": 1024,
+    "metricIcons": 3,
+    "width": 768
+  },
+  {
+    "page": "petugas",
+    "clippedMetricIcons": 0,
+    "documentWidth": 753,
+    "height": 1024,
+    "metricIcons": 3,
+    "width": 768
+  },
+  {
+    "page": "laporan",
+    "clippedMetricIcons": 0,
+    "documentWidth": 753,
+    "height": 1024,
+    "metricIcons": 3,
+    "width": 768
+  },
+  {
+    "page": "login",
+    "clippedMetricIcons": 0,
+    "documentWidth": 753,
+    "height": 1024,
+    "metricIcons": 0,
+    "width": 768
+  },
+  {
+    "page": "banner",
+    "clippedMetricIcons": 0,
+    "documentWidth": 753,
+    "height": 1024,
+    "metricIcons": 0,
+    "width": 768
+  },
+  {
+    "page": "dashboard",
+    "clippedMetricIcons": 0,
+    "documentWidth": 345,
+    "height": 800,
+    "metricIcons": 4,
+    "width": 360
+  },
+  {
+    "page": "pesanan",
+    "clippedMetricIcons": 0,
+    "documentWidth": 345,
+    "height": 800,
+    "metricIcons": 3,
+    "width": 360
+  },
+  {
+    "page": "jadwal",
+    "clippedMetricIcons": 0,
+    "documentWidth": 345,
+    "height": 800,
+    "metricIcons": 3,
+    "width": 360
+  },
+  {
+    "page": "layanan",
+    "clippedMetricIcons": 0,
+    "documentWidth": 345,
+    "height": 800,
+    "metricIcons": 3,
+    "width": 360
+  },
+  {
+    "page": "faq",
+    "clippedMetricIcons": 0,
+    "documentWidth": 345,
+    "height": 800,
+    "metricIcons": 3,
+    "width": 360
+  },
+  {
+    "page": "customer",
+    "clippedMetricIcons": 0,
+    "documentWidth": 345,
+    "height": 800,
+    "metricIcons": 3,
+    "width": 360
+  },
+  {
+    "page": "petugas",
+    "clippedMetricIcons": 0,
+    "documentWidth": 345,
+    "height": 800,
+    "metricIcons": 3,
+    "width": 360
+  },
+  {
+    "page": "laporan",
+    "clippedMetricIcons": 0,
+    "documentWidth": 345,
+    "height": 800,
+    "metricIcons": 3,
+    "width": 360
+  },
+  {
+    "page": "login",
+    "clippedMetricIcons": 0,
+    "documentWidth": 345,
+    "height": 800,
+    "metricIcons": 0,
+    "width": 360
+  },
+  {
+    "page": "banner",
+    "clippedMetricIcons": 0,
+    "documentWidth": 345,
+    "height": 800,
+    "metricIcons": 0,
+    "width": 360
+  },
+  {
+    "page": "dashboard",
+    "clippedMetricIcons": 0,
+    "documentWidth": 785,
+    "height": 360,
+    "metricIcons": 4,
+    "width": 800
+  },
+  {
+    "page": "pesanan",
+    "clippedMetricIcons": 0,
+    "documentWidth": 785,
+    "height": 360,
+    "metricIcons": 3,
+    "width": 800
+  },
+  {
+    "page": "jadwal",
+    "clippedMetricIcons": 0,
+    "documentWidth": 785,
+    "height": 360,
+    "metricIcons": 3,
+    "width": 800
+  },
+  {
+    "page": "layanan",
+    "clippedMetricIcons": 0,
+    "documentWidth": 785,
+    "height": 360,
+    "metricIcons": 3,
+    "width": 800
+  },
+  {
+    "page": "faq",
+    "clippedMetricIcons": 0,
+    "documentWidth": 785,
+    "height": 360,
+    "metricIcons": 3,
+    "width": 800
+  },
+  {
+    "page": "customer",
+    "clippedMetricIcons": 0,
+    "documentWidth": 785,
+    "height": 360,
+    "metricIcons": 3,
+    "width": 800
+  },
+  {
+    "page": "petugas",
+    "clippedMetricIcons": 0,
+    "documentWidth": 785,
+    "height": 360,
+    "metricIcons": 3,
+    "width": 800
+  },
+  {
+    "page": "laporan",
+    "clippedMetricIcons": 0,
+    "documentWidth": 785,
+    "height": 360,
+    "metricIcons": 3,
+    "width": 800
+  },
+  {
+    "page": "login",
+    "clippedMetricIcons": 0,
+    "documentWidth": 785,
+    "height": 360,
+    "metricIcons": 0,
+    "width": 800
+  },
+  {
+    "page": "banner",
+    "clippedMetricIcons": 0,
+    "documentWidth": 785,
+    "height": 360,
+    "metricIcons": 0,
+    "width": 800
+  }
+]

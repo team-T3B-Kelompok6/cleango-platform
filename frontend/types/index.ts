@@ -28,10 +28,10 @@ export interface Service extends RecordData {
   features?: string[];
 }
 export interface Staff extends RecordData {
-  skills?: string[];
+  skills: string[];
   rating?: number;
   name: string;
-  area: string;
+  area?: string;
   phone: string;
   status: string;
 }
@@ -66,6 +66,7 @@ export interface Schedule extends RecordData {
 export type Resource =
   'orders' | 'services' | 'staff' | 'customers' | 'faqs' | 'schedules';
 export type FormState = {
+  success?: boolean;
   message?: string;
   errors?: Record<string, string>;
   values?: Record<string, string | string[]>;
@@ -87,4 +88,13 @@ export interface Field {
   options?: string[];
   placeholder?: string;
   hint?: string;
+  lines?: boolean;
+}
+
+export interface Category extends RecordData {
+  name: string;
+  resource: 'services' | 'faqs';
+}
+export interface Banner extends RecordData {
+  imageUrl: string;
 }

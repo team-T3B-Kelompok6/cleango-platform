@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { ApiError, request, list, detail } from '@/lib/api';
 import { resources, isResource } from '@/lib/resources';
+import { listCategories } from '@/lib/categories';
 import type { FormState, Resource, RecordData, Staff, Order } from '@/types';
 export async function loginAction(
   _previous: FormState,
@@ -90,7 +91,7 @@ export async function saveAction(
       if (raw !== 'true' && raw !== 'false')
         errors[field.name] = 'Pilih status yang valid.';
       data[field.name] = raw === 'true';
-    } else if (field.name === 'features')
+    } else if (field.lines)
       data[field.name] = String(raw)
         .split(/\r?\n/)
         .map((s) => s.trim())
@@ -99,6 +100,10 @@ export async function saveAction(
     if (
       field.options?.length &&
       field.kind === 'select' &&
+      !(
+        field.name === 'category' &&
+        (resource === 'services' || resource === 'faqs')
+      ) &&
       !field.options.includes(String(raw))
     )
       errors[field.name] = 'Pilihan tidak valid.';
@@ -136,6 +141,18 @@ export async function saveAction(
   if (Object.keys(errors).length) return { errors, values };
   let saved: RecordData;
   try {
+    if (resource === 'services' || resource === 'faqs') {
+      const categories = await listCategories(resource);
+      const existing = id ? await detail(resource, id) : undefined;
+      if (
+        !categories.some((category) => category.name === data.category) &&
+        existing?.category !== data.category
+      )
+        return {
+          errors: { category: 'Pilih kategori yang tersedia.' },
+          values,
+        };
+    }
     const result = await request<{ data: RecordData }>(
       '/' + resource + (id ? '/' + encodeURIComponent(id) : ''),
       { method: id ? 'PATCH' : 'POST', body: JSON.stringify(data) },

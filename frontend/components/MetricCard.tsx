@@ -8,6 +8,7 @@ export function MetricCard({
   icon,
   tone = 'green',
   uiIcon,
+  compactValue = false,
 }: {
   label: string;
   value: number | string;
@@ -16,22 +17,23 @@ export function MetricCard({
   icon: IconName;
   tone?: 'green' | 'blue' | 'amber';
   uiIcon?: UiIconName;
+  compactValue?: boolean;
 }) {
   return (
     <article className={`metric-card ${tone}`}>
-      <div>
+      <div className="metric-top">
         <p className="metric-label">{label}</p>
-        <div className="metric-value">
-          {value}
-          <span>{unit}</span>
-        </div>
-        <span className={`metric-note ${tone === 'blue' ? 'green' : tone}`}>
-          {note}
+        <span className={`metric-icon ${tone}`}>
+          {uiIcon ? <UiIcon name={uiIcon} /> : <Icon name={icon} />}
         </span>
       </div>
-      <span className={`metric-icon ${tone}`}>
-        {uiIcon ? <UiIcon name={uiIcon} /> : <Icon name={icon} />}
-      </span>
+      <div
+        className={'metric-value' + (compactValue ? ' metric-value-text' : '')}
+      >
+        {value}
+        {unit && <span>{unit}</span>}
+      </div>
+      <span className="metric-note">{note}</span>
     </article>
   );
 }
