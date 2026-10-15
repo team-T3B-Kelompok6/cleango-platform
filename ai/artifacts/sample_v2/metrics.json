@@ -1,0 +1,102 @@
+{
+  "warning": "Metrics use LaDe proxy data and simulated schedules; they are not real-world CleanGo accuracy claims.",
+  "eta": {
+    "train": {
+      "model": {
+        "mae_seconds": 1754.188015794445,
+        "rmse_seconds": 3106.029360616617
+      },
+      "maps_proxy_baseline": {
+        "mae_seconds": 1774.4116627632307,
+        "rmse_seconds": 3214.6145348179048
+      },
+      "rows": 19897,
+      "trips": 670
+    },
+    "validation": {
+      "model": {
+        "mae_seconds": 2074.24073891708,
+        "rmse_seconds": 3278.00222376269
+      },
+      "maps_proxy_baseline": {
+        "mae_seconds": 2132.9382352941175,
+        "rmse_seconds": 3430.764665563935
+      },
+      "rows": 4981,
+      "trips": 132
+    },
+    "test": {
+      "model": {
+        "mae_seconds": 2132.267793385383,
+        "rmse_seconds": 3815.562666524542
+      },
+      "maps_proxy_baseline": {
+        "mae_seconds": 2205.8140911815744,
+        "rmse_seconds": 4034.8783472211085
+      },
+      "rows": 6339,
+      "trips": 198
+    }
+  },
+  "eta_training": {
+    "selected_regularization": 1000.0,
+    "selection_rule": "Lowest validation MAE; test split was not used for tuning.",
+    "trip_balanced_sample_weights": true
+  },
+  "late_risk": {
+    "train": {
+      "accuracy": 0.515015015015015,
+      "precision": 0.4662309368191721,
+      "recall": 0.7328767123287672,
+      "specificity": 0.3449197860962567,
+      "balanced_accuracy": 0.538898249212512,
+      "f1": 0.5699067909454061,
+      "true_positive": 214,
+      "true_negative": 129,
+      "false_positive": 245,
+      "false_negative": 78,
+      "rows": 666,
+      "trips": 666,
+      "majority_baseline_accuracy": 0.5615615615615616,
+      "majority_baseline_balanced_accuracy": 0.5
+    },
+    "validation": {
+      "accuracy": 0.5572519083969466,
+      "precision": 0.5154639175257731,
+      "recall": 0.819672131147541,
+      "specificity": 0.32857142857142857,
+      "balanced_accuracy": 0.5741217798594848,
+      "f1": 0.6329113924050632,
+      "true_positive": 50,
+      "true_negative": 23,
+      "false_positive": 47,
+      "false_negative": 11,
+      "rows": 131,
+      "trips": 131,
+      "majority_baseline_accuracy": 0.5343511450381679,
+      "majority_baseline_balanced_accuracy": 0.5
+    },
+    "test": {
+      "accuracy": 0.5656565656565656,
+      "precision": 0.5263157894736842,
+      "recall": 0.7526881720430108,
+      "specificity": 0.4,
+      "balanced_accuracy": 0.5763440860215054,
+      "f1": 0.6194690265486724,
+      "true_positive": 70,
+      "true_negative": 42,
+      "false_positive": 63,
+      "false_negative": 23,
+      "rows": 198,
+      "trips": 198,
+      "majority_baseline_accuracy": 0.5303030303030303,
+      "majority_baseline_balanced_accuracy": 0.5
+    }
+  },
+  "late_risk_training": {
+    "decision_threshold": 0.4400000000000001,
+    "selection_rule": "Highest validation balanced accuracy, then F1; test split was not used for tuning.",
+    "one_pre_deadline_checkpoint_per_trip": true,
+    "minimum_validation_recall_per_class": 0.1
+  }
+}

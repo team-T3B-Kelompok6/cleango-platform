@@ -1,0 +1,52 @@
+{
+  "schema_version": 2,
+  "model_type": "logistic_regression",
+  "target": "late_label",
+  "features": [
+    "eta_model_lateness_seconds",
+    "eta_schedule_ratio",
+    "predicted_lateness_seconds",
+    "elapsed_seconds",
+    "stopped_duration_seconds",
+    "distance_ratio",
+    "rolling_speed_ratio",
+    "hour_sin",
+    "hour_cos"
+  ],
+  "mean": [
+    -427.75149301676254,
+    0.9793725720720722,
+    -41.68449099099099,
+    169.65915915915915,
+    115.63513513513513,
+    1.008089539039039,
+    0.13934272672672673,
+    -0.22172696246246248,
+    -0.6368173333333333
+  ],
+  "scale": [
+    127.17542486077078,
+    0.25034290413895355,
+    85.87191311979443,
+    241.58153091611425,
+    59.3703996205842,
+    0.06107465468457491,
+    0.5187024220489247,
+    0.6586476951207276,
+    0.333892339325739
+  ],
+  "intercept": 0.010624654040326134,
+  "coefficients": [
+    0.30368748458196765,
+    0.06287288022492915,
+    0.08557688431895277,
+    0.0682803951683245,
+    0.02564837639960936,
+    -0.0099213556513588,
+    0.031375314448331616,
+    0.15928263561258899,
+    -0.04671072578026954
+  ],
+  "training_scope": "LaDe proxy trajectories with simulated CleanGo schedules; demo/learning only.",
+  "decision_threshold": 0.4400000000000001
+}
