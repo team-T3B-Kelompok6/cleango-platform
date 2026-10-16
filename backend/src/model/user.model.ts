@@ -71,6 +71,29 @@ export async function insertCustomer(input: {
   return user;
 }
 
+export async function updateUserProfile(
+  id: number,
+  input: { name?: string; email?: string; phone?: string },
+): Promise<User> {
+  const [result] = await pool.execute<ResultSetHeader>(
+    `UPDATE users SET
+       name = IF(?, ?, name),
+       email = IF(?, ?, email),
+       phone = IF(?, ?, phone)
+     WHERE id = ?`,
+    [
+      input.name !== undefined, input.name ?? '',
+      input.email !== undefined, input.email ?? '',
+      input.phone !== undefined, input.phone ?? '',
+      id,
+    ],
+  );
+  if (result.affectedRows === 0) throw new Error('User tidak ditemukan');
+  const user = await findUserById(id);
+  if (!user) throw new Error('User gagal dibaca setelah diperbarui');
+  return user;
+}
+
 export async function updateUserPassword(id: number, passwordHash: string): Promise<void> {
   await pool.execute(
     'UPDATE users SET password_hash = ? WHERE id = ?',
