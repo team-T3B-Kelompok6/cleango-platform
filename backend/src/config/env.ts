@@ -10,6 +10,8 @@ export interface AppEnv {
   DB_NAME: string;
   FRONTEND_ORIGIN: string;
   JWT_SECRET: string;
+  GOOGLE_CLIENT_ID?: string | undefined;
+  GOOGLE_ANDROID_CLIENT_ID?: string | undefined;
 }
 
 let cachedEnv: AppEnv | undefined;
@@ -37,6 +39,8 @@ export function getEnv(): AppEnv {
     DB_NAME: process.env.DB_NAME ?? 'cleango',
     FRONTEND_ORIGIN: process.env.FRONTEND_ORIGIN ?? 'http://localhost:3000',
     JWT_SECRET: jwtSecret,
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+    GOOGLE_ANDROID_CLIENT_ID: process.env.GOOGLE_ANDROID_CLIENT_ID,
   };
-  return cachedEnv;
+  return cachedEnv!;
 }

@@ -13,3 +13,15 @@ export function authenticate(request: Request, _response: Response, next: NextFu
     next(error instanceof AppError ? error : new AppError(401, 'Token tidak valid atau kedaluwarsa', 'INVALID_TOKEN'));
   }
 }
+
+export function requireCustomer(request: Request, _response: Response, next: NextFunction): void {
+  if (!request.user) {
+    next(new AppError(401, 'Authentication diperlukan', 'AUTH_REQUIRED'));
+    return;
+  }
+  if (request.user.role !== 'customer') {
+    next(new AppError(403, 'Akses customer diperlukan', 'FORBIDDEN'));
+    return;
+  }
+  next();
+}

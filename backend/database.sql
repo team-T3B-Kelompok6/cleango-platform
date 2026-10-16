@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS users (
   phone VARCHAR(30) NULL,
   password_hash VARCHAR(255) NOT NULL,
   role ENUM('customer', 'admin') NOT NULL DEFAULT 'customer',
+  auth_provider ENUM('local', 'google', 'facebook') NOT NULL DEFAULT 'local',
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
