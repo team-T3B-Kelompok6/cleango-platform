@@ -48,6 +48,11 @@ describe('customer profile', () => {
     expect(response.status).toBe(401);
     expect(userModel.updateUserPassword).not.toHaveBeenCalled();
   });
+  it('rejects short new password', async () => {
+    const response = await request(app).patch('/api/customer/profile/password').set('Authorization', `Bearer ${customerToken}`).send({ currentPassword: 'current', newPassword: '1234567' });
+    expect(response.status).toBe(400);
+    expect(response.body.message).toBe('Password baru minimal 8 karakter');
+  });
   it('rejects oversized new password', async () => {
     const response = await request(app).patch('/api/customer/profile/password').set('Authorization', `Bearer ${customerToken}`).send({ currentPassword: 'current', newPassword: 'x'.repeat(73) });
     expect(response.status).toBe(400);

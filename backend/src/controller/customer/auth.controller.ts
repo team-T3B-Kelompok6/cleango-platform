@@ -53,8 +53,8 @@ export async function register(request: Request, response: Response, next: NextF
       throw new AppError(400, 'Email tidak valid');
     }
 
-    if (password.length < 6) {
-      throw new AppError(400, 'Password minimal 6 karakter');
+    if (password.length < 8) {
+      throw new AppError(400, 'Password minimal 8 karakter');
     }
 
     if (await findUserByPhone(phone)) throw new AppError(400, 'Nomor telepon sudah terdaftar');
@@ -208,7 +208,7 @@ export async function resetPassword(request: Request, response: Response, next: 
     const newPassword = typeof body.newPassword === 'string' ? body.newPassword : '';
 
     if (!token) throw new AppError(400, 'Token reset wajib diisi');
-    if (newPassword.length < 6) throw new AppError(400, 'Password baru minimal 6 karakter');
+    if (newPassword.length < 8) throw new AppError(400, 'Password baru minimal 8 karakter');
 
     let payload;
     try {

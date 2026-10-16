@@ -115,6 +115,15 @@ describe('customer authentication contract', () => {
     expect(response.body.message).toBe('Nomor telepon wajib diisi');
   });
 
+  it('rejects passwords shorter than 8 characters on registration', async () => {
+    const response = await request(app).post('/api/customer/auth/register').send({
+      name: 'User Baru', phone: '081234567890', password: '1234567',
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.body.message).toBe('Password minimal 8 karakter');
+  });
+
   it('returns reset token in development for registered customer', async () => {
     userModel.findUserByPhone.mockResolvedValue({
       id: 10,
@@ -168,6 +177,16 @@ describe('customer authentication contract', () => {
 
     expect(response.status).toBe(200);
     expect(userModel.updateUserPassword).toHaveBeenCalledWith(10, expect.any(String));
+  });
+
+  it('rejects passwords shorter than 8 characters on reset', async () => {
+    const response = await request(app).post('/api/customer/auth/reset-password').send({
+      token: createResetToken(10), newPassword: '1234567',
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.body.message).toBe('Password baru minimal 8 karakter');
+    expect(userModel.updateUserPassword).not.toHaveBeenCalled();
   });
 
   it('rejects access token as reset token (purpose mismatch)', async () => {
