@@ -67,6 +67,7 @@ export async function changePassword(request: Request, response: Response, next:
     const newPassword = typeof body.newPassword === 'string' ? body.newPassword : '';
     if (!currentPassword) throw new AppError(400, 'Password lama wajib diisi');
     if (newPassword.length < 6) throw new AppError(400, 'Password baru minimal 6 karakter');
+    if (newPassword.length > 72) throw new AppError(400, 'Password baru maksimal 72 karakter');
 
     if (!await bcrypt.compare(currentPassword, user.passwordHash)) {
       throw new AppError(401, 'Password lama salah');

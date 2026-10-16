@@ -36,31 +36,41 @@ function requiredText(body: Record<string, unknown>, key: string, label: string,
   return value;
 }
 
-function optionalCoordinate(value: unknown, label: string): number | null {
+function optionalCoordinate(value: unknown, label: string, min: number, max: number): number | null {
   if (value === undefined || value === null || value === '') return null;
   const num = Number(value);
-  if (Number.isNaN(num)) throw new AppError(400, `${label} tidak valid`);
+  if (!Number.isFinite(num) || num < min || num > max) throw new AppError(400, `${label} tidak valid`);
   return num;
+}
+
+function optionalPostalCode(value: unknown): string | null {
+  if (value === undefined || value === null || value === '') return null;
+  if (typeof value !== 'string' || !/^\d{5}$/.test(value.trim())) {
+    throw new AppError(400, 'Kode pos harus 5 digit');
+  }
+  return value.trim();
 }
 
 function parseInput(body: Record<string, unknown>): AddressInput {
   const recipientPhone = normalizePhone(requiredText(body, 'recipient_phone', 'Nomor penerima', 30));
-  if (recipientPhone.length < 9 || recipientPhone.length > 15) {
-    throw new AppError(400, 'Nomor penerima tidak valid');
-  }
+  if (!/^0[0-9]{8,14}$/.test(recipientPhone)) throw new AppError(400, 'Nomor penerima tidak valid');
   const landmark = typeof body.landmark === 'string' ? body.landmark.trim() : '';
-  const postalCode = typeof body.postal_code === 'string' ? body.postal_code.trim() : '';
+  const city = typeof body.city === 'string' && body.city.trim() ? body.city.trim() : 'Malang';
+  const province = typeof body.province === 'string' && body.province.trim() ? body.province.trim() : 'Jawa Timur';
+  if (city.length > 100) throw new AppError(400, 'Kota maksimal 100 karakter');
+  if (province.length > 100) throw new AppError(400, 'Provinsi maksimal 100 karakter');
+  if (landmark.length > 255) throw new AppError(400, 'Patokan maksimal 255 karakter');
   return {
     label: requiredText(body, 'label', 'Label alamat', 80),
     recipientName: requiredText(body, 'recipient_name', 'Nama penerima', 120),
     recipientPhone,
     streetAddress: requiredText(body, 'street_address', 'Alamat lengkap', 1000),
-    city: typeof body.city === 'string' && body.city.trim() ? body.city.trim() : 'Malang',
-    province: typeof body.province === 'string' && body.province.trim() ? body.province.trim() : 'Jawa Timur',
-    postalCode: postalCode || null,
+    city,
+    province,
+    postalCode: optionalPostalCode(body.postal_code),
     landmark: landmark || null,
-    latitude: optionalCoordinate(body.latitude, 'Latitude'),
-    longitude: optionalCoordinate(body.longitude, 'Longitude'),
+    latitude: optionalCoordinate(body.latitude, 'Latitude', -90, 90),
+    longitude: optionalCoordinate(body.longitude, 'Longitude', -180, 180),
     isPrimary: body.is_primary === true,
   };
 }
@@ -102,16 +112,25 @@ export async function updateAddress(request: Request, response: Response, next: 
     if (body.recipient_name !== undefined) input.recipientName = requiredText(body, 'recipient_name', 'Nama penerima', 120);
     if (body.recipient_phone !== undefined) {
       const phone = normalizePhone(requiredText(body, 'recipient_phone', 'Nomor penerima', 30));
-      if (phone.length < 9 || phone.length > 15) throw new AppError(400, 'Nomor penerima tidak valid');
+      if (!/^0[0-9]{8,14}$/.test(phone)) throw new AppError(400, 'Nomor penerima tidak valid');
       input.recipientPhone = phone;
     }
     if (body.street_address !== undefined) input.streetAddress = requiredText(body, 'street_address', 'Alamat lengkap', 1000);
-    if (body.city !== undefined) input.city = String(body.city).trim() || 'Malang';
-    if (body.province !== undefined) input.province = String(body.province).trim() || 'Jawa Timur';
-    if (body.postal_code !== undefined) input.postalCode = String(body.postal_code).trim() || null;
-    if (body.landmark !== undefined) input.landmark = String(body.landmark).trim() || null;
-    if (body.latitude !== undefined) input.latitude = optionalCoordinate(body.latitude, 'Latitude');
-    if (body.longitude !== undefined) input.longitude = optionalCoordinate(body.longitude, 'Longitude');
+    if (body.city !== undefined) {
+      input.city = String(body.city).trim() || 'Malang';
+      if (input.city.length > 100) throw new AppError(400, 'Kota maksimal 100 karakter');
+    }
+    if (body.province !== undefined) {
+      input.province = String(body.province).trim() || 'Jawa Timur';
+      if (input.province.length > 100) throw new AppError(400, 'Provinsi maksimal 100 karakter');
+    }
+    if (body.postal_code !== undefined) input.postalCode = optionalPostalCode(body.postal_code);
+    if (body.landmark !== undefined) {
+      input.landmark = String(body.landmark).trim() || null;
+      if (input.landmark && input.landmark.length > 255) throw new AppError(400, 'Patokan maksimal 255 karakter');
+    }
+    if (body.latitude !== undefined) input.latitude = optionalCoordinate(body.latitude, 'Latitude', -90, 90);
+    if (body.longitude !== undefined) input.longitude = optionalCoordinate(body.longitude, 'Longitude', -180, 180);
     if (body.is_primary !== undefined) input.isPrimary = body.is_primary === true;
 
     const address = await updateAddressById(current.id, userId, input);
