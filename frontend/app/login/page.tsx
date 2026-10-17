@@ -4,6 +4,7 @@ import { CleanGoLogo } from '@/components/CleanGoLogo';
 import { DialogTrigger } from '@/components/DialogTrigger';
 import { LoginForm } from '@/components/LoginForm';
 import { logoutAction } from '@/app/actions';
+import { adminDemoEnabled } from '@/lib/demo/mode';
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Masuk Admin' };
 export default async function Login() {
@@ -27,8 +28,9 @@ export default async function Login() {
         >
           <div className="modal-body">
             <p>
-              Masuk dengan username admin dan kata sandi admin. Hubungi
-              pengelola jika akun belum dapat digunakan.
+              {adminDemoEnabled()
+                ? 'Mode demo frontend: gunakan username admin dan kata sandi admin. Seluruh data adalah data uji lokal.'
+                : 'Gunakan akun admin yang diberikan pengelola. Akun demo backend tim: admin@cleango.id dengan kata sandi 321321.'}
             </p>
             {session && (
               <form action={logoutAction}>

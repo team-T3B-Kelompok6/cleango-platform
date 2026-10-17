@@ -1,0 +1,56 @@
+[
+  {
+    "page": "Dashboard Utama",
+    "hasHorizontalOverflow": false,
+    "heading": "Halo, Admin Cleango!",
+    "loaded": true
+  },
+  {
+    "page": "Kelola Pesanan",
+    "hasHorizontalOverflow": false,
+    "heading": "Data belum bisa dimuat",
+    "loaded": false
+  },
+  {
+    "page": "Kelola Jadwal",
+    "hasHorizontalOverflow": false,
+    "heading": "Kelola Jadwal",
+    "loaded": true
+  },
+  {
+    "page": "Kelola Layanan",
+    "hasHorizontalOverflow": false,
+    "heading": "Kelola Layanan",
+    "loaded": true
+  },
+  {
+    "page": "Kelola FAQ",
+    "hasHorizontalOverflow": false,
+    "heading": "Kelola FAQ",
+    "loaded": true
+  },
+  {
+    "page": "Kelola Data Customer",
+    "hasHorizontalOverflow": false,
+    "heading": "Kelola Data Customer",
+    "loaded": true
+  },
+  {
+    "page": "Kelola Data Petugas",
+    "hasHorizontalOverflow": false,
+    "heading": "Kelola Data Petugas",
+    "loaded": true
+  },
+  {
+    "page": "Laporan",
+    "hasHorizontalOverflow": false,
+    "heading": "Laporan Keuangan & Operasional",
+    "loaded": true
+  },
+  {
+    "page": "Login",
+    "hasHorizontalOverflow": false,
+    "heading": "Masuk ke Akun Admin",
+    "loaded": true
+  }
+]

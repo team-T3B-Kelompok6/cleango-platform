@@ -19,7 +19,7 @@ export function LoginForm() {
             id="username"
             name="username"
             autoComplete="username"
-            placeholder="admin"
+            placeholder="admin@cleango.id"
             required
             defaultValue={(state.values?.username as string) ?? ''}
             aria-invalid={!!state.errors?.username}

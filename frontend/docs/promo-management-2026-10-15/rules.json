@@ -1,0 +1,10 @@
+{
+  "validation": "passed",
+  "calculation": "passed",
+  "duplicateCode": "passed",
+  "serviceSelection": "passed",
+  "quota": "passed",
+  "responseValidation": "passed",
+  "statusToggle": "passed",
+  "delete": "passed"
+}

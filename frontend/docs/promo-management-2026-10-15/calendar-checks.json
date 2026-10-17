@@ -1,0 +1,86 @@
+[
+  {
+    "case": "internal-scroll",
+    "calendarScroll": 180,
+    "footerBottom": 343.2000045776367,
+    "headerBottom": 72,
+    "open": true,
+    "pageScroll": 0,
+    "panelTop": 84,
+    "viewport": "800x360"
+  },
+  {
+    "belowHeader": true,
+    "bottom": 883.9999847412109,
+    "case": "bounds",
+    "footerVisible": true,
+    "headerBottom": 72,
+    "insideViewport": true,
+    "noHorizontalOverflow": true,
+    "open": true,
+    "placement": "below",
+    "route": "/jadwal",
+    "top": 168.8874969482422,
+    "viewport": "1280x900"
+  },
+  {
+    "belowHeader": true,
+    "bottom": 987.0125427246094,
+    "case": "bounds",
+    "footerVisible": true,
+    "headerBottom": 72,
+    "insideViewport": true,
+    "noHorizontalOverflow": true,
+    "open": true,
+    "placement": "below",
+    "route": "/jadwal",
+    "top": 265.8000183105469,
+    "viewport": "768x1024"
+  },
+  {
+    "belowHeader": true,
+    "bottom": 784.0000305175781,
+    "case": "bounds",
+    "footerVisible": true,
+    "headerBottom": 66,
+    "insideViewport": true,
+    "noHorizontalOverflow": true,
+    "open": true,
+    "placement": "below",
+    "route": "/jadwal",
+    "top": 257.1000061035156,
+    "viewport": "360x800"
+  },
+  {
+    "belowHeader": true,
+    "bottom": 344,
+    "case": "bounds",
+    "footerVisible": true,
+    "headerBottom": 72,
+    "insideViewport": true,
+    "noHorizontalOverflow": true,
+    "open": true,
+    "placement": "center",
+    "route": "/jadwal",
+    "top": 84,
+    "viewport": "800x360"
+  },
+  {
+    "anchorTop": -67.11250305175781,
+    "case": "page-scroll",
+    "headerOnTop": true,
+    "headerTop": 0,
+    "open": "false",
+    "route": "/jadwal",
+    "scrollY": 180
+  },
+  {
+    "anchorTop": -67.11250305175781,
+    "case": "page-scroll",
+    "headerOnTop": true,
+    "headerTop": 0,
+    "open": "false",
+    "route": "/pesanan",
+    "scrollY": 180
+  }
+]

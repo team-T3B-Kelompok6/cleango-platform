@@ -1,6 +1,75 @@
 import type { CSSProperties } from 'react';
 
 const paths = {
+  bike: (
+    <>
+      <circle cx="5" cy="17" r="4" />
+      <circle cx="19" cy="17" r="4" />
+      <path d="m5 17 5-9 5 9H5m5-9 4 1 5 8M9 5h4m1 4 2-4h3" />
+    </>
+  ),
+  paw: (
+    <>
+      <ellipse cx="12" cy="16" rx="6" ry="5" />
+      <ellipse cx="5" cy="9" rx="2" ry="3" transform="rotate(-25 5 9)" />
+      <ellipse cx="10" cy="5" rx="2" ry="3" />
+      <ellipse cx="16" cy="5" rx="2" ry="3" />
+      <ellipse cx="21" cy="10" rx="2" ry="3" transform="rotate(25 21 10)" />
+    </>
+  ),
+  calendar: (
+    <>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M7 3v4m10-4v4M3 11h18m-13 4h2m4 0h2m-8 3h2" />
+    </>
+  ),
+  faq: (
+    <>
+      <path d="M8 9a4 4 0 0 1 8 0c0 3-4 3-4 6M12 18h.01" />
+      <circle cx="12" cy="12" r="10" />
+    </>
+  ),
+  contact: (
+    <>
+      <rect x="4" y="5" width="17" height="16" rx="2" />
+      <path d="M8 3v4m9-4v4m-2 7h3m-3 3h3M7 18v-1a3 3 0 0 1 6 0v1" />
+      <circle cx="10" cy="12" r="2" />
+    </>
+  ),
+  services: (
+    <>
+      <rect x="3" y="7" width="18" height="14" rx="2" />
+      <path d="M8 7V4h8v3M3 12a25 25 0 0 0 18 0M12 11v4" />
+    </>
+  ),
+  image: (
+    <>
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <circle cx="8" cy="8" r="1.5" />
+      <path d="m3 17 5-5 4 4 4-6 5 7" />
+    </>
+  ),
+  phone: (
+    <path d="m5 3 4 1 1 5-3 2a15 15 0 0 0 6 6l2-3 5 1 1 4a2 2 0 0 1-2 2C10 21 3 14 3 5a2 2 0 0 1 2-2Z" />
+  ),
+  chat: (
+    <>
+      <path d="M21 14a3 3 0 0 1-3 3H8l-5 4V6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v8Z" />
+      <path d="M7 8h10M7 12h7" />
+    </>
+  ),
+  copy: (
+    <>
+      <rect x="8" y="8" width="13" height="13" rx="2" />
+      <path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3" />
+    </>
+  ),
+  tag: (
+    <>
+      <path d="M3 3h7l11 11-7 7L3 10V3Z" />
+      <circle cx="7" cy="7" r="1" />
+    </>
+  ),
   search: (
     <>
       <circle cx="10.5" cy="10.5" r="6.5" />
@@ -8,6 +77,7 @@ const paths = {
     </>
   ),
   chevron: <path d="m9 5 7 7-7 7" />,
+  down: <path d="m5 9 7 7 7-7" />,
   arrow: <path d="M4 12h16m-6-6 6 6-6 6" />,
   plus: <path d="M12 5v14M5 12h14" />,
   more: (

@@ -1,0 +1,56 @@
+[
+  {
+    "aligned": true,
+    "context": "modal-top",
+    "footerY": 1385.300048828125,
+    "height": 346,
+    "position": "static",
+    "scrollY": 0,
+    "width": 1054
+  },
+  {
+    "buttonVisible": true,
+    "context": "modal-bottom",
+    "footerY": 162.90000915527344,
+    "overlapsForm": false,
+    "scrollY": 1222.4000244140625
+  },
+  {
+    "aligned": true,
+    "context": "direct-top",
+    "footerY": 1385.300048828125,
+    "height": 720,
+    "overflow": false,
+    "position": "static",
+    "scrollY": 0,
+    "width": 1280
+  },
+  {
+    "buttonVisible": true,
+    "context": "direct-bottom",
+    "footerY": 537.2999877929688,
+    "height": 720,
+    "overlapsForm": false,
+    "scrollY": 848,
+    "width": 1280
+  },
+  {
+    "aligned": true,
+    "context": "direct-top",
+    "footerY": 1405.300048828125,
+    "height": 844,
+    "overflow": false,
+    "position": "static",
+    "scrollY": 0,
+    "width": 390
+  },
+  {
+    "buttonVisible": true,
+    "context": "direct-bottom",
+    "footerY": 661.2999877929688,
+    "height": 844,
+    "overlapsForm": false,
+    "scrollY": 744,
+    "width": 390
+  }
+]

@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { Modal } from './Modal';
+import { useDialogClose } from './DialogContext';
 
 type Step = 'Ringkasan' | 'Persiapan' | 'Pengerjaan' | 'Serah terima';
 const steps: Step[] = ['Ringkasan', 'Persiapan', 'Pengerjaan', 'Serah terima'];
@@ -40,6 +41,18 @@ const sections = [
     ],
   },
 ];
+
+function SopFooter() {
+  const close = useDialogClose();
+  return (
+    <div className="modal-footer sop-footer">
+      <span>Disiapkan untuk tim operasional Cleango</span>
+      <button className="button primary" onClick={close ?? undefined}>
+        Selesai membaca
+      </button>
+    </div>
+  );
+}
 
 export function SopDialog({ onClose }: { onClose: () => void }) {
   const [active, setActive] = useState<Step>('Ringkasan');
@@ -130,12 +143,7 @@ export function SopDialog({ onClose }: { onClose: () => void }) {
           kepada pelanggan, lalu catat masukan atau kendala di pesanan.
         </p>
       </div>
-      <div className="modal-footer sop-footer">
-        <span>Disiapkan untuk tim operasional Cleango</span>
-        <button className="button primary" onClick={onClose}>
-          Selesai membaca
-        </button>
-      </div>
+      <SopFooter />
     </Modal>
   );
 }

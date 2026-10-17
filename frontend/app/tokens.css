@@ -1,4 +1,4 @@
-/* Exact values retained from the Cleango UI; root is 12px. */
+/* Shared values; the 12px root preserves the existing layout scale. */
 :root {
   --ui-accent: #0a805b;
   --ui-accent-hover: #066647;
@@ -11,6 +11,25 @@
   --ui-blue: #156885;
   --ui-amber: #91610c;
   --ui-shadow: 0 0.333333rem 2rem #1738290a;
+  --ui-radius-card: 1rem;
+  --ui-radius-dialog: 1.333333rem;
+  --ui-control-primary: 3.666667rem;
+  --ui-text-body: 1.25rem;
+  --ui-text-meta: 1.083333rem;
+  --ui-text-small: 1rem;
+  --ui-text-control: 1.166667rem;
+  --ui-text-record: 1.333333rem;
+  --ui-text-section: 1.5rem;
+  --ui-text-page: 2.333333rem;
+  --ui-text-value: 2.666667rem;
+  --ui-focus: #81baa4;
+  --ui-shadow-dialog: 0 20px 64px #162c2329;
+  --ui-shadow-popover: 0 12px 36px #162c231a;
+  --ui-backdrop: #192c244d;
+  --motion-fast: 140ms;
+  --motion-base: 180ms;
+  --motion-panel: 220ms;
+  --motion-ease: cubic-bezier(0.2, 0.7, 0.3, 1);
   --color-001: #16231d;
   --color-002: #f5f8f6;
   --color-003: #20c875;
@@ -376,4 +395,14 @@
   --space-7-2: 0.6rem;
   --space-7-8: 0.65rem;
   --space-8-4: 0.7rem;
+  --service-photo-bg: #f1f6f4;
+  --service-photo-overlay: #172a24d9;
+  --service-upload-border: #83bba5;
+  --service-form-tint: #f6fcf9;
+  --service-form-hover: #e8f6ef;
+  --service-field-label: #40574e;
+  --service-price-border: #c8e5d6;
+  --service-switch-off: #9aaba3;
+  --service-note-border: #a6d4bc;
+  --banner-preview-bg: #f4f8f6;
 }

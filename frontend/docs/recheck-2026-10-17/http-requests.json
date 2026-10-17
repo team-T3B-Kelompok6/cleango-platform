@@ -1,0 +1,391 @@
+{
+  "fixture": true,
+  "mode": "normal",
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "time": "2026-10-16T18:32:58.840Z",
+      "mode": "normal",
+      "status": 401
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "time": "2026-10-16T18:32:58.855Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/services",
+      "time": "2026-10-16T18:32:59.642Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/services/DEMO-SERVICES-b066bb8a-aa31-448b-9ff0-bff58565002b",
+      "time": "2026-10-16T18:32:59.657Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/services/DEMO-SERVICES-b066bb8a-aa31-448b-9ff0-bff58565002b",
+      "time": "2026-10-16T18:32:59.673Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/services/DEMO-SERVICES-b066bb8a-aa31-448b-9ff0-bff58565002b",
+      "time": "2026-10-16T18:32:59.681Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/services/DEMO-SERVICES-b066bb8a-aa31-448b-9ff0-bff58565002b",
+      "time": "2026-10-16T18:32:59.689Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/services/DEMO-SERVICES-b066bb8a-aa31-448b-9ff0-bff58565002b",
+      "time": "2026-10-16T18:32:59.697Z",
+      "mode": "normal",
+      "status": 404
+    },
+    {
+      "method": "POST",
+      "path": "/api/staff",
+      "time": "2026-10-16T18:32:59.721Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff/DEMO-STAFF-9d4a021f-e221-409b-8547-a57bcebeac62",
+      "time": "2026-10-16T18:32:59.737Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/staff/DEMO-STAFF-9d4a021f-e221-409b-8547-a57bcebeac62",
+      "time": "2026-10-16T18:32:59.752Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff/DEMO-STAFF-9d4a021f-e221-409b-8547-a57bcebeac62",
+      "time": "2026-10-16T18:32:59.768Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/staff/DEMO-STAFF-9d4a021f-e221-409b-8547-a57bcebeac62",
+      "time": "2026-10-16T18:32:59.784Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff/DEMO-STAFF-9d4a021f-e221-409b-8547-a57bcebeac62",
+      "time": "2026-10-16T18:32:59.800Z",
+      "mode": "normal",
+      "status": 404
+    },
+    {
+      "method": "POST",
+      "path": "/api/faqs",
+      "time": "2026-10-16T18:32:59.816Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/faqs/DEMO-FAQS-34257c0c-bce7-46f9-897d-2cd48727f923",
+      "time": "2026-10-16T18:32:59.832Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/faqs/DEMO-FAQS-34257c0c-bce7-46f9-897d-2cd48727f923",
+      "time": "2026-10-16T18:32:59.848Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/faqs/DEMO-FAQS-34257c0c-bce7-46f9-897d-2cd48727f923",
+      "time": "2026-10-16T18:32:59.864Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/faqs/DEMO-FAQS-34257c0c-bce7-46f9-897d-2cd48727f923",
+      "time": "2026-10-16T18:32:59.879Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/faqs/DEMO-FAQS-34257c0c-bce7-46f9-897d-2cd48727f923",
+      "time": "2026-10-16T18:32:59.895Z",
+      "mode": "normal",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/customers",
+      "time": "2026-10-16T18:32:59.903Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/customers/DEMO-CUS-04",
+      "time": "2026-10-16T18:32:59.926Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/customers/DEMO-CUS-04",
+      "time": "2026-10-16T18:32:59.941Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/customers/DEMO-CUS-04",
+      "time": "2026-10-16T18:32:59.957Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/customers/DEMO-CUS-04",
+      "time": "2026-10-16T18:32:59.973Z",
+      "mode": "normal",
+      "status": 404
+    },
+    {
+      "method": "POST",
+      "path": "/api/orders",
+      "time": "2026-10-16T18:32:59.990Z",
+      "mode": "normal",
+      "status": 405
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-16T18:33:00.005Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-16T18:33:00.018Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/schedules",
+      "time": "2026-10-16T18:33:00.019Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-16T18:33:00.019Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/orders/DEMO-CHECK-01",
+      "time": "2026-10-16T18:33:00.053Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders/DEMO-CHECK-01",
+      "time": "2026-10-16T18:33:00.069Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/orders/DEMO-CHECK-01",
+      "time": "2026-10-16T18:33:00.085Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders/DEMO-CHECK-01",
+      "time": "2026-10-16T18:33:00.113Z",
+      "mode": "normal",
+      "status": 404
+    },
+    {
+      "method": "POST",
+      "path": "/api/schedules",
+      "time": "2026-10-16T18:33:00.129Z",
+      "mode": "normal",
+      "status": 400
+    },
+    {
+      "method": "POST",
+      "path": "/api/schedules",
+      "time": "2026-10-16T18:33:00.145Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/schedules/DEMO-SCHEDULES-77a404c4-0257-4086-9d25-372012535f77",
+      "time": "2026-10-16T18:33:00.160Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/schedules/DEMO-SCHEDULES-77a404c4-0257-4086-9d25-372012535f77",
+      "time": "2026-10-16T18:33:00.176Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/schedules/DEMO-SCHEDULES-77a404c4-0257-4086-9d25-372012535f77",
+      "time": "2026-10-16T18:33:00.192Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/schedules/DEMO-SCHEDULES-77a404c4-0257-4086-9d25-372012535f77",
+      "time": "2026-10-16T18:33:00.208Z",
+      "mode": "normal",
+      "status": 404
+    },
+    {
+      "method": "POST",
+      "path": "/api/uploads",
+      "time": "2026-10-16T18:33:00.224Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/media/20e9e79a-e9e9-42d0-8a52-5a04a628c044.jpg",
+      "time": "2026-10-16T18:33:00.240Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/categories",
+      "time": "2026-10-16T18:33:00.247Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/categories",
+      "time": "2026-10-16T18:33:00.255Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/banners",
+      "time": "2026-10-16T18:33:00.271Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/banners/DEMO-BANNERS-43b85952-78e9-4133-97d4-4891065f6227",
+      "time": "2026-10-16T18:33:00.287Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/banners/DEMO-BANNERS-43b85952-78e9-4133-97d4-4891065f6227",
+      "time": "2026-10-16T18:33:00.303Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/promos",
+      "time": "2026-10-16T18:33:00.311Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/promos/DEMO-PROMOS-5da17fc3-dbf3-473b-851c-565aaf4d7a1a",
+      "time": "2026-10-16T18:33:00.334Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/promos/DEMO-PROMOS-5da17fc3-dbf3-473b-851c-565aaf4d7a1a",
+      "time": "2026-10-16T18:33:00.350Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/services",
+      "time": "2026-10-16T18:33:00.381Z",
+      "mode": "empty",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/services",
+      "time": "2026-10-16T18:33:00.429Z",
+      "mode": "error",
+      "status": 503
+    },
+    {
+      "method": "GET",
+      "path": "/api/services",
+      "time": "2026-10-16T18:33:00.461Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-16T18:33:00.489Z",
+      "mode": "expired",
+      "status": 401
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-16T18:33:00.527Z",
+      "mode": "slow",
+      "status": 200
+    }
+  ]
+}

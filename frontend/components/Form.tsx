@@ -95,13 +95,26 @@ export function ResourceForm({
                         <label key={option}>
                           <input
                             type="checkbox"
+                            aria-label={option}
                             name={field.name}
                             value={option}
                             defaultChecked={
                               Array.isArray(value) && value.includes(option)
                             }
                           />
-                          {option}
+                          <span className="staff-option-copy">
+                            <span>
+                              {option}
+                              {field.recommendedOptions?.includes(option) && (
+                                <small className="staff-recommended">
+                                  Direkomendasikan
+                                </small>
+                              )}
+                            </span>
+                            {field.optionHints?.[option] && (
+                              <small>{field.optionHints[option]}</small>
+                            )}
+                          </span>
                         </label>
                       ))}
                       {!field.options?.length && (
@@ -167,6 +180,13 @@ export function ResourceForm({
             {state.message}
           </p>
         )}
+        {Object.entries(state.errors ?? {})
+          .filter(([name]) => !fields.some((field) => field.name === name))
+          .map(([name, message]) => (
+            <p key={name} className="field-error" role="alert">
+              {message}
+            </p>
+          ))}
       </div>
       <div className="modal-footer">
         {close ? (

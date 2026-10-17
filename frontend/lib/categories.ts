@@ -5,9 +5,15 @@ import type { Category } from '@/types';
 
 export type CategoryResource = Category['resource'];
 export const listCategories = cache(async (resource: CategoryResource) => {
-  const result = await request<{ data: Category[] }>(
-    '/categories?resource=' + resource,
-  );
+  let result: { data: Category[] };
+  try {
+    result = await request<{ data: Category[] }>(
+      '/categories?resource=' + resource,
+    );
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return [];
+    throw error;
+  }
   if (
     !Array.isArray(result.data) ||
     result.data.some(

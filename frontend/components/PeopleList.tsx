@@ -1,3 +1,4 @@
+import { displayId } from '@/lib/display';
 import { valueText, rupiah } from '@/lib/resources';
 import { Badge } from './StatusBadge';
 import { UiIcon } from './UiIcon';
@@ -16,29 +17,37 @@ export function PeopleList({ shown, resource, edit }: RecordListProps) {
           >
             <div className="figma-person-main">
               <span className="figma-person-meta">
-                #{item.id} ·{' '}
+                #{displayId(item.id)} ·{' '}
                 {resource === 'staff' ? (
                   <Badge
                     status={
-                      item.status === 'Tersedia'
-                        ? 'Siaga & Tersedia'
-                        : item.status === 'Bertugas'
-                          ? 'Sedang Bekerja'
-                          : valueText(item.status)
+                      typeof item.operationalStatus === 'string'
+                        ? item.operationalStatus
+                        : item.status === 'Tersedia'
+                          ? 'Siaga & Tersedia'
+                          : item.status === 'Bertugas'
+                            ? 'Sedang Bekerja'
+                            : valueText(item.status)
                     }
                   />
                 ) : (
-                  'Terdaftar sejak ' +
-                  (item.joined
-                    ? new Date(String(item.joined)).toLocaleDateString(
-                        'id-ID',
-                        {
-                          month: 'long',
-                          year: 'numeric',
-                          timeZone: 'Asia/Jakarta',
-                        },
-                      )
-                    : '—')
+                  <>
+                    {'Terdaftar sejak ' +
+                      (item.joined &&
+                      Number.isFinite(Date.parse(String(item.joined)))
+                        ? new Date(String(item.joined)).toLocaleDateString(
+                            'id-ID',
+                            {
+                              month: 'long',
+                              year: 'numeric',
+                              timeZone: 'Asia/Jakarta',
+                            },
+                          )
+                        : '—')}
+                    {typeof item.active === 'boolean' && (
+                      <Badge status={item.active ? 'Aktif' : 'Nonaktif'} />
+                    )}
+                  </>
                 )}
               </span>
               <h3>
@@ -72,7 +81,9 @@ export function PeopleList({ shown, resource, edit }: RecordListProps) {
               ) : (
                 <div className="customer-chips">
                   <span>{Number(item.orderCount ?? 0)} Pesanan</span>
-                  <span>Total {rupiah(Number(item.totalSpent ?? 0))}</span>
+                  <span>
+                    Nilai pesanan selesai {rupiah(Number(item.totalSpent ?? 0))}
+                  </span>
                   <span>
                     {item.area
                       ? 'Area: ' + valueText(item.area)
@@ -83,26 +94,38 @@ export function PeopleList({ shown, resource, edit }: RecordListProps) {
             </div>
             <div className="managed-record-footer">
               <RecordActions resource={resource} record={item} edit={edit}>
-                {resource === 'staff' && item.status === 'Bertugas' && (
-                  <TrackingButton
-                    name={String(item.name)}
-                    label="Lihat lokasi"
-                    className="button tracking-location-action"
-                  />
-                )}
-                {resource === 'customers' && (
-                  <a
-                    className="button"
-                    href={
-                      'https://wa.me/' +
-                      String(item.phone).replace(/\D/g, '').replace(/^0/, '62')
-                    }
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Hubungi WhatsApp
-                  </a>
-                )}
+                {resource === 'staff' &&
+                  ['Menuju Lokasi', 'Sedang Bekerja', 'Bertugas'].includes(
+                    String(item.operationalStatus),
+                  ) && (
+                    <TrackingButton
+                      name={String(item.name)}
+                      label="Lihat lokasi"
+                      className="button tracking-location-action"
+                    />
+                  )}
+                {resource === 'customers' &&
+                  !String(item.id).startsWith('DEMO-') && (
+                    <a
+                      className="button"
+                      href={
+                        'https://wa.me/' +
+                        String(item.phone)
+                          .replace(/\D/g, '')
+                          .replace(/^0/, '62')
+                      }
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Hubungi WhatsApp
+                    </a>
+                  )}
+                {resource === 'customers' &&
+                  String(item.id).startsWith('DEMO-') && (
+                    <button className="button" disabled>
+                      WhatsApp belum terhubung
+                    </button>
+                  )}
               </RecordActions>
             </div>
           </article>

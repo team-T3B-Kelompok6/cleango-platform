@@ -2,10 +2,10 @@
    Existing design tokens and components remain the source of shared values. */
 :root {
   --design-text: var(--color-001);
-  --design-muted: var(--color-020);
+  --design-muted: var(--ui-muted);
   --design-soft: var(--color-008);
-  --design-green: var(--color-003);
-  --design-border: var(--color-004);
+  --design-green: var(--ui-accent);
+  --design-border: var(--ui-border);
   --design-radius: var(--space-12);
   --design-section-gap: var(--space-24);
   --design-row-gap: var(--space-10);
@@ -205,8 +205,8 @@
 .admin-heading-actions > .button,
 .admin-heading-actions .admin-add,
 .admin-heading-actions .date-filter {
-  font-size: var(--text-16);
-  min-height: var(--design-control-height);
+  font-size: var(--ui-text-control);
+  min-height: var(--ui-control-primary);
 }
 
 @media (min-width: 981px) {
@@ -283,7 +283,7 @@
 
 /* Calendar reservation picker shared by orders and schedules. */
 .date-filter-anchor:has(.date-popover[data-open='true']) {
-  z-index: 100;
+  z-index: 70;
 }
 .date-popover {
   display: flex;
@@ -296,10 +296,9 @@
   top: auto;
   bottom: calc(100% + var(--space-12));
 }
-.next-date-filter .date-popover[data-placement='center'] {
+.date-popover[data-placement='center'] {
   position: fixed;
-  z-index: 100;
-  top: var(--space-16);
+  top: var(--date-popover-top, var(--space-16));
   bottom: auto;
   left: 50%;
   right: auto;
@@ -984,7 +983,25 @@
 }
 .account-popover:popover-open,
 .order-more-menu:popover-open {
-  animation: admin-content-in 0.22s ease both;
+  opacity: 1;
+  transform: translateY(0);
+}
+.account-popover,
+.order-more-menu {
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    opacity var(--motion-base) ease,
+    transform var(--motion-panel) var(--motion-ease),
+    display var(--motion-panel) allow-discrete,
+    overlay var(--motion-panel) allow-discrete;
+}
+@starting-style {
+  .account-popover:popover-open,
+  .order-more-menu:popover-open {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
 }
 
 @media (max-width: 700px) {

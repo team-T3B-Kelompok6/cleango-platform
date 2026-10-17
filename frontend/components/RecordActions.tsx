@@ -1,7 +1,6 @@
-import Link from 'next/link';
 import type { ReactNode } from 'react';
 import type { RecordData, Resource } from '@/types';
-import { resources } from '@/lib/resources';
+import { RecordDetailLink } from './RecordDetailLink';
 import { DeleteRecordButton } from './DeleteRecordButton';
 
 export function RecordActions({
@@ -15,18 +14,11 @@ export function RecordActions({
   edit: (record: RecordData, label?: string) => ReactNode;
   children?: ReactNode;
 }) {
-  const config = resources[resource];
   return (
     <div className="figma-row-actions record-rud">
       {children}
       {edit(record, 'Ubah')}
-      <Link
-        className="button"
-        aria-label={'Detail ' + config.singular + ' ' + record.id}
-        href={config.path + '/' + encodeURIComponent(record.id)}
-      >
-        Detail
-      </Link>
+      <RecordDetailLink resource={resource} id={record.id} />
       <DeleteRecordButton resource={resource} record={record} />
     </div>
   );

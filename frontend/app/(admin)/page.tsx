@@ -1,3 +1,4 @@
+import { displayId } from '@/lib/display';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { list } from '@/lib/api';
@@ -6,10 +7,19 @@ import type { Order } from '@/types';
 import { MetricCard } from '@/components/MetricCard';
 import { Icon } from '@/components/Icon';
 import { SopButton } from '@/components/SopButton';
+import {
+  needsAssignment,
+  newestOrderFirst,
+  orderTimeText,
+  orderStatusLabel,
+} from '@/lib/order-flow';
+import { withOrderWorkTimes } from '@/lib/order-work-times';
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Dashboard Utama' };
 export default async function Dashboard() {
-  const orders = await list<Order>('orders');
+  const orders = [
+    ...(await withOrderWorkTimes(await list<Order>('orders'))),
+  ].sort(newestOrderFirst);
   const now = new Date();
   const today = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Jakarta',
@@ -75,7 +85,7 @@ export default async function Dashboard() {
         />
         <MetricCard
           label="Menunggu petugas"
-          value={counts('Menunggu Assign')}
+          value={dailyOrders.filter(needsAssignment).length}
           unit="Order"
           note="Perlu tindakan segera"
           icon="clock"
@@ -113,7 +123,7 @@ export default async function Dashboard() {
             </span>
             <div className="activity-copy">
               <small>
-                #{order.id} · {order.address}
+                #{displayId(order.id)} · {order.address}
               </small>
               <h3>{order.service}</h3>
               <p className="activity-meta">
@@ -122,13 +132,13 @@ export default async function Dashboard() {
                 </span>
                 <span>
                   <Icon name="clock" />
-                  {order.time}
+                  {orderTimeText(order)}
                 </span>
               </p>
             </div>
             <span className={'status-badge ' + tone(order.status)}>
               <i />
-              {order.status}
+              {orderStatusLabel(order.status)}
             </span>
             <Icon name="chevron" />
           </Link>

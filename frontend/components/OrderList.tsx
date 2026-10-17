@@ -1,3 +1,4 @@
+import { displayId } from '@/lib/display';
 import Link from 'next/link';
 import { rupiah } from '@/lib/resources';
 
@@ -10,6 +11,7 @@ import { TrackingButton } from './tracking/TrackingButton';
 import { RecordActions } from './RecordActions';
 import type { Order } from '@/types';
 import type { RecordListProps } from './RecordListProps';
+import { needsAssignment, orderTimeText } from '@/lib/order-flow';
 export function OrderList({ shown, resource, config, edit }: RecordListProps) {
   return (
     <>
@@ -20,43 +22,22 @@ export function OrderList({ shown, resource, config, edit }: RecordListProps) {
             <article
               key={order.id}
               className={
-                'order-card ' +
-                (['Menunggu Assign', 'Menunggu Lokasi'].includes(order.status)
-                  ? 'needs-action'
-                  : '')
+                'order-card ' + (needsAssignment(order) ? 'needs-action' : '')
               }
             >
               <div className="order-card-top">
                 <Link
                   className="order-id"
                   href={config.path + '/' + encodeURIComponent(order.id)}
+                  scroll={false}
                 >
-                  #{order.id}
+                  #{displayId(order.id)}
                 </Link>
                 <Badge status={order.status} />
                 <span className="order-time">
                   <UiIcon name="clock" />
-                  {order.time}
+                  {orderTimeText(order)}
                 </span>
-                <button
-                  className="order-more"
-                  popoverTarget={'order-menu-' + encodeURIComponent(order.id)}
-                  aria-label={'Opsi pesanan ' + order.id}
-                >
-                  <UiIcon name="more" />
-                </button>
-                <div
-                  id={'order-menu-' + encodeURIComponent(order.id)}
-                  className="order-more-menu"
-                  popover="auto"
-                >
-                  <Link
-                    className="button"
-                    href={config.path + '/' + encodeURIComponent(order.id)}
-                  >
-                    Buka halaman detail #{order.id}
-                  </Link>
-                </div>
               </div>
               <h3>{order.customer}</h3>
               <div className="order-info">
@@ -73,20 +54,18 @@ export function OrderList({ shown, resource, config, edit }: RecordListProps) {
                   <span>{order.staff.join(' & ') || 'Belum Ditugaskan'}</span>
                 </p>
                 <RecordActions resource={resource} record={order} edit={edit}>
-                  {order.staff.length > 0 &&
-                    order.status === 'Sedang Dikerjakan' && (
-                      <TrackingButton
-                        name={order.staff[0]}
-                        label="Pantau Petugas"
-                      />
-                    )}
-                  {['Menunggu Assign', 'Menunggu Lokasi'].includes(
-                    order.status,
-                  ) && (
+                  {order.staff.length > 0 && order.status !== 'Batal' && (
+                    <TrackingButton
+                      name={order.staff[0]}
+                      orderId={order.id}
+                      label="Pantau Petugas"
+                    />
+                  )}
+                  {needsAssignment(order) && (
                     <DialogTrigger
                       label="Tugaskan Petugas"
                       title="Tugaskan Petugas"
-                      subtitle={'#' + order.id}
+                      subtitle={'#' + displayId(order.id)}
                       className="button primary assign-button"
                       dialogClass="order-form-dialog"
                       icon="person"

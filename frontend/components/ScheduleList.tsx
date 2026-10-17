@@ -1,17 +1,14 @@
-import { shiftOf } from '@/lib/resources';
+import { scheduleShifts, shiftOf } from '@/lib/resources';
 
 import { Icon } from './Icon';
 
 import { Badge } from './StatusBadge';
-import { UiIcon } from './UiIcon';
 import { RecordActions } from './RecordActions';
 import type { Schedule } from '@/types';
 import type { RecordListProps } from './RecordListProps';
-const shiftHours: Record<string, string> = {
-  'Shift Pagi': '08.00–11.30 WIB',
-  'Shift Siang': '12.00–15.30 WIB',
-  'Shift Sore': '16.00–19.30 WIB',
-};
+const shiftHours: Record<string, string> = Object.fromEntries(
+  scheduleShifts.map((shift) => [shift.name, shift.time]),
+);
 export function ScheduleList({ shown, resource, tab, edit }: RecordListProps) {
   return (
     <>
@@ -30,7 +27,7 @@ export function ScheduleList({ shown, resource, tab, edit }: RecordListProps) {
                     shown.filter((item) => shiftOf(String(item.time)) === shift)
                       .length
                   }{' '}
-                  order
+                  jadwal petugas
                 </small>
               </div>
               <div className="shift-grid">
@@ -41,12 +38,7 @@ export function ScheduleList({ shown, resource, tab, edit }: RecordListProps) {
                     return (
                       <article key={schedule.id} className="shift-card">
                         <Badge status={schedule.status} />
-                        <h3>{schedule.customer}</h3>
-                        <p>{schedule.service}</p>
-                        <small className="shift-address">
-                          <UiIcon name={schedule.address ? 'pin' : 'person'} />
-                          {schedule.address || schedule.staff}
-                        </small>
+                        <h3>{schedule.staff || 'Petugas belum dipilih'}</h3>
                         <div className="shift-card-bottom">
                           <span>
                             {schedule.date} · {schedule.time}
@@ -69,8 +61,8 @@ export function ScheduleList({ shown, resource, tab, edit }: RecordListProps) {
                     <Icon name="clock" />
                     <h3>Belum ada jadwal tambahan</h3>
                     <p>
-                      Jadwal pada shift ini mengikuti pesanan dari aplikasi
-                      pelanggan.
+                      Tambahkan shift kerja petugas agar dapat dipilih saat
+                      penugasan pesanan.
                     </p>
                   </article>
                 ) : null}
