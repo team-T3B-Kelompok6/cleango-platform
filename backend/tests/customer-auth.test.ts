@@ -236,6 +236,18 @@ describe('customer authentication contract', () => {
     }
   });
 
+  it('rejects Facebook social login without an access token', async () => {
+    const response = await request(app).post('/api/customer/auth/social-login').send({
+      provider: 'facebook',
+      email: 'pelanggan@facebook.com',
+      name: 'Pelanggan Facebook',
+    });
+
+    expect(response.status).toBe(401);
+    expect(response.body.message).toBe('Facebook access token wajib diisi');
+    expect(userModel.findOrCreateSocialCustomer).not.toHaveBeenCalled();
+  });
+
   it('rejects unsupported social provider', async () => {
     const response = await request(app).post('/api/customer/auth/social-login').send({
       provider: 'twitter',
@@ -247,26 +259,49 @@ describe('customer authentication contract', () => {
   });
 
   it('rejects social login that resolves to an admin account', async () => {
-    userModel.findOrCreateSocialCustomer.mockResolvedValue({
-      id: 1,
-      name: 'CleanGo Admin',
-      email: 'admin@cleango.id',
-      phone: null,
-      passwordHash: 'x',
-      role: 'admin',
-      authProvider: 'google',
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = vi.fn().mockImplementation(async (url: string) => {
+      if (url.includes('debug_token')) {
+        return {
+          ok: true,
+          json: async () => ({ data: { is_valid: true, app_id: 'test-fb-id' } }),
+        } as Response;
+      }
+      return {
+        ok: true,
+        json: async () => ({ id: '123', name: 'Admin', email: 'admin@cleango.id' }),
+      } as Response;
     });
 
-    const response = await request(app).post('/api/customer/auth/social-login').send({
-      provider: 'facebook',
-      email: 'admin@cleango.id',
-    });
+    process.env.FACEBOOK_APP_ID = 'test-fb-id';
+    process.env.FACEBOOK_APP_SECRET = 'test-fb-secret';
 
-    expect(response.status).toBe(401);
-    expect(response.body.message).toBe('Akun ini bukan akun customer');
+    try {
+      userModel.findOrCreateSocialCustomer.mockResolvedValue({
+        id: 1,
+        name: 'CleanGo Admin',
+        email: 'admin@cleango.id',
+        phone: null,
+        passwordHash: 'x',
+        role: 'admin',
+        authProvider: 'google',
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      const response = await request(app).post('/api/customer/auth/social-login').send({
+        provider: 'facebook',
+        accessToken: 'fb-test-token',
+      });
+
+      expect(response.status).toBe(401);
+      expect(response.body.message).toBe('Akun ini bukan akun customer');
+    } finally {
+      globalThis.fetch = originalFetch;
+      delete process.env.FACEBOOK_APP_ID;
+      delete process.env.FACEBOOK_APP_SECRET;
+    }
   });
 
   it('rejects customer profile access without a token', async () => {

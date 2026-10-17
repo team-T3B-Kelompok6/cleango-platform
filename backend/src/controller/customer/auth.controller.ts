@@ -123,6 +123,7 @@ export async function socialLogin(request: Request, response: Response, next: Ne
     let email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
     let name = typeof body.name === 'string' ? body.name.trim() : '';
     const idToken = typeof body.idToken === 'string' ? body.idToken.trim() : '';
+    const accessToken = typeof body.accessToken === 'string' ? body.accessToken.trim() : '';
 
     if (provider !== 'google' && provider !== 'facebook') {
       throw new AppError(400, 'Provider harus google atau facebook');
@@ -154,6 +155,37 @@ export async function socialLogin(request: Request, response: Response, next: Ne
       } catch (err) {
         if (err instanceof AppError) throw err;
         throw new AppError(401, 'Verifikasi Google ID token gagal');
+      }
+    }
+
+    if (provider === 'facebook') {
+      if (!accessToken) throw new AppError(401, 'Facebook access token wajib diisi');
+
+      const appId = process.env.FACEBOOK_APP_ID;
+      const appSecret = process.env.FACEBOOK_APP_SECRET;
+
+      try {
+        if (appId && appSecret) {
+          const debugUrl = `https://graph.facebook.com/debug_token?input_token=${encodeURIComponent(accessToken)}&access_token=${encodeURIComponent(appId)}|${encodeURIComponent(appSecret)}`;
+          const debugRes = await fetch(debugUrl);
+          if (!debugRes.ok) throw new AppError(401, 'Verifikasi token Facebook gagal');
+          const debugData = (await debugRes.json()) as { data?: { is_valid?: boolean; app_id?: string } };
+          if (!debugData.data?.is_valid || debugData.data?.app_id !== appId) {
+            throw new AppError(401, 'Token Facebook tidak valid atau tidak cocok dengan aplikasi');
+          }
+        }
+
+        const meUrl = `https://graph.facebook.com/v19.0/me?fields=id,name,email&access_token=${encodeURIComponent(accessToken)}`;
+        const meRes = await fetch(meUrl);
+        if (!meRes.ok) throw new AppError(401, 'Gagal mengambil data profil Facebook');
+        const meData = (await meRes.json()) as { id?: string; name?: string; email?: string };
+        if (!meData.id) throw new AppError(401, 'Data akun Facebook tidak valid');
+
+        email = (meData.email ?? email ?? `${meData.id}@facebook.cleango.local`).toLowerCase();
+        name = (meData.name ?? name ?? email.split('@')[0] ?? 'Pengguna Facebook').trim();
+      } catch (err) {
+        if (err instanceof AppError) throw err;
+        throw new AppError(401, 'Verifikasi Facebook access token gagal');
       }
     }
 
