@@ -2,13 +2,26 @@
   "name": "cleango-platform",
   "private": true,
   "version": "1.0.0",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
   "scripts": {
-    "dev": "npm --prefix frontend run dev",
-    "build": "npm --prefix frontend run build",
-    "preview": "npm --prefix frontend run start",
-    "typecheck": "npm --prefix frontend run typecheck",
-    "format": "npm --prefix frontend run format",
-    "format:check": "npm --prefix frontend run format:check",
-    "setup:frontend": "npm --prefix frontend install"
+    "dev": "npm run dev:frontend",
+    "dev:backend": "npm run dev --workspace backend",
+    "dev:frontend": "npm run dev --workspace frontend",
+    "build": "npm run build:frontend",
+    "build:backend": "npm run build --workspace backend",
+    "build:frontend": "npm run build --workspace frontend",
+    "preview": "npm run start --workspace frontend",
+    "typecheck": "npm run typecheck --workspace frontend",
+    "typecheck:backend": "npm run typecheck --workspace backend",
+    "test:backend": "npm test --workspace backend",
+    "db:setup": "npm run db:setup --workspace backend",
+    "format": "npm run format --workspace frontend",
+    "format:check": "npm run format:check --workspace frontend"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
   }
 }

@@ -58,7 +58,7 @@ export default async function AdminLayout({
               <Icon name="calendar" />
               {date}
             </span>
-            <Notifications orders={orders} />
+            <Notifications orders={orders.slice(0, 8)} />
             <button
               className="profile"
               popoverTarget="admin-profile"

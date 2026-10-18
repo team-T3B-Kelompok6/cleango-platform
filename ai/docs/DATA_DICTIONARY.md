@@ -8,7 +8,8 @@
 | `accepted_at`, `started_at`, `completed_at` | Event waktu perjalanan sumber. |
 | `scheduled_at` | Jadwal simulasi untuk eksperimen klasifikasi. |
 | `schedule_is_simulated` | Penanda jadwal bukan data CleanGo. |
-| `destination_x/y` | Tujuan dalam koordinat transformasi LaDe; bukan meter/WGS84. |
+| `destination_x/y` | Titik terakhir lintasan anonim sebagai proxy tujuan dalam sistem koordinat LaDe. |
+| `destination_is_trajectory_proxy` | Penanda bahwa tujuan bukan alamat pelanggan CleanGo. |
 | `actual_duration_seconds` | Durasi perjalanan aktual. |
 | `actual_delay_seconds` | Selisih selesai aktual terhadap jadwal simulasi. |
 | `late_label` | Target klasifikasi biner simulasi. |
@@ -19,16 +20,18 @@
 
 Riwayat titik anonim untuk audit dan reproduksi fitur. `position_x/y` memakai koordinat transformasi sumber dan tidak dipakai langsung oleh model v2.
 
+Lompatan koordinat yang melebihi batas robust per perjalanan dianggap GPS teleport dan tidak dihitung sebagai jarak/kecepatan. Aturan ini hanya memakai distribusi perpindahan pada lintasan, bukan label ETA.
+
 ## `eta_training.csv`
 
 Target: `actual_remaining_seconds`.
 
 | Fitur model v2 | Arti |
 | --- | --- |
-| `baseline_eta_seconds` | ETA dari proxy routing; produksi harus memakai Maps/routing API. |
+| `baseline_eta_seconds` | Sisa panjang lintasan proxy dibagi median kecepatan historis training; produksi memakai OSRM. |
 | `elapsed_seconds` | Waktu sejak perjalanan dimulai. |
 | `stopped_duration_seconds` | Akumulasi waktu berhenti. |
-| `distance_ratio` | Jarak tersisa dibagi jarak awal. |
+| `distance_ratio` | Sisa panjang lintasan proxy dibagi panjang lintasan awal. |
 | `rolling_speed_ratio` | Kecepatan rolling dibagi kecepatan rute yang diharapkan. |
 | `eta_elapsed_ratio` | ETA dasar dibagi ETA dasar + waktu berlalu. |
 | `hour_sin`, `hour_cos` | Jam dalam bentuk siklik. |

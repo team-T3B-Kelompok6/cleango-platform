@@ -3,7 +3,13 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { trackingDemo } from '@/lib/demo/tracking';
-import { trackingStatuses, trackingSteps } from '@/types/tracking';
+import {
+  trackingPosition,
+  trackingStatuses,
+  trackingSteps,
+  type EtaSnapshot,
+  type RiskSnapshot,
+} from '@/types/tracking';
 import { UiIcon } from '../UiIcon';
 const TrackingMap = dynamic(() => import('./TrackingMap'), {
   ssr: false,
@@ -31,6 +37,12 @@ export function TrackingPanel({
   const [running, setRunning] = useState(false);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
+  const [eta, setEta] = useState<EtaSnapshot | null>(null);
+  const [etaLoading, setEtaLoading] = useState(false);
+  const [etaError, setEtaError] = useState('');
+  const [risk, setRisk] = useState<RiskSnapshot | null>(null);
+  const [riskLoading, setRiskLoading] = useState(false);
+  const [riskError, setRiskError] = useState('');
   const rosterList = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const list = rosterList.current;
@@ -64,6 +76,84 @@ export function TrackingPanel({
     [roster, stages],
   );
   const selected = people.find((person) => person.id === selectedId)!;
+  useEffect(() => {
+    const controller = new AbortController();
+    if (selected.stage >= 2) {
+      setEtaLoading(false);
+      setEta(null);
+      setEtaError('Petugas sudah berada di lokasi.');
+      setRiskLoading(false);
+      setRisk(null);
+      setRiskError('Risiko perjalanan sudah tidak aktif.');
+      return () => controller.abort();
+    }
+    const [cleanerLatitude, cleanerLongitude] = trackingPosition(selected);
+    const [destinationLatitude, destinationLongitude] = selected.destination;
+    setEtaLoading(true);
+    setEtaError('');
+    setRiskLoading(true);
+    setRiskError('');
+    const predictionAt = new Date();
+    const trackingInput = {
+      cleanerLatitude,
+      cleanerLongitude,
+      destinationLatitude,
+      destinationLongitude,
+      initialDistanceM: 6500,
+      elapsedSeconds: selected.stage * 420,
+      stoppedDurationSeconds: selected.stale ? 900 : 0,
+      rollingSpeedMps: selected.stale ? 0 : 5.8,
+      predictionAt: predictionAt.toISOString(),
+    };
+    const requestPrediction = async <T,>(path: string, input: object) => {
+      const response = await fetch(path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(input),
+        signal: controller.signal,
+      });
+      const payload = (await response.json()) as { data?: T; message?: string };
+      if (!response.ok || !payload.data)
+        throw new Error(payload.message ?? 'Prediksi belum tersedia.');
+      return payload.data;
+    };
+    void Promise.allSettled([
+      requestPrediction<EtaSnapshot>('/api/tracking/eta', trackingInput),
+      requestPrediction<RiskSnapshot>('/api/tracking/risk', {
+        ...trackingInput,
+        scheduledAt: new Date(
+          predictionAt.getTime() + selected.minutesToSchedule * 60_000,
+        ).toISOString(),
+        locationAgeSeconds: selected.stale ? 1_080 : 25,
+        hasDeparted: selected.stage >= 1,
+      }),
+    ]).then(([etaResult, riskResult]) => {
+      if (controller.signal.aborted) return;
+      if (etaResult.status === 'fulfilled') {
+        setEta(etaResult.value);
+      } else {
+        setEta(null);
+        setEtaError(
+          etaResult.reason instanceof Error
+            ? etaResult.reason.message
+            : 'ETA belum tersedia.',
+        );
+      }
+      if (riskResult.status === 'fulfilled') {
+        setRisk(riskResult.value);
+      } else {
+        setRisk(null);
+        setRiskError(
+          riskResult.reason instanceof Error
+            ? riskResult.reason.message
+            : 'Risiko belum tersedia.',
+        );
+      }
+      setEtaLoading(false);
+      setRiskLoading(false);
+    });
+    return () => controller.abort();
+  }, [selected]);
   const choose = useCallback((id: string) => {
     setSelectedId(id);
     setRunning(false);
@@ -234,6 +324,67 @@ export function TrackingPanel({
                 <UiIcon name="pin" />
                 {selected.address}
               </p>
+              <div className="tracking-eta" aria-live="polite">
+                <div>
+                  <small>Prediksi waktu tiba</small>
+                  <strong>
+                    {etaLoading
+                      ? 'Menghitung…'
+                      : eta
+                        ? `${eta.etaMinutes} menit`
+                        : etaError || 'Belum tersedia'}
+                  </strong>
+                </div>
+                {eta && (
+                  <div>
+                    <small>
+                      {Math.max(0.1, eta.distanceMeters / 1000).toFixed(1)} km
+                      tersisa
+                    </small>
+                    <span>
+                      {eta.source === 'ml'
+                        ? `ML ${eta.modelVersion}`
+                        : 'Fallback OSRM'}{' '}
+                      ·{' '}
+                      {new Date(eta.updatedAt).toLocaleTimeString('id-ID', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                      })}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div
+                className={`tracking-risk ${risk ? `is-${risk.riskLevel}` : ''}`}
+                aria-live="polite"
+              >
+                <div>
+                  <small>Risiko keterlambatan</small>
+                  <strong>
+                    {riskLoading
+                      ? 'Menilai…'
+                      : risk
+                        ? risk.riskLevel === 'high'
+                          ? 'Tinggi'
+                          : risk.riskLevel === 'medium'
+                            ? 'Sedang'
+                            : 'Rendah'
+                        : riskError || 'Belum tersedia'}
+                  </strong>
+                </div>
+                {risk && (
+                  <div>
+                    <span>{risk.reason}</span>
+                    <small>
+                      {risk.source === 'ml'
+                        ? `ML ${risk.modelVersion} · ${Math.round((risk.lateProbability ?? 0) * 100)}%`
+                        : 'Aturan operasional'}
+                    </small>
+                    <em>{risk.recommendation}</em>
+                  </div>
+                )}
+              </div>
               <div
                 className={
                   'tracking-last-update' + (selected.stale ? ' is-stale' : '')

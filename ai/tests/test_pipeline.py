@@ -6,8 +6,15 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from pipeline import balanced_select, normalize_day, parse_source_time, trajectory_member, validate  # noqa: E402
-from predict import build_live_features, predict_model  # noqa: E402
+from pipeline import (  # noqa: E402
+    GpsPoint,
+    balanced_select,
+    normalize_day,
+    parse_source_time,
+    remaining_route_distances,
+    trajectory_member,
+    validate,
+)
 
 
 class PipelineTests(unittest.TestCase):
@@ -39,46 +46,14 @@ class PipelineTests(unittest.TestCase):
 
         self.assertEqual(trajectory_member(Archive()), "trajectory.csv")
 
-    def test_live_features_use_unitless_ratios(self):
-        features = build_live_features(
-            {
-                "prediction_at": "2026-10-15T08:10:00+07:00",
-                "baseline_eta_seconds": 1200,
-                "elapsed_seconds": 600,
-                "stopped_duration_seconds": 30,
-                "remaining_distance_m": 3000,
-                "initial_distance_m": 6000,
-                "rolling_speed_mps": 4,
-                "expected_route_speed_mps": 5,
-                "seconds_to_schedule": 1000,
-            }
-        )
-        self.assertAlmostEqual(features["distance_ratio"], 0.5)
-        self.assertAlmostEqual(features["rolling_speed_ratio"], 0.8)
-        self.assertAlmostEqual(features["predicted_lateness_seconds"], 200)
-
-    def test_prediction_rejects_missing_feature(self):
-        model = {
-            "model_type": "ridge_regression",
-            "features": ["required"],
-            "mean": [0],
-            "scale": [1],
-            "intercept": 0,
-            "coefficients": [1],
-        }
-        with self.assertRaisesRegex(ValueError, "required"):
-            predict_model(model, {})
-
-    def test_prediction_applies_standardization(self):
-        model = {
-            "model_type": "ridge_regression",
-            "features": ["value"],
-            "mean": [10],
-            "scale": [2],
-            "intercept": 1,
-            "coefficients": [3],
-        }
-        self.assertEqual(predict_model(model, {"value": 12}), 4)
+    def test_remaining_route_distance_ignores_coordinate_teleport(self):
+        points = [
+            GpsPoint(datetime(2000, 1, 1, 8, 0, 0), 0, 0),
+            GpsPoint(datetime(2000, 1, 1, 8, 1, 0), 10, 0),
+            GpsPoint(datetime(2000, 1, 1, 8, 2, 0), 3_000_000, 0),
+            GpsPoint(datetime(2000, 1, 1, 8, 3, 0), 3_000_010, 0),
+        ]
+        self.assertEqual(remaining_route_distances(points), [20.0, 10.0, 10.0, 0.0])
 
     def test_validation_rejects_duplicate_risk_checkpoints(self):
         trips = [

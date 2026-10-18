@@ -1,0 +1,44 @@
+{
+  "model_version": "work-duration-v1-synthetic",
+  "selected_model": "linear_regression",
+  "validation_candidates": {
+    "linear_regression": {
+      "mae_minutes": 11.8122,
+      "rmse_minutes": 15.7078,
+      "r2": 0.897897
+    },
+    "decision_tree": {
+      "mae_minutes": 13.9427,
+      "rmse_minutes": 18.4363,
+      "r2": 0.859345
+    },
+    "random_forest": {
+      "mae_minutes": 13.0648,
+      "rmse_minutes": 17.1009,
+      "r2": 0.878983
+    }
+  },
+  "validation_sop_baseline": {
+    "mae_minutes": 18.7275,
+    "rmse_minutes": 24.8656,
+    "r2": 0.744137
+  },
+  "test_selected_model": {
+    "mae_minutes": 12.0186,
+    "rmse_minutes": 15.8732,
+    "r2": 0.908885
+  },
+  "test_sop_baseline": {
+    "mae_minutes": 18.2071,
+    "rmse_minutes": 24.0503,
+    "r2": 0.79083
+  },
+  "ready_for_demo": true,
+  "production_ready": false,
+  "rows": {
+    "train": 1120,
+    "validation": 240,
+    "test": 240
+  },
+  "leakage_control": "chronological split; completion fields are excluded from features"
+}

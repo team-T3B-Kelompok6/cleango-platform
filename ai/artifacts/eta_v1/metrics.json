@@ -1,0 +1,118 @@
+{
+  "card": "AI-01 — Tracking Cleaner dan Prediksi ETA Menggunakan ML Regression",
+  "warning": "LaDe proxy trajectories and simulated CleanGo schedules; not validated for real operations.",
+  "selected_model": "linear_regression",
+  "selection_rule": "Lowest validation MAE, then RMSE. Test data is used once for final reporting.",
+  "features": [
+    "baseline_eta_seconds",
+    "elapsed_seconds",
+    "stopped_duration_seconds",
+    "distance_ratio",
+    "rolling_speed_ratio",
+    "eta_elapsed_ratio",
+    "hour_sin",
+    "hour_cos",
+    "weekday_sin",
+    "weekday_cos"
+  ],
+  "target": "actual_remaining_seconds",
+  "maps_baseline": "OSRM in live inference; training uses the AI-00 routing-speed proxy.",
+  "comparison": {
+    "linear_regression": {
+      "train": {
+        "mae_seconds": 1199.5246807790052,
+        "rmse_seconds": 2187.5068810230055
+      },
+      "validation": {
+        "mae_seconds": 1278.3672628113268,
+        "rmse_seconds": 2046.7679325269653
+      }
+    },
+    "ridge_regression": {
+      "train": {
+        "mae_seconds": 1199.469507939338,
+        "rmse_seconds": 2187.986402914795
+      },
+      "validation": {
+        "mae_seconds": 1278.4688871087778,
+        "rmse_seconds": 2047.5995170868582
+      }
+    },
+    "decision_tree": {
+      "train": {
+        "mae_seconds": 437.26827894804853,
+        "rmse_seconds": 871.0256264055087
+      },
+      "validation": {
+        "mae_seconds": 1770.962914292715,
+        "rmse_seconds": 3131.277619789389
+      }
+    },
+    "random_forest": {
+      "train": {
+        "mae_seconds": 452.03160237244947,
+        "rmse_seconds": 954.2046381393095
+      },
+      "validation": {
+        "mae_seconds": 1486.0444051209704,
+        "rmse_seconds": 2360.810090940399
+      }
+    }
+  },
+  "test": {
+    "model": {
+      "mae_seconds": 1587.6791094619,
+      "rmse_seconds": 3247.7046352127195
+    },
+    "osrm_proxy_baseline": {
+      "mae_seconds": 1929.4599588263136,
+      "rmse_seconds": 3820.317255872703
+    },
+    "model_better_than_baseline": true,
+    "rows": 6339,
+    "trips": 198
+  },
+  "condition_errors": {
+    "moving": {
+      "mae_seconds": 1349.2254037850519,
+      "rmse_seconds": 2694.547394064265,
+      "rows": 5202
+    },
+    "stopped": {
+      "mae_seconds": 2678.6520003422543,
+      "rmse_seconds": 5058.2862378411,
+      "rows": 1137
+    },
+    "distance_near": {
+      "mae_seconds": 1636.5638184772013,
+      "rmse_seconds": 3546.7856981950736,
+      "rows": 2533
+    },
+    "distance_middle": {
+      "mae_seconds": 1295.1689750112905,
+      "rmse_seconds": 2870.8977800748894,
+      "rows": 1508
+    },
+    "distance_far": {
+      "mae_seconds": 1725.7471315749374,
+      "rmse_seconds": 3133.7861415429043,
+      "rows": 2298
+    }
+  },
+  "split": {
+    "train": {
+      "rows": 19897,
+      "trips": 670
+    },
+    "validation": {
+      "rows": 4981,
+      "trips": 132
+    },
+    "test": {
+      "rows": 6339,
+      "trips": 198
+    }
+  },
+  "model_version": "eta-v1",
+  "trained_at": "2026-10-16T08:47:42.603198+00:00"
+}

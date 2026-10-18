@@ -269,6 +269,29 @@ def euclidean(x1: float, y1: float, x2: float, y2: float) -> float:
     return math.hypot(x2 - x1, y2 - y1)
 
 
+def cleaned_segment_distances(points: list[GpsPoint]) -> list[float]:
+    raw = [
+        euclidean(current.x, current.y, following.x, following.y)
+        for current, following in zip(points, points[1:])
+    ]
+    positive = [distance for distance in raw if distance > 0]
+    if not positive:
+        return raw
+    # LaDe contains occasional coordinate-frame jumps around 3 million units.
+    # A per-trip robust limit removes those teleports without using the ETA label.
+    limit = min(10_000.0, max(1_000.0, statistics.median(positive) * 20))
+    return [0.0 if distance > limit else distance for distance in raw]
+
+
+def remaining_route_distances(points: list[GpsPoint]) -> list[float]:
+    """Approximate a planned route using a cleaned anonymous trajectory."""
+    segments = cleaned_segment_distances(points)
+    remaining = [0.0] * len(points)
+    for index in range(len(points) - 2, -1, -1):
+        remaining[index] = remaining[index + 1] + segments[index]
+    return remaining
+
+
 def write_csv(path: Path, rows: list[dict], fieldnames: list[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as handle:
@@ -290,7 +313,7 @@ def build_datasets(
         points = points_by_trip[trip.trip_id]
         first = points[0]
         remaining = (trip.completed_at - first.recorded_at).total_seconds()
-        distance = euclidean(first.x, first.y, trip.destination_x, trip.destination_y)
+        distance = remaining_route_distances(points)[0]
         if trip_split[trip.trip_id] == "train" and remaining > 0 and distance > 0:
             training_speeds.append(distance / remaining)
     if not training_speeds:
@@ -304,7 +327,10 @@ def build_datasets(
     for trip in trips:
         points = points_by_trip[trip.trip_id]
         first = points[0]
-        initial_distance = euclidean(first.x, first.y, trip.destination_x, trip.destination_y)
+        destination = points[-1]
+        segment_distances = cleaned_segment_distances(points)
+        route_distances = remaining_route_distances(points)
+        initial_distance = route_distances[0]
         scheduled_at = first.recorded_at + timedelta(seconds=(initial_distance / reference_speed) * schedule_buffer)
         actual_delay_seconds = (trip.completed_at - scheduled_at).total_seconds()
         late_label = int(actual_delay_seconds > 0)
@@ -321,8 +347,9 @@ def build_datasets(
                 "completed_at": iso(trip.completed_at),
                 "scheduled_at": iso(scheduled_at),
                 "schedule_is_simulated": "true",
-                "destination_x": round(trip.destination_x, 3),
-                "destination_y": round(trip.destination_y, 3),
+                "destination_x": round(destination.x, 3),
+                "destination_y": round(destination.y, 3),
+                "destination_is_trajectory_proxy": "true",
                 "actual_duration_seconds": int((trip.completed_at - trip.started_at).total_seconds()),
                 "actual_delay_seconds": round(actual_delay_seconds, 3),
                 "late_label": late_label,
@@ -342,12 +369,12 @@ def build_datasets(
             if previous is not None:
                 delta_seconds = (point.recorded_at - previous.recorded_at).total_seconds()
                 if delta_seconds > 0:
-                    instant_speed = euclidean(previous.x, previous.y, point.x, point.y) / delta_seconds
+                    instant_speed = segment_distances[sequence - 1] / delta_seconds
                     if instant_speed <= reference_speed * 0.05:
                         stopped_duration += delta_seconds
             speeds.append(instant_speed)
             rolling_speed = statistics.fmean(speeds[-5:])
-            remaining_distance = euclidean(point.x, point.y, trip.destination_x, trip.destination_y)
+            remaining_distance = route_distances[sequence]
             baseline_eta = remaining_distance / reference_speed
             actual_remaining = max(0.0, (trip.completed_at - point.recorded_at).total_seconds())
             seconds_to_schedule = (scheduled_at - point.recorded_at).total_seconds()

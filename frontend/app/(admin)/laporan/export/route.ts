@@ -10,7 +10,7 @@ function cell(value: unknown) {
 export async function GET(request: Request) {
   try {
     const month = new URL(request.url).searchParams.get('month');
-    if (month && !/^\d{4}-\d{2}$/.test(month))
+    if (month && !/^\d{4}-(0[1-9]|1[0-2])$/.test(month))
       return Response.json({ message: 'Bulan tidak valid.' }, { status: 400 });
     const orders = (await list<Order>('orders')).filter(
       (order) =>

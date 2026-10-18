@@ -10,6 +10,9 @@ export interface AppEnv {
   DB_NAME: string;
   FRONTEND_ORIGIN: string;
   JWT_SECRET: string;
+  OSRM_BASE_URL: string;
+  AI_SERVICE_URL: string;
+  AI_SERVICE_TOKEN: string;
 }
 
 let cachedEnv: AppEnv | undefined;
@@ -22,9 +25,13 @@ export function getEnv(): AppEnv {
   }
   const port = Number(process.env.PORT ?? 3001);
   const dbPort = Number(process.env.DB_PORT ?? 3306);
-  if (!Number.isInteger(port) || port <= 0 || port > 65535) throw new Error('PORT tidak valid');
-  if (!Number.isInteger(dbPort) || dbPort <= 0 || dbPort > 65535) throw new Error('DB_PORT tidak valid');
-  const jwtSecret = process.env.JWT_SECRET ?? (nodeEnv === 'production' ? '' : 'cleango-development-only');
+  if (!Number.isInteger(port) || port <= 0 || port > 65535)
+    throw new Error('PORT tidak valid');
+  if (!Number.isInteger(dbPort) || dbPort <= 0 || dbPort > 65535)
+    throw new Error('DB_PORT tidak valid');
+  const jwtSecret =
+    process.env.JWT_SECRET ??
+    (nodeEnv === 'production' ? '' : 'cleango-development-only');
   if (!jwtSecret) throw new Error('JWT_SECRET wajib diisi pada production');
 
   cachedEnv = {
@@ -37,6 +44,10 @@ export function getEnv(): AppEnv {
     DB_NAME: process.env.DB_NAME ?? 'cleango',
     FRONTEND_ORIGIN: process.env.FRONTEND_ORIGIN ?? 'http://localhost:3000',
     JWT_SECRET: jwtSecret,
+    OSRM_BASE_URL:
+      process.env.OSRM_BASE_URL ?? 'https://router.project-osrm.org',
+    AI_SERVICE_URL: process.env.AI_SERVICE_URL ?? 'http://127.0.0.1:5000',
+    AI_SERVICE_TOKEN: process.env.AI_SERVICE_TOKEN ?? '',
   };
   return cachedEnv;
 }
