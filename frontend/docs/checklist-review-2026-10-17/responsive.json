@@ -1,0 +1,188 @@
+[
+  {
+    "page": "login",
+    "scroll": 345,
+    "width": 360,
+    "passed": true
+  },
+  {
+    "page": "login",
+    "scroll": 753,
+    "width": 768,
+    "passed": true
+  },
+  {
+    "page": "login",
+    "scroll": 1265,
+    "width": 1280,
+    "passed": true
+  },
+  {
+    "page": "dashboard",
+    "scroll": 1265,
+    "title": "Halo, Admin Cleango!",
+    "width": 1280,
+    "passed": true
+  },
+  {
+    "page": "pesanan",
+    "scroll": 1265,
+    "title": "Kelola Pesanan",
+    "width": 1280,
+    "passed": true
+  },
+  {
+    "page": "jadwal",
+    "scroll": 1265,
+    "title": "Kelola Jadwal",
+    "width": 1280,
+    "passed": true
+  },
+  {
+    "page": "layanan",
+    "scroll": 1265,
+    "title": "Kelola Layanan",
+    "width": 1280,
+    "passed": true
+  },
+  {
+    "page": "faq",
+    "scroll": 1265,
+    "title": "Kelola FAQ",
+    "width": 1280,
+    "passed": true
+  },
+  {
+    "page": "customer",
+    "scroll": 1265,
+    "title": "Kelola Data Customer",
+    "width": 1280,
+    "passed": true
+  },
+  {
+    "page": "petugas",
+    "scroll": 1265,
+    "title": "Kelola Data Petugas",
+    "width": 1280,
+    "passed": true
+  },
+  {
+    "page": "laporan",
+    "scroll": 1265,
+    "title": "Laporan Keuangan & Operasional",
+    "width": 1280,
+    "passed": true
+  },
+  {
+    "page": "dashboard",
+    "scroll": 753,
+    "title": "Halo, Admin Cleango!",
+    "width": 768,
+    "passed": true
+  },
+  {
+    "page": "pesanan",
+    "scroll": 753,
+    "title": "Kelola Pesanan",
+    "width": 768,
+    "passed": true
+  },
+  {
+    "page": "jadwal",
+    "scroll": 753,
+    "title": "Kelola Jadwal",
+    "width": 768,
+    "passed": true
+  },
+  {
+    "page": "layanan",
+    "scroll": 753,
+    "title": "Kelola Layanan",
+    "width": 768,
+    "passed": true
+  },
+  {
+    "page": "faq",
+    "scroll": 753,
+    "title": "Kelola FAQ",
+    "width": 768,
+    "passed": true
+  },
+  {
+    "page": "customer",
+    "scroll": 753,
+    "title": "Kelola Data Customer",
+    "width": 768,
+    "passed": true
+  },
+  {
+    "page": "petugas",
+    "scroll": 753,
+    "title": "Kelola Data Petugas",
+    "width": 768,
+    "passed": true
+  },
+  {
+    "page": "laporan",
+    "scroll": 753,
+    "title": "Laporan Keuangan & Operasional",
+    "width": 768,
+    "passed": true
+  },
+  {
+    "page": "dashboard",
+    "scroll": 345,
+    "title": "Halo, Admin Cleango!",
+    "width": 360,
+    "passed": true
+  },
+  {
+    "page": "pesanan",
+    "scroll": 345,
+    "title": "Kelola Pesanan",
+    "width": 360,
+    "passed": true
+  },
+  {
+    "page": "jadwal",
+    "scroll": 345,
+    "title": "Kelola Jadwal",
+    "width": 360,
+    "passed": true
+  },
+  {
+    "page": "layanan",
+    "scroll": 345,
+    "title": "Kelola Layanan",
+    "width": 360,
+    "passed": true
+  },
+  {
+    "page": "faq",
+    "scroll": 345,
+    "title": "Kelola FAQ",
+    "width": 360,
+    "passed": true
+  },
+  {
+    "page": "customer",
+    "scroll": 345,
+    "title": "Kelola Data Customer",
+    "width": 360,
+    "passed": true
+  },
+  {
+    "page": "petugas",
+    "scroll": 345,
+    "title": "Kelola Data Petugas",
+    "width": 360,
+    "passed": true
+  },
+  {
+    "page": "laporan",
+    "scroll": 345,
+    "title": "Laporan Keuangan & Operasional",
+    "width": 360,
+    "passed": true
+  }
+]

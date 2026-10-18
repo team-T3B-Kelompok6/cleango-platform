@@ -3,7 +3,7 @@ import { revalidatePath } from 'next/cache';
 import { ApiError, request } from '@/lib/api';
 import { listCategories, type CategoryResource } from '@/lib/categories';
 import { resources } from '@/lib/resources';
-import type { FormState } from '@/types';
+import type { Category, FormState } from '@/types';
 
 export async function addCategory(
   resource: CategoryResource,
@@ -31,10 +31,22 @@ export async function addCategory(
     ) {
       return { errors: { name: 'Kategori ini sudah ada.' }, values };
     }
-    await request('/categories', {
+    const result = await request<{ data: Category }>('/categories', {
       method: 'POST',
       body: JSON.stringify({ name, resource }),
     });
+    revalidatePath(resources[resource].path);
+    if (
+      !result.data ||
+      typeof result.data.id !== 'string' ||
+      !result.data.id ||
+      result.data.name !== name ||
+      result.data.resource !== resource
+    )
+      throw new ApiError(
+        'Kategori belum tersimpan dengan benar. Muat ulang daftar kategori.',
+        502,
+      );
   } catch (error) {
     if (!(error instanceof ApiError)) throw error;
     return { message: error.message, errors: error.errors, values };

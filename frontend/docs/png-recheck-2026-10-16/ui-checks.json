@@ -1,0 +1,138 @@
+{
+  "date": "2026-10-16",
+  "geometry": [
+    {
+      "label": "schedule-edit-desktop",
+      "dialogContentFitsWidth": true,
+      "dialogWithinViewport": true,
+      "footerWithinViewport": true,
+      "heading": "Kelola Jadwal",
+      "horizontalOverflow": false,
+      "viewport": [
+        1280,
+        720
+      ]
+    },
+    {
+      "label": "schedule-edit-phone",
+      "dialogContentFitsWidth": true,
+      "dialogWithinViewport": true,
+      "footerWithinViewport": true,
+      "heading": "Kelola Jadwal",
+      "horizontalOverflow": false,
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "label": "service-add-phone",
+      "dialogContentFitsWidth": true,
+      "dialogWithinViewport": true,
+      "footerWithinViewport": true,
+      "heading": "Kelola Layanan",
+      "horizontalOverflow": false,
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "label": "promo-form-phone",
+      "dialogContentFitsWidth": true,
+      "dialogWithinViewport": true,
+      "footerWithinViewport": true,
+      "heading": "Kelola Layanan",
+      "horizontalOverflow": false,
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "label": "customer-add-desktop",
+      "dialogContentFitsWidth": true,
+      "dialogWithinViewport": true,
+      "footerWithinViewport": true,
+      "heading": "Kelola Data Customer",
+      "horizontalOverflow": false,
+      "viewport": [
+        1280,
+        850
+      ]
+    },
+    {
+      "label": "customer-add-phone",
+      "dialogContentFitsWidth": true,
+      "dialogWithinViewport": true,
+      "footerWithinViewport": true,
+      "heading": "Kelola Data Customer",
+      "horizontalOverflow": false,
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "label": "faq-edit-phone",
+      "dialogContentFitsWidth": true,
+      "dialogWithinViewport": true,
+      "footerWithinViewport": true,
+      "heading": "Kelola FAQ",
+      "horizontalOverflow": false,
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "label": "cleaner-admin-preview-desktop",
+      "dialogContentFitsWidth": true,
+      "dialogWithinViewport": true,
+      "footerWithinViewport": true,
+      "heading": "Kelola Data Petugas",
+      "horizontalOverflow": false,
+      "viewport": [
+        1280,
+        850
+      ]
+    },
+    {
+      "label": "faq-detail-desktop",
+      "dialogContentFitsWidth": true,
+      "dialogWithinViewport": true,
+      "footerWithinViewport": true,
+      "heading": "Kelola FAQ",
+      "horizontalOverflow": false,
+      "viewport": [
+        1280,
+        850
+      ]
+    }
+  ],
+  "orderActions": {
+    "deleteIconOffsets": [
+      {
+        "x": 4.76837158203125e-7,
+        "y": 4.76837158203125e-7
+      },
+      {
+        "x": 4.76837158203125e-7,
+        "y": 4.76837158203125e-7
+      },
+      {
+        "x": 4.76837158203125e-7,
+        "y": 4.76837158203125e-7
+      },
+      {
+        "x": 4.76837158203125e-7,
+        "y": 4.76837158203125e-7
+      }
+    ],
+    "moreMenuRemoved": true
+  },
+  "notificationUnreadBeforeMark": 8,
+  "notificationUnreadAfterMark": 0,
+  "notificationUnreadAfterReload": 8,
+  "failedPage": "Kelola Pesanan tanpa filter"
+}

@@ -1,0 +1,53 @@
+{
+  "date": "2026-10-15",
+  "environment": "Local frontend + API preview",
+  "checks": [
+    {
+      "resource": "services",
+      "create": "passed",
+      "read": true,
+      "update": "passed",
+      "delete": "passed"
+    },
+    {
+      "resource": "faqs",
+      "create": "passed",
+      "read": true,
+      "update": "passed",
+      "delete": "passed"
+    },
+    {
+      "resource": "staff",
+      "create": "passed",
+      "read": true,
+      "update": "passed",
+      "delete": "passed"
+    },
+    {
+      "resource": "customers",
+      "create": "passed",
+      "read": true,
+      "update": "passed",
+      "delete": "passed"
+    },
+    {
+      "resource": "orders",
+      "create": "blocked as required",
+      "addButtonAbsent": true,
+      "read": true,
+      "assign": "#ORDERS-127\nMenunggu Lokasi\n12.00 WIB\nQA Pemeriksaan Pesanan\nAlamat pengujian sementara\nDeep Cleaning\nRp 100.000\n\nPetugas: Budi Santoso\n\nPantau Petugas\nUbah\nDetail\nHapus Pesanan",
+      "update": "passed",
+      "delete": "passed"
+    },
+    {
+      "resource": "schedules",
+      "create": "blocked as required",
+      "addButtonAbsent": true,
+      "read": true,
+      "update": "passed",
+      "delete": "passed"
+    }
+  ],
+  "consoleErrors": [],
+  "remainingTestRecords": 0
+}

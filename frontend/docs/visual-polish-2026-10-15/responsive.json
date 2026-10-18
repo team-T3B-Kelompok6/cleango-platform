@@ -1,0 +1,1918 @@
+[
+  {
+    "page": "dashboard",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Lihat SOP"
+      }
+    ],
+    "gridColumns": "230.45px 230.462px 230.462px 230.462px",
+    "headingFont": "28px",
+    "height": 900,
+    "overflow": false,
+    "width": 1280
+  },
+  {
+    "page": "pesanan",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 44,
+        "text": "Filter Tanggal"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Semua tanggal"
+      },
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 39.98749923706055,
+        "text": "Pilih tanggal"
+      },
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 39.98749923706055,
+        "text": "Tugaskan Petugas"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Pantau Petugas"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      }
+    ],
+    "gridColumns": "311.6px 311.612px 311.6px",
+    "headingFont": "28px",
+    "height": 900,
+    "overflow": false,
+    "width": 1280
+  },
+  {
+    "page": "jadwal",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 44,
+        "text": "Filter Tanggal"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Semua tanggal"
+      },
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 39.98749923706055,
+        "text": "Pilih tanggal"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      }
+    ],
+    "gridColumns": "311.6px 311.612px 311.6px",
+    "headingFont": "28px",
+    "height": 900,
+    "overflow": false,
+    "width": 1280
+  },
+  {
+    "page": "layanan",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 44,
+        "text": "Tambah Banner Promo"
+      },
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 44,
+        "text": "Tambah Layanan Baru"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Tambah kategori"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Atur Promo"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Atur Promo"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      }
+    ],
+    "gridColumns": "311.6px 311.612px 311.6px",
+    "headingFont": "28px",
+    "height": 900,
+    "overflow": false,
+    "width": 1280
+  },
+  {
+    "page": "faq",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 44,
+        "text": "Tambah FAQ Baru"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Tambah kategori"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      }
+    ],
+    "gridColumns": "311.6px 311.612px 311.6px",
+    "headingFont": "28px",
+    "height": 900,
+    "overflow": false,
+    "width": 1280
+  },
+  {
+    "page": "customer",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 44,
+        "text": "Tambah Customer Baru"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Hubungi WhatsApp"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Hubungi WhatsApp"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Hubungi WhatsApp"
+      }
+    ],
+    "gridColumns": "311.6px 311.612px 311.6px",
+    "headingFont": "28px",
+    "height": 900,
+    "overflow": false,
+    "width": 1280
+  },
+  {
+    "page": "petugas",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 44,
+        "text": "Pantau Petugas"
+      },
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 44,
+        "text": "Tambah Petugas Baru"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Lihat lokasi"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Lihat lokasi"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      }
+    ],
+    "gridColumns": "311.6px 311.612px 311.6px",
+    "headingFont": "28px",
+    "height": 900,
+    "overflow": false,
+    "width": 1280
+  },
+  {
+    "page": "laporan",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 44,
+        "text": "Semua Periode"
+      },
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 44,
+        "text": "Unduh Laporan CSV"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 33.900001525878906,
+        "text": "Lihat Rincian"
+      }
+    ],
+    "gridColumns": "311.6px 311.612px 311.6px",
+    "headingFont": "28px",
+    "height": 900,
+    "overflow": false,
+    "width": 1280
+  },
+  {
+    "page": "login",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "16px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 48,
+        "text": "Masuk Sekarang"
+      }
+    ],
+    "gridColumns": null,
+    "headingFont": "28px",
+    "height": 900,
+    "overflow": false,
+    "width": 1280
+  },
+  {
+    "page": "dashboard",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Lihat SOP"
+      }
+    ],
+    "gridColumns": "235.913px 235.913px",
+    "headingFont": "28px",
+    "height": 1024,
+    "overflow": false,
+    "width": 768
+  },
+  {
+    "page": "pesanan",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 44,
+        "text": "Filter Tanggal"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Semua tanggal"
+      },
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 39.98749923706055,
+        "text": "Pilih tanggal"
+      },
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 39.98749923706055,
+        "text": "Tugaskan Petugas"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Pantau Petugas"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      }
+    ],
+    "gridColumns": "235.913px 235.913px",
+    "headingFont": "28px",
+    "height": 1024,
+    "overflow": false,
+    "width": 768
+  },
+  {
+    "page": "jadwal",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 44,
+        "text": "Filter Tanggal"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Semua tanggal"
+      },
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 39.98749923706055,
+        "text": "Pilih tanggal"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      }
+    ],
+    "gridColumns": "235.913px 235.913px",
+    "headingFont": "28px",
+    "height": 1024,
+    "overflow": false,
+    "width": 768
+  },
+  {
+    "page": "layanan",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 44,
+        "text": "Tambah Banner Promo"
+      },
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 44,
+        "text": "Tambah Layanan Baru"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Tambah kategori"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Atur Promo"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Atur Promo"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      }
+    ],
+    "gridColumns": "235.913px 235.913px",
+    "headingFont": "28px",
+    "height": 1024,
+    "overflow": false,
+    "width": 768
+  },
+  {
+    "page": "faq",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 44,
+        "text": "Tambah FAQ Baru"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Tambah kategori"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      }
+    ],
+    "gridColumns": "235.913px 235.913px",
+    "headingFont": "28px",
+    "height": 1024,
+    "overflow": false,
+    "width": 768
+  },
+  {
+    "page": "customer",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 44,
+        "text": "Tambah Customer Baru"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Hubungi WhatsApp"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Hubungi WhatsApp"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Hubungi WhatsApp"
+      }
+    ],
+    "gridColumns": "235.913px 235.913px",
+    "headingFont": "28px",
+    "height": 1024,
+    "overflow": false,
+    "width": 768
+  },
+  {
+    "page": "petugas",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 44,
+        "text": "Pantau Petugas"
+      },
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 44,
+        "text": "Tambah Petugas Baru"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Lihat lokasi"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Lihat lokasi"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      }
+    ],
+    "gridColumns": "235.913px 235.913px",
+    "headingFont": "28px",
+    "height": 1024,
+    "overflow": false,
+    "width": 768
+  },
+  {
+    "page": "laporan",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 44,
+        "text": "Semua Periode"
+      },
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 44,
+        "text": "Unduh Laporan CSV"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 33.900001525878906,
+        "text": "Lihat Rincian"
+      }
+    ],
+    "gridColumns": "235.913px 235.913px",
+    "headingFont": "28px",
+    "height": 1024,
+    "overflow": false,
+    "width": 768
+  },
+  {
+    "page": "login",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "16px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 48,
+        "text": "Masuk Sekarang"
+      }
+    ],
+    "gridColumns": null,
+    "headingFont": "28px",
+    "height": 1024,
+    "overflow": false,
+    "width": 768
+  },
+  {
+    "page": "dashboard",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Lihat SOP"
+      }
+    ],
+    "gridColumns": "149.4px 149.413px",
+    "headingFont": "26px",
+    "height": 800,
+    "overflow": false,
+    "width": 360
+  },
+  {
+    "page": "pesanan",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 44,
+        "text": "Filter Tanggal"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Semua tanggal"
+      },
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 39.98749923706055,
+        "text": "Pilih tanggal"
+      },
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 39.98749923706055,
+        "text": "Tugaskan Petugas"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Pantau Petugas"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      }
+    ],
+    "gridColumns": "149.4px 149.413px",
+    "headingFont": "26px",
+    "height": 800,
+    "overflow": false,
+    "width": 360
+  },
+  {
+    "page": "jadwal",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 44,
+        "text": "Filter Tanggal"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Semua tanggal"
+      },
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 39.98749923706055,
+        "text": "Pilih tanggal"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      }
+    ],
+    "gridColumns": "149.4px 149.413px",
+    "headingFont": "26px",
+    "height": 800,
+    "overflow": false,
+    "width": 360
+  },
+  {
+    "page": "layanan",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 44,
+        "text": "Tambah Banner Promo"
+      },
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 44,
+        "text": "Tambah Layanan Baru"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Tambah kategori"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Atur Promo"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Atur Promo"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      }
+    ],
+    "gridColumns": "149.4px 149.413px",
+    "headingFont": "26px",
+    "height": 800,
+    "overflow": false,
+    "width": 360
+  },
+  {
+    "page": "faq",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 44,
+        "text": "Tambah FAQ Baru"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Tambah kategori"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      }
+    ],
+    "gridColumns": "147.9px 147.913px",
+    "headingFont": "26px",
+    "height": 800,
+    "overflow": false,
+    "width": 360
+  },
+  {
+    "page": "customer",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 44,
+        "text": "Tambah Customer Baru"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Hubungi WhatsApp"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Hubungi WhatsApp"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Hubungi WhatsApp"
+      }
+    ],
+    "gridColumns": "149.4px 149.413px",
+    "headingFont": "26px",
+    "height": 800,
+    "overflow": false,
+    "width": 360
+  },
+  {
+    "page": "petugas",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 44,
+        "text": "Pantau Petugas"
+      },
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 44,
+        "text": "Tambah Petugas Baru"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Lihat lokasi"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Lihat lokasi"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      }
+    ],
+    "gridColumns": "149.4px 149.413px",
+    "headingFont": "26px",
+    "height": 800,
+    "overflow": false,
+    "width": 360
+  },
+  {
+    "page": "laporan",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 44,
+        "text": "Semua Periode"
+      },
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 44,
+        "text": "Unduh Laporan CSV"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 33.900001525878906,
+        "text": "Lihat Rincian"
+      }
+    ],
+    "gridColumns": "149.4px 149.413px",
+    "headingFont": "26px",
+    "height": 800,
+    "overflow": false,
+    "width": 360
+  },
+  {
+    "page": "login",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "16px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 48,
+        "text": "Masuk Sekarang"
+      }
+    ],
+    "gridColumns": null,
+    "headingFont": "26px",
+    "height": 800,
+    "overflow": false,
+    "width": 360
+  },
+  {
+    "page": "dashboard",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Lihat SOP"
+      }
+    ],
+    "gridColumns": "251.913px 251.913px",
+    "headingFont": "28px",
+    "height": 360,
+    "overflow": false,
+    "width": 800
+  },
+  {
+    "page": "pesanan",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 44,
+        "text": "Filter Tanggal"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Semua tanggal"
+      },
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 39.98749923706055,
+        "text": "Pilih tanggal"
+      },
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 39.98749923706055,
+        "text": "Tugaskan Petugas"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Pantau Petugas"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      }
+    ],
+    "gridColumns": "251.913px 251.913px",
+    "headingFont": "28px",
+    "height": 360,
+    "overflow": false,
+    "width": 800
+  },
+  {
+    "page": "jadwal",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 44,
+        "text": "Filter Tanggal"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Semua tanggal"
+      },
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 39.98749923706055,
+        "text": "Pilih tanggal"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      }
+    ],
+    "gridColumns": "251.913px 251.913px",
+    "headingFont": "28px",
+    "height": 360,
+    "overflow": false,
+    "width": 800
+  },
+  {
+    "page": "layanan",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 44,
+        "text": "Tambah Banner Promo"
+      },
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 44,
+        "text": "Tambah Layanan Baru"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Tambah kategori"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Atur Promo"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Atur Promo"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      }
+    ],
+    "gridColumns": "251.913px 251.913px",
+    "headingFont": "28px",
+    "height": 360,
+    "overflow": false,
+    "width": 800
+  },
+  {
+    "page": "faq",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 44,
+        "text": "Tambah FAQ Baru"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Tambah kategori"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      }
+    ],
+    "gridColumns": "251.913px 251.913px",
+    "headingFont": "28px",
+    "height": 360,
+    "overflow": false,
+    "width": 800
+  },
+  {
+    "page": "customer",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 44,
+        "text": "Tambah Customer Baru"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Hubungi WhatsApp"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Hubungi WhatsApp"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Hubungi WhatsApp"
+      }
+    ],
+    "gridColumns": "251.913px 251.913px",
+    "headingFont": "28px",
+    "height": 360,
+    "overflow": false,
+    "width": 800
+  },
+  {
+    "page": "petugas",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 44,
+        "text": "Pantau Petugas"
+      },
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 44,
+        "text": "Tambah Petugas Baru"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Lihat lokasi"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Lihat lokasi"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(10, 128, 91)",
+        "height": 39.98749923706055,
+        "text": "Ubah"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 39.98749923706055,
+        "text": "Detail"
+      }
+    ],
+    "gridColumns": "251.913px 251.913px",
+    "headingFont": "28px",
+    "height": 360,
+    "overflow": false,
+    "width": 800
+  },
+  {
+    "page": "laporan",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 44,
+        "text": "Semua Periode"
+      },
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "14px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 44,
+        "text": "Unduh Laporan CSV"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "font": "14px",
+        "foreground": "rgb(52, 72, 62)",
+        "height": 33.900001525878906,
+        "text": "Lihat Rincian"
+      }
+    ],
+    "gridColumns": "251.913px 251.913px",
+    "headingFont": "28px",
+    "height": 360,
+    "overflow": false,
+    "width": 800
+  },
+  {
+    "page": "login",
+    "background": "rgb(245, 248, 246)",
+    "bodyFont": "15px",
+    "buttons": [
+      {
+        "background": "rgb(10, 128, 91)",
+        "font": "16px",
+        "foreground": "rgb(255, 255, 255)",
+        "height": 48,
+        "text": "Masuk Sekarang"
+      }
+    ],
+    "gridColumns": null,
+    "headingFont": "28px",
+    "height": 360,
+    "overflow": false,
+    "width": 800
+  }
+]

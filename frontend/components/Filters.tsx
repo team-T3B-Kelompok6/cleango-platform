@@ -41,6 +41,7 @@ export function Filters({
     above: false,
     center: false,
     room: 0,
+    top: 0,
   });
   const ref = useRef<HTMLDivElement>(null);
   useOutsideDismiss(ref, open, () => setOpen(false));
@@ -49,20 +50,30 @@ export function Filters({
     const measure = () => {
       const anchor = ref.current?.getBoundingClientRect();
       if (!anchor) return;
+      const header = document.querySelector('.header')?.getBoundingClientRect();
+      const top = Math.max(16, (header?.bottom ?? 0) + 12);
+      if (
+        anchor.top < (header?.bottom ?? 0) ||
+        anchor.top >= window.innerHeight
+      ) {
+        setOpen(false);
+        return;
+      }
       const below = window.innerHeight - anchor.bottom - 28;
-      const above = anchor.top - 28;
+      const above = anchor.top - top - 12;
       const center = Math.max(below, above) < 240;
       const useAbove = below < 200 && above > below;
       const room = Math.max(
-        140,
-        center ? window.innerHeight - 32 : useAbove ? above : below,
+        0,
+        center ? window.innerHeight - top - 16 : useAbove ? above : below,
       );
       setPlacement((current) =>
         current.above === useAbove &&
         current.center === center &&
-        current.room === room
+        current.room === room &&
+        current.top === top
           ? current
-          : { above: useAbove, center, room },
+          : { above: useAbove, center, room, top },
       );
     };
     measure();
@@ -118,6 +129,7 @@ export function Filters({
               placement.room
                 ? ({
                     '--date-popover-room': `${placement.room}px`,
+                    '--date-popover-top': `${placement.top}px`,
                   } as CSSProperties)
                 : undefined
             }
@@ -220,10 +232,11 @@ export function Filters({
                 ? ((
                     {
                       Tersedia: 'Siaga & Tersedia',
-                      Bertugas: 'Sedang Bekerja',
                     } as Record<string, string>
                   )[tab] ?? tab)
-                : tab}
+                : tab === 'Menunggu Lokasi'
+                  ? 'Siap Berangkat'
+                  : tab}
             </button>
           ))}
         </div>
@@ -240,7 +253,8 @@ export function SearchInput({
 }) {
   const params = useSearchParams(),
     pathname = usePathname();
-  const action = ['/', '/laporan'].includes(pathname) ? '/pesanan' : pathname;
+  const section = '/' + (pathname.split('/')[1] ?? '');
+  const action = ['/', '/laporan'].includes(section) ? '/pesanan' : section;
   const pageLabels: Record<string, string> = {
     '/': 'Dashboard Utama',
     '/pesanan': 'Kelola Pesanan',
@@ -270,7 +284,7 @@ export function SearchInput({
         placeholder={
           faq
             ? 'Cari pertanyaan…'
-            : `Cari di ${pageLabels[pathname] ?? 'Cleango'}…`
+            : `Cari di ${pageLabels[section] ?? 'Cleango'}…`
         }
         defaultValue={params.get('q') ?? ''}
       />

@@ -1,0 +1,398 @@
+[
+  {
+    "page": "dashboard",
+    "size": {
+      "width": 1280,
+      "height": 900
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Halo, Admin Cleango!",
+    "scrollWidth": 1265,
+    "viewport": 1280
+  },
+  {
+    "page": "pesanan",
+    "size": {
+      "width": 1280,
+      "height": 900
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Kelola Pesanan",
+    "scrollWidth": 1265,
+    "viewport": 1280
+  },
+  {
+    "page": "jadwal",
+    "size": {
+      "width": 1280,
+      "height": 900
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Kelola Jadwal",
+    "scrollWidth": 1265,
+    "viewport": 1280
+  },
+  {
+    "page": "layanan",
+    "size": {
+      "width": 1280,
+      "height": 900
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Kelola Layanan",
+    "scrollWidth": 1265,
+    "viewport": 1280
+  },
+  {
+    "page": "faq",
+    "size": {
+      "width": 1280,
+      "height": 900
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Kelola FAQ",
+    "scrollWidth": 1265,
+    "viewport": 1280
+  },
+  {
+    "page": "customer",
+    "size": {
+      "width": 1280,
+      "height": 900
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Kelola Data Customer",
+    "scrollWidth": 1265,
+    "viewport": 1280
+  },
+  {
+    "page": "petugas",
+    "size": {
+      "width": 1280,
+      "height": 900
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Kelola Data Petugas",
+    "scrollWidth": 1265,
+    "viewport": 1280
+  },
+  {
+    "page": "laporan",
+    "size": {
+      "width": 1280,
+      "height": 900
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Laporan Keuangan & Operasional",
+    "scrollWidth": 1265,
+    "viewport": 1280
+  },
+  {
+    "page": "login",
+    "size": {
+      "width": 1280,
+      "height": 900
+    },
+    "headerSticky": null,
+    "primaryHeading": "Masuk ke Akun Admin",
+    "scrollWidth": 1265,
+    "viewport": 1280
+  },
+  {
+    "page": "dashboard",
+    "size": {
+      "width": 768,
+      "height": 1024
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Halo, Admin Cleango!",
+    "scrollWidth": 753,
+    "viewport": 768
+  },
+  {
+    "page": "pesanan",
+    "size": {
+      "width": 768,
+      "height": 1024
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Kelola Pesanan",
+    "scrollWidth": 753,
+    "viewport": 768
+  },
+  {
+    "page": "jadwal",
+    "size": {
+      "width": 768,
+      "height": 1024
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Kelola Jadwal",
+    "scrollWidth": 753,
+    "viewport": 768
+  },
+  {
+    "page": "layanan",
+    "size": {
+      "width": 768,
+      "height": 1024
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Kelola Layanan",
+    "scrollWidth": 753,
+    "viewport": 768
+  },
+  {
+    "page": "faq",
+    "size": {
+      "width": 768,
+      "height": 1024
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Kelola FAQ",
+    "scrollWidth": 753,
+    "viewport": 768
+  },
+  {
+    "page": "customer",
+    "size": {
+      "width": 768,
+      "height": 1024
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Kelola Data Customer",
+    "scrollWidth": 753,
+    "viewport": 768
+  },
+  {
+    "page": "petugas",
+    "size": {
+      "width": 768,
+      "height": 1024
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Kelola Data Petugas",
+    "scrollWidth": 753,
+    "viewport": 768
+  },
+  {
+    "page": "laporan",
+    "size": {
+      "width": 768,
+      "height": 1024
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Laporan Keuangan & Operasional",
+    "scrollWidth": 753,
+    "viewport": 768
+  },
+  {
+    "page": "login",
+    "size": {
+      "width": 768,
+      "height": 1024
+    },
+    "headerSticky": null,
+    "primaryHeading": "Masuk ke Akun Admin",
+    "scrollWidth": 753,
+    "viewport": 768
+  },
+  {
+    "page": "dashboard",
+    "size": {
+      "width": 360,
+      "height": 800
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Halo, Admin Cleango!",
+    "scrollWidth": 345,
+    "viewport": 360
+  },
+  {
+    "page": "pesanan",
+    "size": {
+      "width": 360,
+      "height": 800
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Kelola Pesanan",
+    "scrollWidth": 345,
+    "viewport": 360
+  },
+  {
+    "page": "jadwal",
+    "size": {
+      "width": 360,
+      "height": 800
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Kelola Jadwal",
+    "scrollWidth": 345,
+    "viewport": 360
+  },
+  {
+    "page": "layanan",
+    "size": {
+      "width": 360,
+      "height": 800
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Kelola Layanan",
+    "scrollWidth": 345,
+    "viewport": 360
+  },
+  {
+    "page": "faq",
+    "size": {
+      "width": 360,
+      "height": 800
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Kelola FAQ",
+    "scrollWidth": 345,
+    "viewport": 360
+  },
+  {
+    "page": "customer",
+    "size": {
+      "width": 360,
+      "height": 800
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Kelola Data Customer",
+    "scrollWidth": 345,
+    "viewport": 360
+  },
+  {
+    "page": "petugas",
+    "size": {
+      "width": 360,
+      "height": 800
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Kelola Data Petugas",
+    "scrollWidth": 345,
+    "viewport": 360
+  },
+  {
+    "page": "laporan",
+    "size": {
+      "width": 360,
+      "height": 800
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Laporan Keuangan & Operasional",
+    "scrollWidth": 345,
+    "viewport": 360
+  },
+  {
+    "page": "login",
+    "size": {
+      "width": 360,
+      "height": 800
+    },
+    "headerSticky": null,
+    "primaryHeading": "Masuk ke Akun Admin",
+    "scrollWidth": 345,
+    "viewport": 360
+  },
+  {
+    "page": "dashboard",
+    "size": {
+      "width": 800,
+      "height": 360
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Halo, Admin Cleango!",
+    "scrollWidth": 785,
+    "viewport": 800
+  },
+  {
+    "page": "pesanan",
+    "size": {
+      "width": 800,
+      "height": 360
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Kelola Pesanan",
+    "scrollWidth": 785,
+    "viewport": 800
+  },
+  {
+    "page": "jadwal",
+    "size": {
+      "width": 800,
+      "height": 360
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Kelola Jadwal",
+    "scrollWidth": 785,
+    "viewport": 800
+  },
+  {
+    "page": "layanan",
+    "size": {
+      "width": 800,
+      "height": 360
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Kelola Layanan",
+    "scrollWidth": 785,
+    "viewport": 800
+  },
+  {
+    "page": "faq",
+    "size": {
+      "width": 800,
+      "height": 360
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Kelola FAQ",
+    "scrollWidth": 785,
+    "viewport": 800
+  },
+  {
+    "page": "customer",
+    "size": {
+      "width": 800,
+      "height": 360
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Kelola Data Customer",
+    "scrollWidth": 785,
+    "viewport": 800
+  },
+  {
+    "page": "petugas",
+    "size": {
+      "width": 800,
+      "height": 360
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Kelola Data Petugas",
+    "scrollWidth": 785,
+    "viewport": 800
+  },
+  {
+    "page": "laporan",
+    "size": {
+      "width": 800,
+      "height": 360
+    },
+    "headerSticky": "sticky",
+    "primaryHeading": "Laporan Keuangan & Operasional",
+    "scrollWidth": 785,
+    "viewport": 800
+  },
+  {
+    "page": "login",
+    "size": {
+      "width": 800,
+      "height": 360
+    },
+    "headerSticky": null,
+    "primaryHeading": "Masuk ke Akun Admin",
+    "scrollWidth": 785,
+    "viewport": 800
+  }
+]

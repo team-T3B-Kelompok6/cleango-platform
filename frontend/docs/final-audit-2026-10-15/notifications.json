@@ -1,0 +1,26 @@
+[
+  {
+    "bodyScroll": false,
+    "footerVisible": true,
+    "insideViewport": true,
+    "viewport": "1280x900"
+  },
+  {
+    "bodyScroll": false,
+    "footerVisible": true,
+    "insideViewport": true,
+    "viewport": "768x1024"
+  },
+  {
+    "bodyScroll": true,
+    "footerVisible": true,
+    "insideViewport": true,
+    "viewport": "360x800"
+  },
+  {
+    "bodyScroll": true,
+    "footerVisible": true,
+    "insideViewport": true,
+    "viewport": "800x360"
+  }
+]

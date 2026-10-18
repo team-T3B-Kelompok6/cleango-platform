@@ -17,6 +17,8 @@ interface OrderRow extends RowDataPacket {
   customerId: number;
   customer: string;
   address: string;
+  latitude: number | string | null;
+  longitude: number | string | null;
   service: string;
   price: number;
   date: string;
@@ -31,6 +33,8 @@ export interface Order {
   customerId: string;
   customer: string;
   address: string;
+  latitude: number | null;
+  longitude: number | null;
   service: string;
   price: number;
   date: string;
@@ -48,6 +52,7 @@ export interface Order {
 const orderSelect = `SELECT b.id, b.customer_id AS customerId,
   u.name AS customer,
   CONCAT_WS(', ', a.street_address, a.city, a.province) AS address,
+  a.latitude, a.longitude,
   s.name AS service, b.total_amount AS price,
   DATE_FORMAT(b.scheduled_date, '%Y-%m-%d') AS date,
   TIME_FORMAT(b.scheduled_start_time, '%H:%i') AS time,
@@ -79,6 +84,8 @@ function mapOrder(row: OrderRow): Order {
     customerId: String(row.customerId),
     customer: row.customer,
     address: row.address,
+    latitude: row.latitude === null ? null : Number(row.latitude),
+    longitude: row.longitude === null ? null : Number(row.longitude),
     service: row.service,
     price: row.price,
     date: row.date,

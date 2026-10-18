@@ -1,0 +1,114 @@
+[
+  {
+    "name": "Login salah ditolak",
+    "passed": true
+  },
+  {
+    "name": "Login demo berhasil",
+    "passed": true
+  },
+  {
+    "name": "Tambah layanan dengan foto, promo, fasilitas dan detail",
+    "passed": true
+  },
+  {
+    "name": "Ubah layanan tersimpan setelah refresh",
+    "passed": true
+  },
+  {
+    "name": "Hapus layanan sementara melalui konfirmasi",
+    "passed": true
+  },
+  {
+    "case": "Tambah petugas dan popup detail",
+    "passed": true
+  },
+  {
+    "case": "Ubah petugas bertahan setelah refresh",
+    "passed": true
+  },
+  {
+    "case": "Hapus petugas sementara",
+    "passed": true
+  },
+  {
+    "case": "Tambah customer dan popup detail",
+    "passed": true
+  },
+  {
+    "case": "Ubah customer bertahan setelah refresh",
+    "passed": true
+  },
+  {
+    "case": "Hapus customer sementara",
+    "passed": true
+  },
+  {
+    "case": "Tambah FAQ dan popup pratinjau",
+    "passed": true
+  },
+  {
+    "case": "Ubah FAQ bertahan setelah refresh",
+    "passed": true
+  },
+  {
+    "case": "Hapus FAQ sementara",
+    "passed": true
+  },
+  {
+    "case": "Empty state pencarian FAQ",
+    "passed": true
+  },
+  {
+    "case": "Detail pesanan tetap popup",
+    "passed": true
+  },
+  {
+    "case": "Popup jadwal dan shift 08–12 / 13–17 / 18–21",
+    "passed": true
+  },
+  {
+    "case": "Loading saat navigasi laporan",
+    "passed": true
+  },
+  {
+    "case": "Tab laporan Laporan Harian",
+    "passed": true
+  },
+  {
+    "case": "Tab laporan Laporan Per Pelanggan",
+    "passed": true
+  },
+  {
+    "case": "Tab laporan Laporan Performa Kru",
+    "passed": true
+  },
+  {
+    "case": "Tab laporan Ringkasan Bulanan",
+    "passed": true
+  },
+  {
+    "case": "Unduh CSV dengan header dan baris dummy",
+    "passed": true
+  },
+  {
+    "case": "Pantau membuka modal cleaner tugas DEMO-ORD-02 dengan status gagal simulasi",
+    "passed": true
+  },
+  {
+    "case": "Cleaner 360px tanpa overflow; tombol berangkat mengikuti form",
+    "passed": true
+  },
+  {
+    "case": "Refresh link cleaner mempertahankan tugas DEMO-ORD-02",
+    "passed": true
+  },
+  {
+    "case": "Logout mengembalikan login",
+    "passed": true
+  },
+  {
+    "case": "Halaman admin terlindungi setelah logout",
+    "passed": true
+  }
+]

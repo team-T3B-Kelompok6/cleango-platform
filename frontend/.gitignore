@@ -1,7 +1,10 @@
 node_modules/
 .next/
+.next-sync-qa/
 out/
 .env
 .env.*
 !.env.example
 *.tsbuildinfo
+.local/
+docs/uts-2026-10-16/presentation/

@@ -1,5 +1,4 @@
 import { valueText } from '@/lib/resources';
-import { Icon } from './Icon';
 
 import { RecordActions } from './RecordActions';
 
@@ -10,8 +9,8 @@ export function FaqList({ shown, resource, edit }: RecordListProps) {
       {resource === 'faqs' &&
         shown.map((item) => (
           <article key={item.id} className="faq-design-row managed-faq-row">
-            <details>
-              <summary>
+            <section>
+              <div className="faq-row-question">
                 <span>
                   <span className="faq-row-meta">
                     <span
@@ -33,22 +32,25 @@ export function FaqList({ shown, resource, edit }: RecordListProps) {
                       <i />
                       {item.published ? 'Aktif' : 'Draf'}
                     </span>
-                    {typeof item.updatedAt === 'string' && (
-                      <small>
-                        Diperbarui{' '}
-                        {new Date(item.updatedAt).toLocaleDateString('id-ID')}
-                      </small>
-                    )}
+                    {typeof item.updatedAt === 'string' &&
+                      Number.isFinite(Date.parse(item.updatedAt)) && (
+                        <small>
+                          Diperbarui{' '}
+                          {new Date(item.updatedAt).toLocaleDateString(
+                            'id-ID',
+                            { timeZone: 'Asia/Jakarta' },
+                          )}
+                        </small>
+                      )}
                   </span>
                   <strong>{valueText(item.question)}</strong>
                 </span>
-                <Icon name="down" />
-              </summary>
-              <p>{valueText(item.answer)}</p>
-            </details>
-            <div className="managed-record-footer">
-              <RecordActions resource={resource} record={item} edit={edit} />
-            </div>
+              </div>
+              <div className="faq-answer-row">
+                <p className="faq-row-answer">{valueText(item.answer)}</p>
+                <RecordActions resource={resource} record={item} edit={edit} />
+              </div>
+            </section>
           </article>
         ))}
     </>

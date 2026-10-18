@@ -1,5 +1,7 @@
 # CleanGo Platform
 
+Pemeriksaan frontend terbaru: [checklist 17–18 Oktober 2026](frontend/docs/checklist-review-2026-10-17/README.md). Pengujian memakai demo dan fixture HTTP lokal; API tim belum diterima pemilik frontend sehingga integrasi produksi belum dinyatakan selesai. Jalankan frontend dari folder `frontend` sesuai [panduannya](frontend/README.md).
+
 Monorepo CleanGo untuk backend Express + TypeScript dan frontend Next.js.
 
 ## Prasyarat

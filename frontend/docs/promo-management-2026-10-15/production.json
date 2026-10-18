@@ -1,0 +1,21 @@
+{
+  "checks": [
+    {
+      "case": "login",
+      "passed": true
+    },
+    {
+      "case": "promo-list",
+      "passed": true
+    },
+    {
+      "case": "server-action-status-roundtrip",
+      "passed": true
+    },
+    {
+      "case": "calendar-scroll-dismiss",
+      "passed": true
+    }
+  ],
+  "consoleErrors": []
+}

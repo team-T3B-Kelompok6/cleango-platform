@@ -26,11 +26,13 @@ export default async function Page({
   searchParams: Promise<Search>;
 }) {
   const { id } = await params;
+  const search = await searchParams;
   return (
     <ResourceDetailPage
       resource="services"
       id={id}
-      saved={(await searchParams).saved === '1'}
+      saved={search.saved === '1'}
+      search={search}
     />
   );
 }

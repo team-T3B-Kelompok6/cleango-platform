@@ -1,0 +1,212 @@
+[
+  {
+    "label": "Detail pesanan desktop",
+    "footerVisible": true,
+    "heading": "Detail Pesanan",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Detail pesanan 360px",
+    "footerVisible": true,
+    "heading": "Detail Pesanan",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Ubah pesanan 360px",
+    "footerVisible": true,
+    "heading": "Ubah Pesanan",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Ubah pesanan desktop",
+    "footerVisible": true,
+    "heading": "Ubah Pesanan",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Detail layanan desktop",
+    "footerVisible": true,
+    "heading": "Detail Layanan",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Detail layanan 360px",
+    "footerVisible": true,
+    "heading": "Detail Layanan",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Ubah layanan 360px",
+    "footerVisible": true,
+    "heading": "Ubah Layanan",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Ubah layanan desktop",
+    "footerVisible": true,
+    "heading": "Ubah Layanan",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Detail jadwal desktop",
+    "footerVisible": true,
+    "heading": "Detail Jadwal",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Detail jadwal 360px",
+    "footerVisible": true,
+    "heading": "Detail Jadwal",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Ubah jadwal 360px",
+    "footerVisible": true,
+    "heading": "Ubah Jadwal",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Ubah jadwal desktop",
+    "footerVisible": true,
+    "heading": "Ubah Jadwal",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Detail customer desktop",
+    "footerVisible": true,
+    "heading": "Detail Customer",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Detail customer 360px",
+    "footerVisible": true,
+    "heading": "Detail Customer",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Ubah customer 360px",
+    "footerVisible": true,
+    "heading": "Ubah Customer",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Ubah customer desktop",
+    "footerVisible": true,
+    "heading": "Ubah Customer",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Detail FAQ desktop",
+    "footerVisible": true,
+    "heading": "Detail FAQ",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Detail FAQ 360px",
+    "footerVisible": true,
+    "heading": "Detail FAQ",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Ubah FAQ 360px",
+    "footerVisible": true,
+    "heading": "Ubah FAQ",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Ubah FAQ desktop",
+    "footerVisible": true,
+    "heading": "Ubah FAQ",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Detail petugas desktop",
+    "footerVisible": true,
+    "heading": "Detail Petugas",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Detail petugas 360px",
+    "footerVisible": true,
+    "heading": "Detail Petugas",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Ubah petugas 360px",
+    "footerVisible": true,
+    "heading": "Ubah Petugas",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Ubah petugas desktop",
+    "footerVisible": true,
+    "heading": "Ubah Petugas",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Konfirmasi hapus desktop",
+    "footerVisible": true,
+    "heading": "Hapus Layanan",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Konfirmasi hapus 360px",
+    "footerVisible": true,
+    "heading": "Hapus Layanan",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Kelola promo 360px",
+    "footerVisible": true,
+    "heading": "Kelola Promo",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Kelola promo desktop",
+    "footerVisible": true,
+    "heading": "Kelola Promo",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Tambah promo desktop",
+    "footerVisible": true,
+    "heading": "Tambah Promo",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  },
+  {
+    "label": "Tambah promo 360px",
+    "footerVisible": true,
+    "heading": "Tambah Promo",
+    "inViewport": true,
+    "noHorizontalOverflow": true
+  }
+]

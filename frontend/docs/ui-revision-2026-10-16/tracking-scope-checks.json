@@ -1,0 +1,26 @@
+[
+  {
+    "test": "Order CL-8901 scoped to Raka and Amanda; no search, all-staff button or assignment picker",
+    "passed": true
+  },
+  {
+    "test": "Location dialog identifies the selected order staff",
+    "passed": true
+  },
+  {
+    "test": "Cleaner preview stays on CL-8901 with Raka; copy and resend available",
+    "passed": true
+  },
+  {
+    "test": "Reload preserves fixed order scope",
+    "passed": true
+  },
+  {
+    "test": "Different order CL-8802 only shows Dina and Bagas",
+    "passed": true
+  },
+  {
+    "test": "Global tracking remains available from Petugas menu",
+    "passed": true
+  }
+]

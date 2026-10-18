@@ -4,7 +4,7 @@ import type { Order } from '@/types';
 export const dynamic = 'force-dynamic';
 function cell(value: unknown) {
   let text = String(value ?? '');
-  if (/^[=+@-]/.test(text)) text = "'" + text;
+  if (/^[\s\u0000-\u001f]*[=+@-]/.test(text)) text = "'" + text;
   return '"' + text.replace(/"/g, '""') + '"';
 }
 export async function GET(request: Request) {

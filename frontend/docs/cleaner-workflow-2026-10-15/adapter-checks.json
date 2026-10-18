@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-15T11:28:46.562Z",
+  "transport": "In-memory contract fixture; no network requests",
+  "checks": [
+    {
+      "name": "Public adapter forwards only the task bearer token and allowlisted fields",
+      "passed": true
+    },
+    {
+      "name": "Manual report draft always targets this order customer",
+      "passed": true
+    },
+    {
+      "name": "No delivered claim without chatbot provider acknowledgement",
+      "passed": true
+    },
+    {
+      "name": "Simulation never offers a real WhatsApp draft",
+      "passed": true
+    },
+    {
+      "name": "Expired and incomplete backend task states are rejected",
+      "passed": true
+    },
+    {
+      "name": "Events forward the idempotency key without admin credentials",
+      "passed": true
+    },
+    {
+      "name": "Live photo proxy checks task ownership first",
+      "passed": true
+    },
+    {
+      "name": "Missing dispatch endpoint reports unavailable without pretending a send",
+      "passed": true
+    }
+  ]
+}
