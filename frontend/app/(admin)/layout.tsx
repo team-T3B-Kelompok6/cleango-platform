@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { list } from '@/lib/api';
@@ -9,6 +8,9 @@ import { Icon } from '@/components/Icon';
 import { Navigation, MobileNavigation } from '@/components/Navigation';
 import { Notifications } from '@/components/Notifications';
 import { SearchInput } from '@/components/Filters';
+import { CleanGoLogo } from '@/components/CleanGoLogo';
+import { AdminLiveSync } from '@/components/AdminLiveSync';
+import { newestOrderFirst } from '@/lib/order-flow';
 export const dynamic = 'force-dynamic';
 export default async function AdminLayout({
   children,
@@ -16,7 +18,7 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   if (!(await cookies()).has('cleango-session')) redirect('/login');
-  const orders = await list<Order>('orders');
+  const orders = [...(await list<Order>('orders'))].sort(newestOrderFirst);
   const date = new Intl.DateTimeFormat('id-ID', {
     weekday: 'long',
     day: 'numeric',
@@ -26,14 +28,13 @@ export default async function AdminLayout({
   }).format(new Date());
   return (
     <div className="app-shell">
+      <AdminLiveSync />
       <a href="#main-content" className="skip-link">
         Lewati ke konten
       </a>
       <aside className="sidebar" aria-label="Navigasi utama">
         <Link href="/" className="brand">
-          <span className="brand-symbol">
-            <Icon name="brand" />
-          </span>
+          <CleanGoLogo />
           <span>
             <strong>
               cleango<span>•</span>
@@ -43,11 +44,6 @@ export default async function AdminLayout({
         </Link>
         <Navigation />
         <div className="sidebar-bottom">
-          <div className="eco-label">
-            <Icon name="leaf" />
-            <span>100% Ramah Lingkungan</span>
-            <i />
-          </div>
           <form action={logoutAction}>
             <button className="nav-link logout">
               <Icon name="logout" />
@@ -71,8 +67,8 @@ export default async function AdminLayout({
               popoverTarget="admin-profile"
               aria-label="Menu akun admin"
             >
-              <span className="avatar">
-                <Image src="/assets/panda.svg" alt="" width={26} height={26} />
+              <span className="avatar" aria-hidden="true">
+                AO
               </span>
               <span className="profile-copy">
                 <strong>Admin Operasional</strong>

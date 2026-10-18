@@ -4,9 +4,14 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "next dev --hostname 127.0.0.1",
+    "dev:lan": "next dev --hostname 0.0.0.0",
     "build": "next build",
     "start": "next start --hostname 127.0.0.1",
     "typecheck": "tsc --noEmit",
+    "check:demo": "node scripts/check-admin-demo.mjs",
+    "check:promo": "node scripts/check-promo-pricing.mjs",
+    "qa:api": "node scripts/uts-qa-api.mjs",
+    "check:uts:http": "node scripts/check-uts-http.mjs",
     "format": "prettier --write app components lib types next.config.ts package.json tsconfig.json",
     "format:check": "prettier --check app components lib types next.config.ts package.json tsconfig.json"
   },

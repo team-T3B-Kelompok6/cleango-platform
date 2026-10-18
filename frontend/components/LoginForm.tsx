@@ -10,7 +10,7 @@ export function LoginForm() {
   return (
     <form action={action}>
       <div className="login-field">
-        <label htmlFor="username">EMAIL ATAU USERNAME</label>
+        <label htmlFor="username">Email atau username</label>
         <span className="login-input-wrap">
           <span className="login-input-icon">
             <UiIcon name="mail" />
@@ -19,7 +19,7 @@ export function LoginForm() {
             id="username"
             name="username"
             autoComplete="username"
-            placeholder="admin"
+            placeholder="admin@cleango.id"
             required
             defaultValue={(state.values?.username as string) ?? ''}
             aria-invalid={!!state.errors?.username}
@@ -30,7 +30,7 @@ export function LoginForm() {
         )}
       </div>
       <div className="login-field">
-        <label htmlFor="password">KATA SANDI</label>
+        <label htmlFor="password">Kata sandi</label>
         <span className="login-input-wrap password-field">
           <span className="login-input-icon">
             <UiIcon name="lock" />

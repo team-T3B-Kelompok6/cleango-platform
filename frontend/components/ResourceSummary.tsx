@@ -1,14 +1,17 @@
 import { MetricCard } from './MetricCard';
-import { Icon } from './Icon';
-import { UiIcon } from './UiIcon';
 import { rupiah } from '@/lib/resources';
 import type { Resource, RecordData } from '@/types';
-export function Summary({
+import { needsAssignment } from '@/lib/order-flow';
+import { promoListState } from '@/lib/promos';
+import { promoStatus } from '@/lib/promo-rules';
+export async function Summary({
   resource,
   records,
+  categoryNames = [],
 }: {
   resource: Resource;
   records: RecordData[];
+  categoryNames?: string[];
 }) {
   const active = records.filter(
     (item) =>
@@ -18,61 +21,44 @@ export function Summary({
   ).length;
   if (resource === 'faqs') {
     const categories = [
-      ...new Set(records.map((record) => String(record.category))),
+      ...new Set([
+        ...categoryNames,
+        ...records.map((record) => String(record.category)),
+      ]),
     ];
+    const mostRead = [...records]
+      .filter((item) => typeof item.viewCount === 'number')
+      .sort((a, b) => Number(b.viewCount) - Number(a.viewCount))[0];
     return (
-      <div className="faq-summary-grid">
-        <article className="faq-summary-card">
-          <div>
-            <small>TOTAL FAQ AKTIF</small>
-            <strong>
-              {active} <span>Pertanyaan</span>
-            </strong>
-            <p className="green">Siap ditampilkan kepada pelanggan</p>
-          </div>
-          <span className="faq-summary-icon green">
-            <Icon name="faq" />
-          </span>
-        </article>
-        <article className="faq-summary-card">
-          <div>
-            <small>PALING SERING DIBACA</small>
-            <strong className="faq-most-read">
-              {records.some((item) => typeof item.viewCount === 'number')
-                ? String(
-                    [...records].sort(
-                      (a, b) =>
-                        Number(b.viewCount ?? 0) - Number(a.viewCount ?? 0),
-                    )[0]?.question ?? '—',
-                  )
-                : 'Belum ada data pembaca'}
-            </strong>
-            <p className="faq-summary-caption">
-              {records.some((item) => typeof item.viewCount === 'number')
-                ? `${Math.max(...records.map((item) => Number(item.viewCount ?? 0)))} kali dibaca`
-                : 'Statistik pembaca belum tersedia'}
-            </p>
-          </div>
-          <span className="faq-summary-icon amber">
-            <UiIcon name="eye" />
-          </span>
-        </article>
-        <article className="faq-summary-card">
-          <div>
-            <small>KATEGORI</small>
-            <strong>
-              {categories.length} <span>Klasifikasi</span>
-            </strong>
-            <div className="faq-category-samples">
-              {categories.slice(0, 3).map((category) => (
-                <span key={category}>{category}</span>
-              ))}
-            </div>
-          </div>
-          <span className="faq-summary-icon blue">
-            <Icon name="package" />
-          </span>
-        </article>
+      <div className="metrics-grid order-metrics faq-summary-grid">
+        <MetricCard
+          label="FAQ aktif"
+          value={active}
+          unit="Pertanyaan"
+          note="Siap ditampilkan kepada pelanggan"
+          icon="faq"
+        />
+        <MetricCard
+          label="Paling sering dibaca"
+          value={mostRead ? String(mostRead.question) : '—'}
+          compactValue={!!mostRead}
+          note={
+            mostRead
+              ? String(mostRead.viewCount) + ' kali dibaca'
+              : 'Belum ada statistik pembaca'
+          }
+          icon="faq"
+          uiIcon="eye"
+          tone="amber"
+        />
+        <MetricCard
+          label="Kategori FAQ"
+          value={categories.length}
+          unit="Kategori"
+          note={categories.slice(0, 3).join(' · ') || 'Belum ada kategori'}
+          icon="package"
+          tone="blue"
+        />
       </div>
     );
   }
@@ -80,25 +66,33 @@ export function Summary({
     return (
       <div className="metrics-grid order-metrics">
         <MetricCard
-          label="PERLU TINDAKAN (UNASSIGNED)"
-          value={
-            records.filter((order) =>
-              ['Menunggu Assign', 'Menunggu Lokasi'].includes(
-                String(order.status),
-              ),
-            ).length
-          }
+          label="Perlu ditugaskan"
+          value={records.filter(needsAssignment).length}
           note="Harus segera di-assign"
           icon="clock"
           tone="amber"
         />
         <MetricCard
-          label="KRU LAPANGAN AKTIF"
+          label="Petugas di lapangan"
           value={
             new Set(
               records
-                .filter((order) => order.status === 'Sedang Dikerjakan')
-                .flatMap((order) => order.staff as string[]),
+                .filter((order) =>
+                  ['Menuju Lokasi', 'Sedang Dikerjakan'].includes(
+                    String(order.status),
+                  ),
+                )
+                .flatMap((order) =>
+                  (order.staff as string[]).filter((name) => {
+                    const progress = (
+                      order as import('@/types').Order
+                    ).staffProgress?.find((item) => item.staffName === name);
+                    return (
+                      !progress ||
+                      ['en_route', 'working'].includes(progress.stage)
+                    );
+                  }),
+                ),
             ).size
           }
           note="Petugas dari pesanan berjalan"
@@ -106,7 +100,7 @@ export function Summary({
           tone="blue"
         />
         <MetricCard
-          label="TUNTAS"
+          label="Pesanan selesai"
           value={records.filter((order) => order.status === 'Selesai').length}
           note="Pesanan selesai"
           icon="check"
@@ -123,18 +117,20 @@ export function Summary({
         String(item.staff).split(' & ').filter(Boolean),
       ),
     );
-    const unassigned = records.filter((item) => !assigned.includes(item));
+    const ready = records.filter((item) =>
+      ['Terjadwal', 'Berlangsung'].includes(String(item.status)),
+    );
     return (
       <div className="metrics-grid order-metrics">
         <MetricCard
-          label="TOTAL JADWAL"
+          label="Total jadwal"
           value={records.length}
           unit="Jadwal"
           note="Jadwal operasional terdaftar"
           icon="schedule"
         />
         <MetricCard
-          label="PETUGAS BERJAGA"
+          label="Petugas terjadwal"
           value={staff.size}
           unit="Petugas"
           note="Petugas pada jadwal terdaftar"
@@ -142,10 +138,10 @@ export function Summary({
           tone="blue"
         />
         <MetricCard
-          label="JADWAL BELUM FIX"
-          value={unassigned.length}
-          unit="Perlu Dicek"
-          note="Jadwal belum memiliki petugas"
+          label="Shift aktif"
+          value={ready.length}
+          unit="Shift"
+          note="Jadwal yang dapat menerima penugasan"
           icon="clock"
           tone="amber"
         />
@@ -153,37 +149,38 @@ export function Summary({
     );
   }
   if (resource === 'services') {
-    const categories = new Set(records.map((item) => String(item.category)));
-    const hasFavorites = records.some(
-      (item) => typeof item.isFavorite === 'boolean',
-    );
+    const { promos, message } = await promoListState();
+    const today = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Jakarta',
+    }).format(new Date());
+    const categories = new Set([
+      ...categoryNames,
+      ...records.map((item) => String(item.category)),
+    ]);
     return (
       <div className="metrics-grid order-metrics">
         <MetricCard
-          label="TOTAL LAYANAN AKTIF"
+          label="Layanan aktif"
           value={active}
           unit="Layanan"
-          note={`Terbagi dalam ${categories.size} kategori utama`}
+          note={`${categories.size} kategori tersedia`}
           icon="services"
         />
         <MetricCard
-          label="PAKET & BUNDLE FAVORIT"
+          label="Kode promo aktif"
           value={
-            hasFavorites
-              ? records.filter((item) => item.isFavorite === true).length
-              : '—'
+            message
+              ? '—'
+              : promos.filter((promo) => promoStatus(promo, today) === 'Aktif')
+                  .length
           }
-          unit="Paket"
-          note={
-            hasFavorites
-              ? 'Paket pilihan pelanggan'
-              : 'Status favorit belum tersedia'
-          }
+          unit="Kode"
+          note={message || 'Diatur melalui Kelola Promo'}
           icon="orders"
           tone="blue"
         />
         <MetricCard
-          label="HARGA RATA-RATA"
+          label="Harga rata-rata"
           value={rupiah(
             records.length
               ? records.reduce((sum, item) => sum + Number(item.price), 0) /
@@ -198,16 +195,29 @@ export function Summary({
     );
   }
   const isStaff = resource === 'staff';
-  const available = records.filter((item) => item.status === 'Tersedia').length;
-  const working = records.filter((item) => item.status === 'Bertugas').length;
+  const available = records.filter(
+    (item) => item.operationalStatus === 'Siaga & Tersedia',
+  ).length;
+  const working = records.filter((item) =>
+    ['Menuju Lokasi', 'Sedang Bekerja', 'Bertugas'].includes(
+      String(item.operationalStatus),
+    ),
+  ).length;
   const repeat = records.filter(
     (item) => Number(item.orderCount ?? 0) >= 2,
   ).length;
   return (
     <div className="metrics-grid order-metrics">
       <MetricCard
-        label={isStaff ? 'TOTAL PETUGAS AKTIF' : 'TOTAL CUSTOMER TERDAFTAR'}
-        value={isStaff ? available + working : records.length}
+        label={isStaff ? 'Petugas aktif' : 'Total pelanggan'}
+        value={
+          isStaff
+            ? records.filter(
+                (item) =>
+                  !['Masa Training', 'Nonaktif'].includes(String(item.status)),
+              ).length
+            : records.length
+        }
         unit={isStaff ? 'Petugas' : 'Customer'}
         note={
           isStaff
@@ -217,7 +227,7 @@ export function Summary({
         icon="customers"
       />
       <MetricCard
-        label={isStaff ? 'SIAGA & TERSEDIA' : 'PELANGGAN BERULANG'}
+        label={isStaff ? 'Petugas tersedia' : 'Pelanggan berulang'}
         value={
           isStaff
             ? available
@@ -233,7 +243,7 @@ export function Summary({
         tone={isStaff ? 'blue' : 'amber'}
       />
       <MetricCard
-        label={isStaff ? 'PETUGAS DI LUAR' : 'TOTAL TRANSAKSI SELESAI'}
+        label={isStaff ? 'Sedang bertugas' : 'Nilai transaksi selesai'}
         value={
           isStaff
             ? working

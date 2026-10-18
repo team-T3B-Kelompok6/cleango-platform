@@ -1,3 +1,4 @@
+import { displayId } from '@/lib/display';
 import { deleteAction } from '@/app/actions';
 import { resources, valueText } from '@/lib/resources';
 import type { RecordData, Resource } from '@/types';
@@ -14,17 +15,24 @@ export function DeleteRecordButton({
   compact?: boolean;
 }) {
   const label = 'Hapus ' + resources[resource].singular;
-  const name = valueText(record.name ?? record.customer ?? record.question);
+  const name =
+    resource === 'schedules'
+      ? [record.staff, record.date, record.time]
+          .map(valueText)
+          .filter(Boolean)
+          .join(' · ')
+      : valueText(record.name ?? record.customer ?? record.question);
   return (
     <DialogTrigger
       label={label}
       title={label}
-      subtitle={'#' + record.id}
+      subtitle={'#' + displayId(record.id)}
       icon="trash"
+      dialogClass="confirmation-dialog"
       className={compact ? 'icon-action record-delete' : 'button record-delete'}
     >
       <DeleteForm
-        name={name || '#' + record.id}
+        name={name || '#' + displayId(record.id)}
         action={deleteAction.bind(null, resource, record.id)}
       />
     </DialogTrigger>

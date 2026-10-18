@@ -1,0 +1,174 @@
+[
+  {
+    "case": "assignment-empty-rejected",
+    "passed": true
+  },
+  {
+    "case": "submit-pending-disabled",
+    "passed": true
+  },
+  {
+    "case": "assignment-saved-read-back",
+    "passed": true
+  },
+  {
+    "case": "order-unassigned-status-conflict",
+    "passed": true
+  },
+  {
+    "case": "API-form-error-preserves-values",
+    "passed": true
+  },
+  {
+    "case": "order-update-detail-read-back",
+    "passed": true
+  },
+  {
+    "case": "search-from-detail-returns-to-list",
+    "passed": true
+  },
+  {
+    "case": "cancel-delete-keeps-record",
+    "passed": true
+  },
+  {
+    "case": "order-delete",
+    "passed": true
+  },
+  {
+    "case": "schedule-moves-to-correct-shift",
+    "passed": true
+  },
+  {
+    "case": "schedule-read-update-delete",
+    "passed": true
+  },
+  {
+    "case": "schedule-date-filter",
+    "passed": true
+  },
+  {
+    "case": "date-reset-restores-list",
+    "passed": true
+  },
+  {
+    "case": "SOP-keyboard-tabs",
+    "passed": true
+  },
+  {
+    "case": "SOP-size-stable",
+    "passed": true
+  },
+  {
+    "case": "notifications-mark-read-filter",
+    "passed": true
+  },
+  {
+    "case": "mobile-menu-escape-focus-restored",
+    "passed": true
+  },
+  {
+    "case": "mobile-navigation-route",
+    "passed": true
+  },
+  {
+    "case": "FAQ-fractional-page-normalized",
+    "passed": true
+  },
+  {
+    "case": "FAQ-category-added",
+    "passed": true
+  },
+  {
+    "case": "FAQ-create-read-update-search-expand",
+    "passed": true
+  },
+  {
+    "case": "FAQ-delete",
+    "passed": true
+  },
+  {
+    "case": "customer-create-read-update",
+    "passed": true
+  },
+  {
+    "case": "customer-delete",
+    "passed": true
+  },
+  {
+    "case": "staff-skills-read",
+    "passed": true
+  },
+  {
+    "case": "staff-update-nonactive-tab",
+    "passed": true
+  },
+  {
+    "case": "staff-delete",
+    "passed": true
+  },
+  {
+    "case": "tracking-search-stale",
+    "passed": true
+  },
+  {
+    "case": "tracking-simulation-advance-pause",
+    "passed": true
+  },
+  {
+    "case": "service-category-added",
+    "passed": true
+  },
+  {
+    "case": "service-create-photo-and-promo",
+    "passed": true
+  },
+  {
+    "case": "service-remove-photo-and-end-promo",
+    "passed": true
+  },
+  {
+    "case": "service-delete",
+    "passed": true
+  },
+  {
+    "case": "banner-empty-rejected",
+    "passed": true
+  },
+  {
+    "case": "banner-upload-save",
+    "passed": true
+  },
+  {
+    "case": "promo-create-selected-update-disable",
+    "passed": true
+  },
+  {
+    "case": "promo-delete",
+    "passed": true
+  },
+  {
+    "case": "login-show-hide-password",
+    "passed": true
+  },
+  {
+    "case": "report-tab-Laporan Harian",
+    "passed": true
+  },
+  {
+    "case": "report-tab-Laporan Per Pelanggan",
+    "passed": true
+  },
+  {
+    "case": "report-tab-Laporan Performa Kru",
+    "passed": true
+  },
+  {
+    "case": "report-month-and-tab-preserved",
+    "passed": true
+  },
+  {
+    "case": "CSV-download-real-data",
+    "passed": true
+  }
+]

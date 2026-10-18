@@ -1,0 +1,116 @@
+{
+  "checks": [
+    {
+      "page": "dashboard",
+      "bodyFont": "15px",
+      "buttonFonts": [
+        {
+          "background": "rgb(255, 255, 255)",
+          "color": "rgb(52, 72, 62)",
+          "font": "14px",
+          "text": "Lihat SOP"
+        }
+      ],
+      "headingFont": "28px",
+      "overflow": false
+    },
+    {
+      "page": "pesanan",
+      "bodyFont": "15px",
+      "buttonFonts": [
+        {
+          "background": "rgb(255, 255, 255)",
+          "color": "rgb(52, 72, 62)",
+          "font": "14px",
+          "text": "Filter Tanggal"
+        },
+        {
+          "background": "rgb(255, 255, 255)",
+          "color": "rgb(52, 72, 62)",
+          "font": "14px",
+          "text": "Semua tanggal"
+        },
+        {
+          "background": "rgb(10, 128, 91)",
+          "color": "rgb(255, 255, 255)",
+          "font": "14px",
+          "text": "Pilih tanggal"
+        },
+        {
+          "background": "rgb(10, 128, 91)",
+          "color": "rgb(255, 255, 255)",
+          "font": "14px",
+          "text": "Tugaskan Petugas"
+        }
+      ],
+      "headingFont": "28px",
+      "overflow": false
+    },
+    {
+      "page": "layanan",
+      "bodyFont": "15px",
+      "buttonFonts": [
+        {
+          "background": "rgb(255, 255, 255)",
+          "color": "rgb(10, 128, 91)",
+          "font": "14px",
+          "text": "Tambah Banner Promo"
+        },
+        {
+          "background": "rgb(10, 128, 91)",
+          "color": "rgb(255, 255, 255)",
+          "font": "14px",
+          "text": "Tambah Layanan Baru"
+        },
+        {
+          "background": "rgb(255, 255, 255)",
+          "color": "rgb(10, 128, 91)",
+          "font": "14px",
+          "text": "Tambah kategori"
+        },
+        {
+          "background": "rgb(255, 255, 255)",
+          "color": "rgb(10, 128, 91)",
+          "font": "14px",
+          "text": "Atur Promo"
+        }
+      ],
+      "headingFont": "28px",
+      "overflow": false
+    },
+    {
+      "page": "faq",
+      "bodyFont": "15px",
+      "buttonFonts": [
+        {
+          "background": "rgb(10, 128, 91)",
+          "color": "rgb(255, 255, 255)",
+          "font": "14px",
+          "text": "Tambah FAQ Baru"
+        },
+        {
+          "background": "rgb(255, 255, 255)",
+          "color": "rgb(10, 128, 91)",
+          "font": "14px",
+          "text": "Tambah kategori"
+        },
+        {
+          "background": "rgb(255, 255, 255)",
+          "color": "rgb(10, 128, 91)",
+          "font": "14px",
+          "text": "Ubah"
+        },
+        {
+          "background": "rgb(255, 255, 255)",
+          "color": "rgb(52, 72, 62)",
+          "font": "14px",
+          "text": "Detail"
+        }
+      ],
+      "headingFont": "28px",
+      "overflow": false
+    }
+  ],
+  "cancelForm": "passed",
+  "consoleErrors": []
+}

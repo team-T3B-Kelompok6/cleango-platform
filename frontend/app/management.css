@@ -1,0 +1,1041 @@
+/* Shared management views and readable controls. */
+.banner-add {
+  color: var(--ui-accent);
+  border-color: var(--ui-border);
+  background: var(--surface);
+}
+.resource-services .admin-heading-actions {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.banner-form-hint {
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+.promo-upload-preview {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 3 / 1;
+  border: 1px dashed var(--ui-border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--banner-preview-bg);
+  color: var(--muted);
+  margin: 10px 0 12px;
+}
+.promo-upload-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.resource-services .admin-heading > div:first-child {
+  min-width: 0;
+}
+@media (max-width: 900px) {
+  .resource-services .admin-heading {
+    flex-wrap: wrap;
+  }
+  .resource-services .admin-heading-actions {
+    flex-basis: 100%;
+    justify-content: flex-end;
+    max-width: 100%;
+    flex-shrink: 1;
+  }
+}
+.cleango-logo {
+  display: inline-block;
+  position: relative;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 12%;
+  background: #26cbbd;
+}
+/* The supplied source includes margins; show its logo region without modifying the image. */
+.cleango-logo img {
+  position: absolute;
+  width: 136.604%;
+  height: auto;
+  max-width: none;
+  left: -21.132%;
+  top: -29.434%;
+}
+.login-brand-logo {
+  width: 52px;
+  height: 52px;
+  margin-bottom: 6px;
+}
+body {
+  font-size: var(--ui-text-body);
+}
+.button,
+.order-tabs button,
+.order-tabs a {
+  min-height: 38px;
+}
+.manage-form input,
+.manage-form select,
+.manage-form textarea {
+  font-size: var(--text-14);
+}
+.category-manager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 0 18px;
+  color: var(--muted);
+}
+.category-add {
+  color: var(--ui-accent);
+  background: white;
+}
+.category-help {
+  margin-top: 16px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.record-rud {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.record-rud .button {
+  font-size: var(--text-12);
+}
+.managed-person-row {
+  flex-direction: column;
+  align-items: stretch;
+}
+.managed-record-footer {
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+  margin-top: 16px;
+  width: 100%;
+}
+.managed-faq-row .faq-row-meta {
+  padding-right: 0;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.faq-category-samples {
+  flex-wrap: wrap;
+}
+.managed-faq-row summary {
+  gap: 16px;
+}
+.managed-faq-row summary > span {
+  min-width: 0;
+  flex: 1;
+}
+.managed-faq-row summary strong {
+  padding-right: 0;
+  overflow-wrap: anywhere;
+}
+.managed-faq-row details p {
+  line-height: 1.7;
+  font-size: var(--text-12);
+}
+.shift-card-bottom {
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.shift-card-bottom .record-rud {
+  width: 100%;
+}
+.manage-form input[type='file'] {
+  padding: 10px;
+  width: 100%;
+  font-size: var(--text-12);
+}
+.manage-form input[type='file']::file-selector-button {
+  border: 0;
+  background: var(--ui-accent-soft);
+  color: var(--ui-accent);
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .category-manager {
+    flex-wrap: wrap;
+  }
+  .record-rud {
+    justify-content: flex-start;
+  }
+  .record-rud .button {
+    flex-grow: 1;
+  }
+  .managed-record-footer {
+    margin-top: 12px;
+  }
+}
+
+/* Shared visual rhythm: readable controls, restrained emphasis, and compact records. */
+.header {
+  z-index: 80;
+}
+.date-popover {
+  z-index: 90;
+}
+@media (max-width: 980px), (max-height: 700px) {
+  .sop-content.summary .sop-step ol {
+    display: none;
+  }
+  .sop-content.summary .sop-step-heading {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+}
+@media (max-width: 700px) {
+  .modal.sop-dialog {
+    height: calc(100dvh - 40px);
+  }
+}
+@media (max-height: 700px) {
+  .sop-content.summary .sop-facts,
+  .sop-content.summary .sop-step-heading p {
+    display: none;
+  }
+}
+@media (max-height: 520px) {
+  .sop-content.summary {
+    padding: var(--space-12);
+  }
+  .sop-content.summary .sop-facts,
+  .sop-content.summary .sop-note,
+  .sop-content.summary .sop-step-heading p {
+    display: none;
+  }
+  .sop-content.summary .sop-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sop-content.summary .sop-step {
+    padding: var(--space-12);
+  }
+}
+.button {
+  min-height: var(--ui-control-height);
+  border-radius: var(--space-8);
+  font-size: var(--ui-text-control);
+  font-weight: 600;
+  line-height: 1.45;
+  border-color: var(--ui-border);
+}
+.button.primary,
+.nav-link.active {
+  background: var(--ui-accent);
+  border-color: var(--ui-accent);
+  color: var(--color-007);
+}
+.button.primary:hover {
+  background: var(--ui-accent-hover);
+  border-color: var(--ui-accent-hover);
+}
+.nav-link.active:hover {
+  background: var(--ui-accent-hover);
+}
+.nav-link {
+  border-radius: var(--space-8);
+}
+.profile .avatar {
+  color: var(--ui-accent);
+  background: var(--ui-accent-soft);
+  font-size: var(--text-12);
+  font-weight: 700;
+}
+.sidebar-bottom {
+  border-top: 1px solid var(--ui-border);
+  padding-top: var(--space-16);
+}
+.header {
+  border-bottom-color: var(--ui-border);
+}
+.section-heading .text-link {
+  font-size: var(--text-12);
+  color: var(--ui-accent);
+}
+.announcement {
+  background: var(--ui-accent-soft);
+  border-color: var(--ui-border);
+  box-shadow: none;
+}
+.announcement-icon {
+  background: var(--ui-accent);
+  color: var(--ui-accent);
+}
+.announcement p {
+  line-height: 1.55;
+}
+.metric-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: var(--space-8);
+  padding: var(--ui-card-padding);
+  min-width: 0;
+}
+.metric-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-10);
+  min-height: var(--space-32);
+}
+.metric-top .metric-label {
+  min-width: 0;
+  padding: 0;
+  white-space: normal;
+  line-height: 1.45;
+  color: var(--ui-muted);
+  font-size: var(--ui-text-control);
+  font-weight: 500;
+}
+.metric-top .metric-icon {
+  position: static;
+  flex: 0 0 var(--space-32);
+  width: var(--space-32);
+  height: var(--space-32);
+  border-radius: var(--space-8);
+  margin: 0;
+}
+.metric-value {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-6);
+  margin: 0;
+  line-height: 1.25;
+  font-size: var(--ui-text-value);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.metric-value span {
+  margin-left: 0;
+  font-size: var(--ui-text-meta);
+  color: var(--ui-muted);
+}
+.metric-value-text {
+  display: block;
+  font-size: var(--text-14);
+  line-height: 1.45;
+}
+.metric-value.metric-value-text {
+  font-size: var(--ui-text-record);
+}
+.metric-note {
+  margin-top: auto;
+  white-space: normal;
+  color: var(--ui-muted);
+  font-size: var(--ui-text-meta);
+  line-height: 1.55;
+}
+.metric-card::before {
+  display: none;
+}
+.metric-card.green::before {
+  background: var(--ui-accent);
+}
+.metric-card.blue::before {
+  background: var(--ui-blue);
+}
+.metric-card.amber::before {
+  background: var(--ui-amber);
+}
+.faq-summary-grid {
+  gap: var(--space-13);
+}
+.record-rud .button {
+  min-height: var(--ui-control-height);
+  padding: var(--space-8) var(--space-12);
+  font-size: var(--ui-text-control);
+  border-radius: var(--space-8);
+}
+.record-rud .record-delete.icon-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ui-control-height);
+  height: var(--ui-control-height);
+  padding: 0;
+  gap: 0;
+  line-height: 1;
+  border-radius: var(--space-8);
+}
+.resource-staff .managed-person-row,
+.resource-customers .managed-person-row {
+  min-height: auto;
+  gap: 0;
+}
+.managed-person-row .managed-record-footer {
+  margin-top: var(--space-16);
+  padding-top: var(--space-14);
+}
+.figma-person-main p,
+.person-missing,
+.figma-service-top p,
+.shift-card > p,
+.shift-address,
+.shift-card-bottom > span {
+  color: var(--ui-muted);
+  line-height: 1.55;
+}
+.resource-staff .figma-person-meta,
+.resource-customers .figma-person-meta {
+  gap: var(--space-5);
+}
+.order-tabs button.selected,
+.faq-filter-bar .order-tabs button.selected,
+.report-tabs a[aria-current='page'] {
+  background: var(--ui-accent);
+  color: var(--color-007);
+}
+.edit-action,
+.text-link,
+.tracking-location-action {
+  color: var(--ui-accent);
+}
+.order-info,
+.activity-copy {
+  line-height: 1.5;
+}
+.status-badge.green,
+.faq-category-tag.green {
+  color: var(--ui-accent-hover);
+}
+.status-badge.blue {
+  color: var(--ui-blue);
+}
+.status-badge.amber {
+  color: var(--ui-amber);
+}
+.finance-bar {
+  background: var(--ui-accent);
+}
+.finance-bar i,
+.finance-bar b {
+  display: none;
+}
+.report-payment-empty {
+  color: var(--ui-muted);
+  line-height: 1.65;
+}
+.empty-state {
+  border-style: solid;
+  border-color: var(--ui-border);
+  box-shadow: none;
+}
+.modal-header {
+  background: var(--color-007);
+}
+.modal-header h2 {
+  line-height: 1.35;
+}
+.modal-footer .button {
+  min-height: var(--ui-control-height);
+}
+.login-page {
+  background: var(--color-002);
+}
+.login-center {
+  justify-content: center;
+  padding-block: var(--space-32);
+  gap: var(--space-20);
+}
+.login-center .login-card {
+  border: 1px solid var(--ui-border);
+  border-radius: var(--space-16);
+  box-shadow: var(--ui-shadow);
+}
+.login-brand-logo {
+  margin-bottom: var(--space-16);
+}
+.login-intro h1 {
+  margin-top: 0;
+}
+.login-intro p {
+  color: var(--ui-muted);
+}
+.login-center .login-card form {
+  gap: var(--space-18);
+}
+.login-center .login-field label {
+  font-size: var(--text-12);
+  font-weight: 600;
+}
+.login-center .login-card input:not([type='checkbox']) {
+  height: var(--space-48);
+  font-size: var(--text-14);
+  border-color: var(--ui-border);
+}
+.login-center .login-card input:-webkit-autofill {
+  -webkit-text-fill-color: var(--design-text);
+  box-shadow: 0 0 0 100rem var(--color-016) inset;
+}
+.login-center .login-submit {
+  height: auto;
+}
+.login-submit > .button {
+  min-height: var(--space-48);
+  box-shadow: none;
+  font-size: var(--text-14);
+}
+.login-center .login-copyright {
+  margin-top: 0;
+  color: var(--ui-muted);
+}
+@media (max-width: 980px) and (min-width: 601px) {
+  .admin-heading {
+    flex-wrap: wrap;
+  }
+  .admin-heading-actions {
+    flex-direction: row;
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .admin-heading-actions > .button {
+    width: auto;
+  }
+}
+@media (max-width: 600px) {
+  .metric-card {
+    padding: var(--space-16);
+  }
+  .metric-top {
+    min-height: var(--space-32);
+  }
+  .metric-top .metric-icon {
+    width: var(--space-32);
+    height: var(--space-32);
+    flex-basis: var(--space-32);
+  }
+  .metric-value {
+    font-size: var(--text-22);
+  }
+  .login-center {
+    padding-block: var(--space-24);
+  }
+}
+
+/* Typography uses proportional line heights so larger text keeps its breathing room. */
+body {
+  line-height: 1.6;
+}
+h1,
+h2 {
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+h3 {
+  font-family: var(--font-body), sans-serif;
+  font-weight: 600;
+  letter-spacing: normal;
+}
+.page-title h1,
+.login-intro h1 {
+  font-size: var(--ui-text-page);
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+}
+.page-title p {
+  margin-top: var(--space-8);
+  line-height: 1.6;
+  font-size: var(--ui-text-body);
+}
+.section-heading h2,
+.shift-heading h2,
+.finance-layout h2 {
+  line-height: 1.45;
+  font-size: var(--ui-text-section);
+}
+.brand {
+  gap: var(--space-10);
+  padding-inline: 0;
+}
+.brand > span:last-child,
+.login-header .login-brand > span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.brand strong,
+.login-header .login-brand strong {
+  font-size: var(--text-18);
+  font-weight: 700;
+  line-height: 1.15;
+}
+.brand small,
+.login-header .login-brand small {
+  font-size: 0.916667rem;
+  margin: 0;
+  line-height: 1.5;
+}
+@media (min-width: 981px) {
+  .brand small {
+    white-space: nowrap;
+  }
+}
+.profile {
+  gap: var(--space-10);
+}
+.profile-copy {
+  gap: var(--space-3);
+}
+.profile strong {
+  font-size: var(--text-13);
+  line-height: 1.4;
+  font-weight: 600;
+}
+.profile small {
+  font-size: 0.916667rem;
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+}
+.nav-link {
+  line-height: 1.5;
+  font-weight: 500;
+}
+.nav-link.active {
+  font-weight: 600;
+}
+.activity-card {
+  padding-block: var(--space-18);
+}
+.activity-copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+.activity-copy > small {
+  margin: 0;
+  line-height: 1.5;
+}
+.activity-copy h3 {
+  font-size: var(--ui-text-record);
+  line-height: 1.5;
+  font-weight: 600;
+}
+.activity-copy > .activity-meta {
+  margin: 0;
+  line-height: 1.55;
+  row-gap: var(--space-4);
+  column-gap: var(--space-18);
+}
+.order-card h3,
+.figma-service-top h3,
+.figma-person-main h3,
+.shift-card h3,
+.finance-order-row h3,
+.sop-step h3 {
+  line-height: 1.5;
+  font-weight: 600;
+}
+.order-info > p,
+.figma-service-top p,
+.figma-person-main > p {
+  margin-top: var(--space-6);
+}
+.figma-person-meta,
+.figma-person-meta > span,
+.shift-heading h2 span,
+.status-badge,
+.faq-category-tag {
+  line-height: 1.5;
+}
+.announcement h3 {
+  line-height: 1.5;
+  font-weight: 600;
+  margin-bottom: var(--space-6);
+}
+.announcement p,
+.manage-form label,
+.manage-form input,
+.manage-form textarea,
+.manage-form select {
+  line-height: 1.6;
+}
+.modal-header h2 {
+  line-height: 1.4;
+  letter-spacing: -0.015em;
+}
+.modal-header p {
+  margin-top: var(--space-6);
+  line-height: 1.55;
+}
+.managed-faq-row summary strong {
+  font-family: var(--font-body), sans-serif;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.login-center .login-field label {
+  line-height: 1.5;
+}
+.sop-content.summary {
+  padding-bottom: var(--space-16);
+}
+
+/* One set of surfaces and control sizes across the operational screens. */
+.admin-heading > div:first-child {
+  min-width: 0;
+}
+.admin-heading-actions > .button,
+.admin-heading-actions .date-filter,
+.admin-heading-actions .date-filter-anchor > .button,
+.admin-heading-actions .admin-add {
+  min-height: var(--ui-control-primary);
+  font-size: var(--ui-text-control);
+}
+.metric-card,
+.activity-card,
+.order-card,
+.figma-service-row,
+.figma-person-row,
+.shift-card,
+.faq-design-row,
+.admin-panel {
+  border-color: var(--ui-border);
+  border-radius: var(--ui-radius-card);
+  box-shadow: none;
+}
+.order-card,
+.figma-service-row,
+.figma-person-row,
+.faq-design-row,
+.shift-card {
+  padding: var(--ui-card-padding);
+}
+.metric-card:hover,
+.order-card:hover,
+.figma-service-row:hover,
+.figma-person-row:hover,
+.shift-card:hover,
+.faq-design-row:hover {
+  border-color: var(--ui-border);
+  box-shadow: none;
+  transform: none;
+}
+.activity-card:hover {
+  background: var(--ui-accent-soft);
+  border-color: var(--ui-border);
+  box-shadow: none;
+}
+.order-card.needs-action {
+  background: var(--color-276);
+  border-color: var(--color-277);
+}
+.order-card h3,
+.figma-service-top h3,
+.figma-person-main h3,
+.shift-card h3,
+.finance-order-row h3,
+.managed-faq-row summary strong {
+  font-size: var(--ui-text-record);
+}
+.figma-service-top p,
+.figma-person-main p,
+.shift-card > p,
+.order-card-bottom p {
+  font-size: var(--ui-text-control);
+  line-height: 1.6;
+}
+.figma-service-top > small,
+.figma-person-meta,
+.figma-kicker,
+.customer-chips,
+.shift-address,
+.shift-card-bottom > span,
+.activity-copy > small,
+.activity-copy > .activity-meta,
+.finance-order-row small,
+.finance-order-row p,
+.faq-pagination {
+  color: var(--ui-muted);
+  font-size: var(--ui-text-meta);
+  line-height: 1.55;
+}
+.figma-feature-list > span {
+  color: var(--ui-muted);
+  background: var(--surface-soft);
+  font-size: var(--ui-text-meta);
+  line-height: 1.5;
+}
+.service-package {
+  color: var(--ui-accent-hover);
+  background: var(--ui-accent-soft);
+}
+.managed-faq-row details > p,
+.order-info,
+.order-card-top .order-time {
+  color: var(--ui-muted);
+}
+.order-card-top .order-time {
+  font-size: var(--ui-text-meta);
+  line-height: 1.5;
+}
+.managed-faq-row summary strong {
+  color: var(--design-text);
+}
+.order-info > strong,
+.figma-service-bottom strong {
+  color: var(--ui-accent);
+}
+.status-badge,
+.faq-category-tag,
+.faq-publish-tag {
+  font-size: var(--ui-text-small);
+  font-weight: 600;
+  line-height: 1.5;
+}
+.faq-category-tag.green,
+.faq-category-tag.blue,
+.faq-category-tag.amber,
+.faq-category-tag.purple {
+  background: var(--surface-soft);
+  color: var(--ui-muted);
+}
+.faq-publish-tag {
+  background: transparent;
+  padding-inline: 0;
+  font-weight: 400;
+  color: var(--ui-muted);
+}
+.order-tabs,
+.report-tabs {
+  border-color: var(--ui-border);
+  border-radius: var(--ui-radius-card);
+}
+.order-tabs button,
+.report-tabs a {
+  min-height: var(--ui-control-height);
+  font-size: var(--ui-text-control);
+  font-weight: 500;
+  line-height: 1.45;
+}
+.order-tabs button.selected,
+.report-tabs a[aria-current='page'] {
+  font-weight: 600;
+  box-shadow: none;
+  animation: tab-select var(--motion-base) ease both;
+}
+.report-tabs a:hover {
+  transform: none;
+}
+.order-list,
+.figma-list,
+.faq-design-list {
+  animation: content-fade var(--motion-fast) ease backwards;
+}
+.record-rud .edit-action,
+.record-rud .tracking-location-action {
+  color: var(--ui-accent);
+}
+.record-rud .button {
+  padding-inline: var(--space-12);
+  background: var(--surface);
+  border-color: var(--ui-border);
+}
+.record-rud .button:hover {
+  background: var(--surface-soft);
+  border-color: var(--ui-focus);
+}
+.record-rud .button.primary {
+  background: var(--ui-accent);
+  border-color: var(--ui-accent);
+  color: var(--surface);
+}
+.record-rud .button.primary:hover {
+  background: var(--ui-accent-hover);
+  border-color: var(--ui-accent-hover);
+}
+.record-rud .record-delete {
+  border-color: var(--ui-border);
+}
+.form-grid input,
+.form-grid select,
+.form-grid textarea,
+.service-field input,
+.service-field select,
+.service-field textarea,
+.global-search {
+  border-color: var(--ui-border);
+  border-radius: var(--space-8);
+}
+.form-grid input:not([type='checkbox']),
+.form-grid select,
+.service-field input,
+.service-field select {
+  min-height: var(--ui-control-primary);
+}
+.form-grid input,
+.form-grid select,
+.form-grid textarea,
+.service-field input,
+.service-field select,
+.service-field textarea {
+  transition:
+    border-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease;
+}
+.form-grid input:focus,
+.form-grid select:focus,
+.form-grid textarea:focus,
+.service-field input:focus,
+.service-field select:focus,
+.service-field textarea:focus {
+  border-color: var(--ui-focus);
+}
+.modal,
+.modal.sop-dialog {
+  border-radius: var(--ui-radius-dialog);
+}
+.modal-header h2,
+.sop-dialog .modal-header h2,
+.notification-popover .modal-header h2,
+.tracking-dialog .modal-header h2,
+.date-popover .modal-header h2 {
+  font-size: var(--text-18);
+}
+.modal-header p,
+.sop-dialog .modal-header p,
+.notification-popover .modal-header p,
+.tracking-dialog .modal-header p,
+.date-popover .modal-header p {
+  font-size: var(--ui-text-meta);
+}
+.modal-heading-icon,
+.calendar-summary-icon {
+  color: var(--ui-accent);
+  background: var(--ui-accent-soft);
+}
+.modal-footer {
+  background: var(--surface);
+}
+.notification-popover,
+.date-popover,
+.account-popover,
+.order-more-menu {
+  border-color: var(--ui-border);
+  box-shadow: var(--ui-shadow-popover);
+  border-radius: var(--ui-radius-card);
+}
+.dialog-tabs button {
+  font-size: var(--ui-text-control);
+  font-weight: 500;
+}
+.sop-dialog .dialog-tabs button.active {
+  animation: tab-select var(--motion-base) ease both;
+}
+.sop-dialog .dialog-tabs button:active {
+  transform: none;
+}
+.close-button {
+  width: var(--ui-control-height);
+  height: var(--ui-control-height);
+}
+.record-detail dt {
+  font-size: var(--ui-text-meta);
+}
+.record-detail dd {
+  font-size: var(--ui-text-body);
+}
+.finance-metrics .metric-value {
+  font-size: var(--ui-text-value);
+}
+.finance-chart-caption,
+.finance-bar-column > span,
+.finance-bar > small {
+  color: var(--ui-muted);
+  font-size: var(--ui-text-meta);
+  line-height: 1.6;
+}
+.faq-in-page-search {
+  height: var(--ui-control-height);
+  border-color: var(--ui-border);
+  background: var(--surface);
+}
+.faq-in-page-search input {
+  font-size: var(--ui-text-control);
+  color: var(--design-text);
+}
+.faq-in-page-search input::placeholder {
+  color: var(--ui-muted);
+}
+.form-grid input:not([type='checkbox']),
+.form-grid select,
+.form-grid textarea,
+.service-field input,
+.service-field select,
+.service-field textarea {
+  font-size: var(--text-14);
+}
+.login-center .login-card {
+  border-radius: var(--ui-radius-dialog);
+}
+.login-center .login-field label {
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: var(--ui-text-control);
+}
+.login-intro .login-eyebrow {
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+.login-tip {
+  border-color: var(--ui-border);
+  box-shadow: none;
+}
+@media (max-width: 980px) {
+  .metrics-grid,
+  .metrics-grid.order-metrics,
+  .finance-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .metrics-grid > .metric-card:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 700px) {
+  .page-title h1,
+  .login-intro h1 {
+    font-size: var(--text-24);
+  }
+  .metric-value {
+    font-size: var(--text-24);
+  }
+  .finance-metrics .metric-value {
+    font-size: var(--text-24);
+  }
+  .metric-top .metric-label {
+    max-width: none;
+  }
+  .order-card,
+  .figma-service-row,
+  .figma-person-row,
+  .faq-design-row,
+  .shift-card {
+    padding: var(--space-16);
+  }
+  .admin-heading-actions {
+    justify-content: flex-start;
+  }
+  .admin-heading-actions > .button {
+    flex: 1 1 auto;
+  }
+  .notification-popover .modal-header h2,
+  .date-popover .modal-header h2 {
+    font-size: var(--ui-text-record);
+  }
+  .notification-toolbar .dialog-tabs button {
+    font-size: var(--ui-text-small);
+  }
+}

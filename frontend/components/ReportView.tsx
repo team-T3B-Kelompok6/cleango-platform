@@ -3,9 +3,10 @@ import { list } from '@/lib/api';
 import { rupiah } from '@/lib/resources';
 import type { Order, Search } from '@/types';
 import { MetricCard } from './MetricCard';
-import { DialogTrigger } from './DialogTrigger';
+import { DialogTrigger, DialogCloseButton } from './DialogTrigger';
 import { Icon } from './Icon';
 import { UiIcon } from './UiIcon';
+import { displayId } from '@/lib/display';
 
 const tabs = [
   'Ringkasan Bulanan',
@@ -110,14 +111,14 @@ export async function ReportView({ params }: { params: Search }) {
       </div>
       <div className="metrics-grid order-metrics finance-metrics">
         <MetricCard
-          label="TOTAL PENDAPATAN"
+          label="Pendapatan selesai"
           value={rupiah(total)}
           note="Pesanan selesai dalam periode"
           icon="services"
           uiIcon="wallet"
         />
         <MetricCard
-          label="PELANGGAN AKTIF"
+          label="Pelanggan aktif"
           value={new Set(visible.map((order) => order.customer)).size}
           unit="Customer"
           note="Pelanggan dengan pesanan selesai"
@@ -125,7 +126,7 @@ export async function ReportView({ params }: { params: Search }) {
           tone="blue"
         />
         <MetricCard
-          label="ORDER BERHASIL"
+          label="Pesanan selesai"
           value={visible.length}
           unit="Order"
           note="Pesanan selesai dalam periode"
@@ -200,8 +201,7 @@ export async function ReportView({ params }: { params: Search }) {
             </div>
           ) : (
             <p className="report-payment-empty">
-              Metode pembayaran belum tersedia. Ringkasan akan tampil setelah
-              informasi pembayaran diterima dari API.
+              Belum ada data metode pembayaran untuk periode ini.
             </p>
           )}
         </section>
@@ -240,7 +240,7 @@ export async function ReportView({ params }: { params: Search }) {
                 <DialogTrigger
                   label="Lihat Rincian"
                   title="Rincian Pesanan Selesai"
-                  subtitle={'#' + order.id}
+                  subtitle={'#' + displayId(order.id)}
                 >
                   <div className="modal-body invoice-detail">
                     <h3>{order.customer}</h3>
@@ -254,11 +254,14 @@ export async function ReportView({ params }: { params: Search }) {
                         ? 'Metode pembayaran: ' + order.paymentMethod
                         : 'Informasi pembayaran belum tersedia.'}
                     </small>
+                  </div>
+                  <div className="modal-footer">
+                    <DialogCloseButton />
                     <Link
-                      className="button"
+                      className="button primary"
                       href={'/pesanan/' + encodeURIComponent(order.id)}
                     >
-                      Detail pesanan
+                      Buka Pesanan
                     </Link>
                   </div>
                 </DialogTrigger>

@@ -1,10 +1,12 @@
 'use client';
+import { displayId } from '@/lib/display';
 import { UiIcon } from './UiIcon';
 import Link from 'next/link';
 import { useState, useRef } from 'react';
 import { Icon } from './Icon';
 import { useOutsideDismiss } from './useOutsideDismiss';
 import type { Order } from '@/types';
+import { orderStatusLabel } from '@/lib/order-flow';
 export function Notifications({ orders }: { orders: Order[] }) {
   const [open, setOpen] = useState(false),
     [read, setRead] = useState<string[]>([]),
@@ -101,13 +103,13 @@ export function Notifications({ orders }: { orders: Order[] }) {
               </span>
               <span className="notification-copy">
                 <span className="notification-row-title">
-                  {order.status}
+                  {orderStatusLabel(order.status)}
                   <small>{order.date}</small>
                 </span>
                 <span>
                   {order.customer} · {order.service}
                 </span>
-                <em>Lihat pesanan #{order.id}</em>
+                <em>Lihat pesanan #{displayId(order.id)}</em>
               </span>
             </Link>
           ))}

@@ -1,7 +1,8 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { list, detail } from '@/lib/api';
-import { resources, rupiah, valueText, shiftOf } from '@/lib/resources';
+import { resources, valueText, shiftOf } from '@/lib/resources';
 import { Filters, SearchInput } from './Filters';
 import { DialogTrigger } from './DialogTrigger';
 import { ResourceFormServer } from './ResourceFormServer';
@@ -12,9 +13,24 @@ import { PeopleList } from './PeopleList';
 import { FaqList } from './FaqList';
 import { ScheduleList } from './ScheduleList';
 import { TrackingButton } from './tracking/TrackingButton';
-import { DeleteRecordButton } from './DeleteRecordButton';
-import { AssignmentFormServer } from './AssignmentFormServer';
-import type { Resource, RecordData, Search, Order } from '@/types';
+import { RecordDetailServer } from './RecordDetailServer';
+import { detailReturn } from '@/lib/detail-return';
+import { listCategories } from '@/lib/categories';
+import { CategoryManager } from './CategoryManager';
+import { PromoManagerServer } from './PromoManagerServer';
+import { UiIcon } from './UiIcon';
+import { displayId } from '@/lib/display';
+import { newestOrderFirst } from '@/lib/order-flow';
+import { withOrderWorkTimes } from '@/lib/order-work-times';
+import type {
+  Resource,
+  RecordData,
+  Search,
+  Order,
+  Service,
+  Staff,
+} from '@/types';
+import { staffOperationalStatus } from '@/lib/staff-availability';
 function query(search: Search, key: string) {
   const value = search[key];
   return typeof value === 'string' ? value : '';
@@ -28,7 +44,20 @@ export async function ResourceListPage({
   search: Search;
 }) {
   const config = resources[resource];
+  const categories =
+    resource === 'services' || resource === 'faqs'
+      ? await listCategories(resource)
+      : [];
   let records = await list(resource);
+  if (resource === 'orders')
+    records = [...(await withOrderWorkTimes(records))].sort(newestOrderFirst);
+  if (resource === 'staff') {
+    const orders = await withOrderWorkTimes(await list<Order>('orders'));
+    records = records.map((person) => ({
+      ...person,
+      operationalStatus: staffOperationalStatus(person as Staff, orders),
+    }));
+  }
   const today = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Jakarta',
   }).format(new Date());
@@ -49,14 +78,25 @@ export async function ResourceListPage({
       );
       return {
         ...customer,
-        orderCount: customer.orderCount ?? ownOrders.length,
-        totalSpent:
-          customer.totalSpent ??
-          ownOrders
-            .filter((order) => order.status === 'Selesai')
-            .reduce((sum, order) => sum + order.price, 0),
+        orderCount: ownOrders.length,
+        totalSpent: ownOrders
+          .filter((order) => order.status === 'Selesai')
+          .reduce((sum, order) => sum + order.price, 0),
       };
     });
+  }
+  if (resource === 'schedules') {
+    records = records
+      .map((record) => ({
+        ...record,
+        date: String(record.date),
+        staff: String(record.staff),
+      }))
+      .sort(
+        (a, b) =>
+          String(b.date).localeCompare(String(a.date)) ||
+          String(a.staff).localeCompare(String(b.staff)),
+      );
   }
   const q = query(search, 'q').toLowerCase(),
     tab = query(search, 'tab'),
@@ -79,7 +119,11 @@ export async function ResourceListPage({
       (!from || String(item.date) >= from) &&
       (!to || String(item.date) <= to),
   );
-  const page = Math.max(1, Number(query(search, 'page')) || 1),
+  const requestedPage = Number(query(search, 'page'));
+  const page =
+      Number.isSafeInteger(requestedPage) && requestedPage > 0
+        ? requestedPage
+        : 1,
     pageCount = Math.max(1, Math.ceil(filtered.length / 4)),
     currentPage = Math.min(page, pageCount),
     shown =
@@ -96,23 +140,50 @@ export async function ResourceListPage({
   const edit = (item: RecordData, label = 'Detail & Ubah') => (
     <DialogTrigger
       label={label}
-      title={'Detail & Ubah ' + config.singular}
-      subtitle={'#' + item.id}
-      wide={resource === 'orders' || resource === 'services'}
-      dialogClass={resource === 'orders' ? 'order-form-dialog' : ''}
-      dialogIcon={resource === 'orders' ? 'edit' : undefined}
-      className={
-        resource === 'faqs'
-          ? 'icon-action'
-          : resource === 'services' || resource === 'staff'
-            ? 'text-action edit-action'
-            : 'button'
+      title={
+        resource === 'services'
+          ? label.includes('Promo')
+            ? 'Atur Promo Layanan'
+            : 'Ubah Layanan'
+          : resource === 'orders'
+            ? 'Ubah Pesanan'
+            : resource === 'schedules'
+              ? 'Ubah Jadwal'
+              : 'Ubah ' + config.singular
       }
-      icon={
-        ['services', 'staff', 'faqs'].includes(resource) ? 'edit' : undefined
+      ariaLabel={
+        (resource === 'services' && label.includes('Promo') ? label : 'Ubah') +
+        ' ' +
+        config.singular +
+        ' ' +
+        item.id
       }
+      subtitle={
+        '#' +
+        displayId(item.id) +
+        (resource === 'services'
+          ? ' · Kelola foto, tarif, durasi, dan fasilitas layanan.'
+          : '')
+      }
+      wide
+      dialogClass={
+        resource === 'orders'
+          ? 'record-detail-dialog orders-detail-dialog'
+          : resource === 'services'
+            ? 'service-form-dialog'
+            : resource === 'schedules'
+              ? 'record-detail-dialog schedules-detail-dialog'
+              : ''
+      }
+      dialogIcon={resource === 'schedules' ? 'calendar' : 'edit'}
+      className="button edit-action"
+      icon="edit"
     >
-      <ResourceFormServer resource={resource} record={item} />
+      <ResourceFormServer
+        resource={resource}
+        record={item}
+        focusPromo={resource === 'services' && label.includes('Promo')}
+      />
     </DialogTrigger>
   );
   return (
@@ -139,7 +210,14 @@ export async function ResourceListPage({
               title={'Tambah ' + config.singular + ' Baru'}
               className="button primary admin-add"
               icon="plus"
-              wide={resource === 'services'}
+              wide
+              dialogClass={
+                resource === 'services'
+                  ? 'service-form-dialog'
+                  : resource === 'schedules'
+                    ? 'record-detail-dialog schedules-detail-dialog'
+                    : ''
+              }
               subtitle={
                 resource === 'services'
                   ? 'Atur detail paket, harga, dan fasilitas layanan.'
@@ -156,12 +234,30 @@ export async function ResourceListPage({
           Data berhasil disimpan.
         </p>
       )}
+      {query(search, 'taskDispatch') && (
+        <p className="dispatch-result-note" role="status">
+          {query(search, 'taskDispatch') === 'simulation'
+            ? 'Penugasan tersimpan.'
+            : query(search, 'taskDispatch') === 'requested'
+              ? 'Penugasan tersimpan. Periksa hasil pengiriman di Pantau Petugas.'
+              : 'Penugasan tersimpan. Pengiriman link belum berhasil; buka Pantau Petugas untuk kirim ulang atau salin link.'}
+        </p>
+      )}
+      {resource === 'services' && query(search, 'bannerSaved') && (
+        <p className="form-success" role="status">
+          Banner promo berhasil ditambahkan.
+        </p>
+      )}
       {query(search, 'deleted') && (
         <p className="form-success" role="status">
           Data berhasil dihapus.
         </p>
       )}
-      <Summary resource={resource} records={records} />
+      <Summary
+        resource={resource}
+        records={records}
+        categoryNames={categories.map((category) => category.name)}
+      />
       <div
         className={
           resource === 'faqs' ? 'faq-filter-bar' : 'resource-filter-bar'
@@ -169,15 +265,49 @@ export async function ResourceListPage({
       >
         <Filters
           tabs={
-            resource === 'staff' &&
-            (records.some((person) => person.status === 'Nonaktif') ||
-              tab === 'Nonaktif')
-              ? [...(config.tabs ?? []), 'Nonaktif']
-              : config.tabs
+            resource === 'services' || resource === 'faqs'
+              ? [
+                  resource === 'services' ? 'Semua Layanan' : 'Semua',
+                  ...new Set([
+                    ...categories.map((category) => category.name),
+                    ...records.map((record) => String(record.category)),
+                  ]),
+                ]
+              : resource === 'staff' &&
+                  (records.some((person) => person.status === 'Nonaktif') ||
+                    tab === 'Nonaktif')
+                ? [...new Set([...(config.tabs ?? []), 'Nonaktif'])]
+                : config.tabs
           }
         />
         <SearchInput mobile={resource !== 'faqs'} faq={resource === 'faqs'} />
       </div>
+      {(resource === 'services' || resource === 'faqs') && (
+        <CategoryManager
+          resource={resource}
+          count={
+            new Set([
+              ...categories.map((category) => category.name),
+              ...records.map((record) => String(record.category)),
+            ]).size
+          }
+        >
+          {resource === 'services' && (
+            <Suspense
+              fallback={
+                <button type="button" className="button category-add" disabled>
+                  <UiIcon name="tag" /> Kelola Promo
+                </button>
+              }
+            >
+              <PromoManagerServer
+                services={records as Service[]}
+                today={today}
+              />
+            </Suspense>
+          )}
+        </CategoryManager>
+      )}
       <div
         className={
           resource === 'orders'
@@ -263,137 +393,27 @@ export async function ResourceDetailPage({
   resource,
   id,
   saved = false,
+  search = {},
 }: {
   resource: Resource;
   id: string;
   saved?: boolean;
+  search?: Search;
 }) {
-  const config = resources[resource],
-    record = await detail(resource, id);
-  const related =
-    resource === 'staff'
-      ? (await list('schedules')).filter((item) =>
-          String(item.staff).split(' & ').includes(String(record.name)),
-        )
-      : resource === 'customers'
-        ? (await list<Order>('orders')).filter((item) =>
-            item.customerId
-              ? item.customerId === id
-              : item.customer === record.name,
-          )
-        : [];
+  const record = await detail(resource, id);
+  const returnTo = detailReturn(resource, search);
   return (
-    <div className="record-page">
-      <div className="page-title">
-        <div>
-          <h1>Detail {config.singular}</h1>
-          <p>#{record.id}</p>
-        </div>
-        <div className="admin-heading-actions">
-          {resource === 'staff' && (
-            <TrackingButton name={String(record.name)} />
-          )}
-          {resource === 'orders' &&
-            Array.isArray(record.staff) &&
-            record.staff.length > 0 && (
-              <TrackingButton name={String(record.staff[0])} />
-            )}
-          <Link className="button" href={config.path}>
-            Kembali ke daftar
-          </Link>
-        </div>
-      </div>
-      {saved && (
-        <p role="status" className="form-success">
-          Data berhasil disimpan.
-        </p>
-      )}
-      <dl className="record-detail">
-        {config.fields.map((field) => (
-          <div
-            key={field.name}
-            className={field.kind === 'textarea' ? 'full-width' : ''}
-          >
-            <dt>{field.label}</dt>
-            <dd>
-              {field.name === 'price'
-                ? rupiah(Number(record[field.name]))
-                : valueText(record[field.name]) || '—'}
-            </dd>
-          </div>
-        ))}
-      </dl>
-      {(resource === 'staff' || resource === 'customers') && (
-        <section className="admin-panel">
-          <h2>
-            {resource === 'staff' ? 'Jadwal & Penugasan' : 'Riwayat Pesanan'}
-          </h2>
-          {related.length ? (
-            <div className="figma-list">
-              {related.map((item) => (
-                <article className="finance-order-row" key={item.id}>
-                  <div>
-                    <small>
-                      #{item.id} · {valueText(item.date)}
-                    </small>
-                    <h3>{valueText(item.service)}</h3>
-                    <p>{valueText(item.status)}</p>
-                  </div>
-                  <Link
-                    className="button"
-                    href={
-                      (resource === 'staff' ? '/jadwal/' : '/pesanan/') +
-                      encodeURIComponent(item.id)
-                    }
-                  >
-                    Lihat Detail
-                  </Link>
-                </article>
-              ))}
-            </div>
-          ) : (
-            <p>
-              Belum ada{' '}
-              {resource === 'staff'
-                ? 'jadwal untuk petugas ini'
-                : 'pesanan untuk pelanggan ini'}
-              .
-            </p>
-          )}
-        </section>
-      )}
-      <div className="record-actions">
-        {resource === 'orders' &&
-          ['Menunggu Assign', 'Menunggu Lokasi'].includes(
-            String(record.status),
-          ) && (
-            <DialogTrigger
-              label="Tugaskan Petugas"
-              title="Tugaskan Petugas"
-              subtitle={'#' + id}
-              className="button primary"
-              dialogClass="order-form-dialog"
-              icon="person"
-            >
-              <AssignmentFormServer order={record as Order} />
-            </DialogTrigger>
-          )}
-        <DialogTrigger
-          label={'Ubah ' + config.singular}
-          title={'Detail & Ubah ' + config.singular}
-          subtitle={'#' + id}
-          wide={resource === 'orders' || resource === 'services'}
-          dialogClass={resource === 'orders' ? 'order-form-dialog' : ''}
-        >
-          <ResourceFormServer resource={resource} record={record} />
-        </DialogTrigger>
-        <DeleteRecordButton
-          resource={resource}
-          record={record}
-          compact={false}
-        />
-      </div>
-    </div>
+    <>
+      <ResourceListPage
+        resource={resource}
+        search={{ ...returnTo.search, ...(saved ? { saved: '1' } : {}) }}
+      />
+      <RecordDetailServer
+        resource={resource}
+        record={record}
+        closeHref={returnTo.href}
+      />
+    </>
   );
 }
 export async function ResourceNewPage({ resource }: { resource: Resource }) {

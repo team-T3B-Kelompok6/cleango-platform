@@ -1,0 +1,362 @@
+[
+  {
+    "key": "pesanan",
+    "bodyScroll": [
+      926,
+      678
+    ],
+    "footerButtonOverflow": false,
+    "footerVisible": true,
+    "inside": true,
+    "overflow": false,
+    "viewport": [
+      1280,
+      900
+    ]
+  },
+  {
+    "key": "pesanan",
+    "bodyScroll": [
+      926,
+      802
+    ],
+    "footerButtonOverflow": false,
+    "footerVisible": true,
+    "inside": true,
+    "overflow": false,
+    "viewport": [
+      768,
+      1024
+    ]
+  },
+  {
+    "key": "pesanan",
+    "bodyScroll": [
+      1358,
+      471
+    ],
+    "footerButtonOverflow": false,
+    "footerVisible": true,
+    "inside": true,
+    "overflow": false,
+    "viewport": [
+      360,
+      800
+    ]
+  },
+  {
+    "key": "pesanan",
+    "bodyScroll": [
+      926,
+      138
+    ],
+    "footerButtonOverflow": false,
+    "footerVisible": true,
+    "inside": true,
+    "overflow": false,
+    "viewport": [
+      800,
+      360
+    ]
+  },
+  {
+    "key": "jadwal",
+    "bodyScroll": [
+      963,
+      678
+    ],
+    "footerButtonOverflow": false,
+    "footerVisible": true,
+    "inside": true,
+    "overflow": false,
+    "viewport": [
+      1280,
+      900
+    ]
+  },
+  {
+    "key": "jadwal",
+    "bodyScroll": [
+      963,
+      802
+    ],
+    "footerButtonOverflow": false,
+    "footerVisible": true,
+    "inside": true,
+    "overflow": false,
+    "viewport": [
+      768,
+      1024
+    ]
+  },
+  {
+    "key": "jadwal",
+    "bodyScroll": [
+      2235,
+      442
+    ],
+    "footerButtonOverflow": false,
+    "footerVisible": true,
+    "inside": true,
+    "overflow": false,
+    "viewport": [
+      360,
+      800
+    ]
+  },
+  {
+    "key": "jadwal",
+    "bodyScroll": [
+      963,
+      138
+    ],
+    "footerButtonOverflow": false,
+    "footerVisible": true,
+    "inside": true,
+    "overflow": false,
+    "viewport": [
+      800,
+      360
+    ]
+  },
+  {
+    "key": "layanan",
+    "bodyScroll": [
+      629,
+      629
+    ],
+    "footerButtonOverflow": false,
+    "footerVisible": true,
+    "inside": true,
+    "overflow": false,
+    "viewport": [
+      1280,
+      900
+    ]
+  },
+  {
+    "key": "layanan",
+    "bodyScroll": [
+      629,
+      629
+    ],
+    "footerButtonOverflow": false,
+    "footerVisible": true,
+    "inside": true,
+    "overflow": false,
+    "viewport": [
+      768,
+      1024
+    ]
+  },
+  {
+    "key": "layanan",
+    "bodyScroll": [
+      767,
+      574
+    ],
+    "footerButtonOverflow": false,
+    "footerVisible": true,
+    "inside": true,
+    "overflow": false,
+    "viewport": [
+      360,
+      800
+    ]
+  },
+  {
+    "key": "layanan",
+    "bodyScroll": [
+      629,
+      138
+    ],
+    "footerButtonOverflow": false,
+    "footerVisible": true,
+    "inside": true,
+    "overflow": false,
+    "viewport": [
+      800,
+      360
+    ]
+  },
+  {
+    "key": "customer",
+    "bodyScroll": [
+      588,
+      588
+    ],
+    "footerButtonOverflow": false,
+    "footerVisible": true,
+    "inside": true,
+    "overflow": false,
+    "viewport": [
+      1280,
+      900
+    ]
+  },
+  {
+    "key": "customer",
+    "bodyScroll": [
+      588,
+      588
+    ],
+    "footerButtonOverflow": false,
+    "footerVisible": true,
+    "inside": true,
+    "overflow": false,
+    "viewport": [
+      768,
+      1024
+    ]
+  },
+  {
+    "key": "customer",
+    "bodyScroll": [
+      935,
+      489
+    ],
+    "footerButtonOverflow": false,
+    "footerVisible": true,
+    "inside": true,
+    "overflow": false,
+    "viewport": [
+      360,
+      800
+    ]
+  },
+  {
+    "key": "customer",
+    "bodyScroll": [
+      588,
+      138
+    ],
+    "footerButtonOverflow": false,
+    "footerVisible": true,
+    "inside": true,
+    "overflow": false,
+    "viewport": [
+      800,
+      360
+    ]
+  },
+  {
+    "key": "faq",
+    "bodyScroll": [
+      524,
+      524
+    ],
+    "footerButtonOverflow": false,
+    "footerVisible": true,
+    "inside": true,
+    "overflow": false,
+    "viewport": [
+      1280,
+      900
+    ]
+  },
+  {
+    "key": "faq",
+    "bodyScroll": [
+      524,
+      524
+    ],
+    "footerButtonOverflow": false,
+    "footerVisible": true,
+    "inside": true,
+    "overflow": false,
+    "viewport": [
+      768,
+      1024
+    ]
+  },
+  {
+    "key": "faq",
+    "bodyScroll": [
+      766,
+      524
+    ],
+    "footerButtonOverflow": false,
+    "footerVisible": true,
+    "inside": true,
+    "overflow": false,
+    "viewport": [
+      360,
+      800
+    ]
+  },
+  {
+    "key": "faq",
+    "bodyScroll": [
+      524,
+      118
+    ],
+    "footerButtonOverflow": false,
+    "footerVisible": true,
+    "inside": true,
+    "overflow": false,
+    "viewport": [
+      800,
+      360
+    ]
+  },
+  {
+    "key": "petugas",
+    "bodyScroll": [
+      675,
+      675
+    ],
+    "footerButtonOverflow": false,
+    "footerVisible": true,
+    "inside": true,
+    "overflow": false,
+    "viewport": [
+      1280,
+      900
+    ]
+  },
+  {
+    "key": "petugas",
+    "bodyScroll": [
+      675,
+      675
+    ],
+    "footerButtonOverflow": false,
+    "footerVisible": true,
+    "inside": true,
+    "overflow": false,
+    "viewport": [
+      768,
+      1024
+    ]
+  },
+  {
+    "key": "petugas",
+    "bodyScroll": [
+      1057,
+      474
+    ],
+    "footerButtonOverflow": false,
+    "footerVisible": true,
+    "inside": true,
+    "overflow": false,
+    "viewport": [
+      360,
+      800
+    ]
+  },
+  {
+    "key": "petugas",
+    "bodyScroll": [
+      675,
+      141
+    ],
+    "footerButtonOverflow": false,
+    "footerVisible": true,
+    "inside": true,
+    "overflow": false,
+    "viewport": [
+      800,
+      360
+    ]
+  }
+]

@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
-import { ResourceDetailPage } from '@/components/ResourcePages';
+import { ResourceListPage } from '@/components/ResourcePages';
+import { StaffDetailServer } from '@/components/StaffDetailServer';
+import { detailReturn } from '@/lib/detail-return';
 import { detail } from '@/lib/api';
 import { resources, valueText } from '@/lib/resources';
-import type { Search } from '@/types';
+import type { Search, Staff } from '@/types';
 export const dynamic = 'force-dynamic';
 export async function generateMetadata({
   params,
@@ -26,11 +28,19 @@ export default async function Page({
   searchParams: Promise<Search>;
 }) {
   const { id } = await params;
+  const record = await detail<Staff>('staff', id);
+  const search = await searchParams;
+  const returnTo = detailReturn('staff', search);
   return (
-    <ResourceDetailPage
-      resource="staff"
-      id={id}
-      saved={(await searchParams).saved === '1'}
-    />
+    <>
+      <ResourceListPage
+        resource="staff"
+        search={{
+          ...returnTo.search,
+          ...(search.saved === '1' ? { saved: '1' } : {}),
+        }}
+      />
+      <StaffDetailServer staff={record} closeHref={returnTo.href} />
+    </>
   );
 }

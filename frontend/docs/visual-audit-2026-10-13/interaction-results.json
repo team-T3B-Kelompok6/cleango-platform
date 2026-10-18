@@ -1,0 +1,337 @@
+{
+  "sop": [
+    {
+      "tab": "Ringkasan",
+      "dialog": [
+        {
+          "bodyScroll": null,
+          "bottom": 780,
+          "footer": {
+            "bottom": 779.2000045776367,
+            "top": 706.4375
+          },
+          "left": 152.40000915527344,
+          "right": 1112.4000091552734,
+          "top": 120
+        }
+      ],
+      "height": 900,
+      "width": 1280
+    },
+    {
+      "tab": "Persiapan",
+      "dialog": [
+        {
+          "bodyScroll": null,
+          "bottom": 780,
+          "footer": {
+            "bottom": 779.2000045776367,
+            "top": 706.4375
+          },
+          "left": 152.40000915527344,
+          "right": 1112.4000091552734,
+          "top": 120
+        }
+      ],
+      "height": 900,
+      "width": 1280
+    },
+    {
+      "tab": "Pengerjaan",
+      "dialog": [
+        {
+          "bodyScroll": null,
+          "bottom": 780,
+          "footer": {
+            "bottom": 779.2000045776367,
+            "top": 706.4375
+          },
+          "left": 152.40000915527344,
+          "right": 1112.4000091552734,
+          "top": 120
+        }
+      ],
+      "height": 900,
+      "width": 1280
+    },
+    {
+      "tab": "Serah terima",
+      "dialog": [
+        {
+          "bodyScroll": null,
+          "bottom": 780,
+          "footer": {
+            "bottom": 779.2000045776367,
+            "top": 706.4375
+          },
+          "left": 152.40000915527344,
+          "right": 1112.4000091552734,
+          "top": 120
+        }
+      ],
+      "height": 900,
+      "width": 1280
+    }
+  ],
+  "flows": [
+    {
+      "flow": "order-tab",
+      "name": "Menunggu Assign",
+      "documentWidth": 1265,
+      "icons": [
+        true,
+        true,
+        true
+      ],
+      "mainWidth": 1024.800048828125
+    },
+    {
+      "flow": "order-tab",
+      "name": "Sedang Dikerjakan",
+      "documentWidth": 1265,
+      "icons": [
+        true,
+        true,
+        true
+      ],
+      "mainWidth": 1024.800048828125
+    },
+    {
+      "flow": "order-tab",
+      "name": "Selesai",
+      "documentWidth": 1265,
+      "icons": [
+        true,
+        true,
+        true
+      ],
+      "mainWidth": 1024.800048828125
+    },
+    {
+      "flow": "order-tab",
+      "name": "Semua Pesanan",
+      "documentWidth": 1265,
+      "icons": [
+        true,
+        true,
+        true
+      ],
+      "mainWidth": 1024.800048828125
+    },
+    {
+      "flow": "date-filter",
+      "url": "http://127.0.0.1:3000/pesanan?from=2026-09-18&to=2026-09-18"
+    },
+    {
+      "flow": "notifications-read",
+      "message": "Notifikasi\n\nAktivitas pesanan terbaru · 0 belum dibaca\n\nSemua\nBelum dibaca\nTandai semua dibaca\nMenunggu Assign\n2026-09-18\nBpk. Hendra Gunawan · Deep Cleaning & Sedot Tungau\nLihat pesanan #CL-8923\nSedang Dikerjakan\n2026-09-18\nPT Megah Cipta (Ibu Rina) · Pembersihan Kantor (Office Daily)\nLihat pesanan #CL-8919\nSelesai\n2026-09-18\nIbu Maya Kartika · Bersih Kilat 2 Jam\nLihat pesanan #CL-8918\nMenunggu Lokasi\n2026-09-18\nNadia Putri · Sanitasi Alergi\nLihat pesanan #CL-8915\nDari aktivitas pesanan terbaru\nLihat semua pesanan"
+    },
+    {
+      "flow": "sticky-header-footer",
+      "bodyScroll": 398.3999938964844,
+      "footerTop": 736.4375,
+      "headerTop": 0,
+      "pageScroll": 372.7999877929687
+    },
+    {
+      "flow": "assignment-dialog",
+      "dialog": [
+        {
+          "bodyScroll": {
+            "height": 468,
+            "total": 468
+          },
+          "bottom": 810,
+          "footer": {
+            "bottom": 809.2000045776367,
+            "top": 736.4375
+          },
+          "left": 362.3999938964844,
+          "right": 902.3999938964844,
+          "top": 90
+        }
+      ],
+      "height": 900,
+      "width": 1280
+    },
+    {
+      "flow": "delete-confirmation",
+      "dialog": [
+        {
+          "bodyScroll": {
+            "height": 96,
+            "total": 96
+          },
+          "bottom": 584.6750183105469,
+          "footer": {
+            "bottom": 583.8750228881836,
+            "top": 511.1125183105469
+          },
+          "left": 362.3999938964844,
+          "right": 902.3999938964844,
+          "top": 315.3125
+        }
+      ],
+      "height": 900,
+      "width": 1280
+    },
+    {
+      "flow": "tracking-simulation",
+      "dialog": [
+        {
+          "bodyScroll": null,
+          "bottom": 840,
+          "footer": {
+            "bottom": 839.2000350952148,
+            "top": 770.4125366210938
+          },
+          "left": 104.4000015258789,
+          "right": 1160.400001525879,
+          "top": 60
+        }
+      ],
+      "height": 900,
+      "width": 1280
+    },
+    {
+      "flow": "Tambah FAQ Baru",
+      "dialog": [
+        {
+          "bodyScroll": {
+            "height": 363,
+            "total": 363
+          },
+          "bottom": 711.0625152587891,
+          "footer": {
+            "bottom": 710.2625045776367,
+            "top": 637.5
+          },
+          "left": 252.40000915527344,
+          "right": 1012.4000091552734,
+          "top": 188.9250030517578
+        }
+      ],
+      "height": 900,
+      "width": 1280
+    },
+    {
+      "flow": "Tambah Petugas Baru",
+      "dialog": [
+        {
+          "bodyScroll": {
+            "height": 391,
+            "total": 391
+          },
+          "bottom": 725.1625213623047,
+          "footer": {
+            "bottom": 724.3625411987305,
+            "top": 651.6000366210938
+          },
+          "left": 252.40000915527344,
+          "right": 1012.4000091552734,
+          "top": 174.8249969482422
+        }
+      ],
+      "height": 900,
+      "width": 1280
+    },
+    {
+      "flow": "Tambah Customer Baru",
+      "dialog": [
+        {
+          "bodyScroll": {
+            "height": 464,
+            "total": 464
+          },
+          "bottom": 761.3625335693359,
+          "footer": {
+            "bottom": 760.5624923706055,
+            "top": 687.7999877929688
+          },
+          "left": 252.40000915527344,
+          "right": 1012.4000091552734,
+          "top": 138.6374969482422
+        }
+      ],
+      "height": 900,
+      "width": 1280
+    },
+    {
+      "flow": "Tambah kategori",
+      "dialog": [
+        {
+          "bodyScroll": {
+            "height": 164,
+            "total": 164
+          },
+          "bottom": 611.6750183105469,
+          "footer": {
+            "bottom": 610.8749923706055,
+            "top": 538.1124877929688
+          },
+          "left": 362.3999938964844,
+          "right": 902.3999938964844,
+          "top": 288.3125
+        }
+      ],
+      "height": 900,
+      "width": 1280
+    },
+    {
+      "flow": "login-wrong-password",
+      "alert": "Username atau kata sandi belum sesuai."
+    },
+    {
+      "flow": "login-admin-admin",
+      "url": "http://127.0.0.1:3000/"
+    },
+    {
+      "flow": "banner-preview",
+      "image": {
+        "loaded": true,
+        "width": 316
+      }
+    },
+    {
+      "flow": "banner-saved",
+      "image": {
+        "loaded": true,
+        "width": 316
+      }
+    },
+    {
+      "flow": "banner-read",
+      "dialog": [
+        {
+          "bodyScroll": {
+            "height": 448,
+            "total": 448
+          },
+          "bottom": 714.2000274658203,
+          "footer": null,
+          "left": 252.40000915527344,
+          "right": 1012.4000091552734,
+          "top": 185.8000030517578
+        }
+      ],
+      "height": 900,
+      "width": 1280
+    },
+    {
+      "flow": "banner-replaced",
+      "image": {
+        "loaded": true,
+        "src": "http://127.0.0.1:4400/media/105",
+        "width": 362
+      }
+    },
+    {
+      "flow": "empty-services",
+      "text": "Kelola Layanan\n\nAtur daftar paket kebersihan, harga dasar layanan, estimasi durasi pengerjaan, dan status ketersediaan.\n\nTambah Banner Promo\nTambah Layanan Baru\nDaftar layanan\nPromo beranda\n\nLayanan aktif\n\n0\nLayanan\n0 kategori tersedia\n\nPaket favorit\n\n—\nPaket\nStatus favorit belum tersedia\n\nHarga rata-rata\n\nRp 0\nRata-rata harga layanan terdaftar\nSemua Layanan\n0 kategori layanan\nTambah kategori\nBelum ada data yang sesuai\n\nCoba ubah pencarian/filter atau tambahkan data pertama.\n\nReset filter"
+    },
+    {
+      "flow": "api-recovery",
+      "heading": "Kelola Layanan"
+    }
+  ]
+}

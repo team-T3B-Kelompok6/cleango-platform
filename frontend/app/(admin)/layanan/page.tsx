@@ -9,5 +9,6 @@ export default async function Page({
 }: {
   searchParams: Promise<Search>;
 }) {
-  return <ResourceListPage resource="services" search={await searchParams} />;
+  const search = await searchParams;
+  return <ResourceListPage resource="services" search={search} />;
 }

@@ -12,3 +12,5 @@ coverage/
 .pgadmin-appdata/
 .DS_Store
 Thumbs.db
+uploads/
+

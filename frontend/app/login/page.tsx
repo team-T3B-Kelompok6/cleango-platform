@@ -1,11 +1,10 @@
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
-import Image from 'next/image';
-import { Icon } from '@/components/Icon';
-import { UiIcon } from '@/components/UiIcon';
+import { CleanGoLogo } from '@/components/CleanGoLogo';
 import { DialogTrigger } from '@/components/DialogTrigger';
 import { LoginForm } from '@/components/LoginForm';
 import { logoutAction } from '@/app/actions';
+import { adminDemoEnabled } from '@/lib/demo/mode';
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Masuk Admin' };
 export default async function Login() {
@@ -14,9 +13,7 @@ export default async function Login() {
     <main className="login-page">
       <header className="login-header">
         <div className="login-brand">
-          <span className="brand-symbol">
-            <Icon name="brand" />
-          </span>
+          <CleanGoLogo />
           <span>
             <strong>
               cleango<span>•</span>
@@ -31,8 +28,9 @@ export default async function Login() {
         >
           <div className="modal-body">
             <p>
-              Masuk dengan username admin dan kata sandi admin. Hubungi
-              pengelola jika akun belum dapat digunakan.
+              {adminDemoEnabled()
+                ? 'Mode demo frontend: gunakan username admin dan kata sandi admin. Seluruh data adalah data uji lokal.'
+                : 'Gunakan akun admin yang diberikan pengelola. Akun demo backend tim: admin@cleango.id dengan kata sandi 321321.'}
             </p>
             {session && (
               <form action={logoutAction}>
@@ -45,37 +43,13 @@ export default async function Login() {
       <div className="login-center">
         <section className="login-card" aria-labelledby="login-title">
           <div className="login-intro">
-            <span className="login-panda">
-              <Image src="/assets/panda.svg" alt="" width={40} height={40} />
-            </span>
-            <span className="login-admin-tag">
-              <UiIcon name="shield" />
-              Admin
-            </span>
-            <span className="login-eyebrow">PORTAL ADMIN OPERASIONAL</span>
+            <CleanGoLogo className="login-brand-logo" />
             <h1 id="login-title">Masuk ke Akun Admin</h1>
-            <p>
-              Silakan masukkan kredensial akun Anda untuk mengelola operasional
-              Cleango.
-            </p>
+            <p>Masuk untuk mengelola pesanan dan layanan CleanGo.</p>
           </div>
-          <p className="login-access">
-            Akses khusus Pengelola &amp; Tim Manajemen Cleango
-          </p>
           <LoginForm />
         </section>
-        <div className="login-tip">
-          <span>
-            <UiIcon name="zap" />
-          </span>
-          <p>
-            <strong>Tips Bos:</strong> Pastikan koneksi internet stabil saat
-            memverifikasi jadwal orderan dan petugas hari ini!
-          </p>
-        </div>
-        <small className="login-copyright">
-          © 2026 Cleango Indonesia · Bersih Cerdas Bersama
-        </small>
+        <small className="login-copyright">© 2026 CleanGo</small>
       </div>
     </main>
   );

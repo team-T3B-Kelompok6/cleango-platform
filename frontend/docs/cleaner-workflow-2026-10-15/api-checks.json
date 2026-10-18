@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-15T08:53:52.797Z",
+  "environment": "Local preview fixture; no real messages sent",
+  "checks": [
+    {
+      "name": "Admin authentication and origin",
+      "passed": true
+    },
+    {
+      "name": "Repeated seed has exactly three distinct orders",
+      "passed": true
+    },
+    {
+      "name": "Task capability scope, tampering, CSRF, no-store",
+      "passed": true
+    },
+    {
+      "name": "Photo cannot be read from a different assignment",
+      "passed": true
+    },
+    {
+      "name": "Out-of-order actions rejected",
+      "passed": true
+    },
+    {
+      "name": "Concurrent departure is idempotent and persists",
+      "passed": true
+    },
+    {
+      "name": "Concurrent arrival preserves server start time",
+      "passed": true
+    },
+    {
+      "name": "Photo validation, storage, removal",
+      "passed": true
+    },
+    {
+      "name": "Concurrent completion saves one report and one simulated send",
+      "passed": true
+    },
+    {
+      "name": "Admin uses the same completed order; no real sends on dummy data",
+      "passed": true
+    }
+  ]
+}

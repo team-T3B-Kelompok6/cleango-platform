@@ -1,35 +1,29 @@
-import Link from 'next/link';
 import { valueText } from '@/lib/resources';
-import { Icon } from './Icon';
 
-import { DeleteRecordButton } from './DeleteRecordButton';
+import { RecordActions } from './RecordActions';
 
 import type { RecordListProps } from './RecordListProps';
-export function FaqList({ shown, resource, config, edit }: RecordListProps) {
+export function FaqList({ shown, resource, edit }: RecordListProps) {
   return (
     <>
       {resource === 'faqs' &&
         shown.map((item) => (
-          <article key={item.id} className="faq-design-row">
-            <div className="faq-header-actions">
-              {edit(item, 'Ubah FAQ')}
-              <DeleteRecordButton resource={resource} record={item} />
-            </div>
-            <details>
-              <summary>
+          <article key={item.id} className="faq-design-row managed-faq-row">
+            <section>
+              <div className="faq-row-question">
                 <span>
                   <span className="faq-row-meta">
                     <span
                       className={
                         'faq-category-tag ' +
-                        (
+                        ((
                           {
                             Layanan: 'green',
                             Jadwal: 'blue',
                             Pembayaran: 'amber',
                             SOP: 'purple',
                           } as Record<string, string>
-                        )[String(item.category)]
+                        )[String(item.category)] ?? 'green')
                       }
                     >
                       {valueText(item.category)}
@@ -38,27 +32,25 @@ export function FaqList({ shown, resource, config, edit }: RecordListProps) {
                       <i />
                       {item.published ? 'Aktif' : 'Draf'}
                     </span>
-                    {typeof item.updatedAt === 'string' && (
-                      <small>
-                        Diperbarui{' '}
-                        {new Date(item.updatedAt).toLocaleDateString('id-ID')}
-                      </small>
-                    )}
+                    {typeof item.updatedAt === 'string' &&
+                      Number.isFinite(Date.parse(item.updatedAt)) && (
+                        <small>
+                          Diperbarui{' '}
+                          {new Date(item.updatedAt).toLocaleDateString(
+                            'id-ID',
+                            { timeZone: 'Asia/Jakarta' },
+                          )}
+                        </small>
+                      )}
                   </span>
                   <strong>{valueText(item.question)}</strong>
                 </span>
-                <Icon name="down" />
-              </summary>
-              <p>{valueText(item.answer)}</p>
-              <div className="figma-row-actions">
-                <Link
-                  className="button"
-                  href={config.path + '/' + encodeURIComponent(item.id)}
-                >
-                  Detail & Pratinjau
-                </Link>
               </div>
-            </details>
+              <div className="faq-answer-row">
+                <p className="faq-row-answer">{valueText(item.answer)}</p>
+                <RecordActions resource={resource} record={item} edit={edit} />
+              </div>
+            </section>
           </article>
         ))}
     </>

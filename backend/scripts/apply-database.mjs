@@ -44,6 +44,26 @@ try {
     'area',
     "`area` VARCHAR(120) NOT NULL DEFAULT 'Malang' AFTER `phone`",
   );
+  await ensureColumn(
+    'promos',
+    'scope',
+    "`scope` ENUM('all','services') NOT NULL DEFAULT 'all' AFTER `is_active`",
+  );
+  await ensureColumn(
+    'promos',
+    'service_ids',
+    '`service_ids` TEXT NULL AFTER `scope`',
+  );
+  await ensureColumn(
+    'promos',
+    'per_customer_limit',
+    '`per_customer_limit` INT UNSIGNED NOT NULL DEFAULT 1 AFTER `service_ids`',
+  );
+  await ensureColumn(
+    'promos',
+    'stackable',
+    '`stackable` BOOLEAN NOT NULL DEFAULT FALSE AFTER `per_customer_limit`',
+  );
   await connection.query(sql);
   const [rows] = await connection.query(
     `SELECT email, role, is_active AS isActive

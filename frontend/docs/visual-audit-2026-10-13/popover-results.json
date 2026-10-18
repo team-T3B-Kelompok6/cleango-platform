@@ -1,0 +1,102 @@
+[
+  {
+    "control": "Filter Tanggal",
+    "height": 800,
+    "popovers": [
+      {
+        "bottom": 686.9130020141602,
+        "class": "notification-popover",
+        "clientWidth": 319,
+        "left": 23.41999626159668,
+        "right": 338.00001335144043,
+        "top": 42.587501525878906,
+        "width": 319
+      },
+      {
+        "bottom": 784.0000457763672,
+        "class": "date-popover",
+        "clientWidth": 307,
+        "left": 18,
+        "right": 327,
+        "top": 241.40000915527344,
+        "width": 307
+      }
+    ],
+    "width": 360
+  },
+  {
+    "control": "Lihat notifikasi",
+    "height": 800,
+    "popovers": [
+      {
+        "bottom": 716.0625381469727,
+        "class": "notification-popover",
+        "clientWidth": 334,
+        "left": 2,
+        "right": 338,
+        "top": 58.587501525878906,
+        "width": 334
+      },
+      {
+        "bottom": 363.07774353027344,
+        "class": "date-popover",
+        "clientWidth": 322,
+        "left": 18,
+        "right": 335.5199890136719,
+        "top": 225.40000915527344,
+        "width": 322
+      }
+    ],
+    "width": 360
+  },
+  {
+    "control": "Filter Tanggal",
+    "height": 360,
+    "popovers": [
+      {
+        "bottom": 314.0800132751465,
+        "class": "notification-popover",
+        "clientWidth": 448,
+        "left": 196.4125061035156,
+        "right": 637.4125061035156,
+        "top": 43.60000228881836,
+        "width": 448
+      },
+      {
+        "bottom": 343.98750019073486,
+        "class": "date-popover",
+        "clientWidth": 526,
+        "left": 128.40000915527344,
+        "right": 656.4000091552734,
+        "top": 15.987500190734863,
+        "width": 526
+      }
+    ],
+    "width": 800
+  },
+  {
+    "control": "Lihat notifikasi",
+    "height": 360,
+    "popovers": [
+      {
+        "bottom": 335.60000228881836,
+        "class": "notification-popover",
+        "clientWidth": 448,
+        "left": 187.4125061035156,
+        "right": 637.4125061035156,
+        "top": 59.60000228881836,
+        "width": 448
+      },
+      {
+        "bottom": 137.6652496336028,
+        "class": "date-popover",
+        "clientWidth": 526,
+        "left": 138.9600067138672,
+        "right": 656.4000091552734,
+        "top": -0.012500000186264517,
+        "width": 526
+      }
+    ],
+    "width": 800
+  }
+]

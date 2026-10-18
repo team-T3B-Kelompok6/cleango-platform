@@ -5,9 +5,9 @@
   font-synthesis: none;
   font-optical-sizing: auto;
   font-size: 75%;
-  --green: var(--color-003);
-  --border: var(--color-004);
-  --muted: var(--color-005);
+  --green: var(--ui-accent);
+  --border: var(--ui-border);
+  --muted: var(--ui-muted);
   --heading: var(--font-heading), sans-serif;
 }
 html {
@@ -60,7 +60,7 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 3px solid var(--color-006);
+  outline: 2px solid var(--ui-focus);
   outline-offset: 3px;
 }
 .icon {
@@ -86,6 +86,17 @@ h3 {
 }
 .skip-link:focus {
   top: 10px;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 .sidebar {
   position: fixed;
@@ -158,7 +169,7 @@ h3 {
   background: var(--color-010);
 }
 .nav-link.active {
-  background: var(--green) !important;
+  background: var(--ui-accent);
   color: var(--color-007);
   box-shadow: 0 8px 16px var(--color-011);
 }
@@ -650,7 +661,7 @@ footer > span:first-child {
   color: var(--color-001);
   width: min(540px, calc(100vw - 32px));
   max-height: calc(100dvh - 40px);
-  box-shadow: 0 24px 90px var(--color-046);
+  box-shadow: var(--ui-shadow-dialog);
 }
 .modal.wide {
   width: min(760px, calc(100vw - 32px));
@@ -682,8 +693,8 @@ footer > span:first-child {
   background: var(--color-007);
 }
 .modal::backdrop {
-  background: var(--color-047);
-  backdrop-filter: blur(3px);
+  background: var(--ui-backdrop);
+  backdrop-filter: blur(2px);
 }
 .modal-header {
   display: flex;
@@ -1191,7 +1202,10 @@ footer > span:first-child {
 }
 .form-grid input,
 .form-grid select,
-.form-grid textarea {
+.form-grid textarea,
+.service-field input,
+.service-field select,
+.service-field textarea {
   border: 1px solid var(--color-054);
   border-radius: 8px;
   background: var(--color-016);
@@ -1442,7 +1456,7 @@ footer > span:first-child {
 /* The two reference dialogs use a clear header, quiet tabs, and restrained cards. */
 .modal.sop-dialog {
   width: min(960px, calc(100vw - 40px));
-  height: min(580px, calc(100dvh - 40px));
+  height: min(660px, calc(100dvh - 40px));
   border-radius: 16px;
   overflow: hidden;
 }
@@ -1485,21 +1499,21 @@ footer > span:first-child {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: translateY(-16px) scale(0.98);
+  transform: translateY(-8px);
   transition:
-    opacity 220ms ease,
-    transform 290ms cubic-bezier(0.2, 0.8, 0.2, 1),
-    visibility 290ms step-end;
+    opacity var(--motion-base) ease,
+    transform var(--motion-panel) var(--motion-ease),
+    visibility var(--motion-panel) step-end;
 }
 .notification-popover[data-open='true'],
 .date-popover[data-open='true'] {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  transform: translateY(0) scale(1);
+  transform: translateY(0);
   transition:
-    opacity 220ms ease,
-    transform 290ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity var(--motion-base) ease,
+    transform var(--motion-panel) var(--motion-ease),
     visibility 0s;
 }
 .notification-popover {
@@ -1655,7 +1669,7 @@ footer > span:first-child {
   border-radius: 11px;
   padding: var(--space-17) var(--space-18);
   background: var(--color-007);
-  animation: soft-rise 260ms ease both;
+  animation: soft-rise var(--motion-base) var(--motion-ease) both;
 }
 .sop-step-heading {
   display: flex;
@@ -1759,7 +1773,7 @@ footer > span:first-child {
   padding: var(--space-15) var(--space-22);
   border-bottom: 1px solid var(--color-070);
   transition: background 160ms ease;
-  animation: soft-rise 260ms ease both;
+  animation: soft-rise var(--motion-base) var(--motion-ease) both;
 }
 .notification-row:hover {
   background: var(--color-080);
@@ -1832,7 +1846,7 @@ footer > span:first-child {
 
 /* Short, consistent motion throughout the dashboard. */
 .page-content {
-  animation: soft-rise 260ms ease both;
+  animation: content-fade var(--motion-base) ease backwards;
 }
 .button,
 .nav-link,
@@ -1841,16 +1855,16 @@ footer > span:first-child {
 .close-button,
 .profile {
   transition:
-    background 160ms ease,
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    color 160ms ease,
-    transform 160ms ease;
+    background var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease,
+    color var(--motion-fast) ease,
+    transform var(--motion-fast) ease;
 }
 .button:hover:not(:disabled),
 .notification-button:hover,
 .profile:hover {
-  transform: translateY(-1px);
+  transform: none;
 }
 .button:active:not(:disabled),
 .nav-link:active:not(:disabled),
@@ -1877,40 +1891,37 @@ footer > span:first-child {
   transform: translateY(-2px);
 }
 .activity-card:hover {
-  transform: translateY(-2px);
+  transform: none;
 }
 .order-card,
 .activity-card {
-  animation: soft-rise 280ms ease both;
-}
-.order-card:nth-child(2),
-.activity-card:nth-child(2) {
-  animation-delay: 35ms;
-}
-.order-card:nth-child(3),
-.activity-card:nth-child(3) {
-  animation-delay: 70ms;
-}
-.order-card:nth-child(4) {
-  animation-delay: 105ms;
+  animation: none;
 }
 .modal {
   opacity: 0;
-  transform: translateY(8px) scale(0.985);
+  transform: translateY(6px);
   transition:
-    opacity 180ms ease,
-    transform 180ms ease,
-    overlay 180ms allow-discrete,
-    display 180ms allow-discrete;
+    opacity var(--motion-base) ease,
+    transform var(--motion-panel) var(--motion-ease),
+    overlay var(--motion-panel) allow-discrete,
+    display var(--motion-panel) allow-discrete;
 }
 .modal[open] {
   opacity: 1;
-  transform: translateY(0) scale(1);
+  transform: translateY(0);
+}
+.modal[data-closing='true'] {
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+}
+.modal[data-closing='true']::backdrop {
+  background: transparent;
 }
 @starting-style {
   .modal[open] {
     opacity: 0;
-    transform: translateY(8px) scale(0.985);
+    transform: translateY(6px);
   }
   .modal[open]::backdrop {
     background: transparent;
@@ -1925,7 +1936,7 @@ footer > span:first-child {
 @keyframes soft-rise {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
@@ -1933,14 +1944,19 @@ footer > span:first-child {
   }
 }
 @keyframes tab-select {
-  0% {
-    transform: translateY(2px) scale(0.96);
+  from {
+    opacity: 0.7;
   }
-  65% {
-    transform: translateY(-1px) scale(1.02);
+  to {
+    opacity: 1;
   }
-  100% {
-    transform: translateY(0) scale(1);
+}
+@keyframes content-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 @media (max-width: 700px) {
@@ -2032,36 +2048,6 @@ footer > span:first-child {
     transition: none !important;
     animation: none !important;
     scroll-behavior: auto !important;
-  }
-  .notification-popover,
-  .date-popover {
-    transition:
-      opacity 130ms ease,
-      transform 130ms ease,
-      visibility 130ms step-end !important;
-  }
-  .notification-popover[data-open='true'],
-  .date-popover[data-open='true'] {
-    transition:
-      opacity 130ms ease,
-      transform 130ms ease,
-      visibility 0s !important;
-  }
-  .order-tabs button {
-    transition:
-      background-color 130ms ease,
-      color 130ms ease !important;
-  }
-  .order-tabs button.selected {
-    animation: tab-select 140ms ease both !important;
-  }
-  .sop-dialog .dialog-tabs button {
-    transition:
-      background-color 130ms ease,
-      color 130ms ease !important;
-  }
-  .sop-dialog .dialog-tabs button.active {
-    animation: tab-select 140ms ease both !important;
   }
 }
 
