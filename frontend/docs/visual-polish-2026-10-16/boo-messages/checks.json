@@ -1,0 +1,12 @@
+{
+  "sameInModalAndDirect": true,
+  "stableAfterPolling": true,
+  "sameAfterRefresh": true,
+  "phone": {
+    "carouselControls": 0,
+    "footerPosition": "static",
+    "horizontalOverflow": false,
+    "messageCount": 1,
+    "width": 390
+  }
+}

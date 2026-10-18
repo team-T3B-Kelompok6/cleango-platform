@@ -1,0 +1,104 @@
+{
+  "orders": [
+    "CL-9004",
+    "CL-9005"
+  ],
+  "checks": [
+    {
+      "name": "Tanpa shift penugasan ditolak; setelah shift Dina direkomendasikan",
+      "passed": true
+    },
+    {
+      "name": "CL-9004 tersimpan Siap Berangkat dengan booking 08.00",
+      "passed": true
+    },
+    {
+      "name": "Penugasan belum berangkat tidak mengisi tugas aktif petugas",
+      "passed": true
+    },
+    {
+      "name": "Dina dan Fajar tersedia untuk shift siang sebelum Dina berangkat",
+      "passed": true
+    },
+    {
+      "name": "Status dan tugas aktif Dina tersinkron otomatis saat berangkat",
+      "passed": true
+    },
+    {
+      "name": "Petugas sibuk hilang dari kandidat meski booking tidak bertumpuk",
+      "passed": true
+    },
+    {
+      "name": "Halaman Fajar berisi CL-9005 dan catatan customer yang benar",
+      "passed": true
+    },
+    {
+      "name": "Status Dina bekerja tersinkron otomatis ke profil",
+      "passed": true
+    },
+    {
+      "name": "Pesanan 9004 bekerja dan 9005 menuju lokasi tetap terpisah",
+      "passed": true
+    },
+    {
+      "name": "Lokasi contoh tampil pada admin",
+      "passed": true
+    },
+    {
+      "name": "Laporan kosong ditolak tanpa menyelesaikan pekerjaan",
+      "passed": true
+    },
+    {
+      "name": "Foto dummy berhasil diunggah",
+      "passed": true
+    },
+    {
+      "name": "Foto dan tahap bekerja tetap ada setelah reload",
+      "passed": true
+    },
+    {
+      "name": "Dina kembali tersedia dengan tugas aktif kosong setelah selesai",
+      "passed": true
+    },
+    {
+      "name": "Detail dan cleaner CL-9004 menampilkan waktu aktual yang sama",
+      "passed": true
+    },
+    {
+      "name": "Nilai customer Amanda bertambah tepat 350000 dan satu pesanan selesai",
+      "passed": true
+    },
+    {
+      "name": "Customer favorit Amanda dihitung dari pesanan selesai",
+      "passed": true
+    },
+    {
+      "name": "Customer Bagas bertambah satu pesanan dan nilai 180000",
+      "passed": true
+    },
+    {
+      "name": "Fajar kembali tersedia setelah selesai",
+      "passed": true
+    },
+    {
+      "name": "CL-9005 paling atas sesuai penyelesaian terbaru",
+      "passed": true
+    },
+    {
+      "name": "Pantau Petugas tidak menghitung tugas assigned sebagai aktif",
+      "passed": true
+    },
+    {
+      "name": "Dua pesanan lainnya tetap Menunggu Assign tanpa petugas",
+      "passed": true
+    },
+    {
+      "name": "Laporan dan foto Dina bertahan setelah reload akhir",
+      "passed": true
+    },
+    {
+      "name": "Laporan Fajar tersimpan tanpa tercampur foto atau catatan Dina",
+      "passed": true
+    }
+  ]
+}

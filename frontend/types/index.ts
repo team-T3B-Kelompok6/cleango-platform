@@ -3,6 +3,15 @@ export interface RecordData {
   [key: string]: unknown;
 }
 export interface Order extends RecordData {
+  updatedAt?: string;
+  activityAt?: string;
+  staffProgress?: { staffName: string; stage: string }[];
+  startedAt?: string;
+  completedAt?: string;
+  started_at?: string;
+  completed_at?: string;
+  createdAt?: string;
+  created_at?: string;
   customerId?: string;
   paymentMethod?: string;
   invoiceId?: string;
@@ -17,6 +26,8 @@ export interface Order extends RecordData {
   notes: string;
 }
 export interface Service extends RecordData {
+  imageUrl?: string | null;
+  discountPrice?: number | null;
   packageLabel?: string;
   isFavorite?: boolean;
   name: string;
@@ -28,6 +39,7 @@ export interface Service extends RecordData {
   features?: string[];
 }
 export interface Staff extends RecordData {
+  joined?: string;
   skills: string[];
   rating?: number;
   name: string;
@@ -55,9 +67,10 @@ export interface Faq extends RecordData {
   published: boolean;
 }
 export interface Schedule extends RecordData {
+  // Optional legacy booking fields; staff shifts do not require these.
   address?: string;
-  customer: string;
-  service: string;
+  customer?: string;
+  service?: string;
   date: string;
   time: string;
   staff: string;
@@ -86,6 +99,8 @@ export interface Field {
     | 'multiselect';
   required?: boolean;
   options?: string[];
+  optionHints?: Record<string, string>;
+  recommendedOptions?: string[];
   placeholder?: string;
   hint?: string;
   lines?: boolean;
@@ -95,6 +110,7 @@ export interface Category extends RecordData {
   name: string;
   resource: 'services' | 'faqs';
 }
+
 export interface Banner extends RecordData {
   imageUrl: string;
 }

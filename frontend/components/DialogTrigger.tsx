@@ -1,9 +1,17 @@
 'use client';
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Modal } from './Modal';
 import { UiIcon, type UiIconName } from './UiIcon';
-const CloseContext = createContext<(() => void) | null>(null);
-export const useDialogClose = () => useContext(CloseContext);
+import { useDialogClose } from './DialogContext';
+export { useDialogClose } from './DialogContext';
+export function DialogCloseButton() {
+  const close = useDialogClose();
+  return (
+    <button className="button" type="button" onClick={() => close?.()}>
+      Tutup
+    </button>
+  );
+}
 export function DialogTrigger({
   label,
   title,
@@ -48,9 +56,7 @@ export function DialogTrigger({
           icon={dialogIcon ?? icon}
           onClose={() => setOpen(false)}
         >
-          <CloseContext.Provider value={() => setOpen(false)}>
-            {children}
-          </CloseContext.Provider>
+          {children}
         </Modal>
       )}
     </>

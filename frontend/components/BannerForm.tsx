@@ -36,8 +36,7 @@ export function BannerForm({ banner }: { banner?: Banner }) {
     >
       <div className="modal-body manage-form">
         <p className="banner-form-hint">
-          Unggah gambar banner untuk home aplikasi. Tulisan atau desain promo
-          dibuat langsung di dalam gambar.
+          Banner akan ditampilkan di beranda aplikasi.
         </p>
         <label htmlFor={id}>Gambar banner promo</label>
         <div className="promo-upload-preview">

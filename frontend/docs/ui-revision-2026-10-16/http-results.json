@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-16T09:47:36.199Z",
+  "transport": "Isolated loopback HTTP contract fixture, not team API/MySQL",
+  "checks": [
+    {
+      "name": "Login rejects wrong credentials and returns a usable session",
+      "passed": true
+    },
+    {
+      "name": "services: POST, GET, PATCH and DELETE travel through HTTP",
+      "passed": true
+    },
+    {
+      "name": "staff: POST, GET, PATCH and DELETE travel through HTTP",
+      "passed": true
+    },
+    {
+      "name": "customers: POST, GET, PATCH and DELETE travel through HTTP",
+      "passed": true
+    },
+    {
+      "name": "faqs: POST, GET, PATCH and DELETE travel through HTTP",
+      "passed": true
+    },
+    {
+      "name": "Orders support assignment/update/read/delete with no create from admin",
+      "passed": true
+    },
+    {
+      "name": "Schedules support read/update/delete with no create from admin",
+      "passed": true
+    },
+    {
+      "name": "Image upload persists and returns readable image bytes",
+      "passed": true
+    },
+    {
+      "name": "Categories, banners and promo settings persist through HTTP",
+      "passed": true
+    },
+    {
+      "name": "Empty state passes through as an empty resource list",
+      "passed": true
+    },
+    {
+      "name": "API failure and recovery preserve a clear error status",
+      "passed": true
+    },
+    {
+      "name": "Expired session redirects instead of rendering protected records",
+      "passed": true
+    },
+    {
+      "name": "Slow API remains awaitable by the server data layer",
+      "passed": true
+    }
+  ]
+}

@@ -3,6 +3,15 @@ import { cache } from 'react';
 import { cookies } from 'next/headers';
 import { redirect, notFound } from 'next/navigation';
 import type { Resource, RecordData } from '@/types';
+import {
+  demoEnabled,
+  demoMutation,
+  demoRecords,
+  isDemoId,
+} from './cleaner/demo-store';
+import { TaskError } from './cleaner/errors';
+import { adminDemoEnabled } from './demo/mode';
+import { adminDemoRequest } from './demo/admin-api';
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -12,7 +21,7 @@ export class ApiError extends Error {
     super(message);
   }
 }
-export async function request<T>(
+async function upstreamRequest<T>(
   path: string,
   options: RequestInit = {},
   anonymous = false,
@@ -41,25 +50,93 @@ export async function request<T>(
       503,
     );
   }
+  if (response.status === 401 && !anonymous) redirect('/login?expired=1');
   let payload: unknown;
   try {
     payload = await response.json();
   } catch {
     throw new ApiError('Respons layanan data tidak valid.', 502);
   }
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload))
+    throw new ApiError('Respons layanan data tidak valid.', 502);
   if (!response.ok) {
-    const p = (payload && typeof payload === 'object' ? payload : {}) as {
-      message?: string;
-      errors?: Record<string, string>;
-    };
-    if (response.status === 401 && !anonymous) redirect('/login?expired=1');
+    const p = payload as Record<string, unknown>;
+    const errors =
+      p.errors && typeof p.errors === 'object' && !Array.isArray(p.errors)
+        ? Object.fromEntries(
+            Object.entries(p.errors).filter(
+              ([, message]) => typeof message === 'string',
+            ),
+          )
+        : undefined;
     throw new ApiError(
-      p.message ?? 'Permintaan gagal diproses.',
+      typeof p.message === 'string' && p.message
+        ? p.message
+        : 'Permintaan gagal diproses.',
       response.status,
-      p.errors,
+      errors,
     );
   }
   return payload as T;
+}
+export async function request<T>(
+  path: string,
+  options: RequestInit = {},
+  anonymous = false,
+): Promise<T> {
+  if (adminDemoEnabled()) {
+    try {
+      return (await adminDemoRequest(
+        path,
+        options,
+        (await cookies()).get('cleango-session')?.value ?? '',
+      )) as T;
+    } catch (error) {
+      if (error instanceof TaskError) {
+        if (error.status === 401 && !anonymous) redirect('/login?expired=1');
+        throw new ApiError(error.message, error.status);
+      }
+      throw error;
+    }
+  }
+  const match = /^\/(orders|staff|customers)(?:\/([^/?]+))?$/.exec(path);
+  if (
+    demoEnabled() &&
+    !anonymous &&
+    match?.[2] &&
+    isDemoId(decodeURIComponent(match[2]))
+  ) {
+    // The upstream verifies the admin session even when only demo data is modified.
+    await upstreamRequest('/staff');
+    try {
+      return (await demoMutation(
+        match[1] as Resource,
+        decodeURIComponent(match[2]),
+        options.method ?? 'GET',
+        typeof options.body === 'string' ? JSON.parse(options.body) : undefined,
+      )) as T;
+    } catch (error) {
+      if (error instanceof TaskError)
+        throw new ApiError(error.message, error.status);
+      throw error;
+    }
+  }
+  const payload = await upstreamRequest<T>(path, options, anonymous);
+  if (
+    demoEnabled() &&
+    !anonymous &&
+    match &&
+    !match[2] &&
+    (!options.method || options.method === 'GET')
+  ) {
+    const envelope = payload as { data: RecordData[] };
+    if (Array.isArray(envelope.data))
+      return {
+        ...envelope,
+        data: [...envelope.data, ...(await demoRecords(match[1] as Resource))],
+      } as T;
+  }
+  return payload;
 }
 export const list = cache(async function list<
   T extends RecordData = RecordData,

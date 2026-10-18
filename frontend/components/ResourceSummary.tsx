@@ -1,7 +1,10 @@
 import { MetricCard } from './MetricCard';
 import { rupiah } from '@/lib/resources';
 import type { Resource, RecordData } from '@/types';
-export function Summary({
+import { needsAssignment } from '@/lib/order-flow';
+import { promoListState } from '@/lib/promos';
+import { promoStatus } from '@/lib/promo-rules';
+export async function Summary({
   resource,
   records,
   categoryNames = [],
@@ -64,13 +67,7 @@ export function Summary({
       <div className="metrics-grid order-metrics">
         <MetricCard
           label="Perlu ditugaskan"
-          value={
-            records.filter((order) =>
-              ['Menunggu Assign', 'Menunggu Lokasi'].includes(
-                String(order.status),
-              ),
-            ).length
-          }
+          value={records.filter(needsAssignment).length}
           note="Harus segera di-assign"
           icon="clock"
           tone="amber"
@@ -80,8 +77,22 @@ export function Summary({
           value={
             new Set(
               records
-                .filter((order) => order.status === 'Sedang Dikerjakan')
-                .flatMap((order) => order.staff as string[]),
+                .filter((order) =>
+                  ['Menuju Lokasi', 'Sedang Dikerjakan'].includes(
+                    String(order.status),
+                  ),
+                )
+                .flatMap((order) =>
+                  (order.staff as string[]).filter((name) => {
+                    const progress = (
+                      order as import('@/types').Order
+                    ).staffProgress?.find((item) => item.staffName === name);
+                    return (
+                      !progress ||
+                      ['en_route', 'working'].includes(progress.stage)
+                    );
+                  }),
+                ),
             ).size
           }
           note="Petugas dari pesanan berjalan"
@@ -106,7 +117,9 @@ export function Summary({
         String(item.staff).split(' & ').filter(Boolean),
       ),
     );
-    const unassigned = records.filter((item) => !assigned.includes(item));
+    const ready = records.filter((item) =>
+      ['Terjadwal', 'Berlangsung'].includes(String(item.status)),
+    );
     return (
       <div className="metrics-grid order-metrics">
         <MetricCard
@@ -117,7 +130,7 @@ export function Summary({
           icon="schedule"
         />
         <MetricCard
-          label="Petugas ditugaskan"
+          label="Petugas terjadwal"
           value={staff.size}
           unit="Petugas"
           note="Petugas pada jadwal terdaftar"
@@ -125,10 +138,10 @@ export function Summary({
           tone="blue"
         />
         <MetricCard
-          label="Belum ditugaskan"
-          value={unassigned.length}
-          unit="Perlu Dicek"
-          note="Jadwal belum memiliki petugas"
+          label="Shift aktif"
+          value={ready.length}
+          unit="Shift"
+          note="Jadwal yang dapat menerima penugasan"
           icon="clock"
           tone="amber"
         />
@@ -136,13 +149,14 @@ export function Summary({
     );
   }
   if (resource === 'services') {
+    const { promos, message } = await promoListState();
+    const today = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Jakarta',
+    }).format(new Date());
     const categories = new Set([
       ...categoryNames,
       ...records.map((item) => String(item.category)),
     ]);
-    const hasFavorites = records.some(
-      (item) => typeof item.isFavorite === 'boolean',
-    );
     return (
       <div className="metrics-grid order-metrics">
         <MetricCard
@@ -153,18 +167,15 @@ export function Summary({
           icon="services"
         />
         <MetricCard
-          label="Paket favorit"
+          label="Kode promo aktif"
           value={
-            hasFavorites
-              ? records.filter((item) => item.isFavorite === true).length
-              : '—'
+            message
+              ? '—'
+              : promos.filter((promo) => promoStatus(promo, today) === 'Aktif')
+                  .length
           }
-          unit="Paket"
-          note={
-            hasFavorites
-              ? 'Paket pilihan pelanggan'
-              : 'Status favorit belum tersedia'
-          }
+          unit="Kode"
+          note={message || 'Diatur melalui Kelola Promo'}
           icon="orders"
           tone="blue"
         />
@@ -184,8 +195,14 @@ export function Summary({
     );
   }
   const isStaff = resource === 'staff';
-  const available = records.filter((item) => item.status === 'Tersedia').length;
-  const working = records.filter((item) => item.status === 'Bertugas').length;
+  const available = records.filter(
+    (item) => item.operationalStatus === 'Siaga & Tersedia',
+  ).length;
+  const working = records.filter((item) =>
+    ['Menuju Lokasi', 'Sedang Bekerja', 'Bertugas'].includes(
+      String(item.operationalStatus),
+    ),
+  ).length;
   const repeat = records.filter(
     (item) => Number(item.orderCount ?? 0) >= 2,
   ).length;
@@ -193,7 +210,14 @@ export function Summary({
     <div className="metrics-grid order-metrics">
       <MetricCard
         label={isStaff ? 'Petugas aktif' : 'Total pelanggan'}
-        value={isStaff ? available + working : records.length}
+        value={
+          isStaff
+            ? records.filter(
+                (item) =>
+                  !['Masa Training', 'Nonaktif'].includes(String(item.status)),
+              ).length
+            : records.length
+        }
         unit={isStaff ? 'Petugas' : 'Customer'}
         note={
           isStaff

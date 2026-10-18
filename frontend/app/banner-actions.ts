@@ -39,7 +39,10 @@ export async function saveBanner(
     if (
       !saved.data ||
       typeof saved.data.id !== 'string' ||
-      !validImageUrl(saved.data.imageUrl)
+      !saved.data.id ||
+      (id && saved.data.id !== id) ||
+      !validImageUrl(saved.data.imageUrl) ||
+      saved.data.imageUrl !== imageUrl
     )
       throw new ApiError('Respons penyimpanan banner tidak valid.', 502);
   } catch (error) {
@@ -48,7 +51,7 @@ export async function saveBanner(
     throw error;
   }
   revalidatePath('/layanan');
-  redirect('/layanan?view=promos&saved=1');
+  redirect('/layanan?bannerSaved=1');
 }
 export async function deleteBanner(
   id: string,
@@ -62,5 +65,5 @@ export async function deleteBanner(
     throw error;
   }
   revalidatePath('/layanan');
-  redirect('/layanan?view=promos&deleted=1');
+  redirect('/layanan');
 }

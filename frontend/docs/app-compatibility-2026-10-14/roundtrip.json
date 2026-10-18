@@ -1,0 +1,44 @@
+[
+  {
+    "resource": "services",
+    "create": "passed",
+    "read": "passed",
+    "update": "passed",
+    "delete": "passed"
+  },
+  {
+    "resource": "faqs",
+    "create": "passed",
+    "read": "passed",
+    "update": "passed",
+    "delete": "passed"
+  },
+  {
+    "resource": "staff",
+    "create": "passed",
+    "read": "passed",
+    "update": "passed",
+    "delete": "passed"
+  },
+  {
+    "resource": "customers",
+    "create": "passed",
+    "read": "passed",
+    "update": "passed",
+    "delete": "passed"
+  },
+  {
+    "resource": "orders",
+    "create": "blocked as required",
+    "read": "passed",
+    "update": "passed",
+    "delete": "passed"
+  },
+  {
+    "resource": "schedules",
+    "create": "blocked as required",
+    "read": "passed",
+    "update": "passed",
+    "delete": "passed"
+  }
+]

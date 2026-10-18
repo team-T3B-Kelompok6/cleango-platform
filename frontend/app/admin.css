@@ -1,6 +1,24 @@
 .admin-heading {
   align-items: center;
 }
+.admin-demo-notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+  margin-bottom: 22px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--color-007);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.admin-demo-notice strong {
+  color: var(--green);
+  font-size: 13px;
+}
 .admin-heading .admin-add {
   flex-shrink: 0;
 }
@@ -901,12 +919,7 @@ main.login-page {
 main.login-page {
   display: block;
   min-height: 100dvh;
-  background: radial-gradient(
-    circle at 50% 47%,
-    var(--color-155) 0,
-    var(--color-156) 48%,
-    var(--color-134) 100%
-  );
+  background: var(--surface-soft);
 }
 .login-header {
   position: relative;
@@ -1839,9 +1852,6 @@ main.login-page {
   }
 }
 
-.workspace:has(.faq-page) {
-  background: var(--color-232);
-}
 .faq-summary-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

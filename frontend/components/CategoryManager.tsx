@@ -1,5 +1,5 @@
 'use client';
-import { useActionState, useEffect, useId } from 'react';
+import { useActionState, useEffect, useId, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { addCategory } from '@/app/category-actions';
 import type { Category } from '@/types';
@@ -67,25 +67,31 @@ function CategoryForm({ resource }: { resource: Category['resource'] }) {
 export function CategoryManager({
   resource,
   count,
+  children,
 }: {
   resource: Category['resource'];
   count: number;
+  children?: ReactNode;
 }) {
   return (
     <div className="category-manager">
       <span>
         {count} kategori {resource === 'services' ? 'layanan' : 'FAQ'}
       </span>
-      <DialogTrigger
-        label="Tambah kategori"
-        title={
-          'Tambah Kategori ' + (resource === 'services' ? 'Layanan' : 'FAQ')
-        }
-        icon="plus"
-        className="button category-add"
-      >
-        <CategoryForm resource={resource} />
-      </DialogTrigger>
+      <div className="category-manager-actions">
+        {children}
+        <DialogTrigger
+          label="Tambah kategori"
+          title={
+            'Tambah Kategori ' + (resource === 'services' ? 'Layanan' : 'FAQ')
+          }
+          icon="plus"
+          dialogClass="compact-dialog"
+          className="button category-add"
+        >
+          <CategoryForm resource={resource} />
+        </DialogTrigger>
+      </div>
     </div>
   );
 }

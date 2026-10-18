@@ -1,0 +1,9 @@
+
+> cleango-frontend@1.0.0 check:promo
+> node scripts/check-promo-pricing.mjs
+
+PASS Percentage uses normal price and ignores legacy stacking
+PASS Maximum discount and fixed discount never produce negative totals
+PASS Minimum purchase keeps normal price and gives a clear reason
+PASS Promo parser disables stacking and rejects percentage above 100
+4 pricing groups passed.

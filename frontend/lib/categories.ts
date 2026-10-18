@@ -11,7 +11,6 @@ export const listCategories = cache(async (resource: CategoryResource) => {
       '/categories?resource=' + resource,
     );
   } catch (error) {
-    // Older API versions keep category names on the service or FAQ records.
     if (error instanceof ApiError && error.status === 404) return [];
     throw error;
   }

@@ -4,13 +4,13 @@ import type { Order } from '@/types';
 export const dynamic = 'force-dynamic';
 function cell(value: unknown) {
   let text = String(value ?? '');
-  if (/^[=+@-]/.test(text)) text = "'" + text;
+  if (/^[\s\u0000-\u001f]*[=+@-]/.test(text)) text = "'" + text;
   return '"' + text.replace(/"/g, '""') + '"';
 }
 export async function GET(request: Request) {
   try {
     const month = new URL(request.url).searchParams.get('month');
-    if (month && !/^\d{4}-\d{2}$/.test(month))
+    if (month && !/^\d{4}-(0[1-9]|1[0-2])$/.test(month))
       return Response.json({ message: 'Bulan tidak valid.' }, { status: 400 });
     const orders = (await list<Order>('orders')).filter(
       (order) =>

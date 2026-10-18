@@ -9,6 +9,8 @@ import { Navigation, MobileNavigation } from '@/components/Navigation';
 import { Notifications } from '@/components/Notifications';
 import { SearchInput } from '@/components/Filters';
 import { CleanGoLogo } from '@/components/CleanGoLogo';
+import { AdminLiveSync } from '@/components/AdminLiveSync';
+import { newestOrderFirst } from '@/lib/order-flow';
 export const dynamic = 'force-dynamic';
 export default async function AdminLayout({
   children,
@@ -16,7 +18,7 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   if (!(await cookies()).has('cleango-session')) redirect('/login');
-  const orders = await list<Order>('orders');
+  const orders = [...(await list<Order>('orders'))].sort(newestOrderFirst);
   const date = new Intl.DateTimeFormat('id-ID', {
     weekday: 'long',
     day: 'numeric',
@@ -26,6 +28,7 @@ export default async function AdminLayout({
   }).format(new Date());
   return (
     <div className="app-shell">
+      <AdminLiveSync />
       <a href="#main-content" className="skip-link">
         Lewati ke konten
       </a>

@@ -1,0 +1,160 @@
+[
+  {
+    "name": "Detail jadwal read-only",
+    "passed": true
+  },
+  {
+    "name": "Edit jadwal tanpa field pelanggan/layanan dan catatan Boo",
+    "passed": true
+  },
+  {
+    "name": "Layanan hanya harga normal; banner tidak ada di heading layanan",
+    "passed": true
+  },
+  {
+    "name": "Promo preview harga normal dan diskon tanpa opsi gabungan",
+    "passed": true
+  },
+  {
+    "name": "Jawaban FAQ langsung terlihat di bawah pertanyaan",
+    "passed": true
+  },
+  {
+    "name": "Tidak ada tambah customer dan label uji",
+    "passed": true
+  },
+  {
+    "name": "Pantau satu kartu per petugas",
+    "passed": true
+  },
+  {
+    "name": "Semua petugas muncul termasuk tanpa penugasan",
+    "passed": true
+  },
+  {
+    "name": "Cleaner tanpa Boo/uji, tombol dalam form, tanpa overflow HP",
+    "passed": true
+  },
+  {
+    "name": "Layanan simpan harga normal tanpa harga promo",
+    "passed": true
+  },
+  {
+    "name": "Hapus record sementara berhasil dengan konfirmasi",
+    "passed": true
+  },
+  {
+    "name": "HP /",
+    "passed": true,
+    "markers": false,
+    "overflow": false,
+    "width": 360
+  },
+  {
+    "name": "HP /pesanan",
+    "passed": true,
+    "markers": false,
+    "overflow": false,
+    "width": 360
+  },
+  {
+    "name": "Popup HP /pesanan",
+    "passed": true,
+    "height": 776,
+    "overflow": false,
+    "width": 308.8000183105469
+  },
+  {
+    "name": "HP /jadwal",
+    "passed": true,
+    "markers": false,
+    "overflow": false,
+    "width": 360
+  },
+  {
+    "name": "Popup HP /jadwal",
+    "passed": true,
+    "height": 776,
+    "overflow": false,
+    "width": 308.8000183105469
+  },
+  {
+    "name": "HP /layanan",
+    "passed": true,
+    "markers": false,
+    "overflow": false,
+    "width": 360
+  },
+  {
+    "name": "Popup HP /layanan",
+    "passed": true,
+    "height": 776,
+    "overflow": false,
+    "width": 308.8000183105469
+  },
+  {
+    "name": "HP /faq",
+    "passed": true,
+    "markers": false,
+    "overflow": false,
+    "width": 360
+  },
+  {
+    "name": "Popup HP /faq",
+    "passed": true,
+    "height": 716.5,
+    "overflow": false,
+    "width": 308.8000183105469
+  },
+  {
+    "name": "HP /customer",
+    "passed": true,
+    "markers": false,
+    "overflow": false,
+    "width": 360
+  },
+  {
+    "name": "Popup HP /customer",
+    "passed": true,
+    "height": 776,
+    "overflow": false,
+    "width": 308.8000183105469
+  },
+  {
+    "name": "HP /petugas",
+    "passed": true,
+    "markers": false,
+    "overflow": false,
+    "width": 360
+  },
+  {
+    "name": "Popup HP /petugas",
+    "passed": true,
+    "height": 776,
+    "overflow": false,
+    "width": 308.8000183105469
+  },
+  {
+    "name": "HP /laporan",
+    "passed": true,
+    "markers": false,
+    "overflow": false,
+    "width": 360
+  },
+  {
+    "name": "Simpan kode promo terpusat berhasil",
+    "passed": true
+  },
+  {
+    "name": "Hapus kode promo sementara berhasil",
+    "passed": true
+  },
+  {
+    "name": "Detail pesanan ringkasan baca, bukan form edit",
+    "passed": true
+  },
+  {
+    "name": "Tahap pengerjaan cleaner 360px tetap terbuka dan tanpa overflow",
+    "passed": true
+  }
+]

@@ -1,0 +1,679 @@
+{
+  "checks": [
+    {
+      "name": "Logout redirects to login",
+      "passed": true
+    },
+    {
+      "name": "Invalid login shows error",
+      "passed": true
+    },
+    {
+      "name": "Valid login opens dashboard",
+      "passed": true
+    },
+    {
+      "name": "dashboard-desktop",
+      "error": false,
+      "overflow": false,
+      "title": "Halo, Admin Cleango!",
+      "viewport": 1280,
+      "passed": true
+    },
+    {
+      "name": "pesanan-desktop",
+      "error": false,
+      "overflow": false,
+      "title": "Kelola Pesanan",
+      "viewport": 1280,
+      "passed": true
+    },
+    {
+      "name": "jadwal-desktop",
+      "error": false,
+      "overflow": false,
+      "title": "Kelola Jadwal",
+      "viewport": 1280,
+      "passed": true
+    },
+    {
+      "name": "layanan-desktop",
+      "error": false,
+      "overflow": false,
+      "title": "Kelola Layanan",
+      "viewport": 1280,
+      "passed": true
+    },
+    {
+      "name": "faq-desktop",
+      "error": false,
+      "overflow": false,
+      "title": "Kelola FAQ",
+      "viewport": 1280,
+      "passed": true
+    },
+    {
+      "name": "customer-desktop",
+      "error": false,
+      "overflow": false,
+      "title": "Kelola Data Customer",
+      "viewport": 1280,
+      "passed": true
+    },
+    {
+      "name": "petugas-desktop",
+      "error": false,
+      "overflow": false,
+      "title": "Kelola Data Petugas",
+      "viewport": 1280,
+      "passed": true
+    },
+    {
+      "name": "laporan-desktop",
+      "error": false,
+      "overflow": false,
+      "title": "Laporan Keuangan & Operasional",
+      "viewport": 1280,
+      "passed": true
+    },
+    {
+      "name": "dashboard-768",
+      "error": false,
+      "overflow": false,
+      "title": "Halo, Admin Cleango!",
+      "viewport": 768,
+      "passed": true
+    },
+    {
+      "name": "pesanan-768",
+      "error": false,
+      "overflow": false,
+      "title": "Kelola Pesanan",
+      "viewport": 768,
+      "passed": true
+    },
+    {
+      "name": "jadwal-768",
+      "error": false,
+      "overflow": false,
+      "title": "Kelola Jadwal",
+      "viewport": 768,
+      "passed": true
+    },
+    {
+      "name": "layanan-768",
+      "error": false,
+      "overflow": false,
+      "title": "Kelola Layanan",
+      "viewport": 768,
+      "passed": true
+    },
+    {
+      "name": "faq-768",
+      "error": false,
+      "overflow": false,
+      "title": "Kelola FAQ",
+      "viewport": 768,
+      "passed": true
+    },
+    {
+      "name": "customer-768",
+      "error": false,
+      "overflow": false,
+      "title": "Kelola Data Customer",
+      "viewport": 768,
+      "passed": true
+    },
+    {
+      "name": "petugas-768",
+      "error": false,
+      "overflow": false,
+      "title": "Kelola Data Petugas",
+      "viewport": 768,
+      "passed": true
+    },
+    {
+      "name": "laporan-768",
+      "error": false,
+      "overflow": false,
+      "title": "Laporan Keuangan & Operasional",
+      "viewport": 768,
+      "passed": true
+    },
+    {
+      "name": "dashboard-360",
+      "error": false,
+      "overflow": false,
+      "title": "Halo, Admin Cleango!",
+      "viewport": 360,
+      "passed": true
+    },
+    {
+      "name": "pesanan-360",
+      "error": false,
+      "overflow": false,
+      "title": "Kelola Pesanan",
+      "viewport": 360,
+      "passed": true
+    },
+    {
+      "name": "jadwal-360",
+      "error": false,
+      "overflow": false,
+      "title": "Kelola Jadwal",
+      "viewport": 360,
+      "passed": true
+    },
+    {
+      "name": "layanan-360",
+      "error": false,
+      "overflow": false,
+      "title": "Kelola Layanan",
+      "viewport": 360,
+      "passed": true
+    },
+    {
+      "name": "faq-360",
+      "error": false,
+      "overflow": false,
+      "title": "Kelola FAQ",
+      "viewport": 360,
+      "passed": true
+    },
+    {
+      "name": "customer-360",
+      "error": false,
+      "overflow": false,
+      "title": "Kelola Data Customer",
+      "viewport": 360,
+      "passed": true
+    },
+    {
+      "name": "petugas-360",
+      "error": false,
+      "overflow": false,
+      "title": "Kelola Data Petugas",
+      "viewport": 360,
+      "passed": true
+    },
+    {
+      "name": "laporan-360",
+      "error": false,
+      "overflow": false,
+      "title": "Laporan Keuangan & Operasional",
+      "viewport": 360,
+      "passed": true
+    },
+    {
+      "name": "FAQ answer and action buttons share desktop row",
+      "passed": true
+    },
+    {
+      "name": "FAQ search renders empty state and reset link",
+      "passed": true
+    },
+    {
+      "name": "Schedule cards use staff names rather than customers",
+      "passed": true
+    },
+    {
+      "name": "Service card codes removed",
+      "passed": true
+    },
+    {
+      "name": "Customers have no registration button; placeholder contacts migrated",
+      "passed": true
+    },
+    {
+      "name": "Order tracking stays scoped without all-staff button or assignment picker",
+      "passed": true
+    },
+    {
+      "name": "Direct cleaner page opens assigned task without admin navigation",
+      "passed": true
+    },
+    {
+      "name": "Refresh preserves completed stage and stored cleaner report",
+      "passed": true
+    },
+    {
+      "name": "cleaner-360",
+      "error": false,
+      "overflow": false,
+      "title": "Tugas Anda",
+      "viewport": 360,
+      "passed": true
+    },
+    {
+      "name": "FAQ sample copy no longer exposes testing instructions",
+      "passed": true
+    },
+    {
+      "name": "Service sample copy no longer exposes testing instructions",
+      "passed": true
+    },
+    {
+      "name": "pesanan-detail-desktop",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Detail Pesanan",
+      "width": 1280,
+      "passed": true
+    },
+    {
+      "name": "pesanan-edit-desktop",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Ubah Pesanan",
+      "width": 1280,
+      "passed": true
+    },
+    {
+      "name": "pesanan-delete-desktop",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Hapus Pesanan",
+      "width": 1280,
+      "passed": true
+    },
+    {
+      "name": "jadwal-detail-desktop",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Detail Jadwal",
+      "width": 1280,
+      "passed": true
+    },
+    {
+      "name": "jadwal-edit-desktop",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Ubah Jadwal",
+      "width": 1280,
+      "passed": true
+    },
+    {
+      "name": "jadwal-create-desktop",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Tambah Jadwal Baru",
+      "width": 1280,
+      "passed": true
+    },
+    {
+      "name": "jadwal-delete-desktop",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Hapus Jadwal",
+      "width": 1280,
+      "passed": true
+    },
+    {
+      "name": "layanan-detail-desktop",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Detail Layanan",
+      "width": 1280,
+      "passed": true
+    },
+    {
+      "name": "layanan-edit-desktop",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Ubah Layanan",
+      "width": 1280,
+      "passed": true
+    },
+    {
+      "name": "layanan-create-desktop",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Tambah Layanan Baru",
+      "width": 1280,
+      "passed": true
+    },
+    {
+      "name": "layanan-delete-desktop",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Hapus Layanan",
+      "width": 1280,
+      "passed": true
+    },
+    {
+      "name": "faq-detail-desktop",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Detail FAQ",
+      "width": 1280,
+      "passed": true
+    },
+    {
+      "name": "faq-edit-desktop",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Ubah FAQ",
+      "width": 1280,
+      "passed": true
+    },
+    {
+      "name": "faq-create-desktop",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Tambah FAQ Baru",
+      "width": 1280,
+      "passed": true
+    },
+    {
+      "name": "faq-delete-desktop",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Hapus FAQ",
+      "width": 1280,
+      "passed": true
+    },
+    {
+      "name": "customer-detail-desktop",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Detail Customer",
+      "width": 1280,
+      "passed": true
+    },
+    {
+      "name": "customer-edit-desktop",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Ubah Customer",
+      "width": 1280,
+      "passed": true
+    },
+    {
+      "name": "customer-delete-desktop",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Hapus Customer",
+      "width": 1280,
+      "passed": true
+    },
+    {
+      "name": "petugas-detail-desktop",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Detail Petugas",
+      "width": 1280,
+      "passed": true
+    },
+    {
+      "name": "petugas-edit-desktop",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Ubah Petugas",
+      "width": 1280,
+      "passed": true
+    },
+    {
+      "name": "petugas-create-desktop",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Tambah Petugas Baru",
+      "width": 1280,
+      "passed": true
+    },
+    {
+      "name": "petugas-delete-desktop",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Hapus Petugas",
+      "width": 1280,
+      "passed": true
+    },
+    {
+      "name": "pesanan-detail-phone",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Detail Pesanan",
+      "width": 360,
+      "passed": true
+    },
+    {
+      "name": "pesanan-edit-phone",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Detail Pesanan",
+      "width": 360,
+      "passed": true
+    },
+    {
+      "name": "pesanan-delete-phone",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Hapus Pesanan",
+      "width": 360,
+      "passed": true
+    },
+    {
+      "name": "jadwal-detail-phone",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Detail Jadwal",
+      "width": 360,
+      "passed": true
+    },
+    {
+      "name": "jadwal-edit-phone",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Ubah Jadwal",
+      "width": 360,
+      "passed": true
+    },
+    {
+      "name": "jadwal-create-phone",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Tambah Jadwal Baru",
+      "width": 360,
+      "passed": true
+    },
+    {
+      "name": "jadwal-delete-phone",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Hapus Jadwal",
+      "width": 360,
+      "passed": true
+    },
+    {
+      "name": "layanan-detail-phone",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Detail Layanan",
+      "width": 360,
+      "passed": true
+    },
+    {
+      "name": "layanan-edit-phone",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Ubah Layanan",
+      "width": 360,
+      "passed": true
+    },
+    {
+      "name": "layanan-create-phone",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Tambah Layanan Baru",
+      "width": 360,
+      "passed": true
+    },
+    {
+      "name": "layanan-delete-phone",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Hapus Layanan",
+      "width": 360,
+      "passed": true
+    },
+    {
+      "name": "faq-detail-phone",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Detail FAQ",
+      "width": 360,
+      "passed": true
+    },
+    {
+      "name": "faq-edit-phone",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Ubah FAQ",
+      "width": 360,
+      "passed": true
+    },
+    {
+      "name": "faq-create-phone",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Tambah FAQ Baru",
+      "width": 360,
+      "passed": true
+    },
+    {
+      "name": "faq-delete-phone",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Hapus FAQ",
+      "width": 360,
+      "passed": true
+    },
+    {
+      "name": "customer-detail-phone",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Detail Customer",
+      "width": 360,
+      "passed": true
+    },
+    {
+      "name": "customer-edit-phone",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Ubah Customer",
+      "width": 360,
+      "passed": true
+    },
+    {
+      "name": "customer-delete-phone",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Hapus Customer",
+      "width": 360,
+      "passed": true
+    },
+    {
+      "name": "petugas-detail-phone",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Detail Petugas",
+      "width": 360,
+      "passed": true
+    },
+    {
+      "name": "petugas-edit-phone",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Ubah Petugas",
+      "width": 360,
+      "passed": true
+    },
+    {
+      "name": "petugas-create-phone",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Tambah Petugas Baru",
+      "width": 360,
+      "passed": true
+    },
+    {
+      "name": "petugas-delete-phone",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Hapus Petugas",
+      "width": 360,
+      "passed": true
+    },
+    {
+      "name": "promo-list",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Kelola Promo",
+      "width": 1280,
+      "passed": true
+    },
+    {
+      "name": "promo-create",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Tambah Promo",
+      "width": 1280,
+      "passed": true
+    },
+    {
+      "name": "banner-create",
+      "footer": true,
+      "inside": true,
+      "overflow": false,
+      "title": "Tambah Banner Promo",
+      "width": 1280,
+      "passed": true
+    }
+  ]
+}

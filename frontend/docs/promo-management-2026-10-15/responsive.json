@@ -1,0 +1,54 @@
+[
+  {
+    "bodyScrolls": true,
+    "dialogHeight": 780,
+    "dialogWidth": 980,
+    "footerVisible": true,
+    "insideViewport": true,
+    "noHorizontalOverflow": true,
+    "selectedServiceIds": [
+      "<redacted>",
+      "<redacted>"
+    ],
+    "viewport": "1280x900"
+  },
+  {
+    "bodyScrolls": true,
+    "dialogHeight": 780,
+    "dialogWidth": 716.7999877929688,
+    "footerVisible": true,
+    "insideViewport": true,
+    "noHorizontalOverflow": true,
+    "selectedServiceIds": [
+      "<redacted>",
+      "<redacted>"
+    ],
+    "viewport": "768x1024"
+  },
+  {
+    "bodyScrolls": true,
+    "dialogHeight": 760,
+    "dialogWidth": 308.8000183105469,
+    "footerVisible": true,
+    "insideViewport": true,
+    "noHorizontalOverflow": true,
+    "selectedServiceIds": [
+      "<redacted>",
+      "<redacted>"
+    ],
+    "viewport": "360x800"
+  },
+  {
+    "bodyScrolls": true,
+    "dialogHeight": 320,
+    "dialogWidth": 748.7999877929688,
+    "footerVisible": true,
+    "insideViewport": true,
+    "noHorizontalOverflow": true,
+    "selectedServiceIds": [
+      "<redacted>",
+      "<redacted>"
+    ],
+    "viewport": "800x360"
+  }
+]

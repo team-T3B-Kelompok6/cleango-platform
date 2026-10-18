@@ -6,10 +6,12 @@ import { TrackingPanel } from './TrackingPanel';
 
 export function TrackingButton({
   name,
+  orderId,
   label = 'Pantau Petugas',
   className = 'button',
 }: {
   name?: string;
+  orderId?: string;
   label?: string;
   className?: string;
 }) {
@@ -27,12 +29,25 @@ export function TrackingButton({
       {open && (
         <Modal
           title="Pantau petugas"
-          subtitle="Posisi terakhir dan progres pengerjaan pesanan"
+          subtitle={
+            orderId
+              ? 'Penugasan dan lokasi petugas pada pesanan ini'
+              : name
+                ? 'Penugasan dan lokasi terakhir ' + name
+                : 'Penugasan dan lokasi terakhir setiap petugas'
+          }
           wide
-          className="tracking-dialog"
+          className={
+            'tracking-dialog' +
+            (orderId || name ? ' tracking-scoped-dialog' : '')
+          }
           onClose={() => setOpen(false)}
         >
-          <TrackingPanel initialName={name} onClose={() => setOpen(false)} />
+          <TrackingPanel
+            initialName={name}
+            initialOrderId={orderId}
+            onClose={() => setOpen(false)}
+          />
         </Modal>
       )}
     </>

@@ -5,7 +5,25 @@ import { redirect } from 'next/navigation';
 import { ApiError, request, list, detail } from '@/lib/api';
 import { resources, isResource } from '@/lib/resources';
 import { listCategories } from '@/lib/categories';
-import type { FormState, Resource, RecordData, Staff, Order } from '@/types';
+import { uploadServiceImage } from '@/lib/service-image';
+import { unsavedFields } from '@/lib/saved-fields';
+import { needsAssignment } from '@/lib/order-flow';
+import { withOrderWorkTimes } from '@/lib/order-work-times';
+import { dispatchAssignment } from '@/lib/cleaner/service';
+import { isDemoId } from '@/lib/cleaner/demo-store';
+import {
+  assignmentIssue,
+  linkedOrders,
+  scheduleIssue,
+} from '@/lib/staff-schedules';
+import type {
+  FormState,
+  Resource,
+  RecordData,
+  Staff,
+  Order,
+  Schedule,
+} from '@/types';
 export async function loginAction(
   _previous: FormState,
   form: FormData,
@@ -31,8 +49,10 @@ export async function loginAction(
       true,
     );
     if (
-      !data.accessToken ||
-      !Number.isFinite(data.expiresIn) ||
+      typeof data.accessToken !== 'string' ||
+      !data.accessToken.trim() ||
+      /[\s\u0000-\u001f\u007f;]/.test(data.accessToken) ||
+      !Number.isSafeInteger(data.expiresIn) ||
       data.expiresIn <= 0
     )
       throw new ApiError('Respons masuk tidak valid.', 502);
@@ -70,8 +90,10 @@ export async function saveAction(
     data: Record<string, unknown> = {},
     values: Record<string, string | string[]> = {},
     errors: Record<string, string> = {};
-  if (id === null && !config.canCreate)
+  if (!id && !config.canCreate)
     return { message: 'Data ini dibuat melalui aplikasi pelanggan.' };
+  if (id !== null && (typeof id !== 'string' || !id.trim()))
+    return { message: 'ID data tidak valid.' };
   for (const field of config.fields) {
     const raw =
       field.kind === 'multiselect'
@@ -82,10 +104,12 @@ export async function saveAction(
       errors[field.name] = 'Kolom ini wajib diisi.';
     if (typeof raw === 'string' && raw.length > 3000)
       errors[field.name] = 'Maksimal 3000 karakter.';
-    if (field.kind === 'number') {
+    if (field.name === 'discountPrice' && raw === '') {
+      data[field.name] = null;
+    } else if (field.kind === 'number') {
       const n = Number(raw);
-      if (!Number.isFinite(n) || n < 0)
-        errors[field.name] = 'Isi angka nol atau lebih.';
+      if (!Number.isSafeInteger(n) || n < 0)
+        errors[field.name] = 'Isi rupiah bulat, nol atau lebih.';
       data[field.name] = n;
     } else if (field.kind === 'boolean') {
       if (raw !== 'true' && raw !== 'false')
@@ -134,18 +158,148 @@ export async function saveAction(
   }
   if (
     resource === 'orders' &&
-    ['Sedang Dikerjakan', 'Selesai'].includes(String(data.status)) &&
+    [
+      'Menunggu Lokasi',
+      'Menuju Lokasi',
+      'Sedang Dikerjakan',
+      'Selesai',
+    ].includes(String(data.status)) &&
     !(data.staff as string[]).length
   )
     errors.staff = 'Pilih petugas untuk status ini.';
+  const imageFile = form.get('serviceImage');
+  const hasImage = imageFile instanceof File && imageFile.size > 0;
+  if (resource === 'services') {
+    // Discounts are managed exclusively through promo codes.
+    data.discountPrice = null;
+    const features = data.features as string[];
+    if (
+      features.length > 15 ||
+      features.some((feature) => feature.length > 180)
+    )
+      errors.features = 'Maksimal 15 fasilitas, masing-masing 180 karakter.';
+    if (
+      data.discountPrice != null &&
+      (!Number.isSafeInteger(data.discountPrice) ||
+        Number(data.discountPrice) <= 0 ||
+        Number(data.discountPrice) >= Number(data.price))
+    )
+      errors.discountPrice =
+        'Harga promo harus lebih dari Rp0 dan lebih rendah dari harga dasar.';
+    if (!Number.isSafeInteger(data.price) || Number(data.price) <= 0)
+      errors.price = 'Isi harga dasar lebih dari Rp0 dalam rupiah bulat.';
+    if (
+      hasImage &&
+      (!['image/jpeg', 'image/png'].includes(imageFile.type) ||
+        imageFile.size > 5 * 1024 * 1024)
+    )
+      errors.serviceImage = 'Gunakan JPG atau PNG, maksimal 5 MB.';
+    if (form.get('removeImage') === 'true') data.imageUrl = null;
+  }
   if (Object.keys(errors).length) return { errors, values };
   let saved: RecordData;
   try {
+    if (resource === 'orders') {
+      const [staff, current, schedules, orders] = await Promise.all([
+        list<Staff>('staff'),
+        detail<Order>('orders', id!),
+        list<Schedule>('schedules'),
+        list<Order>('orders'),
+      ]);
+      const selected = [...new Set(data.staff as string[])];
+      const liveOrders = await withOrderWorkTimes(orders);
+      if (
+        selected.some((name) => {
+          const person = staff.find((item) => item.name === name);
+          return !person || isDemoId(person.id) !== isDemoId(id!);
+        })
+      )
+        return {
+          errors: {
+            staff:
+              'Petugas tidak tersedia untuk pesanan ini. Perbarui pilihan petugas.',
+          },
+          values,
+        };
+      if (
+        selected.some(
+          (name) =>
+            !(Array.isArray(current.staff) && current.staff.includes(name)) &&
+            !staff.some(
+              (person) =>
+                person.name === name &&
+                ['Tersedia', 'Bertugas'].includes(person.status),
+            ),
+        )
+      )
+        return {
+          errors: {
+            staff:
+              'Ada petugas yang tidak lagi dapat ditugaskan. Perbarui pilihan.',
+          },
+          values,
+        };
+      if (data.status === 'Menunggu Assign' && selected.length)
+        return {
+          errors: {
+            status:
+              'Pilih Siap Berangkat jika petugas sudah ditentukan, atau kosongkan pilihan petugas.',
+          },
+          values,
+        };
+      data.staff = selected;
+      if (
+        ['Menunggu Lokasi', 'Menuju Lokasi', 'Sedang Dikerjakan'].includes(
+          String(data.status),
+        )
+      ) {
+        for (const name of selected) {
+          const issue = assignmentIssue(
+            staff.find((person) => person.name === name)!,
+            { ...current, ...data } as Order,
+            schedules,
+            liveOrders,
+          );
+          if (issue) return { errors: { staff: name + ': ' + issue }, values };
+        }
+      }
+    }
+    if (resource === 'schedules') {
+      const [staff, schedules, orders] = await Promise.all([
+        list<Staff>('staff'),
+        list<Schedule>('schedules'),
+        list<Order>('orders'),
+      ]);
+      const previous = id
+        ? schedules.find((shift) => shift.id === id)
+        : undefined;
+      if (
+        !staff.some(
+          (person) =>
+            person.name === data.staff &&
+            (previous?.staff === person.name ||
+              ['Tersedia', 'Bertugas'].includes(person.status)),
+        )
+      )
+        return {
+          errors: { staff: 'Pilih petugas aktif yang terdaftar.' },
+          values,
+        };
+      const issue = scheduleIssue(
+        { ...data, id: id ?? '' } as Schedule,
+        schedules,
+        orders,
+        previous,
+      );
+      if (issue) return { message: issue, values };
+    }
     if (resource === 'services' || resource === 'faqs') {
       const categories = await listCategories(resource);
       const existing = id ? await detail(resource, id) : undefined;
+      const fallbackRecords = categories.length ? [] : await list(resource);
       if (
         !categories.some((category) => category.name === data.category) &&
+        !fallbackRecords.some((record) => record.category === data.category) &&
         existing?.category !== data.category
       )
         return {
@@ -153,24 +307,57 @@ export async function saveAction(
           values,
         };
     }
+    if (resource === 'services' && hasImage)
+      data.imageUrl = await uploadServiceImage(imageFile);
     const result = await request<{ data: RecordData }>(
       '/' + resource + (id ? '/' + encodeURIComponent(id) : ''),
       { method: id ? 'PATCH' : 'POST', body: JSON.stringify(data) },
     );
     saved = result.data;
-    if (!saved || typeof saved.id !== 'string')
+    if (
+      !saved ||
+      typeof saved.id !== 'string' ||
+      !saved.id ||
+      (id && saved.id !== id)
+    )
       throw new ApiError('Respons penyimpanan tidak valid.', 502);
+    const incomplete = unsavedFields(resource, data, saved);
+    if (Object.keys(incomplete).length) {
+      revalidatePath(config.path);
+      revalidatePath(config.path + '/' + saved.id);
+      revalidatePath('/');
+      return {
+        message:
+          'Penyimpanan belum lengkap. Periksa pesan di bawah kolom terkait sebelum melanjutkan.',
+        errors: incomplete,
+        values,
+      };
+    }
   } catch (error) {
     if (!(error instanceof ApiError)) throw error;
     return { message: error.message, errors: error.errors, values };
   }
+  let taskDispatch = 'none';
+  if (
+    resource === 'orders' &&
+    Array.isArray(saved.staff) &&
+    saved.staff.length &&
+    ['Menunggu Lokasi', 'Menuju Lokasi', 'Sedang Dikerjakan'].includes(
+      String(saved.status),
+    )
+  )
+    taskDispatch = await dispatchAssignment(saved as Order);
   revalidatePath(config.path);
   revalidatePath('/');
   revalidatePath('/laporan');
+  revalidatePath('/jadwal');
+  revalidatePath('/pesanan');
   revalidatePath(config.path + '/' + saved.id);
   redirect(
     id
-      ? config.path + '?saved=1'
+      ? config.path +
+          '?saved=1' +
+          (taskDispatch !== 'none' ? '&taskDispatch=' + taskDispatch : '')
       : config.path + '/' + encodeURIComponent(saved.id) + '?saved=1',
   );
 }
@@ -182,6 +369,21 @@ export async function deleteAction(
 ): Promise<FormState> {
   if (!isResource(resource)) return { message: 'Jenis data tidak valid.' };
   try {
+    if (resource === 'schedules') {
+      const [schedule, orders] = await Promise.all([
+        detail<Schedule>('schedules', id),
+        list<Order>('orders'),
+      ]);
+      if (
+        linkedOrders(schedule, orders).some(
+          (order) => order.status !== 'Selesai',
+        )
+      )
+        return {
+          message:
+            'Shift masih dipakai pesanan aktif. Pindahkan penugasan pesanan terlebih dahulu.',
+        };
+    }
     await request('/' + resource + '/' + encodeURIComponent(id), {
       method: 'DELETE',
     });
@@ -212,28 +414,70 @@ export async function assignAction(
       values: { staff: selected },
     };
   try {
-    const [staff, order] = await Promise.all([
+    const [staff, order, schedules, orders] = await Promise.all([
       list<Staff>('staff'),
       detail<Order>('orders', id),
+      list<Schedule>('schedules'),
+      list<Order>('orders'),
     ]);
+    if (
+      selected.some((name) => {
+        const person = staff.find((item) => item.name === name);
+        return !person || isDemoId(person.id) !== isDemoId(id);
+      })
+    )
+      return {
+        errors: {
+          staff:
+            'Petugas tidak tersedia untuk pesanan ini. Perbarui pilihan petugas.',
+        },
+        values: { staff: selected },
+      };
     if (!['Menunggu Assign', 'Menunggu Lokasi'].includes(order.status))
       return { message: 'Status pesanan sudah berubah. Muat ulang daftar.' };
+    if (!needsAssignment(order))
+      return {
+        message:
+          'Pesanan sudah memiliki petugas. Ubah penugasan melalui detail pesanan.',
+      };
+    const liveOrders = await withOrderWorkTimes(orders);
     if (
       selected.some(
         (name) =>
           !staff.some(
-            (person) => person.name === name && person.status === 'Tersedia',
+            (person) =>
+              person.name === name &&
+              !assignmentIssue(person, order, schedules, liveOrders),
           ),
       )
     )
       return {
-        errors: { staff: 'Pilih petugas yang tersedia.' },
+        errors: {
+          staff:
+            'Jadwal petugas tidak sesuai atau sudah terisi. Perbarui pilihan dan periksa Kelola Jadwal.',
+        },
         values: { staff: selected },
       };
-    await request('/orders/' + encodeURIComponent(id), {
-      method: 'PATCH',
-      body: JSON.stringify({ staff: selected, status: 'Sedang Dikerjakan' }),
-    });
+    const result = await request<{ data: RecordData }>(
+      '/orders/' + encodeURIComponent(id),
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ staff: selected, status: 'Menunggu Lokasi' }),
+      },
+    );
+    revalidatePath('/pesanan');
+    if (
+      !result.data ||
+      result.data.id !== id ||
+      result.data.status !== 'Menunggu Lokasi' ||
+      !Array.isArray(result.data.staff) ||
+      JSON.stringify([...result.data.staff].sort()) !==
+        JSON.stringify([...selected].sort())
+    )
+      throw new ApiError(
+        'Penugasan belum tersimpan dengan benar. Periksa pesanan sebelum mencoba lagi.',
+        502,
+      );
   } catch (error) {
     if (!(error instanceof ApiError)) throw error;
     return {
@@ -247,5 +491,11 @@ export async function assignAction(
   revalidatePath('/petugas');
   revalidatePath('/jadwal');
   revalidatePath('/pesanan/' + id);
-  redirect('/pesanan?saved=1');
+  const assigned = await detail<Order>('orders', id);
+  const taskDispatch = await dispatchAssignment({
+    ...assigned,
+    staff: selected,
+    status: 'Menunggu Lokasi',
+  });
+  redirect('/pesanan?saved=1&taskDispatch=' + taskDispatch);
 }

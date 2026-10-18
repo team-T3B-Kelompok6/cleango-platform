@@ -1,0 +1,26 @@
+[
+  {
+    "font": "15px",
+    "logoLoaded": true,
+    "noHorizontalOverflow": true,
+    "viewport": "1280x900"
+  },
+  {
+    "font": "15px",
+    "logoLoaded": true,
+    "noHorizontalOverflow": true,
+    "viewport": "768x1024"
+  },
+  {
+    "font": "15px",
+    "logoLoaded": true,
+    "noHorizontalOverflow": true,
+    "viewport": "360x800"
+  },
+  {
+    "font": "15px",
+    "logoLoaded": true,
+    "noHorizontalOverflow": true,
+    "viewport": "800x360"
+  }
+]

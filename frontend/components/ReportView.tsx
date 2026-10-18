@@ -3,9 +3,10 @@ import { list } from '@/lib/api';
 import { rupiah } from '@/lib/resources';
 import type { Order, Search } from '@/types';
 import { MetricCard } from './MetricCard';
-import { DialogTrigger } from './DialogTrigger';
+import { DialogTrigger, DialogCloseButton } from './DialogTrigger';
 import { Icon } from './Icon';
 import { UiIcon } from './UiIcon';
+import { displayId } from '@/lib/display';
 
 const tabs = [
   'Ringkasan Bulanan',
@@ -239,7 +240,7 @@ export async function ReportView({ params }: { params: Search }) {
                 <DialogTrigger
                   label="Lihat Rincian"
                   title="Rincian Pesanan Selesai"
-                  subtitle={'#' + order.id}
+                  subtitle={'#' + displayId(order.id)}
                 >
                   <div className="modal-body invoice-detail">
                     <h3>{order.customer}</h3>
@@ -253,11 +254,14 @@ export async function ReportView({ params }: { params: Search }) {
                         ? 'Metode pembayaran: ' + order.paymentMethod
                         : 'Informasi pembayaran belum tersedia.'}
                     </small>
+                  </div>
+                  <div className="modal-footer">
+                    <DialogCloseButton />
                     <Link
-                      className="button"
+                      className="button primary"
                       href={'/pesanan/' + encodeURIComponent(order.id)}
                     >
-                      Detail pesanan
+                      Buka Pesanan
                     </Link>
                   </div>
                 </DialogTrigger>
