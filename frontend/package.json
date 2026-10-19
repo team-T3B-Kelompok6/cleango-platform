@@ -3,10 +3,10 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "dev": "next dev --hostname 127.0.0.1 -p 3100",
-    "dev:lan": "next dev --hostname 0.0.0.0 -p 3100",
+    "dev": "next dev --hostname 127.0.0.1",
+    "dev:lan": "next dev --hostname 0.0.0.0",
     "build": "next build",
-    "start": "next start --hostname 127.0.0.1 -p 3100",
+    "start": "next start --hostname 127.0.0.1",
     "typecheck": "tsc --noEmit",
     "check:demo": "node scripts/check-admin-demo.mjs",
     "check:promo": "node scripts/check-promo-pricing.mjs",
@@ -17,10 +17,10 @@
   },
   "dependencies": {
     "leaflet": "^1.9.4",
-    "next": "16.4.0",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
-    "server-only": "0.0.1"
+    "next": "^16.4.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@types/leaflet": "^1.9.22",

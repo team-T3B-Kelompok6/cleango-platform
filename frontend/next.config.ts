@@ -5,7 +5,7 @@ const config: NextConfig = {
   outputFileTracingExcludes: { '/*': ['./.local/**/*'] },
   devIndicators: false,
   experimental: { serverActions: { bodySizeLimit: '8mb' } },
-
+  turbopack: { root: process.cwd() },
   async headers() {
     return [
       {

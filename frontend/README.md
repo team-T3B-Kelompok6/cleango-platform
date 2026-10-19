@@ -1,5 +1,7 @@
 # Web Admin CleanGo
 
+[Checklist terbaru 17–18 Oktober 2026](docs/checklist-review-2026-10-17/README.md): 71 pemeriksaan browser, 27 kombinasi halaman/lebar, pengujian HTTP terisolasi, dokumentasi render, dan screenshot perbandingan Figma. API tim belum diterima; hasil demo/fixture tidak membuktikan integrasi backend produksi.
+
 [Ringkasan perubahan dan pemeriksaan 17 Oktober](docs/recheck-2026-10-17/README.md): hasil tes terbaru, perubahan tiap halaman, dan integrasi yang masih menunggu backend.
 
 [Pemeriksaan seluruh popup terbaru](docs/popup-review-2026-10-16/README.md): ukuran sesuai isi, form dan footer konsisten, konfirmasi hapus ringkas, serta pemeriksaan desktop/HP/tablet.
