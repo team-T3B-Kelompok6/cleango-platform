@@ -10,7 +10,8 @@
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --configLoader runner --pool=threads --maxWorkers=1 --no-file-parallelism",
-    "test:watch": "vitest --configLoader runner --pool=threads --maxWorkers=1 --no-file-parallelism"
+    "test:watch": "vitest --configLoader runner --pool=threads --maxWorkers=1 --no-file-parallelism",
+    "chat:check": "tsx scripts/check-chatbot.ts"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

@@ -13,6 +13,10 @@ export interface AppEnv {
   OSRM_BASE_URL: string;
   AI_SERVICE_URL: string;
   AI_SERVICE_TOKEN: string;
+  GROQ_API_KEY: string;
+  GROQ_MODEL: string;
+  GROQ_FALLBACK_MODELS: string[];
+  CHATBOT_DATABASE_ENABLED: boolean;
 }
 
 let cachedEnv: AppEnv | undefined;
@@ -33,6 +37,9 @@ export function getEnv(): AppEnv {
     process.env.JWT_SECRET ??
     (nodeEnv === 'production' ? '' : 'cleango-development-only');
   if (!jwtSecret) throw new Error('JWT_SECRET wajib diisi pada production');
+  const chatDatabase = process.env.CHATBOT_DATABASE_ENABLED ?? 'false';
+  if (!['true', 'false'].includes(chatDatabase))
+    throw new Error('CHATBOT_DATABASE_ENABLED harus true atau false');
 
   cachedEnv = {
     NODE_ENV: nodeEnv as AppEnv['NODE_ENV'],
@@ -48,6 +55,15 @@ export function getEnv(): AppEnv {
       process.env.OSRM_BASE_URL ?? 'https://router.project-osrm.org',
     AI_SERVICE_URL: process.env.AI_SERVICE_URL ?? 'http://127.0.0.1:5000',
     AI_SERVICE_TOKEN: process.env.AI_SERVICE_TOKEN ?? '',
+    GROQ_API_KEY: process.env.GROQ_API_KEY?.trim() ?? '',
+    CHATBOT_DATABASE_ENABLED: chatDatabase === 'true',
+    GROQ_MODEL: process.env.GROQ_MODEL?.trim() || 'openai/gpt-oss-20b',
+    GROQ_FALLBACK_MODELS: (
+      process.env.GROQ_FALLBACK_MODELS ?? 'openai/gpt-oss-120b,qwen/qwen3.8-27b'
+    )
+      .split(',')
+      .map((model) => model.trim())
+      .filter(Boolean),
   };
   return cachedEnv;
 }
