@@ -68,7 +68,6 @@ export function getEnv(): AppEnv {
       .split(',')
       .map((model) => model.trim())
       .filter(Boolean),
->>>>>>> origin/feature/ai-chatbot
   };
   return cachedEnv!;
 }
