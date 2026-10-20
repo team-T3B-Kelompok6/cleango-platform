@@ -2,7 +2,12 @@ import bcrypt from 'bcrypt';
 import type { NextFunction, Request, Response } from 'express';
 import { OAuth2Client } from 'google-auth-library';
 import { AppError } from '../../lib/AppError.js';
-import { createAccessToken, createResetToken, verifyResetToken } from '../../lib/jwt.js';
+import {
+  ACCESS_TOKEN_EXPIRES_IN_SECONDS,
+  createAccessToken,
+  createResetToken,
+  verifyResetToken,
+} from '../../lib/jwt.js';
 import {
   findOrCreateSocialCustomer,
   findUserByEmail,
@@ -69,7 +74,11 @@ export async function register(request: Request, response: Response, next: NextF
 
     response.status(201).json({
       message: 'Registrasi berhasil',
-      data: { user: publicUser(user), token: createAccessToken(user) },
+      data: {
+        user: publicUser(user),
+        token: createAccessToken(user),
+        expiresIn: ACCESS_TOKEN_EXPIRES_IN_SECONDS,
+      },
     });
   } catch (error) { next(error); }
 }
@@ -96,7 +105,11 @@ export async function login(request: Request, response: Response, next: NextFunc
 
     response.status(200).json({
       message: 'Login berhasil',
-      data: { user: publicUser(user), token: createAccessToken(user) },
+      data: {
+        user: publicUser(user),
+        token: createAccessToken(user),
+        expiresIn: ACCESS_TOKEN_EXPIRES_IN_SECONDS,
+      },
     });
   } catch (error) { next(error); }
 }
@@ -201,7 +214,11 @@ export async function socialLogin(request: Request, response: Response, next: Ne
 
     response.status(200).json({
       message: 'Login berhasil',
-      data: { user: publicUser(user), token: createAccessToken(user) },
+      data: {
+        user: publicUser(user),
+        token: createAccessToken(user),
+        expiresIn: ACCESS_TOKEN_EXPIRES_IN_SECONDS,
+      },
     });
   } catch (error) { next(error); }
 }
