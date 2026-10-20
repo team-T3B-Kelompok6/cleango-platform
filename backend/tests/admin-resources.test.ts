@@ -22,7 +22,7 @@ describe('admin resource contracts', () => {
     },
   );
 
-  it('validates the frontend service category before database access', async () => {
+  it('rejects a service category that is not registered', async () => {
     const response = await authorized('post', '/api/services').send({
       name: 'Tes Layanan',
       category: 'Tidak Ada',
@@ -34,7 +34,7 @@ describe('admin resource contracts', () => {
     });
 
     expect(response.status).toBe(400);
-    expect(response.body.errors.category).toBe('Kategori layanan tidak valid.');
+    expect(response.body.errors.category).toBe('Kategori layanan tidak ditemukan.');
   });
 
   it('validates FAQ publication as a boolean before database access', async () => {

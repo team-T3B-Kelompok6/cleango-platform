@@ -7,7 +7,6 @@ import {
   listPlatformServices,
   SERVICE_SORTS,
   type ServiceSort,
-  SERVICE_CATEGORY_DATABASE_NAMES,
   updatePlatformService,
   type PlatformServiceInput,
   type ServiceCategory,
@@ -54,13 +53,13 @@ function inputFrom(
   );
   let category: ServiceCategory | undefined;
   if (!partial || body.category !== undefined) {
-    if (
-      typeof body.category !== 'string' ||
-      !(body.category in SERVICE_CATEGORY_DATABASE_NAMES)
-    ) {
-      validationError({ category: 'Kategori layanan tidak valid.' });
+    if (typeof body.category !== 'string' || !body.category.trim()) {
+      validationError({ category: 'Kategori layanan wajib diisi.' });
     }
-    category = body.category as ServiceCategory;
+    const value = (body.category as string).trim();
+    if (value.length > 100)
+      validationError({ category: 'Kategori maksimal 100 karakter.' });
+    category = value;
   }
   let price: number | undefined;
   if (!partial || body.price !== undefined) {
@@ -100,6 +99,18 @@ function inputFrom(
   return input;
 }
 
+
+// A category that is not registered (or is inactive) is a client mistake, not a
+// server fault.
+function categoryError(error: unknown): unknown {
+  if (error instanceof Error && error.message === 'CATEGORY_NOT_FOUND') {
+    return new AppError(400, 'Periksa kembali data yang dikirim.', 'VALIDATION_ERROR', {
+      category: 'Kategori layanan tidak ditemukan.',
+    });
+  }
+  return error;
+}
+
 export async function getServices(
   request: Request,
   response: Response,
@@ -115,12 +126,12 @@ export async function getServices(
 
     let category: ServiceCategory | null = null;
     if (request.query.category !== undefined && request.query.category !== '') {
-      if (
-        typeof request.query.category !== 'string' ||
-        !(request.query.category in SERVICE_CATEGORY_DATABASE_NAMES)
-      )
+      if (typeof request.query.category !== 'string')
         validationError({ category: 'Kategori layanan tidak valid.' });
-      category = request.query.category as ServiceCategory;
+      const value = (request.query.category as string).trim();
+      if (!value || value.length > 100)
+        validationError({ category: 'Kategori layanan tidak valid.' });
+      category = value;
     }
 
     let sort: ServiceSort = 'name';
@@ -170,7 +181,7 @@ export async function createService(
     );
     response.status(201).json({ message: 'Layanan berhasil dibuat.', data });
   } catch (error) {
-    next(error);
+    next(categoryError(error));
   }
 }
 export async function updateService(
@@ -188,7 +199,7 @@ export async function updateService(
       .status(200)
       .json({ message: 'Layanan berhasil diperbarui.', data });
   } catch (error) {
-    next(error);
+    next(categoryError(error));
   }
 }
 export async function deleteService(

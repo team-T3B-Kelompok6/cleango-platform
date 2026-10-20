@@ -2,12 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import request from 'supertest';
 
 const serviceModel = vi.hoisted(() => ({
-  SERVICE_CATEGORY_DATABASE_NAMES: {
-    Rumah: 'Rumah',
-    Kantor: 'Kantor',
-    Sofa: 'Sofa dan Kasur',
-    AC: 'AC',
-  },
   SERVICE_SORTS: ['name', 'price', 'category', 'newest'],
   listPlatformServices: vi.fn(),
 }));
@@ -58,10 +52,18 @@ describe('GET /api/services filters and sorting', () => {
     expect(serviceModel.listPlatformServices).not.toHaveBeenCalled();
   });
 
-  it('rejects an unknown category value', async () => {
+  it('passes any registered category name through to the model', async () => {
+    // Categories are admin-managed, so a new one (e.g. "Gudang") must be usable.
     const response = await get('/api/services?category=Gudang');
+    expect(response.status).toBe(200);
+    expect(serviceModel.listPlatformServices).toHaveBeenCalledWith(
+      expect.objectContaining({ category: 'Gudang' }),
+    );
+  });
+
+  it('rejects an empty category value', async () => {
+    const response = await get('/api/services?category=' + 'a'.repeat(101));
     expect(response.status).toBe(400);
-    expect(response.body.errors.category).toBe('Kategori layanan tidak valid.');
     expect(serviceModel.listPlatformServices).not.toHaveBeenCalled();
   });
 

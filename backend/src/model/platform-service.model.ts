@@ -5,14 +5,9 @@ import type {
 } from 'mysql2/promise';
 import { pool } from '../lib/db.js';
 
-export const SERVICE_CATEGORY_DATABASE_NAMES = {
-  Rumah: 'Rumah',
-  Kantor: 'Kantor',
-  Sofa: 'Sofa dan Kasur',
-  AC: 'AC',
-} as const;
-
-export type ServiceCategory = keyof typeof SERVICE_CATEGORY_DATABASE_NAMES;
+// Categories are managed in the `service_categories` table (admin dashboard can
+// add new ones), so the API accepts any name instead of a hardcoded whitelist.
+export type ServiceCategory = string;
 
 export interface PlatformServiceInput {
   name: string;
@@ -51,12 +46,6 @@ export interface PlatformService {
   features: string[];
 }
 
-function apiCategory(databaseName: string): ServiceCategory {
-  return databaseName === 'Sofa dan Kasur'
-    ? 'Sofa'
-    : (databaseName as ServiceCategory);
-}
-
 async function attachFeatures(rows: ServiceRow[]): Promise<PlatformService[]> {
   if (!rows.length) return [];
   const ids = rows.map((row) => row.id);
@@ -70,7 +59,7 @@ async function attachFeatures(rows: ServiceRow[]): Promise<PlatformService[]> {
   return rows.map((row) => ({
     id: String(row.id),
     name: row.name,
-    category: apiCategory(row.category),
+    category: row.category,
     duration: row.duration,
     price: row.price,
     description: row.description,
@@ -113,7 +102,7 @@ export async function listPlatformServices(
   }
   if (filters.category) {
     conditions.push('c.name = ?');
-    values.push(SERVICE_CATEGORY_DATABASE_NAMES[filters.category]);
+    values.push(filters.category);
   }
   if (filters.activeOnly) conditions.push('s.is_active = TRUE');
   const where = conditions.length ? ` WHERE ${conditions.join(' AND ')}` : '';
@@ -140,10 +129,10 @@ async function categoryId(
   category: ServiceCategory,
 ): Promise<number> {
   const [rows] = await connection.query<(RowDataPacket & { id: number })[]>(
-    'SELECT id FROM service_categories WHERE name = ? LIMIT 1',
-    [SERVICE_CATEGORY_DATABASE_NAMES[category]],
+    'SELECT id FROM service_categories WHERE name = ? AND is_active = TRUE LIMIT 1',
+    [category],
   );
-  if (!rows[0]) throw new Error(`Kategori master ${category} belum tersedia`);
+  if (!rows[0]) throw new Error('CATEGORY_NOT_FOUND');
   return rows[0].id;
 }
 
