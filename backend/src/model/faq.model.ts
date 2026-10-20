@@ -43,6 +43,12 @@ export async function listFaqs(): Promise<Faq[]> {
   );
   return rows.map(mapFaq);
 }
+export async function listPublishedFaqs(): Promise<Faq[]> {
+  const [rows] = await pool.query<FaqRow[]>(
+    `${select} WHERE is_active = TRUE ORDER BY sort_order, id`,
+  );
+  return rows.map(mapFaq);
+}
 export async function findFaq(id: number): Promise<Faq | null> {
   const [rows] = await pool.query<FaqRow[]>(`${select} WHERE id = ? LIMIT 1`, [
     id,
