@@ -9,6 +9,7 @@ import { customerChatbotRouter } from './chatbot.routes.js';
 import { customerBookingRouter } from './booking.routes.js';
 import { customerBannerRouter } from './banner.routes.js';
 import { customerPromoRouter } from './promo.routes.js';
+import { customerNotificationRouter } from './notification.routes.js';
 
 export const customerRouter = Router();
 customerRouter.use('/auth', customerAuthRouter);
@@ -21,3 +22,4 @@ customerRouter.use('/chat', customerChatbotRouter);
 customerRouter.use('/bookings', customerBookingRouter);
 customerRouter.use('/banners', customerBannerRouter);
 customerRouter.use('/promos', customerPromoRouter);
+customerRouter.use('/notifications', customerNotificationRouter);

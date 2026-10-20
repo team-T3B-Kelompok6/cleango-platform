@@ -297,6 +297,16 @@ export async function createBooking(input: CreateBookingInput): Promise<{
       ],
     );
 
+    await connection.execute(
+      `INSERT INTO notifications (recipient_user_id, booking_id, type, title, message)
+       VALUES (?, ?, 'order', 'Pesanan Dikonfirmasi', ?)`,
+      [
+        input.customerId,
+        result.insertId,
+        `Pesanan ${code} untuk ${input.date} pukul ${input.time} telah dibuat dan menunggu penugasan cleaner.`,
+      ],
+    );
+
     await connection.commit();
     return { id: Number(result.insertId), code };
   } catch (error) {
