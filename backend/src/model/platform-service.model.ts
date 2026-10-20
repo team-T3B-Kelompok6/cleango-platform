@@ -86,9 +86,41 @@ const serviceSelect = `SELECT s.id, s.name, c.name AS category,
   s.price, COALESCE(s.description, '') AS description, s.is_active AS active
   FROM services s INNER JOIN service_categories c ON c.id = s.category_id`;
 
-export async function listPlatformServices(): Promise<PlatformService[]> {
+export type ServiceSort = 'name' | 'price' | 'category' | 'newest';
+export const SERVICE_SORTS: ServiceSort[] = ['name', 'price', 'category', 'newest'];
+const SORT_SQL: Record<ServiceSort, string> = {
+  name: 's.name ASC',
+  price: 's.price ASC, s.name ASC',
+  category: 'c.name ASC, s.name ASC',
+  newest: 's.created_at DESC, s.id DESC',
+};
+
+export interface PlatformServiceFilters {
+  search?: string | null;
+  category?: ServiceCategory | null;
+  activeOnly?: boolean;
+  sort?: ServiceSort;
+}
+
+export async function listPlatformServices(
+  filters: PlatformServiceFilters = {},
+): Promise<PlatformService[]> {
+  const conditions: string[] = [];
+  const values: (string | number)[] = [];
+  if (filters.search) {
+    conditions.push("(s.name LIKE ? OR COALESCE(s.description, '') LIKE ?)");
+    values.push(`%${filters.search}%`, `%${filters.search}%`);
+  }
+  if (filters.category) {
+    conditions.push('c.name = ?');
+    values.push(SERVICE_CATEGORY_DATABASE_NAMES[filters.category]);
+  }
+  if (filters.activeOnly) conditions.push('s.is_active = TRUE');
+  const where = conditions.length ? ` WHERE ${conditions.join(' AND ')}` : '';
+  const order = SORT_SQL[filters.sort ?? 'name'];
   const [rows] = await pool.query<ServiceRow[]>(
-    `${serviceSelect} ORDER BY s.name`,
+    `${serviceSelect}${where} ORDER BY ${order}`,
+    values,
   );
   return attachFeatures(rows);
 }

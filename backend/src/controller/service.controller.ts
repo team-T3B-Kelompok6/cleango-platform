@@ -5,6 +5,8 @@ import {
   findPlatformService,
   insertPlatformService,
   listPlatformServices,
+  SERVICE_SORTS,
+  type ServiceSort,
   SERVICE_CATEGORY_DATABASE_NAMES,
   updatePlatformService,
   type PlatformServiceInput,
@@ -99,12 +101,42 @@ function inputFrom(
 }
 
 export async function getServices(
-  _request: Request,
+  request: Request,
   response: Response,
   next: NextFunction,
 ): Promise<void> {
   try {
-    response.status(200).json({ data: await listPlatformServices() });
+    const search =
+      typeof request.query.search === 'string' && request.query.search.trim()
+        ? request.query.search.trim()
+        : null;
+    if (search && search.length > 100)
+      validationError({ search: 'Pencarian maksimal 100 karakter.' });
+
+    let category: ServiceCategory | null = null;
+    if (request.query.category !== undefined && request.query.category !== '') {
+      if (
+        typeof request.query.category !== 'string' ||
+        !(request.query.category in SERVICE_CATEGORY_DATABASE_NAMES)
+      )
+        validationError({ category: 'Kategori layanan tidak valid.' });
+      category = request.query.category as ServiceCategory;
+    }
+
+    let sort: ServiceSort = 'name';
+    if (request.query.sort !== undefined && request.query.sort !== '') {
+      if (
+        typeof request.query.sort !== 'string' ||
+        !SERVICE_SORTS.includes(request.query.sort as ServiceSort)
+      )
+        validationError({ sort: 'Pengurutan tidak valid.' });
+      sort = request.query.sort as ServiceSort;
+    }
+
+    const activeOnly = request.query.active === 'true';
+    response.status(200).json({
+      data: await listPlatformServices({ search, category, activeOnly, sort }),
+    });
   } catch (error) {
     next(error);
   }
