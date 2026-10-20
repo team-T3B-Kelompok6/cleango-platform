@@ -393,6 +393,13 @@ export async function adminTaskBoard(origin: string): Promise<TaskBoard> {
           staffId: person?.id,
           service: order.service,
           address: order.address,
+          destinationLocation:
+            Number.isFinite(order.latitude) && Number.isFinite(order.longitude)
+              ? {
+                  latitude: Number(order.latitude),
+                  longitude: Number(order.longitude),
+                }
+              : undefined,
           date: order.date,
           time: order.time,
           startedAt: order.startedAt ?? order.started_at,

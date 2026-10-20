@@ -33,6 +33,11 @@ function duration(seconds: number) {
     .map((value) => String(value).padStart(2, '0'))
     .join(':');
 }
+const demoCleanerLocations: Record<string, [number, number]> = {
+  'DEMO-ORD-01': [-7.94974, 112.63092],
+  'DEMO-ORD-02': [-7.98018, 112.63063],
+  'DEMO-ORD-03': [-7.96792, 112.65354],
+};
 export function CleanerPortal({
   initial,
   token,
@@ -174,7 +179,10 @@ export function CleanerPortal({
   }
   function shareLocation() {
     if (task.demo) {
-      void perform('location', { latitude: -6.276, longitude: 106.755 });
+      const [latitude, longitude] = demoCleanerLocations[task.orderId] ?? [
+        -7.96662, 112.63263,
+      ];
+      void perform('location', { latitude, longitude });
       return;
     }
     if (!navigator.geolocation) {

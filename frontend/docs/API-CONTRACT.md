@@ -232,7 +232,7 @@ Customer menampilkan transaksi selesai yang tercatat, `totalSpent` bila tersedia
 
 Frontend menyediakan `/tugas/:token` di luar layout admin, serta BFF `/api/tugas/:token` dan `/api/admin/cleaner-tasks`. URL tugas yang sama dibuka dalam iframe popup Pantau Petugas dan sebagai halaman penuh di HP. Tidak ada daftar pesanan atau API admin pada halaman publik. BFF publik hanya mengirim Bearer token tugas ke API, tanpa cookie/token sesi admin. Backend wajib memperlakukan token sebagai akses terbatas pada satu pasangan pesanan–petugas, memeriksa masa berlaku, dan mencabutnya ketika penugasan berubah atau pesanan dibatalkan.
 
-Endpoint berikut adalah kontrak tambahan **yang belum tersedia pada backend tim yang diperiksa**. Implementasi saat ini lengkap untuk data `[UJI]` dengan penyimpanan lokal server dan pengiriman simulasi. Tidak ada perubahan pada backend/mobile.
+Endpoint berikut adalah kontrak tambahan **yang belum tersedia pada backend tim yang diperiksa**. Implementasi saat ini lengkap untuk data `[UJI]` dengan penyimpanan lokal server dan pengiriman simulasi. Mobile belum diubah. Backend yang ada sudah mengembalikan koordinat alamat pada data pesanan untuk kebutuhan rute, tetapi endpoint tugas cleaner tetap menunggu implementasi tim backend.
 
 | Method | API backend (relatif `API_URL`) | Kegunaan |
 | --- | --- | --- |
@@ -243,7 +243,7 @@ Endpoint berikut adalah kontrak tambahan **yang belum tersedia pada backend tim 
 | POST | `/cleaner-task/photos` | Bearer token tugas; multipart field `file`, satu JPG/PNG maksimal 2 MB |
 | GET | `/cleaner-task/photos/:id` | Bearer token tugas; verifikasi kepemilikan foto sebelum mengirim bytes JPG/PNG |
 
-Tipe lengkap ada di `types/cleaner.ts`. Field tugas: `id,orderId,staffId,staffName,customer,customerPhone,address,date,time,service,notes,orderStatus,stage,demo,updatedAt,expiresAt,photos,linkDelivery,reportDelivery`. Timestamp opsional `departedAt,arrivedAt,startedAt,completedAt` adalah ISO dari server. `photos` berisi `{id,type}`, tanpa URL publik permanen. `report` berisi `{summary,checked}`. `location` opsional `{latitude,longitude,updatedAt}`. Data customer/layanan/jadwal harus mengikuti pesanan yang sama dengan dashboard. Backend tidak boleh menyalin seluruh objek customer/admin ke respons publik.
+Tipe lengkap ada di `types/cleaner.ts`. Field tugas: `id,orderId,staffId,staffName,customer,customerPhone,address,date,time,service,notes,orderStatus,stage,demo,updatedAt,expiresAt,photos,linkDelivery,reportDelivery`. Timestamp opsional `departedAt,arrivedAt,startedAt,completedAt` adalah ISO dari server. `photos` berisi `{id,type}`, tanpa URL publik permanen. `report` berisi `{summary,checked}`. `location` opsional `{latitude,longitude,updatedAt}`. Data pesanan admin juga membawa `latitude` dan `longitude` alamat tujuan (boleh `null` jika alamat belum memiliki koordinat); dashboard hanya meminta prediksi ETA bila lokasi cleaner dan koordinat tujuan sama-sama tersedia. Data customer/layanan/jadwal harus mengikuti pesanan yang sama dengan dashboard. Backend tidak boleh menyalin seluruh objek customer/admin ke respons publik.
 
 Body event memakai `{kind,key,...}`. `key` adalah ID tindakan 8–100 karakter; HTTP `Idempotency-Key` memakai nilai yang sama. Jenis tindakan:
 

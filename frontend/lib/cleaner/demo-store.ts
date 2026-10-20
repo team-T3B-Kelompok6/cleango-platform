@@ -192,74 +192,92 @@ export async function seedDemo(reset = false) {
     const today = new Intl.DateTimeFormat('en-CA', {
       timeZone: 'Asia/Jakarta',
     }).format(new Date());
-    const scenarios = [
+    const scenarios: [
+      string,
+      string,
+      string,
+      string,
+      string,
+      number,
+      number,
+    ][] = [
       [
         'Amanda Pratama',
-        'Cluster Anggrek 2 Blok B No. 15, Bintaro, Tangerang Selatan',
+        'Jl. Candi Panggung No. 15, Mojolangu, Lowokwaru, Kota Malang',
         'Deep Cleaning Rumah 2 Lantai',
         '13.30–16.30 WIB',
         'Anjing di halaman samping sudah dikandangkan. Fokus pada kamar utama dan dapur.',
+        -7.93465,
+        112.62177,
       ],
       [
         'Bagas Wicaksono',
-        'Jl. Melati No. 28, Kebayoran Baru, Jakarta Selatan',
+        'Jl. Ijen No. 28, Oro-oro Dowo, Klojen, Kota Malang',
         'Cuci Sofa & Kasur',
         '09.00–11.00 WIB',
         'Bersihkan sofa ruang keluarga dan kasur kamar utama. Skenario uji: pengiriman link pertama gagal.',
+        -7.96832,
+        112.62155,
       ],
       [
         'Citra Lestari',
-        'Ruko Permata Blok C4, Bekasi',
+        'Ruko Sawojajar Blok C4, Kedungkandang, Kota Malang',
         'Pembersihan Kantor',
         '15.00–17.00 WIB',
         'Koordinasikan akses dengan resepsionis. Skenario uji: pengiriman laporan pertama gagal.',
+        -7.97871,
+        112.66374,
       ],
     ];
-    scenarios.forEach(([name, address, service, time, notes], index) => {
-      const suffix = String(index + 1).padStart(2, '0');
-      const customerId = 'DEMO-CUS-' + suffix,
-        staffId = 'DEMO-PT-' + suffix,
-        orderId = 'DEMO-ORD-' + suffix;
-      if (!store.entities.customers.some((item) => item.id === customerId))
-        store.entities.customers.push({
-          id: customerId,
-          name: '' + name,
-          address,
-          ...sampleContact('customer', index + 1, name),
-          joined: today,
-          active: true,
-          isDemo: true,
-        });
-      if (!store.entities.staff.some((item) => item.id === staffId))
-        store.entities.staff.push({
-          id: staffId,
-          name: '' + ['Raka Saputra', 'Dina Rahma', 'Fajar Hidayat'][index],
-          phone: sampleContact(
-            'staff',
-            index + 1,
-            ['Raka Saputra', 'Dina Rahma', 'Fajar Hidayat'][index],
-          ).phone,
-          skills: ['Deep Cleaning', 'Sanitasi'],
-          area: ['Tangerang Selatan', 'Jakarta Selatan', 'Bekasi'][index],
-          status: 'Tersedia',
-          isDemo: true,
-        });
-      if (!store.entities.orders.some((item) => item.id === orderId))
-        store.entities.orders.push({
-          id: orderId,
-          customerId,
-          customer: '' + name,
-          address,
-          service,
-          date: today,
-          time,
-          price: [300000, 180000, 450000][index],
-          staff: [],
-          status: 'Menunggu Assign',
-          notes,
-          isDemo: true,
-        });
-    });
+    scenarios.forEach(
+      ([name, address, service, time, notes, latitude, longitude], index) => {
+        const suffix = String(index + 1).padStart(2, '0');
+        const customerId = 'DEMO-CUS-' + suffix,
+          staffId = 'DEMO-PT-' + suffix,
+          orderId = 'DEMO-ORD-' + suffix;
+        if (!store.entities.customers.some((item) => item.id === customerId))
+          store.entities.customers.push({
+            id: customerId,
+            name: '' + name,
+            address,
+            ...sampleContact('customer', index + 1, name),
+            joined: today,
+            active: true,
+            isDemo: true,
+          });
+        if (!store.entities.staff.some((item) => item.id === staffId))
+          store.entities.staff.push({
+            id: staffId,
+            name: '' + ['Raka Saputra', 'Dina Rahma', 'Fajar Hidayat'][index],
+            phone: sampleContact(
+              'staff',
+              index + 1,
+              ['Raka Saputra', 'Dina Rahma', 'Fajar Hidayat'][index],
+            ).phone,
+            skills: ['Deep Cleaning', 'Sanitasi'],
+            area: ['Lowokwaru', 'Klojen', 'Kedungkandang'][index],
+            status: 'Tersedia',
+            isDemo: true,
+          });
+        if (!store.entities.orders.some((item) => item.id === orderId))
+          store.entities.orders.push({
+            id: orderId,
+            customerId,
+            customer: '' + name,
+            address,
+            latitude,
+            longitude,
+            service,
+            date: today,
+            time,
+            price: [300000, 180000, 450000][index],
+            staff: [],
+            status: 'Menunggu Assign',
+            notes,
+            isDemo: true,
+          });
+      },
+    );
     return {
       orders: store.entities.orders.length,
       message: reset

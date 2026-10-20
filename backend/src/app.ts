@@ -11,7 +11,7 @@ export function createApp() {
   const env = getEnv();
 
   app.use(cors({ origin: env.FRONTEND_ORIGIN }));
-  app.use(express.json());
+  app.use(express.json({ limit: '1mb' }));
   app.use(requestLogger);
   app.get('/health', (_request, response) => response.status(200).json({ message: 'CleanGo API sehat' }));
   app.use(

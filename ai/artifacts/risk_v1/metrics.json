@@ -1,0 +1,199 @@
+{
+  "card": "AI-02 — Prediksi Risiko Keterlambatan dengan ML Classification",
+  "warning": "LaDe proxy trajectories and simulated CleanGo schedules; not validated for real operations.",
+  "late_definition": "late_label=1 when simulated actual arrival is later than scheduled_at.",
+  "selected_model": "random_forest",
+  "selection_rule": "Highest validation balanced accuracy, then F1, then fewer false negatives. Test data is used once for final reporting.",
+  "features": [
+    "eta_model_lateness_seconds",
+    "eta_schedule_ratio",
+    "predicted_lateness_seconds",
+    "elapsed_seconds",
+    "stopped_duration_seconds",
+    "distance_ratio",
+    "rolling_speed_ratio",
+    "location_age_seconds",
+    "has_departed",
+    "hour_sin",
+    "hour_cos",
+    "weekday_sin",
+    "weekday_cos"
+  ],
+  "target": "late_label",
+  "comparison": {
+    "logistic_regression": {
+      "decision_threshold": 0.5600000000000003,
+      "validation": {
+        "accuracy": 0.8515625,
+        "balanced_accuracy": 0.8402520385470719,
+        "precision": 0.9130434782608695,
+        "recall": 0.7368421052631579,
+        "f1": 0.8155339805825242,
+        "confusion_matrix": {
+          "true_negative": 67,
+          "false_positive": 4,
+          "false_negative": 15,
+          "true_positive": 42
+        },
+        "brier_score": 0.14582223163842312,
+        "log_loss": 0.45583577480651033
+      }
+    },
+    "decision_tree": {
+      "decision_threshold": 0.5700000000000003,
+      "validation": {
+        "accuracy": 0.796875,
+        "balanced_accuracy": 0.7909562638991845,
+        "precision": 0.7924528301886793,
+        "recall": 0.7368421052631579,
+        "f1": 0.7636363636363637,
+        "confusion_matrix": {
+          "true_negative": 60,
+          "false_positive": 11,
+          "false_negative": 15,
+          "true_positive": 42
+        },
+        "brier_score": 0.16527641554856265,
+        "log_loss": 1.0068663783118332
+      }
+    },
+    "random_forest": {
+      "decision_threshold": 0.6000000000000003,
+      "validation": {
+        "accuracy": 0.8671875,
+        "balanced_accuracy": 0.8577958981961946,
+        "precision": 0.9166666666666666,
+        "recall": 0.7719298245614035,
+        "f1": 0.8380952380952381,
+        "confusion_matrix": {
+          "true_negative": 67,
+          "false_positive": 4,
+          "false_negative": 13,
+          "true_positive": 44
+        },
+        "brier_score": 0.13275000286840374,
+        "log_loss": 0.4258132210850757
+      }
+    }
+  },
+  "thresholds": {
+    "low_below": 0.6000000000000003,
+    "medium_from": 0.6000000000000003,
+    "high_from": 0.6500000000000004,
+    "selected_on": "validation"
+  },
+  "class_balance": {
+    "train": {
+      "on_time": 393,
+      "late": 263,
+      "late_rate": 0.4009146341463415
+    },
+    "validation": {
+      "on_time": 71,
+      "late": 57,
+      "late_rate": 0.4453125
+    },
+    "test": {
+      "on_time": 110,
+      "late": 81,
+      "late_rate": 0.42408376963350786
+    }
+  },
+  "test": {
+    "model": {
+      "accuracy": 0.7801047120418848,
+      "balanced_accuracy": 0.7618967452300786,
+      "precision": 0.8,
+      "recall": 0.6419753086419753,
+      "f1": 0.7123287671232876,
+      "confusion_matrix": {
+        "true_negative": 97,
+        "false_positive": 13,
+        "false_negative": 29,
+        "true_positive": 52
+      },
+      "brier_score": 0.15185852270028555,
+      "log_loss": 0.4667727201573639
+    },
+    "simple_eta_rule": {
+      "accuracy": 0.7172774869109948,
+      "balanced_accuracy": 0.6666666666666666,
+      "precision": 1.0,
+      "recall": 0.3333333333333333,
+      "f1": 0.5,
+      "confusion_matrix": {
+        "true_negative": 110,
+        "false_positive": 0,
+        "false_negative": 54,
+        "true_positive": 27
+      },
+      "brier_score": 0.28272251308900526,
+      "log_loss": 10.190352267080241
+    },
+    "calibration_bins": [
+      {
+        "range": [
+          0.0,
+          0.2
+        ],
+        "rows": 34,
+        "mean_probability": 0.142202507822977,
+        "observed_late_rate": 0.058823529411764705
+      },
+      {
+        "range": [
+          0.2,
+          0.4
+        ],
+        "rows": 65,
+        "mean_probability": 0.285008205544302,
+        "observed_late_rate": 0.23076923076923078
+      },
+      {
+        "range": [
+          0.4,
+          0.6
+        ],
+        "rows": 27,
+        "mean_probability": 0.5159963673950572,
+        "observed_late_rate": 0.4444444444444444
+      },
+      {
+        "range": [
+          0.6,
+          0.8
+        ],
+        "rows": 32,
+        "mean_probability": 0.6950485962345108,
+        "observed_late_rate": 0.625
+      },
+      {
+        "range": [
+          0.8,
+          1.0
+        ],
+        "rows": 33,
+        "mean_probability": 0.9005918257206259,
+        "observed_late_rate": 0.9696969696969697
+      }
+    ],
+    "rows": 191,
+    "trips": 191
+  },
+  "split": {
+    "train": {
+      "rows": 656,
+      "trips": 656
+    },
+    "validation": {
+      "rows": 128,
+      "trips": 128
+    },
+    "test": {
+      "rows": 191,
+      "trips": 191
+    }
+  },
+  "model_version": "risk-v1",
+  "trained_at": "2026-10-16T17:27:38.090260+00:00"
+}

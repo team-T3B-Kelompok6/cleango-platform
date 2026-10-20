@@ -50,6 +50,7 @@ export interface AdminCleanerTask {
   staffId?: string;
   service: string;
   address: string;
+  destinationLocation?: { latitude: number; longitude: number };
   date: string;
   time: string;
   orderStatus: string;

@@ -3,6 +3,8 @@ export interface RecordData {
   [key: string]: unknown;
 }
 export interface Order extends RecordData {
+  latitude?: number | null;
+  longitude?: number | null;
   updatedAt?: string;
   activityAt?: string;
   staffProgress?: { staffName: string; stage: string }[];

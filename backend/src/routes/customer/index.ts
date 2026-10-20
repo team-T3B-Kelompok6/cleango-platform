@@ -5,6 +5,7 @@ import { customerServiceRouter } from './service.routes.js';
 import { customerAddressRouter } from './address.routes.js';
 import { customerProfileRouter } from './profile.routes.js';
 import { customerFaqRouter } from './faq.routes.js';
+import { customerChatbotRouter } from './chatbot.routes.js';
 
 export const customerRouter = Router();
 customerRouter.use('/auth', customerAuthRouter);
@@ -13,3 +14,4 @@ customerRouter.use('/services', customerServiceRouter);
 customerRouter.use('/profile', customerProfileRouter);
 customerRouter.use('/addresses', customerAddressRouter);
 customerRouter.use('/faqs', customerFaqRouter);
+customerRouter.use('/chat', customerChatbotRouter);

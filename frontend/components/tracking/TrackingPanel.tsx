@@ -9,6 +9,16 @@ import { DeliveryBadge } from '../cleaner/DeliveryBadge';
 import { Modal } from '../Modal';
 import { displayId } from '@/lib/display';
 import { orderStatusLabel, orderTimeText } from '@/lib/order-flow';
+import type { RiskSnapshot } from '@/types/tracking';
+
+function scheduledAt(item: AdminCleanerTask) {
+  const start = item.time.match(/(\d{1,2})[.:](\d{2})/);
+  if (!start) return null;
+  const value = new Date(
+    `${item.date}T${start[1].padStart(2, '0')}:${start[2]}:00+07:00`,
+  );
+  return Number.isNaN(value.getTime()) ? null : value.toISOString();
+}
 
 export function TrackingPanel({
   initialName,
@@ -32,6 +42,9 @@ export function TrackingPanel({
   const [busy, setBusy] = useState(''),
     [copied, setCopied] = useState(false),
     [locationItem, setLocationItem] = useState<AdminCleanerTask | null>(null);
+  const [prediction, setPrediction] = useState<RiskSnapshot | null>(null),
+    [predictionBusy, setPredictionBusy] = useState(false),
+    [predictionError, setPredictionError] = useState('');
   const [choices, setChoices] = useState<Record<string, string>>({});
   const frame = useRef<HTMLIFrameElement>(null),
     linkField = useRef<HTMLInputElement>(null),
@@ -186,6 +199,94 @@ export function TrackingPanel({
       .toLowerCase()
       .includes(search.toLowerCase().trim()),
   );
+  const trackedItem = locationItem
+    ? (board?.items.find(
+        (item) =>
+          item.orderId === locationItem.orderId &&
+          item.staffName === locationItem.staffName,
+      ) ?? locationItem)
+    : null;
+  const trackedLocation = trackedItem?.task?.location;
+  const destination = trackedItem?.destinationLocation;
+  useEffect(() => {
+    const controller = new AbortController();
+    setPrediction(null);
+    setPredictionError('');
+    setPredictionBusy(false);
+    if (!trackedItem || !trackedLocation) return () => controller.abort();
+    if (trackedItem.task?.stage !== 'en_route') {
+      setPredictionError(
+        'Prediksi ETA aktif setelah cleaner menekan Berangkat Sekarang.',
+      );
+      return () => controller.abort();
+    }
+    if (!destination) {
+      setPredictionError(
+        'Koordinat tujuan belum tersedia pada alamat pesanan. Lokasi cleaner tetap ditampilkan.',
+      );
+      return () => controller.abort();
+    }
+    const schedule = scheduledAt(trackedItem);
+    if (!schedule) {
+      setPredictionError('Jadwal pesanan belum dapat dibaca untuk prediksi.');
+      return () => controller.abort();
+    }
+    const predictionAt = new Date();
+    const departedAt = Date.parse(trackedItem.task.departedAt ?? '');
+    const locationUpdatedAt = Date.parse(trackedLocation.updatedAt);
+    setPredictionBusy(true);
+    void fetch('/api/tracking/risk', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        cleanerLatitude: trackedLocation.latitude,
+        cleanerLongitude: trackedLocation.longitude,
+        destinationLatitude: destination.latitude,
+        destinationLongitude: destination.longitude,
+        predictionAt: predictionAt.toISOString(),
+        elapsedSeconds: Number.isFinite(departedAt)
+          ? Math.max(0, (predictionAt.getTime() - departedAt) / 1000)
+          : 0,
+        scheduledAt: schedule,
+        locationAgeSeconds: Number.isFinite(locationUpdatedAt)
+          ? Math.max(0, (predictionAt.getTime() - locationUpdatedAt) / 1000)
+          : 0,
+        hasDeparted: true,
+      }),
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        const payload = (await response.json()) as {
+          data?: RiskSnapshot;
+          message?: string;
+        };
+        if (!response.ok || !payload.data)
+          throw new Error(payload.message ?? 'Prediksi belum tersedia.');
+        setPrediction(payload.data);
+      })
+      .catch((error: unknown) => {
+        if (controller.signal.aborted) return;
+        setPredictionError(
+          error instanceof Error ? error.message : 'Prediksi belum tersedia.',
+        );
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setPredictionBusy(false);
+      });
+    return () => controller.abort();
+  }, [
+    destination?.latitude,
+    destination?.longitude,
+    trackedItem?.date,
+    trackedItem?.orderId,
+    trackedItem?.staffName,
+    trackedItem?.task?.departedAt,
+    trackedItem?.task?.stage,
+    trackedItem?.time,
+    trackedLocation?.latitude,
+    trackedLocation?.longitude,
+    trackedLocation?.updatedAt,
+  ]);
   return (
     <>
       {selected ? (
@@ -517,55 +618,118 @@ export function TrackingPanel({
           Tutup
         </button>
       </div>
-      {locationItem && (
+      {trackedItem && (
         <Modal
           title="Lokasi Petugas"
-          subtitle={locationItem.staffName}
+          subtitle={trackedItem.staffName}
           icon="pin"
           onClose={() => setLocationItem(null)}
         >
           <div className="modal-body staff-location-detail">
-            {locationItem.task?.location ? (
+            {trackedLocation ? (
               <>
                 <div className="staff-location-pin">
                   <UiIcon name="pin" />
                 </div>
-                <h3>{locationItem.staffName}</h3>
+                <h3>{trackedItem.staffName}</h3>
                 <p>
-                  {locationItem.demo
-                    ? 'Lokasi contoh · GPS langsung belum terhubung'
+                  {trackedItem.demo
+                    ? 'Lokasi simulasi area Malang'
                     : 'Lokasi terakhir yang dibagikan petugas'}
                 </p>
                 <dl className="record-facts">
                   <div>
                     <dt>Koordinat</dt>
                     <dd>
-                      {locationItem.task.location.latitude.toFixed(5)},{' '}
-                      {locationItem.task.location.longitude.toFixed(5)}
+                      {trackedLocation.latitude.toFixed(5)},{' '}
+                      {trackedLocation.longitude.toFixed(5)}
                     </dd>
                   </div>
                   <div>
                     <dt>Diperbarui</dt>
                     <dd>
-                      {new Date(
-                        locationItem.task.location.updatedAt,
-                      ).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}
+                      {new Date(trackedLocation.updatedAt).toLocaleString(
+                        'id-ID',
+                        { timeZone: 'Asia/Jakarta' },
+                      )}
                     </dd>
                   </div>
+                  {destination && (
+                    <div>
+                      <dt>Tujuan pesanan</dt>
+                      <dd>
+                        {destination.latitude.toFixed(5)},{' '}
+                        {destination.longitude.toFixed(5)}
+                      </dd>
+                    </div>
+                  )}
+                  {prediction && (
+                    <>
+                      <div>
+                        <dt>ETA perjalanan</dt>
+                        <dd>
+                          {Math.max(1, Math.round(prediction.etaSeconds / 60))}{' '}
+                          menit ·{' '}
+                          {prediction.etaSource === 'ml'
+                            ? 'Model ML'
+                            : 'Rute OSRM'}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Risiko keterlambatan</dt>
+                        <dd>
+                          {prediction.riskLevel === 'high'
+                            ? 'Tinggi'
+                            : prediction.riskLevel === 'medium'
+                              ? 'Sedang'
+                              : 'Rendah'}
+                        </dd>
+                      </div>
+                    </>
+                  )}
                 </dl>
-                {!locationItem.demo && (
+                {predictionBusy && <p role="status">Menghitung ETA…</p>}
+                {predictionError && <p className="muted">{predictionError}</p>}
+                {prediction && (
+                  <p className="muted">
+                    {prediction.reason} {prediction.recommendation}
+                  </p>
+                )}
+                {destination ? (
                   <a
                     className="button primary"
                     href={
-                      'https://www.google.com/maps/search/?api=1&query=' +
-                      locationItem.task.location.latitude +
-                      ',' +
-                      locationItem.task.location.longitude
+                      'https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=' +
+                      trackedLocation.latitude +
+                      '%2C' +
+                      trackedLocation.longitude +
+                      '%3B' +
+                      destination.latitude +
+                      '%2C' +
+                      destination.longitude
                     }
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    Buka di Google Maps
+                    Buka rute OpenStreetMap
+                  </a>
+                ) : (
+                  <a
+                    className="button primary"
+                    href={
+                      'https://www.openstreetmap.org/?mlat=' +
+                      trackedLocation.latitude +
+                      '&mlon=' +
+                      trackedLocation.longitude +
+                      '#map=16/' +
+                      trackedLocation.latitude +
+                      '/' +
+                      trackedLocation.longitude
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Buka lokasi OpenStreetMap
                   </a>
                 )}
               </>

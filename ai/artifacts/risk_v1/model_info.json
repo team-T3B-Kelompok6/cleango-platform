@@ -1,0 +1,23 @@
+{
+  "model_version": "risk-v1",
+  "selected_model": "random_forest",
+  "features": [
+    "eta_model_lateness_seconds",
+    "eta_schedule_ratio",
+    "predicted_lateness_seconds",
+    "elapsed_seconds",
+    "stopped_duration_seconds",
+    "distance_ratio",
+    "rolling_speed_ratio",
+    "location_age_seconds",
+    "has_departed",
+    "hour_sin",
+    "hour_cos",
+    "weekday_sin",
+    "weekday_cos"
+  ],
+  "target": "late_label",
+  "decision_threshold": 0.6000000000000003,
+  "high_threshold": 0.6500000000000004,
+  "fallback": "Use schedule/ETA, departure status, and location freshness rules when the model is unavailable."
+}

@@ -14,6 +14,7 @@ import { staffRouter } from './staff.routes.js';
 import { platformServiceRouter } from './service.routes.js';
 import { orderRouter } from './order.routes.js';
 import { scheduleRouter } from './schedule.routes.js';
+import { trackingRouter } from './tracking.routes.js';
 
 export const apiRouter = Router();
 apiRouter.use('/auth', authRouter);
@@ -31,3 +32,4 @@ apiRouter.use('/banners', bannerRouter);
 apiRouter.use('/uploads', uploadRouter);
 adminCleanerTaskRoutes(apiRouter);
 apiRouter.use('/cleaner-task', cleanerTaskRouter);
+apiRouter.use('/tracking', trackingRouter);

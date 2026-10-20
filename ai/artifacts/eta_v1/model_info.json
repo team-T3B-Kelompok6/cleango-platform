@@ -1,0 +1,18 @@
+{
+  "model_version": "eta-v1",
+  "selected_model": "linear_regression",
+  "features": [
+    "baseline_eta_seconds",
+    "elapsed_seconds",
+    "stopped_duration_seconds",
+    "distance_ratio",
+    "rolling_speed_ratio",
+    "eta_elapsed_ratio",
+    "hour_sin",
+    "hour_cos",
+    "weekday_sin",
+    "weekday_cos"
+  ],
+  "target": "actual_remaining_seconds",
+  "fallback": "Use OSRM duration when the model is unavailable or does not beat baseline MAE."
+}

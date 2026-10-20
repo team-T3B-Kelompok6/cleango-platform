@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+.venv/
+data/processed/
+artifacts/*
+!artifacts/eta_v1/
+artifacts/eta_v1/*
+!artifacts/eta_v1/*.json
+!artifacts/eta_v1/*.joblib
+!artifacts/risk_v1/
+artifacts/risk_v1/*
+!artifacts/risk_v1/*.json
+!artifacts/risk_v1/*.joblib
+!artifacts/work_duration_v1/
+artifacts/work_duration_v1/*
+!artifacts/work_duration_v1/*.json
+!artifacts/work_duration_v1/*.joblib
