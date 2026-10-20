@@ -105,6 +105,17 @@ export async function listPromos(): Promise<Promo[]> {
   return rows.map(mapPromo);
 }
 
+// Promos the customer app may show: active, inside the period, quota left.
+export async function listActivePromos(): Promise<Promo[]> {
+  const [rows] = await pool.query<PromoRow[]>(
+    `${SELECT}
+     WHERE is_active = TRUE AND starts_at <= NOW() AND ends_at > NOW()
+       AND (quota IS NULL OR used_count < quota)
+     ORDER BY ends_at ASC, id ASC`,
+  );
+  return rows.map(mapPromo);
+}
+
 export async function findPromo(id: number): Promise<Promo | null> {
   const [rows] = await pool.query<PromoRow[]>(`${SELECT} WHERE id = ? LIMIT 1`, [id]);
   return rows[0] ? mapPromo(rows[0]) : null;

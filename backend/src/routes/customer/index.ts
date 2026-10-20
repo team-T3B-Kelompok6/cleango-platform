@@ -7,6 +7,8 @@ import { customerProfileRouter } from './profile.routes.js';
 import { customerFaqRouter } from './faq.routes.js';
 import { customerChatbotRouter } from './chatbot.routes.js';
 import { customerBookingRouter } from './booking.routes.js';
+import { customerBannerRouter } from './banner.routes.js';
+import { customerPromoRouter } from './promo.routes.js';
 
 export const customerRouter = Router();
 customerRouter.use('/auth', customerAuthRouter);
@@ -17,3 +19,5 @@ customerRouter.use('/addresses', customerAddressRouter);
 customerRouter.use('/faqs', customerFaqRouter);
 customerRouter.use('/chat', customerChatbotRouter);
 customerRouter.use('/bookings', customerBookingRouter);
+customerRouter.use('/banners', customerBannerRouter);
+customerRouter.use('/promos', customerPromoRouter);
