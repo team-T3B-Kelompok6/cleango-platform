@@ -11,6 +11,7 @@ import {
   isSlotLeadTimePassed,
   isValidSlot,
   listAvailability,
+  listCustomerBookings,
   validateBookingDate,
   type BookingSlot,
 } from '../../model/booking.model.js';
@@ -177,3 +178,44 @@ export async function getCustomerBooking(
 }
 
 export const BOOKING_LIMITS = { maxDaysAhead: BOOKING_MAX_DAYS_AHEAD };
+
+// Mirrors the admin order status labels used across the apps.
+function apiStatus(status: string): string {
+  if (status === 'in_progress') return 'Sedang Dikerjakan';
+  if (status === 'completed') return 'Selesai';
+  if (status === 'cancelled') return 'Batal';
+  if (status === 'departed' || status === 'en_route') return 'Menuju Lokasi';
+  if (status === 'assigned') return 'Menunggu Lokasi';
+  return 'Menunggu Assign';
+}
+
+export async function listMyBookings(
+  request: Request,
+  response: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const rows = await listCustomerBookings(customerId(request));
+    response.status(200).json({
+      data: rows.map((row) => ({
+        id: String(row.id),
+        code: row.code,
+        date: row.date,
+        time: row.time,
+        service: row.service,
+        servicePrice: Number(row.servicePrice),
+        platformFee: Number(row.platformFee),
+        discountAmount: Number(row.discountAmount),
+        totalAmount: Number(row.totalAmount),
+        status: apiStatus(row.databaseStatus),
+        notes: row.notes,
+        addressLabel: row.addressLabel,
+        address: row.address,
+        latitude: row.latitude === null ? null : Number(row.latitude),
+        longitude: row.longitude === null ? null : Number(row.longitude),
+      })),
+    });
+  } catch (error) {
+    next(error);
+  }
+}

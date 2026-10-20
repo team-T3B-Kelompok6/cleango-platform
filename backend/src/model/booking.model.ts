@@ -337,3 +337,46 @@ export async function findCustomerBooking(customerId: number, id: number) {
   );
   return rows[0] ?? null;
 }
+
+export interface CustomerBookingRow extends RowDataPacket {
+  id: number;
+  code: string;
+  date: string;
+  time: string;
+  service: string;
+  servicePrice: number;
+  platformFee: number;
+  discountAmount: number;
+  totalAmount: number;
+  databaseStatus: string;
+  notes: string;
+  addressLabel: string;
+  address: string;
+  latitude: number | null;
+  longitude: number | null;
+}
+
+// Only the signed-in customer's own bookings are returned.
+export async function listCustomerBookings(
+  customerId: number,
+): Promise<CustomerBookingRow[]> {
+  const [rows] = await pool.execute<CustomerBookingRow[]>(
+    `SELECT b.id, b.booking_code AS code,
+       DATE_FORMAT(b.scheduled_date, '%Y-%m-%d') AS date,
+       TIME_FORMAT(b.scheduled_start_time, '%H:%i') AS time,
+       s.name AS service, b.service_price AS servicePrice,
+       b.platform_fee AS platformFee, b.discount_amount AS discountAmount,
+       b.total_amount AS totalAmount, b.status AS databaseStatus,
+       COALESCE(b.customer_notes, '') AS notes,
+       a.label AS addressLabel,
+       CONCAT_WS(', ', a.street_address, a.city, a.province) AS address,
+       a.latitude, a.longitude
+     FROM bookings b
+     INNER JOIN services s ON s.id = b.service_id
+     INNER JOIN addresses a ON a.id = b.address_id
+     WHERE b.customer_id = ?
+     ORDER BY b.scheduled_date DESC, b.scheduled_start_time DESC, b.id DESC`,
+    [customerId],
+  );
+  return rows;
+}
