@@ -26,12 +26,11 @@ export async function listBanners(): Promise<Banner[]> {
   return result.data;
 }
 export async function uploadBanner(file: File): Promise<string> {
-  const form = new FormData();
-  form.set('file', file);
-  form.set('purpose', 'promotion');
+  // The upload endpoint reads a raw binary body, not multipart form data.
   const result = await request<{ data: { url: string } }>('/uploads', {
     method: 'POST',
-    body: form,
+    body: file,
+    headers: { 'Content-Type': file.type },
   });
   if (!validImageUrl(result.data?.url))
     throw new ApiError('Alamat foto dari layanan upload tidak valid.', 502);

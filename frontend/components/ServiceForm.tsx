@@ -65,9 +65,9 @@ export function ServiceForm({
     if (!selected) return;
     if (
       !['image/jpeg', 'image/png'].includes(selected.type) ||
-      selected.size > 5 * 1024 * 1024
+      selected.size > 2 * 1024 * 1024
     ) {
-      setImageError('Gunakan JPG atau PNG, maksimal 5 MB.');
+      setImageError('Gunakan JPG atau PNG, maksimal 2 MB.');
       if (fileInput.current) fileInput.current.value = '';
       return;
     }
@@ -126,7 +126,7 @@ export function ServiceForm({
             <div className="service-photo-box">
               <div className="service-section-heading">
                 <strong>Foto utama layanan</strong>
-                <small>JPG, PNG · maks. 5 MB</small>
+                <small>JPG, PNG · maks. 2 MB</small>
               </div>
               <div className="service-photo-preview">
                 {preview && !imageFailed ? (
