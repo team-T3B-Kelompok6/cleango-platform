@@ -79,6 +79,7 @@ Customer/public:
 - `GET /api/customer/categories/:id`
 - `GET /api/customer/services?search=&category=`
 - `GET /api/customer/services/:id`
+- `POST /api/customer/chat` — Boo: FAQ, katalog, promo; JWT customer diperlukan untuk pesanan pribadi.
 
 Admin:
 
@@ -113,6 +114,17 @@ python service.py
 Dokumentasi eksperimen dan keterbatasannya tersedia di `ai/docs/AI-01.md` dan `ai/docs/AI-02.md`. Data saat ini adalah proxy LaDe dengan jadwal simulasi, sehingga belum boleh dianggap akurat untuk operasional nyata.
 
 ## Verifikasi backend
+
+Chatbot Groq tidak memerlukan training atau layanan Python. Konfigurasi, alur,
+cara menjalankan Flutter, hasil uji dan pending integrasi ada di
+[AI-04](ai/docs/AI-04.md).
+Secara default chatbot memakai pengetahuan umum tanpa database
+(`CHATBOT_DATABASE_ENABLED=false`); harga/promo live dan pesanan pribadi masih pending.
+Uji mode ini dengan `npm run chat:check --workspace backend -- --knowledge`.
+Konfigurasi lokal saat ini sudah diaktifkan atas permintaan pengguna dengan
+`CHATBOT_DATABASE_ENABLED=true` pada `backend/.env`: knowledge dan database baca
+dipakai bersama. Uji dengan `npm run chat:check --workspace backend -- --database`.
+Restart backend setelah mengubah flag; pesanan pribadi tetap memerlukan JWT customer.
 
 ```powershell
 npm run typecheck:backend

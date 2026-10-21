@@ -1,4 +1,5 @@
 import type { ChatSource } from './groq-chat.js';
+import { chatSearchText } from './chatbot-text.js';
 
 export function chatCapabilities(databaseEnabled = false): string {
   return `Saya Boo, asisten informasi CleanGo. Saya dapat membantu:
@@ -13,7 +14,30 @@ ${databaseEnabled ? 'Saya juga dapat membaca katalog, harga, FAQ, dan promo terb
 export const pendingOrderReply =
   'Pengecekan pesanan pribadi melalui Boo masih menunggu integrasi database dan akun pelanggan. Saya belum dapat membaca status, jadwal, pembayaran, atau lokasi cleaner Anda. Periksa halaman Pesanan/Status Pesanan di aplikasi atau Pusat Bantuan. Saya tetap bisa menjelaskan arti status dan alur layanannya.';
 export const noActionReply =
-  'Saya bisa menjelaskan langkahnya, tetapi tidak dapat membuat, mengubah, membatalkan, menjadwalkan ulang, atau membayar pesanan, menerapkan promo, dan menghubungi admin untuk Anda. Silakan gunakan fitur yang tersedia di aplikasi atau minta bantuan melalui Pusat Bantuan. Tidak ada pesanan atau pembayaran yang saya ubah.';
+  'Saya bisa bantu menjelaskan caranya. Untuk membuat, mengubah, membatalkan, menjadwalkan ulang, atau membayar pesanan, menerapkan promo, dan menghubungi admin, gunakan fitur di aplikasi atau Pusat Bantuan, ya. Boo tidak dapat menjalankan tindakan itu melalui chat. Tidak ada pesanan atau pembayaran yang saya ubah.';
+
+const policyTopics: Record<string, RegExp> = {
+  pembatalan: /\b(?:batal|batalkan|membatalkan|pembatalan|cancel)\b/i,
+  refund: /\b(?:refund|pengembalian)\b/i,
+  'perubahan jadwal':
+    /\b(?:reschedule|jadwal ulang|ubah jadwal|ganti jadwal|perubahan jadwal|penjadwalan ulang)\b/i,
+  garansi: /\b(?:garansi|jaminan)\b/i,
+};
+
+export function policyTopicsFor(
+  question: string,
+  includeGeneral = true,
+): string[] {
+  const text = chatSearchText(question);
+  const matched = Object.entries(policyTopics)
+    .filter(([, pattern]) => pattern.test(text))
+    .map(([topic]) => topic);
+  return matched.length ||
+    !includeGeneral ||
+    !/\b(?:kebijakan|ketentuan)\b/i.test(text)
+    ? matched
+    : Object.keys(policyTopics);
+}
 
 // Public product guidance from PRD_CleanGo.md and Konsep_Fitur_Smart_CleanGo, not live business data.
 const knowledge: (ChatSource & { matches: RegExp })[] = [
@@ -39,11 +63,18 @@ const knowledge: (ChatSource & { matches: RegExp })[] = [
     text: 'Wilayah layanan awal yang dirancang adalah Kota Malang, Jawa Timur. Boo belum dapat mengecek jangkauan alamat, kecamatan, slot, atau ketersediaan cleaner secara langsung. Konfirmasi alamat melalui aplikasi atau admin sebelum memesan; layanan di luar Malang belum dapat dipastikan.',
   },
   {
+    id: 'knowledge:account',
+    title: 'Akun, login, dan pendaftaran',
+    matches:
+      /akun|login|log in|masuk|daftar|registrasi|register|lupa password|lupa kata sandi|ubah password|ubah kata sandi/i,
+    text: 'Gunakan halaman Masuk atau Daftar di aplikasi CleanGo dan isi form sesuai petunjuk. Untuk mengubah data diri atau kata sandi, gunakan menu Profil yang tersedia. Jika lupa kata sandi atau gagal masuk, periksa koneksi dan data yang dimasukkan lalu buka Pusat Bantuan jika kendala berlanjut. Boo tidak membuat akun, mereset kata sandi, atau membuka akun lewat chat. Jangan kirim password, OTP, PIN, maupun token. Sesi login demo lokal tidak otomatis memberi akses ke pesanan server.',
+  },
+  {
     id: 'knowledge:booking',
     title: 'Cara booking',
     matches:
       /booking|memesan|pemesanan|pesen|pesan layanan|pesan jasa|order baru|pesan.*(?:gimana|bagaimana|cara)|cara.*pesan/i,
-    text: 'Untuk memesan di aplikasi, pilih layanan dan baca detailnya, tentukan tanggal/jam, pilih alamat pembersihan, dan isi catatan bila perlu. Lanjut ke checkout, periksa ringkasan, pilih metode pembayaran yang tersedia, lalu ikuti instruksi aplikasi. Pantau hasilnya pada halaman Pesanan/Status Pesanan. Panduan ini tidak membuat booking melalui chat.',
+    text: 'Untuk booking di aplikasi, ikuti langkah berikut, ya:\n• Pilih layanan dan baca detailnya.\n• Tentukan tanggal/jam dan pilih alamat pembersihan. Tambahkan catatan bila perlu.\n• Lanjut ke checkout, periksa ringkasan, lalu pilih metode pembayaran yang tersedia.\n• Ikuti instruksi aplikasi dan pantau hasilnya di Pesanan/Status Pesanan. Booking tetap dilakukan melalui aplikasi, bukan chat Boo.',
   },
   {
     id: 'knowledge:address',
@@ -56,7 +87,7 @@ const knowledge: (ChatSource & { matches: RegExp })[] = [
     id: 'knowledge:service',
     title: 'Jenis dan cakupan layanan',
     matches:
-      /layanan|cleaning|bersih|cuci|sofa|kasur|rumah|kantor|kos|kost|\bac\b|luas|ukuran|\bbrp\s*x|berapa\s*x|m²|\bm2\b/i,
+      /layanan|cleaning|bersih|cuci|sofa|kasur|rumah|kantor|kos|kost|setrika|ironing|fogging|karpet|motor|mobil|\bac\b|luas|ukuran|\bbrp\s*x|berapa\s*x|m²|\bm2\b/i,
     text: 'Konsep CleanGo mencakup layanan kebersihan rumah, kamar/kos, sofa, kasur, dan sejenisnya. Daftar aktif, detail pekerjaan, luas maksimal, jumlah petugas, alat, bahan, serta durasi setiap layanan harus mengikuti detail katalog dan konfirmasi admin. Data katalog chatbot masih pending. Deep Cleaning tidak boleh disamakan dengan Basic/Home Cleaning; perbedaan paket resmi belum dapat dipastikan tanpa detailnya. Nama layanan baru seperti cuci motor tidak otomatis berarti tersedia.',
   },
   {
@@ -64,33 +95,33 @@ const knowledge: (ChatSource & { matches: RegExp })[] = [
     title: 'Harga dan total biaya',
     matches:
       /harga|biaya|tarif|ongkos|berapa.*(?:bayar|rupiah)|brp.*harga|estimasi harga|total|mahal|murah/i,
-    text: 'Pengambilan harga terkini melalui chatbot masih menunggu integrasi database. Lihat harga pada detail layanan dan rincian checkout, termasuk tambahan biaya bila ada. Boo tidak dapat menghitung penawaran resmi dari luas rumah saja, memastikan harga final, memberi diskon, atau mengubah biaya. Konfirmasi kebutuhan khusus kepada admin.',
+    text: 'Harga terbaru di Boo masih menunggu integrasi katalog. Untuk sementara, Anda bisa cek harga pada detail layanan dan rincian checkout, termasuk biaya tambahan bila ada, ya. Harga final atau penawaran berdasarkan luas rumah belum bisa saya pastikan lewat chat. Untuk kebutuhan khusus, silakan konfirmasi kepada admin.',
   },
   {
     id: 'knowledge:promo',
     title: 'Promo dan voucher',
     matches: /promo|diskon|voucher|kupon|potongan/i,
-    text: 'Data promo aktif, kode, kuota, masa berlaku, dan syaratnya belum terhubung ke Boo. Saya belum dapat memastikan ada atau tidaknya promo. Periksa informasi promo dan validasi kode saat checkout; jangan menganggap kode dari percakapan otomatis berlaku. Boo tidak menerapkan voucher untuk pelanggan.',
+    text: 'Data promo aktif beserta kode, kuota, masa berlaku, dan syaratnya belum terhubung ke Boo. Saya belum dapat memastikan ada atau tidaknya promo. Coba periksa promo di checkout dan validasi kodenya di sana, ya. Kode yang disebut dalam chat belum otomatis diterapkan atau dijamin berlaku.',
   },
   {
     id: 'knowledge:payment',
     title: 'Panduan pembayaran',
     matches:
-      /bayar|pembayaran|payment|qris|dana|gopay|tunai|transfer|debit|kredit/i,
-    text: 'Pilih metode pembayaran yang ditampilkan pada checkout dan ikuti instruksi aplikasi. Rancangan antarmuka mencakup DANA, GoPay, QRIS, dan Tunai; tampilnya pilihan bukan bukti semua gateway sudah terintegrasi. Boo belum dapat memeriksa uang masuk, memastikan transaksi berhasil, atau membayar untuk Anda. Jangan kirim PIN, OTP, password, data kartu, atau bukti pembayaran sensitif ke chat.',
+      /bayar|membayar|pembayaran|payment|qris|dana|gopay|tunai|transfer|debit|kredit/i,
+    text: 'Pilih metode pembayaran yang ditampilkan pada checkout dan ikuti instruksi aplikasi. Panduan umum ini tidak memastikan metode mana yang saat ini aktif. Untuk konfirmasi pembayaran pesanan, gunakan data pesanan server yang terhubung dengan akun Anda; Boo tidak membayar untuk Anda. Jangan kirim PIN, OTP, password, data kartu, atau bukti pembayaran sensitif ke chat.',
   },
   {
     id: 'knowledge:policy',
     title: 'Pembatalan, ubah jadwal, refund, dan garansi',
     matches:
-      /batal|cancel|reschedule|jadwal ulang|ubah jadwal|ganti jadwal|refund|pengembalian|garansi|jaminan|kebijakan/i,
-    text: 'Ketentuan pembatalan, perubahan jadwal, refund, garansi, tenggat, dan biayanya belum dipastikan dalam informasi resmi yang tersedia. Minta bantuan admin melalui Pusat Bantuan sebelum menganggap permintaan diterima. Boo tidak membatalkan, mengganti jadwal, menjanjikan refund, atau menjamin pengembalian uang.',
+      /batal|batalkan|membatalkan|pembatalan|cancel|reschedule|jadwal ulang|ubah jadwal|ganti jadwal|perubahan jadwal|penjadwalan ulang|refund|pengembalian|garansi|jaminan|kebijakan|ketentuan/i,
+    text: 'Ketentuan resmi pembatalan, perubahan jadwal, refund, garansi, tenggat, dan biayanya belum dipastikan di sumber Boo. Silakan konfirmasi melalui Pusat Bantuan agar admin dapat memeriksa ketentuan yang berlaku untuk kebutuhan Anda, ya. Saya belum bisa memastikan persetujuan atau pengembalian uang melalui chat.',
   },
   {
     id: 'knowledge:status',
     title: 'Arti tahapan layanan',
     matches:
-      /arti.*status|maksud.*status|tahap|dikonfirmasi|ditugaskan|berangkat|dalam perjalanan|dikerjakan|selesai|menunggu pembayaran/i,
+      /arti.*status|maksud.*status|status.*apa saja|cara.*(?:cek|lihat|melihat).*status|tahap|dikonfirmasi|ditugaskan|berangkat|dalam perjalanan|dikerjakan|selesai|menunggu pembayaran/i,
     text: 'Alur utama yang dirancang adalah Dikonfirmasi, Berangkat, Dalam Perjalanan, Sedang Dikerjakan, lalu Selesai. Dikonfirmasi berarti pesanan diterima; Berangkat/Dalam Perjalanan berarti cleaner menuju lokasi; Sedang Dikerjakan berarti pembersihan berlangsung; Selesai berarti pekerjaan dinyatakan selesai. Penugasan dan pembayaran dapat memiliki status tambahan. Penjelasan ini bukan pengecekan keadaan pesanan Anda.',
   },
   {
@@ -101,10 +132,16 @@ const knowledge: (ChatSource & { matches: RegExp })[] = [
     text: 'Dalam konsep CleanGo, admin menugaskan cleaner internal, membuat tautan unik pesanan, lalu mengirimkannya melalui WhatsApp. Cleaner membuka tautan dan mengizinkan lokasi pada perangkatnya. GPS memberikan posisi; model AI tidak menciptakan atau menentukan posisi cleaner. Tracking memerlukan lokasi nyata, izin, dan koneksi yang memadai. Boo tidak membaca lokasi langsung dan tidak membuat/membagikan tautan akses cleaner.',
   },
   {
+    id: 'knowledge:ai',
+    title: 'Boo dan penggunaan AI di CleanGo',
+    matches: /\bai\b|llm|rag|generative ai|kamu.*(?:robot|manusia)/i,
+    text: 'Boo adalah asisten AI, bukan manusia. Boo memakai LLM melalui Groq untuk membantu menjelaskan informasi resmi CleanGo. Sistem mencari sumber pengetahuan, FAQ, atau katalog yang relevan lalu memberikan konteks itu kepada model; pencarian saat ini berbasis kata kunci, bukan vector database. Ini berbeda dari model regresi ETA perjalanan/durasi pengerjaan dan klasifikasi risiko keterlambatan. GPS memberikan posisi, bukan AI. Boo dapat salah memahami pertanyaan dan tidak memiliki akses bebas untuk mengubah database atau melakukan transaksi.',
+  },
+  {
     id: 'knowledge:eta',
     title: 'ETA kedatangan dan estimasi selesai',
     matches:
-      /\beta\b|estimasi|durasi|berapa lama|jam berapa|waktu tiba|waktu selesai|prediksi|ai\b|machine learning/i,
+      /\beta\b|estimasi|durasi|berapa lama|jam berapa|waktu tiba|waktu selesai|prediksi|machine learning/i,
     text: 'ETA kedatangan adalah perkiraan sisa waktu cleaner menuju alamat pembersihan, bukan jaminan waktu tiba. Estimasi selesai cleaning berbeda: dihitung dari waktu mulai pengerjaan dan durasi pekerjaan yang diperkirakan. ETA perjalanan tidak dipakai sebagai durasi membersihkan rumah. Lokasi, rute, keadaan perjalanan, dan waktu pembaruan memengaruhi perkiraan. Boo belum dapat mengambil prediksi langsung untuk pesanan tertentu.',
   },
   {
@@ -157,6 +194,7 @@ const knowledge: (ChatSource & { matches: RegExp })[] = [
 ];
 
 export function knowledgeFor(question: string): ChatSource[] {
+  const text = chatSearchText(question);
   return knowledge
     .map((entry) => ({
       entry,
@@ -169,9 +207,12 @@ export function knowledgeFor(question: string): ChatSource[] {
           ? 0.25
           : 1) *
         new Set(
-          question
-            .toLowerCase()
-            .match(new RegExp(entry.matches.source, 'gi')) ?? [],
+          text.match(
+            new RegExp(
+              `(?<![\\p{L}\\p{N}])(?:${entry.matches.source})(?![\\p{L}\\p{N}])`,
+              'giu',
+            ),
+          ) ?? [],
         ).size,
     }))
     .filter(({ score }) => score > 0)
@@ -194,7 +235,7 @@ export function chatSafetyReply(question: string): string | null {
   )
     return 'Jangan kirim password, PIN, OTP, token, NIK, atau data kartu ke chat. Boo tidak membutuhkannya. Jika rahasia sudah terlanjur dibagikan, amankan atau ganti melalui pengaturan/layanan resminya. Silakan ulangi pertanyaan tanpa informasi sensitif.';
   if (
-    /^(?:tolong\s+|bantu\s+|langsung\s+|sekarang\s+|please\s+)*(?:pesankan|pesenin|buatkan\s+(?:booking|pesanan|order)|bookingkan|batalkan|cancel|reschedule|ubah(?:kan)?\s+(?:jadwal|status|pesanan)|ganti(?:kan)?\s+(?:jadwal|cleaner|petugas)|bayarkan|terapkan\s+(?:promo|voucher)|hubungi\s+(?:admin|cleaner|cs))\b/i.test(
+    /^(?:(?:tolong|bantu|langsung|sekarang|please|bisa|boleh|mohon|saya|ingin|mau|kamu|boo|kak|min|admin)\s+)*(?:pesankan|pesenin|buatkan\s+(?:booking|pesanan|order)|bookingkan|batalkan|cancel|reschedule|ubah(?:kan)?\s+(?:jadwal|status|pesanan)|ganti(?:kan)?\s+(?:jadwal|cleaner|petugas)|bayarkan|terapkan\s+(?:promo|voucher)|hubungi\s+(?:admin|cleaner|cs))\b/i.test(
       question,
     )
   )

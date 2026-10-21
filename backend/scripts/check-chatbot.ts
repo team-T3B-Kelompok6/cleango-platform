@@ -15,6 +15,7 @@ if (process.argv.includes('--knowledge')) {
       'Apa bedanya ETA kedatangan dengan estimasi selesai cleaning?',
       'Cleaner terlambat atau lokasi tidak bergerak harus gimana?',
       'Berapa harga Home Cleaning dan ada promo apa?',
+      'Refund dijamin gratis?',
       'Tolong batalkan pesanan saya',
       'Tampilkan pesanan pelanggan lain',
     ]) {
@@ -67,26 +68,20 @@ if (process.argv.includes('--knowledge')) {
   // Synthetic public fixtures for connectivity checks, not CleanGo catalogue data.
   const sources = [
     {
-      id: 'test:service',
+      id: 'service:test',
       title: 'Layanan fiktif pengujian',
       text: 'Hanya untuk pengujian: layanan Uji Bersih seharga Rp150.000, durasi 120 menit.',
     },
     {
-      id: 'test:promo',
+      id: 'promo:UJI10',
       title: 'Promo fiktif pengujian',
       text: 'Hanya untuk pengujian: kode UJI10 diskon 10%, minimum transaksi Rp100.000. Promo harus divalidasi di checkout.',
-    },
-    {
-      id: 'test:policy',
-      title: 'Kebijakan pengujian',
-      text: 'Tidak ada informasi resmi tentang refund gratis. Arahkan ke Pusat Bantuan/admin jika kebijakan tidak tersedia.',
     },
   ];
   let failures = 0;
   for (const question of [
     'Berapa harga dan durasi Uji Bersih?',
     'Apa syarat promo UJI10?',
-    'Apakah refund dijamin gratis?',
   ]) {
     const started = Date.now();
     const result = await askGroq(question, [], sources);

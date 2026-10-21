@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { AppError } from '../lib/AppError.js';
 import { replyToChat, type ChatInput } from '../lib/chatbot.js';
+import { normalizeChatText } from '../lib/chatbot-text.js';
 
 export async function chat(
   request: Request,
@@ -14,8 +15,9 @@ export async function chat(
       typeof body !== 'object' ||
       Array.isArray(body) ||
       typeof body.message !== 'string' ||
-      !body.message.trim() ||
-      body.message.length > 2000
+      !normalizeChatText(body.message) ||
+      body.message.length > 2000 ||
+      normalizeChatText(body.message).length > 2000
     )
       throw new AppError(400, 'Pesan harus berisi 1–2000 karakter.');
     if (
@@ -37,8 +39,9 @@ export async function chat(
           typeof item.role === 'string' &&
           ['user', 'assistant'].includes(item.role) &&
           typeof item.content === 'string' &&
-          item.content.trim().length > 0 &&
-          item.content.length <= 2000
+          normalizeChatText(item.content).length > 0 &&
+          item.content.length <= 2000 &&
+          normalizeChatText(item.content).length <= 2000
         );
       })
     )

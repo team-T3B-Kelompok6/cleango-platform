@@ -8,7 +8,7 @@ vi.mock('../src/config/env.js', () => ({
 }));
 import { askGroq, minimizeChatText } from '../src/lib/groq-chat.js';
 const sources = [
-  { id: 'faq:1', title: 'Harga', text: 'Deep Cleaning mulai Rp150.000.' },
+  { id: 'service:1', title: 'Harga', text: 'Deep Cleaning mulai Rp150.000.' },
 ];
 const valid = () =>
   new Response(
@@ -19,7 +19,7 @@ const valid = () =>
           message: {
             content: JSON.stringify({
               answer: 'Harga Deep Cleaning mulai Rp150.000.',
-              sourceIds: ['faq:1'],
+              sourceIds: ['service:1'],
             }),
           },
         },
@@ -34,6 +34,81 @@ beforeEach(() => {
 });
 afterEach(() => vi.unstubAllGlobals());
 describe('Groq bounded fallback and validation', () => {
+  it('rejects an unsolicited refund guarantee even in a response to a price question', async () => {
+    fetchMock.mockImplementation(
+      () =>
+        new Response(
+          JSON.stringify({
+            choices: [
+              {
+                finish_reason: 'stop',
+                message: {
+                  content: JSON.stringify({
+                    answer:
+                      'Harga Deep Cleaning Rp150.000. Refund selalu gratis dan pasti disetujui.',
+                    sourceIds: ['service:1'],
+                  }),
+                },
+              },
+            ],
+          }),
+        ),
+    );
+    expect(
+      await askGroq('Berapa harga Deep Cleaning?', [], sources),
+    ).toBeNull();
+  });
+  it.each([
+    'Refund selalu gratis?',
+    'Cara membatalkan layanan?',
+    'Garansi pasti disetujui?',
+    'Bisa reskedul?',
+    'ketentuan refund?',
+  ])(
+    'leaves policy decisions to exact server-owned answers: %s',
+    async (question) => {
+      fetchMock.mockResolvedValue(valid());
+      expect(
+        await askGroq(
+          question,
+          [],
+          [
+            {
+              id: 'faq:policy',
+              title: 'Refund',
+              text: 'Ketentuan refund belum tersedia; tanyakan kepada admin.',
+            },
+          ],
+        ),
+      ).toBeNull();
+      expect(fetchMock).not.toHaveBeenCalled();
+    },
+  );
+  it.each([400, 404, 422, 429, 503])(
+    'tries the next configured model after a provider-specific %s response',
+    async (status) => {
+      fetchMock
+        .mockResolvedValueOnce(new Response('', { status }))
+        .mockResolvedValueOnce(valid());
+      expect((await askGroq('harga?', [], sources))?.attempts).toBe(2);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    },
+  );
+  it.each(['null', '[]', '{bad json'])(
+    'rejects malformed model content: %s',
+    async (content) => {
+      fetchMock.mockImplementation(
+        () =>
+          new Response(
+            JSON.stringify({
+              choices: [{ finish_reason: 'stop', message: { content } }],
+            }),
+          ),
+      );
+      expect(await askGroq('harga?', [], sources)).toBeNull();
+      expect(fetchMock).toHaveBeenCalledTimes(3);
+    },
+  );
   it('tries all three models in order on rate limit and timeout', async () => {
     fetchMock
       .mockResolvedValueOnce(new Response('', { status: 429 }))
@@ -65,7 +140,7 @@ describe('Groq bounded fallback and validation', () => {
                 message: {
                   content: JSON.stringify({
                     answer: 'Rp999.000',
-                    sourceIds: ['faq:1'],
+                    sourceIds: ['service:1'],
                   }),
                 },
               },
@@ -142,7 +217,10 @@ describe('Groq bounded fallback and validation', () => {
                 {
                   finish_reason: 'stop',
                   message: {
-                    content: JSON.stringify({ answer, sourceIds: ['faq:1'] }),
+                    content: JSON.stringify({
+                      answer,
+                      sourceIds: ['service:1'],
+                    }),
                   },
                 },
               ],
