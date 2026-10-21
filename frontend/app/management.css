@@ -98,6 +98,46 @@ body {
   color: var(--muted);
   line-height: 1.6;
 }
+.category-delete-services {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid var(--ui-border);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.category-delete-services input {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: #c23f38;
+}
+.category-delete-services span {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.category-delete-services strong {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.category-delete-services small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.category-delete-services[data-disabled] {
+  color: #89928e;
+  background: #f3f5f4;
+  border-color: #e3e7e5;
+  cursor: not-allowed;
+}
+.category-delete-services[data-disabled] small {
+  color: inherit;
+}
 .record-rud {
   display: flex;
   align-items: center;

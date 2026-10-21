@@ -264,6 +264,7 @@ export function SearchInput({
     '/customer': 'Kelola Data Customer',
     '/laporan': 'Laporan',
     '/faq': 'Kelola FAQ',
+    '/audit-log': 'Audit Log Admin',
   };
   return (
     <Form

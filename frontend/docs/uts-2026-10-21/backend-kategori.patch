@@ -1,0 +1,542 @@
+diff --git a/backend/src/controller/admin/category.controller.ts b/backend/src/controller/admin/category.controller.ts
+index 52caaa7..f1fa359 100644
+--- a/backend/src/controller/admin/category.controller.ts
++++ b/backend/src/controller/admin/category.controller.ts
+@@ -11,68 +11,135 @@ import {
+ 
+ function numericId(value: unknown): number {
+   const id = Number(value);
+-  if (!Number.isInteger(id) || id <= 0) throw new AppError(400, 'ID kategori tidak valid');
++  if (!Number.isInteger(id) || id <= 0)
++    throw new AppError(400, 'ID kategori tidak valid');
+   return id;
+ }
+ 
+ function optionalText(value: unknown, field: string): string | null {
+   if (value === null || value === undefined || value === '') return null;
+-  if (typeof value !== 'string') throw new AppError(400, `${field} harus berupa teks`);
++  if (typeof value !== 'string')
++    throw new AppError(400, `${field} harus berupa teks`);
+   return value.trim();
+ }
+ 
+-function categoryInput(body: Record<string, unknown>, partial: boolean): Partial<CategoryInput> {
++function categoryInput(
++  body: Record<string, unknown>,
++  partial: boolean,
++): Partial<CategoryInput> {
+   const input: Partial<CategoryInput> = {};
+   if (!partial || body.name !== undefined) {
+-    if (typeof body.name !== 'string' || !body.name.trim()) throw new AppError(400, 'Nama kategori wajib diisi');
+-    if (body.name.trim().length > 100) throw new AppError(400, 'Nama kategori maksimal 100 karakter');
++    if (typeof body.name !== 'string' || !body.name.trim())
++      throw new AppError(400, 'Nama kategori wajib diisi');
++    if (body.name.trim().length > 100)
++      throw new AppError(400, 'Nama kategori maksimal 100 karakter');
+     input.name = body.name.trim();
+   }
+-  if (!partial || body.description !== undefined) input.description = optionalText(body.description, 'Deskripsi');
+-  if (!partial || body.icon !== undefined) input.icon = optionalText(body.icon, 'Icon');
++  if (!partial || body.description !== undefined)
++    input.description = optionalText(body.description, 'Deskripsi');
++  if (!partial || body.icon !== undefined)
++    input.icon = optionalText(body.icon, 'Icon');
+   if (!partial || body.isActive !== undefined) {
+-    if (body.isActive !== undefined && typeof body.isActive !== 'boolean') throw new AppError(400, 'isActive harus boolean');
++    if (body.isActive !== undefined && typeof body.isActive !== 'boolean')
++      throw new AppError(400, 'isActive harus boolean');
+     input.isActive = body.isActive === undefined ? true : body.isActive;
+   }
+-  if (partial && Object.keys(input).length === 0) throw new AppError(400, 'Tidak ada data yang diperbarui');
++  if (partial && Object.keys(input).length === 0)
++    throw new AppError(400, 'Tidak ada data yang diperbarui');
+   return input;
+ }
+ 
+-export async function getCategories(_request: Request, response: Response, next: NextFunction): Promise<void> {
++export async function getCategories(
++  _request: Request,
++  response: Response,
++  next: NextFunction,
++): Promise<void> {
+   try {
+     response.status(200).json({ data: await findCategories(false) });
+-  } catch (error) { next(error); }
++  } catch (error) {
++    next(error);
++  }
+ }
+ 
+-export async function getCategoryDetail(request: Request, response: Response, next: NextFunction): Promise<void> {
++export async function getCategoryDetail(
++  request: Request,
++  response: Response,
++  next: NextFunction,
++): Promise<void> {
+   try {
+-    const category = await findCategoryById(numericId(request.params.id), false);
++    const category = await findCategoryById(
++      numericId(request.params.id),
++      false,
++    );
+     if (!category) throw new AppError(404, 'Kategori tidak ditemukan');
+     response.status(200).json({ data: category });
+-  } catch (error) { next(error); }
++  } catch (error) {
++    next(error);
++  }
+ }
+ 
+-export async function createCategory(request: Request, response: Response, next: NextFunction): Promise<void> {
++export async function createCategory(
++  request: Request,
++  response: Response,
++  next: NextFunction,
++): Promise<void> {
+   try {
+-    const input = categoryInput(request.body as Record<string, unknown>, false) as CategoryInput;
+-    response.status(201).json({ message: 'Kategori berhasil dibuat', data: await insertCategory(input) });
+-  } catch (error) { next(error); }
++    const input = categoryInput(
++      request.body as Record<string, unknown>,
++      false,
++    ) as CategoryInput;
++    response
++      .status(201)
++      .json({
++        message: 'Kategori berhasil dibuat',
++        data: await insertCategory(input),
++      });
++  } catch (error) {
++    next(error);
++  }
+ }
+ 
+-export async function updateCategory(request: Request, response: Response, next: NextFunction): Promise<void> {
++export async function updateCategory(
++  request: Request,
++  response: Response,
++  next: NextFunction,
++): Promise<void> {
+   try {
+     const category = await updateCategoryById(
+       numericId(request.params.id),
+       categoryInput(request.body as Record<string, unknown>, true),
+     );
+     if (!category) throw new AppError(404, 'Kategori tidak ditemukan');
+-    response.status(200).json({ message: 'Kategori berhasil diperbarui', data: category });
+-  } catch (error) { next(error); }
++    response
++      .status(200)
++      .json({ message: 'Kategori berhasil diperbarui', data: category });
++  } catch (error) {
++    next(error);
++  }
+ }
+ 
+-export async function deleteCategory(request: Request, response: Response, next: NextFunction): Promise<void> {
++export async function deleteCategory(
++  request: Request,
++  response: Response,
++  next: NextFunction,
++): Promise<void> {
+   try {
+-    if (!await deleteCategoryById(numericId(request.params.id))) throw new AppError(404, 'Kategori tidak ditemukan');
++    const deleteServices = request.query.deleteServices;
++    if (
++      deleteServices !== undefined &&
++      deleteServices !== 'true' &&
++      deleteServices !== 'false'
++    )
++      throw new AppError(400, 'Pilihan hapus layanan tidak valid');
++    if (
++      !(await deleteCategoryById(
++        numericId(request.params.id),
++        deleteServices === 'true',
++      ))
++    )
++      throw new AppError(404, 'Kategori tidak ditemukan');
+     response.status(200).json({ message: 'Kategori berhasil dihapus' });
+-  } catch (error) { next(error); }
++  } catch (error) {
++    next(error);
++  }
+ }
+diff --git a/backend/src/controller/service.controller.ts b/backend/src/controller/service.controller.ts
+index b91a8b8..9f09818 100644
+--- a/backend/src/controller/service.controller.ts
++++ b/backend/src/controller/service.controller.ts
+@@ -5,10 +5,8 @@ import {
+   findPlatformService,
+   insertPlatformService,
+   listPlatformServices,
+-  SERVICE_CATEGORY_DATABASE_NAMES,
+   updatePlatformService,
+   type PlatformServiceInput,
+-  type ServiceCategory,
+ } from '../model/platform-service.model.js';
+ import {
+   booleanValue,
+@@ -50,16 +48,13 @@ function inputFrom(
+     3000,
+     partial,
+   );
+-  let category: ServiceCategory | undefined;
+-  if (!partial || body.category !== undefined) {
+-    if (
+-      typeof body.category !== 'string' ||
+-      !(body.category in SERVICE_CATEGORY_DATABASE_NAMES)
+-    ) {
+-      validationError({ category: 'Kategori layanan tidak valid.' });
+-    }
+-    category = body.category as ServiceCategory;
+-  }
++  const category = requiredText(
++    body,
++    'category',
++    'Kategori layanan',
++    100,
++    partial,
++  );
+   let price: number | undefined;
+   if (!partial || body.price !== undefined) {
+     price = Number(body.price);
+diff --git a/backend/src/model/category.model.ts b/backend/src/model/category.model.ts
+index efa6391..7fb2556 100644
+--- a/backend/src/model/category.model.ts
++++ b/backend/src/model/category.model.ts
+@@ -1,5 +1,6 @@
+ import type { ResultSetHeader, RowDataPacket } from 'mysql2';
+ import { pool } from '../lib/db.js';
++import { AppError } from '../lib/AppError.js';
+ 
+ export interface Category extends RowDataPacket {
+   id: number;
+@@ -87,7 +88,42 @@ export async function updateCategoryById(
+   return findCategoryById(id, false);
+ }
+ 
+-export async function deleteCategoryById(id: number): Promise<boolean> {
++export async function deleteCategoryById(
++  id: number,
++  deleteServices = false,
++): Promise<boolean> {
++  if (deleteServices) {
++    const connection = await pool.getConnection();
++    try {
++      await connection.beginTransaction();
++      const [categories] = await connection.query<RowDataPacket[]>(
++        'SELECT id FROM service_categories WHERE id = ? FOR UPDATE',
++        [id],
++      );
++      if (!categories.length) {
++        await connection.rollback();
++        return false;
++      }
++      await connection.execute('DELETE FROM services WHERE category_id = ?', [
++        id,
++      ]);
++      await connection.execute('DELETE FROM service_categories WHERE id = ?', [
++        id,
++      ]);
++      await connection.commit();
++      return true;
++    } catch (error) {
++      await connection.rollback();
++      if ((error as { code?: string }).code === 'ER_ROW_IS_REFERENCED_2')
++        throw new AppError(
++          409,
++          'Layanan masih terkait pesanan atau ulasan. Kategori dan seluruh layanan tidak dihapus.',
++        );
++      throw error;
++    } finally {
++      connection.release();
++    }
++  }
+   const [result] = await pool.execute<ResultSetHeader>(
+     'DELETE FROM service_categories WHERE id = ?',
+     [id],
+diff --git a/backend/src/model/platform-service.model.ts b/backend/src/model/platform-service.model.ts
+index bfec391..c5cd721 100644
+--- a/backend/src/model/platform-service.model.ts
++++ b/backend/src/model/platform-service.model.ts
+@@ -4,6 +4,7 @@ import type {
+   RowDataPacket,
+ } from 'mysql2/promise';
+ import { pool } from '../lib/db.js';
++import { AppError } from '../lib/AppError.js';
+ 
+ export const SERVICE_CATEGORY_DATABASE_NAMES = {
+   Rumah: 'Rumah',
+@@ -12,7 +13,7 @@ export const SERVICE_CATEGORY_DATABASE_NAMES = {
+   AC: 'AC',
+ } as const;
+ 
+-export type ServiceCategory = keyof typeof SERVICE_CATEGORY_DATABASE_NAMES;
++export type ServiceCategory = string;
+ 
+ export interface PlatformServiceInput {
+   name: string;
+@@ -109,9 +110,23 @@ async function categoryId(
+ ): Promise<number> {
+   const [rows] = await connection.query<(RowDataPacket & { id: number })[]>(
+     'SELECT id FROM service_categories WHERE name = ? LIMIT 1',
+-    [SERVICE_CATEGORY_DATABASE_NAMES[category]],
++    [
++      Object.hasOwn(SERVICE_CATEGORY_DATABASE_NAMES, category)
++        ? SERVICE_CATEGORY_DATABASE_NAMES[
++            category as keyof typeof SERVICE_CATEGORY_DATABASE_NAMES
++          ]
++        : category,
++    ],
+   );
+-  if (!rows[0]) throw new Error(`Kategori master ${category} belum tersedia`);
++  if (!rows[0])
++    throw new AppError(
++      400,
++      'Kategori layanan tidak valid.',
++      'VALIDATION_ERROR',
++      {
++        category: 'Kategori layanan tidak valid.',
++      },
++    );
+   return rows[0].id;
+ }
+ 
+diff --git a/backend/tests/admin-resources.test.ts b/backend/tests/admin-resources.test.ts
+index 5b8ac6b..6c5fb86 100644
+--- a/backend/tests/admin-resources.test.ts
++++ b/backend/tests/admin-resources.test.ts
+@@ -25,7 +25,7 @@ describe('admin resource contracts', () => {
+   it('validates the frontend service category before database access', async () => {
+     const response = await authorized('post', '/api/services').send({
+       name: 'Tes Layanan',
+-      category: 'Tidak Ada',
++      category: '',
+       duration: '2 jam',
+       price: 100000,
+       description: 'Deskripsi layanan',
+@@ -34,7 +34,7 @@ describe('admin resource contracts', () => {
+     });
+ 
+     expect(response.status).toBe(400);
+-    expect(response.body.errors.category).toBe('Kategori layanan tidak valid.');
++    expect(response.body.errors.category).toBe('Kategori layanan wajib diisi.');
+   });
+ 
+   it('validates FAQ publication as a boolean before database access', async () => {
+diff --git a/backend/tests/service-categories.test.ts b/backend/tests/service-categories.test.ts
+new file mode 100644
+index 0000000..9113ef4
+--- /dev/null
++++ b/backend/tests/service-categories.test.ts
+@@ -0,0 +1,209 @@
++import jwt from 'jsonwebtoken';
++import request from 'supertest';
++import { beforeEach, describe, expect, it, vi } from 'vitest';
++
++const database = vi.hoisted(() => ({
++  query: vi.fn(),
++  execute: vi.fn(),
++  getConnection: vi.fn(),
++}));
++vi.mock('../src/lib/db.js', () => ({ pool: database }));
++
++import { createApp } from '../src/app.js';
++
++const app = createApp();
++const token = (role = 'admin') =>
++  jwt.sign(
++    { id: 1, email: 'test@example.com', role },
++    process.env.JWT_SECRET ?? 'cleango-development-only',
++  );
++const connection = {
++  query: vi.fn(),
++  execute: vi.fn(),
++  beginTransaction: vi.fn(),
++  commit: vi.fn(),
++  rollback: vi.fn(),
++  release: vi.fn(),
++};
++
++beforeEach(() => {
++  vi.resetAllMocks();
++  database.getConnection.mockResolvedValue(connection);
++  connection.execute.mockResolvedValue([{ affectedRows: 1 }]);
++});
++
++describe('service category deletion', () => {
++  it('requires an admin session for deletion', async () => {
++    expect((await request(app).delete('/api/admin/categories/9')).status).toBe(
++      401,
++    );
++    expect(
++      (
++        await request(app)
++          .delete('/api/admin/categories/9')
++          .set('Authorization', `Bearer ${token('customer')}`)
++      ).status,
++    ).toBe(403);
++    expect(database.execute).not.toHaveBeenCalled();
++  });
++
++  it('deletes an unused category by its numeric database id', async () => {
++    database.execute.mockResolvedValue([{ affectedRows: 1 }]);
++    const response = await request(app)
++      .delete('/api/admin/categories/9')
++      .set('Authorization', `Bearer ${token()}`);
++    expect(response.status).toBe(200);
++    expect(database.execute).toHaveBeenCalledWith(
++      'DELETE FROM service_categories WHERE id = ?',
++      [9],
++    );
++  });
++
++  it('reports an already deleted category', async () => {
++    database.execute.mockResolvedValue([{ affectedRows: 0 }]);
++    const response = await request(app)
++      .delete('/api/admin/categories/9')
++      .set('Authorization', `Bearer ${token()}`);
++    expect(response.status).toBe(404);
++  });
++
++  it('rejects deletion when a service starts using the category before the delete', async () => {
++    database.execute.mockRejectedValue({ code: 'ER_ROW_IS_REFERENCED_2' });
++    const response = await request(app)
++      .delete('/api/admin/categories/9')
++      .set('Authorization', `Bearer ${token()}`);
++    expect(response.status).toBe(409);
++    expect(response.body.message).toContain('masih digunakan');
++  });
++});
++
++describe('category and services deletion', () => {
++  it('deletes services and their category in one transaction with explicit consent', async () => {
++    connection.query.mockResolvedValueOnce([[{ id: 9 }]]);
++    const response = await request(app)
++      .delete('/api/admin/categories/9?deleteServices=true')
++      .set('Authorization', `Bearer ${token()}`);
++    expect(response.status).toBe(200);
++    expect(connection.query).toHaveBeenCalledWith(
++      'SELECT id FROM service_categories WHERE id = ? FOR UPDATE',
++      [9],
++    );
++    expect(connection.execute).toHaveBeenNthCalledWith(
++      1,
++      'DELETE FROM services WHERE category_id = ?',
++      [9],
++    );
++    expect(connection.execute).toHaveBeenNthCalledWith(
++      2,
++      'DELETE FROM service_categories WHERE id = ?',
++      [9],
++    );
++    expect(connection.commit).toHaveBeenCalledOnce();
++    expect(connection.release).toHaveBeenCalledOnce();
++    expect(database.execute).not.toHaveBeenCalled();
++  });
++
++  it.each([1, 2])(
++    'rolls back all changes if deletion step %s fails',
++    async (step) => {
++      connection.query.mockResolvedValueOnce([[{ id: 9 }]]);
++      if (step === 2)
++        connection.execute.mockResolvedValueOnce([{ affectedRows: 2 }]);
++      connection.execute.mockRejectedValueOnce({
++        code: 'ER_ROW_IS_REFERENCED_2',
++      });
++      const response = await request(app)
++        .delete('/api/admin/categories/9?deleteServices=true')
++        .set('Authorization', `Bearer ${token()}`);
++      expect(response.status).toBe(409);
++      expect(response.body.message).toContain('tidak dihapus');
++      expect(connection.rollback).toHaveBeenCalledOnce();
++      expect(connection.commit).not.toHaveBeenCalled();
++      expect(connection.release).toHaveBeenCalledOnce();
++    },
++  );
++
++  it('does not delete any services when the category is missing', async () => {
++    connection.query.mockResolvedValueOnce([[]]);
++    const response = await request(app)
++      .delete('/api/admin/categories/9?deleteServices=true')
++      .set('Authorization', `Bearer ${token()}`);
++    expect(response.status).toBe(404);
++    expect(connection.execute).not.toHaveBeenCalled();
++    expect(connection.rollback).toHaveBeenCalledOnce();
++  });
++
++  it('rejects invalid consent before accessing the database', async () => {
++    const response = await request(app)
++      .delete('/api/admin/categories/9?deleteServices=yes')
++      .set('Authorization', `Bearer ${token()}`);
++    expect(response.status).toBe(400);
++    expect(database.getConnection).not.toHaveBeenCalled();
++    expect(database.execute).not.toHaveBeenCalled();
++  });
++
++  it('protects bulk deletion from customer accounts', async () => {
++    const response = await request(app)
++      .delete('/api/admin/categories/9?deleteServices=true')
++      .set('Authorization', `Bearer ${token('customer')}`);
++    expect(response.status).toBe(403);
++    expect(database.getConnection).not.toHaveBeenCalled();
++  });
++});
++
++describe('services use database categories', () => {
++  it.each([
++    ['Perawatan taman', 'Perawatan taman'],
++    ['Sofa', 'Sofa dan Kasur'],
++    ['constructor', 'constructor'],
++  ])(
++    'accepts category %s and preserves legacy aliases',
++    async (category, databaseName) => {
++      connection.query
++        .mockResolvedValueOnce([[{ id: 3 }]])
++        .mockResolvedValueOnce([[{ id: 9 }]]);
++      database.query
++        .mockResolvedValueOnce([
++          [
++            {
++              id: 3,
++              name: 'Layanan',
++              category: databaseName,
++              duration: '2 jam',
++              price: 100000,
++              description: 'Layanan kebersihan',
++              active: 1,
++            },
++          ],
++        ])
++        .mockResolvedValueOnce([[]]);
++      const response = await request(app)
++        .patch('/api/services/3')
++        .set('Authorization', `Bearer ${token()}`)
++        .send({ category });
++      expect(response.status).toBe(200);
++      expect(response.body.data.category).toBe(category);
++      expect(connection.query).toHaveBeenCalledWith(
++        'SELECT id FROM service_categories WHERE name = ? LIMIT 1',
++        [databaseName],
++      );
++      expect(connection.commit).toHaveBeenCalledOnce();
++      expect(connection.release).toHaveBeenCalledOnce();
++    },
++  );
++
++  it('returns a field error and rolls back if the chosen category was deleted', async () => {
++    connection.query
++      .mockResolvedValueOnce([[{ id: 3 }]])
++      .mockResolvedValueOnce([[]]);
++    const response = await request(app)
++      .patch('/api/services/3')
++      .set('Authorization', `Bearer ${token()}`)
++      .send({ category: 'Kategori terhapus' });
++    expect(response.status).toBe(400);
++    expect(response.body.errors.category).toBe('Kategori layanan tidak valid.');
++    expect(connection.rollback).toHaveBeenCalledOnce();
++    expect(connection.commit).not.toHaveBeenCalled();
++    expect(connection.execute).not.toHaveBeenCalled();
++  });
++});

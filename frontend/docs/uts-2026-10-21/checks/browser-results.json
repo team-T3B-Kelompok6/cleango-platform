@@ -1,0 +1,505 @@
+{
+  "checks": [
+    {
+      "name": "Login salah ditolak",
+      "mode": "demo UI",
+      "result": "pass",
+      "evidence": "Pesan Gunakan akun demo tampil; tetap di /login"
+    },
+    {
+      "name": "Login benar membuka dashboard",
+      "mode": "demo UI",
+      "result": "pass"
+    },
+    {
+      "name": "Navigasi sidebar Dashboard Utama",
+      "mode": "demo UI",
+      "result": "pass"
+    },
+    {
+      "name": "Navigasi sidebar Kelola Pesanan",
+      "mode": "demo UI",
+      "result": "pass"
+    },
+    {
+      "name": "Navigasi sidebar Kelola Jadwal",
+      "mode": "demo UI",
+      "result": "pass"
+    },
+    {
+      "name": "Navigasi sidebar Kelola Layanan",
+      "mode": "demo UI",
+      "result": "pass"
+    },
+    {
+      "name": "Navigasi sidebar Kelola FAQ",
+      "mode": "demo UI",
+      "result": "pass"
+    },
+    {
+      "name": "Navigasi sidebar Kelola Data Customer",
+      "mode": "demo UI",
+      "result": "pass"
+    },
+    {
+      "name": "Navigasi sidebar Kelola Data Petugas",
+      "mode": "demo UI",
+      "result": "pass"
+    },
+    {
+      "name": "Navigasi sidebar Laporan",
+      "mode": "demo UI",
+      "result": "pass"
+    },
+    {
+      "name": "Navigasi sidebar Audit Log Admin",
+      "mode": "demo UI",
+      "result": "pass"
+    },
+    {
+      "name": "Layanan: isian wajib menolak form kosong",
+      "mode": "demo UI",
+      "result": "pass"
+    },
+    {
+      "name": "Layanan: tambah tersimpan setelah refresh",
+      "mode": "demo UI",
+      "result": "pass"
+    },
+    {
+      "name": "Layanan: perubahan harga tersimpan",
+      "mode": "demo UI",
+      "result": "pass"
+    },
+    {
+      "name": "Layanan: hapus bertahan setelah refresh",
+      "mode": "demo UI",
+      "result": "pass"
+    },
+    {
+      "name": "Cleaner: validasi ringkasan dan konfirmasi hasil",
+      "mode": "demo UI 360px",
+      "result": "pass"
+    },
+    {
+      "name": "Cleaner: tiba, laporan selesai, dan persistensi refresh",
+      "mode": "demo UI 360px",
+      "result": "pass",
+      "delivery": "simulation only"
+    },
+    {
+      "name": "Laporan: Laporan Harian",
+      "mode": "demo UI",
+      "result": "pass",
+      "groups": 11
+    },
+    {
+      "name": "Laporan: Laporan Per Pelanggan",
+      "mode": "demo UI",
+      "result": "pass",
+      "groups": 4
+    },
+    {
+      "name": "Laporan: Laporan Performa Kru",
+      "mode": "demo UI",
+      "result": "pass",
+      "groups": 4
+    },
+    {
+      "name": "Laporan: ekspor CSV berisi header dan baris pesanan",
+      "mode": "demo UI download",
+      "result": "pass"
+    },
+    {
+      "name": "Pesanan: detail dan form ubah terbuka",
+      "mode": "demo UI",
+      "result": "pass",
+      "fields": 13
+    },
+    {
+      "name": "Jadwal: detail dan form ubah terbuka",
+      "mode": "demo UI",
+      "result": "pass",
+      "fields": 10
+    },
+    {
+      "name": "Customer: detail dan form ubah terbuka",
+      "mode": "demo UI",
+      "result": "pass",
+      "fields": 6
+    },
+    {
+      "name": "FAQ: detail dan form ubah terbuka",
+      "mode": "demo UI",
+      "result": "pass",
+      "fields": 4
+    },
+    {
+      "name": "Petugas: detail profil dan form ubah terbuka",
+      "mode": "demo UI",
+      "result": "pass",
+      "fields": 4,
+      "note": "Dialog profil memakai judul Detail Petugas"
+    },
+    {
+      "name": "Logout dan proteksi halaman setelah logout",
+      "mode": "demo UI",
+      "result": "pass"
+    },
+    {
+      "name": "Login melalui API HTTP fixture",
+      "mode": "HTTP fixture UI",
+      "result": "pass"
+    },
+    {
+      "name": "API kosong menampilkan empty state",
+      "mode": "HTTP fixture UI",
+      "result": "pass"
+    },
+    {
+      "name": "API 503 menampilkan pesan error dan tombol coba lagi",
+      "mode": "HTTP fixture UI",
+      "result": "pass"
+    },
+    {
+      "name": "Tombol Coba lagi memulihkan halaman setelah API normal",
+      "mode": "HTTP fixture UI",
+      "result": "pass"
+    },
+    {
+      "name": "API lambat menampilkan loading",
+      "mode": "HTTP fixture UI",
+      "result": "pass"
+    },
+    {
+      "name": "API lambat selesai memuat konten",
+      "mode": "HTTP fixture UI",
+      "result": "pass"
+    },
+    {
+      "name": "Sesi API berakhir mengarahkan kembali ke login",
+      "mode": "HTTP fixture UI",
+      "result": "pass"
+    }
+  ],
+  "screens": [
+    {
+      "page": "/login",
+      "width": 360,
+      "file": "login-360.jpg",
+      "result": "captured"
+    },
+    {
+      "page": "/login",
+      "width": 768,
+      "file": "login-768.jpg",
+      "result": "captured"
+    },
+    {
+      "page": "/login",
+      "width": 1280,
+      "file": "login-1280.jpg",
+      "result": "captured"
+    },
+    {
+      "page": "/",
+      "width": 1280,
+      "file": "dashboard-1280.jpg",
+      "geometry": {
+        "scrollWidth": 1265,
+        "width": 1265
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/pesanan",
+      "width": 1280,
+      "file": "pesanan-1280.jpg",
+      "geometry": {
+        "scrollWidth": 1265,
+        "width": 1265
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/jadwal",
+      "width": 1280,
+      "file": "jadwal-1280.jpg",
+      "geometry": {
+        "scrollWidth": 1265,
+        "width": 1265
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/layanan",
+      "width": 1280,
+      "file": "layanan-1280.jpg",
+      "geometry": {
+        "scrollWidth": 1265,
+        "width": 1265
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/faq",
+      "width": 1280,
+      "file": "faq-1280.jpg",
+      "geometry": {
+        "scrollWidth": 1265,
+        "width": 1265
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/customer",
+      "width": 1280,
+      "file": "customer-1280.jpg",
+      "geometry": {
+        "scrollWidth": 1265,
+        "width": 1265
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/petugas",
+      "width": 1280,
+      "file": "petugas-1280.jpg",
+      "geometry": {
+        "scrollWidth": 1265,
+        "width": 1265
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/laporan",
+      "width": 1280,
+      "file": "laporan-1280.jpg",
+      "geometry": {
+        "scrollWidth": 1265,
+        "width": 1265
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/audit-log",
+      "width": 1280,
+      "file": "audit-log-1280.jpg",
+      "geometry": {
+        "scrollWidth": 1265,
+        "width": 1265
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/",
+      "width": 360,
+      "file": "dashboard-360.jpg",
+      "geometry": {
+        "scrollWidth": 345,
+        "width": 345
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/pesanan",
+      "width": 360,
+      "file": "pesanan-360.jpg",
+      "geometry": {
+        "scrollWidth": 345,
+        "width": 345
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/jadwal",
+      "width": 360,
+      "file": "jadwal-360.jpg",
+      "geometry": {
+        "scrollWidth": 345,
+        "width": 345
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/layanan",
+      "width": 360,
+      "file": "layanan-360.jpg",
+      "geometry": {
+        "scrollWidth": 345,
+        "width": 345
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/faq",
+      "width": 360,
+      "file": "faq-360.jpg",
+      "geometry": {
+        "scrollWidth": 345,
+        "width": 345
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/customer",
+      "width": 360,
+      "file": "customer-360.jpg",
+      "geometry": {
+        "scrollWidth": 345,
+        "width": 345
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/petugas",
+      "width": 360,
+      "file": "petugas-360.jpg",
+      "geometry": {
+        "scrollWidth": 345,
+        "width": 345
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/laporan",
+      "width": 360,
+      "file": "laporan-360.jpg",
+      "geometry": {
+        "scrollWidth": 345,
+        "width": 345
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/audit-log",
+      "width": 360,
+      "file": "audit-log-360.jpg",
+      "geometry": {
+        "scrollWidth": 345,
+        "width": 345
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/",
+      "width": 768,
+      "file": "dashboard-768.jpg",
+      "geometry": {
+        "scrollWidth": 753,
+        "width": 753
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/pesanan",
+      "width": 768,
+      "file": "pesanan-768.jpg",
+      "geometry": {
+        "scrollWidth": 753,
+        "width": 753
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/jadwal",
+      "width": 768,
+      "file": "jadwal-768.jpg",
+      "geometry": {
+        "scrollWidth": 753,
+        "width": 753
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/layanan",
+      "width": 768,
+      "file": "layanan-768.jpg",
+      "geometry": {
+        "scrollWidth": 753,
+        "width": 753
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/faq",
+      "width": 768,
+      "file": "faq-768.jpg",
+      "geometry": {
+        "scrollWidth": 753,
+        "width": 753
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/customer",
+      "width": 768,
+      "file": "customer-768.jpg",
+      "geometry": {
+        "scrollWidth": 753,
+        "width": 753
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/petugas",
+      "width": 768,
+      "file": "petugas-768.jpg",
+      "geometry": {
+        "scrollWidth": 753,
+        "width": 753
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/laporan",
+      "width": 768,
+      "file": "laporan-768.jpg",
+      "geometry": {
+        "scrollWidth": 753,
+        "width": 753
+      },
+      "result": "pass"
+    },
+    {
+      "page": "/audit-log",
+      "width": 768,
+      "file": "audit-log-768.jpg",
+      "geometry": {
+        "scrollWidth": 753,
+        "width": 753
+      },
+      "result": "pass"
+    },
+    {
+      "page": "layanan/form",
+      "width": 360,
+      "file": "layanan-form-360.jpg",
+      "geometry": {
+        "scrollWidth": 307,
+        "width": 307
+      },
+      "result": "pass"
+    },
+    {
+      "page": "layanan/form",
+      "width": 768,
+      "file": "layanan-form-768.jpg",
+      "geometry": {
+        "scrollWidth": 715,
+        "width": 715
+      },
+      "result": "pass"
+    },
+    {
+      "page": "layanan/form",
+      "width": 1280,
+      "file": "layanan-form-1280.jpg",
+      "geometry": {
+        "scrollWidth": 738,
+        "width": 738
+      },
+      "result": "pass"
+    }
+  ]
+}

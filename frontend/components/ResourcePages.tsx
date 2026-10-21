@@ -285,6 +285,12 @@ export async function ResourceListPage({
       {(resource === 'services' || resource === 'faqs') && (
         <CategoryManager
           resource={resource}
+          categories={categories.map((category) => ({
+            ...category,
+            serviceCount: records.filter(
+              (record) => record.category === category.name,
+            ).length,
+          }))}
           count={
             new Set([
               ...categories.map((category) => category.name),

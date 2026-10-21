@@ -21,6 +21,8 @@ import { TaskError } from './errors';
 import { adminDemoEnabled } from '../demo/mode';
 import { sampleContact } from '../demo/contacts';
 import { assignmentIssue } from '../staff-schedules';
+import { recordDemoAudit } from '../demo/audit-store';
+import type { AuditLog } from '@/types/audit';
 
 interface StoredTask {
   id: string;
@@ -52,6 +54,8 @@ interface Store {
     staffShiftRevision?: number;
     contentRevision?: number;
     sessionToken: string;
+    auditLogs?: AuditLog[];
+    auditSeeded?: boolean;
     records: Record<string, RecordData[]>;
   };
 }
@@ -291,6 +295,15 @@ export async function demoMutation(
     if (index < 0) throw new TaskError('Data uji tidak ditemukan.', 404);
     if (method === 'GET') return { data: structuredClone(records[index]) };
     if (method === 'DELETE') {
+      if (adminDemoEnabled() && store.admin)
+        recordDemoAudit(
+          store.admin,
+          'delete',
+          resource,
+          id,
+          records[index],
+          null,
+        );
       records.splice(index, 1);
       store.tasks = store.tasks.filter(
         (task) => task.orderId !== id && task.staffId !== id,
@@ -381,6 +394,17 @@ export async function demoMutation(
         }
       }
     }
+    if (adminDemoEnabled() && store.admin)
+      recordDemoAudit(
+        store.admin,
+        resource === 'orders' && Object.hasOwn(body, 'staff')
+          ? 'assign'
+          : 'update',
+        resource,
+        id,
+        current,
+        updated,
+      );
     return { data: structuredClone(updated) };
   });
 }

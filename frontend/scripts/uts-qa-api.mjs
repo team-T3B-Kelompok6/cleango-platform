@@ -69,7 +69,17 @@ http
     }
     if (url.pathname === '/__qa/mode' && req.method === 'POST') {
       const next = url.searchParams.get('value');
-      if (!['normal', 'empty', 'error', 'slow', 'expired'].includes(next))
+      if (
+        ![
+          'normal',
+          'empty',
+          'error',
+          'slow',
+          'expired',
+          'audit-unavailable',
+          'audit-error',
+        ].includes(next)
+      )
         return send(400, { message: 'Unknown QA mode' });
       mode = next;
       return send(200, { mode });
@@ -96,7 +106,12 @@ http
         entry.status = 404;
         return send(404, { message: 'Route fixture tidak ditemukan.' });
       }
-      const route = url.pathname.slice(4) + url.search;
+      const pathname = url.pathname.slice(4);
+      const categoryRoute = /^\/admin\/categories(?:\/[^/]+)?$/.test(pathname);
+      const route =
+        (categoryRoute
+          ? pathname.replace('/admin/categories', '/categories')
+          : pathname) + url.search;
       if (mode === 'error') {
         entry.status = 503;
         return send(503, { message: 'Gangguan API khusus pengujian.' });
@@ -104,6 +119,15 @@ http
       if (mode === 'expired' && route !== '/auth/login') {
         entry.status = 401;
         return send(401, { message: 'Sesi uji berakhir.' });
+      }
+      if (
+        pathname === '/audit-logs' &&
+        (mode === 'audit-unavailable' || mode === 'audit-error')
+      ) {
+        entry.status = mode === 'audit-unavailable' ? 404 : 503;
+        return send(entry.status, {
+          message: 'Kondisi API audit khusus pengujian.',
+        });
       }
       if (mode === 'slow')
         await new Promise((resolve) => setTimeout(resolve, 1800));
@@ -133,6 +157,15 @@ http
         { method: req.method, ...(body ? { body } : {}) },
         String(req.headers.authorization ?? '').replace(/^Bearer /, ''),
       );
+      if (categoryRoute && result.data) {
+        const nativeCategory = (category) => {
+          const { resource, ...record } = category;
+          return record;
+        };
+        result.data = Array.isArray(result.data)
+          ? result.data.map(nativeCategory)
+          : nativeCategory(result.data);
+      }
       if (route === '/auth/login') session = result.accessToken;
       if (route === '/uploads')
         result.data.url =
