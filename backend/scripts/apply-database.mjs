@@ -87,6 +87,11 @@ try {
   );
 
   await ensureColumn(
+    'faqs',
+    'view_count',
+    '`view_count` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `category`',
+  );
+  await ensureColumn(
     'users',
     'password_changed_at',
     '`password_changed_at` DATETIME NULL AFTER `is_active`',

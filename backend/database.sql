@@ -442,6 +442,8 @@ CREATE TABLE IF NOT EXISTS booking_risk_alerts (
 CREATE TABLE IF NOT EXISTS faqs (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   category VARCHAR(100) NULL,
+  -- Read counter: drives the "popular questions" list in the mobile app.
+  view_count INT UNSIGNED NOT NULL DEFAULT 0,
   question VARCHAR(255) NOT NULL,
   answer TEXT NOT NULL,
   sort_order SMALLINT UNSIGNED NOT NULL DEFAULT 0,
