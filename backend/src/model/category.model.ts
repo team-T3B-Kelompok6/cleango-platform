@@ -94,3 +94,61 @@ export async function deleteCategoryById(id: number): Promise<boolean> {
   );
   return result.affectedRows > 0;
 }
+
+export type CategoryDeleteResult =
+  | 'deleted'
+  | 'not_found'
+  | 'in_use_by_services'
+  | 'in_use_by_orders';
+
+/**
+ * Deletes a service category. When [deleteServices] is set the services in that
+ * category are removed too, but only if no booking references them (bookings
+ * keep a foreign key to services).
+ */
+export async function deleteResourceCategoryById(
+  id: number,
+  options: { deleteServices?: boolean } = {},
+): Promise<CategoryDeleteResult> {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const [serviceRows] = await connection.execute<RowDataPacket[]>(
+      'SELECT COUNT(*) AS total FROM services WHERE category_id = ?',
+      [id],
+    );
+    const serviceCount = Number(serviceRows[0]?.total ?? 0);
+
+    if (serviceCount > 0 && !options.deleteServices) {
+      await connection.rollback();
+      return 'in_use_by_services';
+    }
+
+    if (serviceCount > 0) {
+      const [bookedRows] = await connection.execute<RowDataPacket[]>(
+        `SELECT COUNT(*) AS total FROM bookings b
+         INNER JOIN services s ON s.id = b.service_id
+         WHERE s.category_id = ?`,
+        [id],
+      );
+      if (Number(bookedRows[0]?.total ?? 0) > 0) {
+        await connection.rollback();
+        return 'in_use_by_orders';
+      }
+      await connection.execute('DELETE FROM services WHERE category_id = ?', [id]);
+    }
+
+    const [result] = await connection.execute<ResultSetHeader>(
+      'DELETE FROM service_categories WHERE id = ?',
+      [id],
+    );
+    await connection.commit();
+    return result.affectedRows > 0 ? 'deleted' : 'not_found';
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}

@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from 'express';
 import { AppError } from '../lib/AppError.js';
 import {
   deleteCategoryById,
+  deleteResourceCategoryById,
   findCategories,
   insertCategory,
   updateCategoryById,
@@ -92,8 +93,25 @@ export async function deleteCategoryByResource(
   next: NextFunction,
 ): Promise<void> {
   try {
-    if (!(await deleteCategoryById(positiveId(request.params.id, 'ID kategori'))))
+    const deleteServices = request.query.deleteServices === 'true';
+    const result = await deleteResourceCategoryById(
+      positiveId(request.params.id, 'ID kategori'),
+      { deleteServices },
+    );
+    if (result === 'not_found')
       throw new AppError(404, 'Kategori tidak ditemukan.');
+    if (result === 'in_use_by_services')
+      throw new AppError(
+        409,
+        'Kategori masih digunakan oleh layanan. Centang hapus semua layanan atau pindahkan layanannya terlebih dahulu.',
+        'CATEGORY_IN_USE',
+      );
+    if (result === 'in_use_by_orders')
+      throw new AppError(
+        409,
+        'Kategori tidak dapat dihapus karena layanannya sudah dipakai pada pesanan. Pindahkan layanan ke kategori lain.',
+        'CATEGORY_IN_USE',
+      );
     response.status(200).json({ message: 'Kategori berhasil dihapus.' });
   } catch (error) {
     next(error);
