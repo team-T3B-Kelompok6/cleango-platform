@@ -95,10 +95,30 @@ export async function updateUserProfile(
 }
 
 export async function updateUserPassword(id: number, passwordHash: string): Promise<void> {
+  // password_changed_at lets the auth middleware revoke tokens issued earlier.
   await pool.execute(
-    'UPDATE users SET password_hash = ? WHERE id = ?',
+    'UPDATE users SET password_hash = ?, password_changed_at = NOW() WHERE id = ?',
     [passwordHash, id],
   );
+}
+
+/**
+ * True when the token was issued before the last password change.
+ * The comparison happens inside MySQL so the server's time zone is applied
+ * consistently to both `password_changed_at` and `UNIX_TIMESTAMP()`; parsing the
+ * DATETIME in JavaScript produced a wrong offset.
+ */
+export async function isTokenRevoked(
+  id: number,
+  issuedAtSeconds: number,
+): Promise<boolean> {
+  const [rows] = await pool.execute<RowDataPacket[]>(
+    `SELECT (password_changed_at IS NOT NULL
+             AND ? < UNIX_TIMESTAMP(password_changed_at)) AS revoked
+     FROM users WHERE id = ? LIMIT 1`,
+    [issuedAtSeconds, id],
+  );
+  return Boolean(rows[0]?.revoked);
 }
 
 export async function findOrCreateSocialCustomer(input: {

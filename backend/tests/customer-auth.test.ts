@@ -4,6 +4,7 @@ import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const userModel = vi.hoisted(() => ({
+  isTokenRevoked: vi.fn().mockResolvedValue(false),
   findUserByEmail: vi.fn(),
   findUserById: vi.fn(),
   findUserByPhone: vi.fn(),
@@ -33,6 +34,8 @@ beforeEach(() => {
   userModel.insertCustomer.mockReset();
   userModel.findOrCreateSocialCustomer.mockReset();
   userModel.updateUserPassword.mockReset();
+  userModel.isTokenRevoked.mockReset();
+  userModel.isTokenRevoked.mockResolvedValue(false);
 });
 
 describe('customer authentication contract', () => {
@@ -344,5 +347,37 @@ describe('customer authentication contract', () => {
     const response = await request(app).post('/api/customer/auth/logout').set('Authorization', `Bearer ${token}`);
     expect(response.status).toBe(200);
     expect(response.body.message).toContain('hapus token');
+  });
+});
+
+describe('token revocation after a password change', () => {
+  const token = () =>
+    createAccessToken({ id: 10, email: 'c@e.com', role: 'customer' } as never);
+
+  it('rejects a token issued before the password change', async () => {
+    userModel.isTokenRevoked.mockResolvedValue(true);
+    const response = await request(app)
+      .get('/api/customer/profile')
+      .set('Authorization', `Bearer ${token()}`);
+
+    expect(response.status).toBe(401);
+    expect(response.body.code).toBe('SESSION_REVOKED');
+  });
+
+  it('accepts a token issued after the password change', async () => {
+    userModel.findUserById.mockResolvedValue({
+      id: 10,
+      name: 'C',
+      email: 'c@e.com',
+      phone: '0812',
+      role: 'customer',
+      passwordHash: 'x',
+      isActive: true,
+    });
+    const response = await request(app)
+      .get('/api/customer/profile')
+      .set('Authorization', `Bearer ${token()}`);
+
+    expect(response.status).toBe(200);
   });
 });

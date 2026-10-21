@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS users (
   role ENUM('customer', 'admin') NOT NULL DEFAULT 'customer',
   auth_provider ENUM('local', 'google', 'facebook') NOT NULL DEFAULT 'local',
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  password_changed_at DATETIME NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY uq_users_email (email),

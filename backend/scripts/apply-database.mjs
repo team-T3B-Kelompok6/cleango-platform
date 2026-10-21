@@ -35,6 +35,11 @@ try {
   }
 
   await ensureColumn(
+    'users',
+    'password_changed_at',
+    '`password_changed_at` DATETIME NULL AFTER `is_active`',
+  );
+  await ensureColumn(
     'services',
     'duration_label',
     '`duration_label` VARCHAR(80) NULL AFTER `duration_minutes`',

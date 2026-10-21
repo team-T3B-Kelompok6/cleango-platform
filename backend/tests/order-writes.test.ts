@@ -20,6 +20,9 @@ const orderModel = vi.hoisted(() => ({
 const db = vi.hoisted(() => ({ pool: { query: vi.fn(), execute: vi.fn() } }));
 
 vi.mock('../src/model/order.model.js', () => orderModel);
+vi.mock('../src/model/user.model.js', () => ({
+  isTokenRevoked: vi.fn().mockResolvedValue(false),
+}));
 vi.mock('../src/lib/db.js', () => db);
 
 import { createApp } from '../src/app.js';
