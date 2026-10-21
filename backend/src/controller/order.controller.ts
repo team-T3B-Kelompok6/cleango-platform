@@ -142,8 +142,17 @@ export async function deleteOrder(
   next: NextFunction,
 ): Promise<void> {
   try {
-    if (!(await deleteBookingById(positiveId(request.params.id, 'ID pesanan'))))
+    const result = await deleteBookingById(
+      positiveId(request.params.id, 'ID pesanan'),
+    );
+    if (result === 'not_found')
       throw new AppError(404, 'Pesanan tidak ditemukan.');
+    if (result === 'not_finished')
+      throw new AppError(
+        409,
+        'Pesanan belum selesai. Selesaikan atau batalkan pesanan sebelum menghapus.',
+        'ORDER_NOT_FINISHED',
+      );
     response.status(200).json({ message: 'Pesanan berhasil dihapus.' });
   } catch (error) {
     next(error);

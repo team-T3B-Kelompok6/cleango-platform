@@ -40,7 +40,7 @@ beforeEach(() => {
   db.pool.query.mockResolvedValue([[{ id: 10 }], []]);
   orderModel.listOrders.mockResolvedValue([]);
   orderModel.findOrder.mockResolvedValue(null);
-  orderModel.deleteBookingById.mockResolvedValue(true);
+  orderModel.deleteBookingById.mockResolvedValue('deleted');
 });
 
 describe('admin order writes', () => {
@@ -169,5 +169,28 @@ describe('resource categories', () => {
       .get('/api/categories?resource=promo')
       .set('Authorization', `Bearer ${adminToken}`);
     expect(response.status).toBe(400);
+  });
+});
+describe('order deletion rules', () => {
+  const remove = (path: string) =>
+    request(app).delete(path).set('Authorization', `Bearer ${adminToken}`);
+
+  it('deletes a finished order', async () => {
+    orderModel.deleteBookingById.mockResolvedValue('deleted');
+    const response = await remove('/api/orders/5');
+    expect(response.status).toBe(200);
+  });
+
+  it('refuses to delete an order that is not finished', async () => {
+    orderModel.deleteBookingById.mockResolvedValue('not_finished');
+    const response = await remove('/api/orders/5');
+    expect(response.status).toBe(409);
+    expect(response.body.code).toBe('ORDER_NOT_FINISHED');
+  });
+
+  it('404s for a missing order', async () => {
+    orderModel.deleteBookingById.mockResolvedValue('not_found');
+    const response = await remove('/api/orders/999');
+    expect(response.status).toBe(404);
   });
 });

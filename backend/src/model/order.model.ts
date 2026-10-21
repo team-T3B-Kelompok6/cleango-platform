@@ -235,11 +235,42 @@ export async function updateBookingById(
   return findOrder(id);
 }
 
-export async function deleteBookingById(id: number): Promise<boolean> {
-  const [result] = await pool.execute<ResultSetHeader>(
-    "DELETE FROM bookings WHERE id = ? AND status IN ('confirmed', 'assigned', 'cancelled')",
-    [id],
-  );
-  return result.affectedRows > 0;
+export type BookingDeleteResult = 'deleted' | 'not_found' | 'not_finished';
+
+// Only finished orders may be removed. Active orders keep their history until
+// they are completed or cancelled.
+const DELETABLE_STATUSES = ['completed', 'cancelled'];
+
+export async function deleteBookingById(id: number): Promise<BookingDeleteResult> {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const [rows] = await connection.execute<RowDataPacket[]>(
+      'SELECT status FROM bookings WHERE id = ? LIMIT 1',
+      [id],
+    );
+    if (!rows[0]) {
+      await connection.rollback();
+      return 'not_found';
+    }
+    if (!DELETABLE_STATUSES.includes(String(rows[0].status))) {
+      await connection.rollback();
+      return 'not_finished';
+    }
+
+    // payments and reviews reference the booking without ON DELETE CASCADE.
+    await connection.execute('DELETE FROM payments WHERE booking_id = ?', [id]);
+    await connection.execute('DELETE FROM reviews WHERE booking_id = ?', [id]);
+    await connection.execute('DELETE FROM bookings WHERE id = ?', [id]);
+
+    await connection.commit();
+    return 'deleted';
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
 }
 
