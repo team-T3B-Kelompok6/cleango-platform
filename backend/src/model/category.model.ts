@@ -1,9 +1,12 @@
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { pool } from '../lib/db.js';
 
+export type CategoryResource = 'services' | 'faqs';
+
 export interface Category extends RowDataPacket {
   id: number;
   name: string;
+  resource: CategoryResource;
   description: string | null;
   icon: string | null;
   isActive: number;
@@ -18,18 +21,44 @@ export interface CategoryInput {
   isActive: boolean;
 }
 
-export async function findCategories(activeOnly: boolean): Promise<Category[]> {
+export async function findCategories(
+  activeOnly: boolean,
+  resource: CategoryResource = 'services',
+): Promise<Category[]> {
   const [rows] = await pool.query<Category[]>(
-    `SELECT id, name, description, icon_url AS icon,
+    `SELECT id, name, resource, description, icon_url AS icon,
             is_active AS isActive,
             created_at AS createdAt,
             updated_at AS updatedAt
      FROM service_categories
-     WHERE (? = 0 OR is_active = 1)
+     WHERE resource = ? AND (? = 0 OR is_active = 1)
      ORDER BY name ASC`,
-    [activeOnly ? 1 : 0],
+    [resource, activeOnly ? 1 : 0],
   );
   return rows;
+}
+
+/** Active FAQ category names, used to validate FAQs. */
+export async function listFaqCategoryNames(): Promise<string[]> {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    "SELECT name FROM service_categories WHERE resource = 'faqs' AND is_active = TRUE ORDER BY name ASC",
+  );
+  return rows.map((row) => String(row.name));
+}
+
+/** How many FAQs still use this category name (FAQs store the name, not the id). */
+export async function countFaqsUsingCategory(name: string): Promise<number> {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    'SELECT COUNT(*) AS total FROM faqs WHERE category = ?',
+    [name],
+  );
+  return Number(rows[0]?.total ?? 0);
+}
+
+/** Keeps FAQs in sync when a FAQ category is renamed. */
+export async function renameFaqCategory(oldName: string, newName: string): Promise<void> {
+  if (oldName === newName) return;
+  await pool.execute('UPDATE faqs SET category = ? WHERE category = ?', [newName, oldName]);
 }
 
 export async function findCategoryById(
@@ -37,7 +66,7 @@ export async function findCategoryById(
   activeOnly: boolean,
 ): Promise<Category | null> {
   const [rows] = await pool.query<Category[]>(
-    `SELECT id, name, description, icon_url AS icon,
+    `SELECT id, name, resource, description, icon_url AS icon,
             is_active AS isActive,
             created_at AS createdAt,
             updated_at AS updatedAt
@@ -49,11 +78,14 @@ export async function findCategoryById(
   return rows[0] ?? null;
 }
 
-export async function insertCategory(input: CategoryInput): Promise<Category> {
+export async function insertCategory(
+  input: CategoryInput,
+  resource: CategoryResource = 'services',
+): Promise<Category> {
   const [result] = await pool.execute<ResultSetHeader>(
-    `INSERT INTO service_categories (name, description, icon_url, is_active)
-     VALUES (?, ?, ?, ?)`,
-    [input.name, input.description, input.icon, input.isActive],
+    `INSERT INTO service_categories (name, resource, description, icon_url, is_active)
+     VALUES (?, ?, ?, ?, ?)`,
+    [input.name, resource, input.description, input.icon, input.isActive],
   );
   const category = await findCategoryById(result.insertId, false);
   if (!category) throw new Error('Kategori gagal dibaca setelah dibuat');

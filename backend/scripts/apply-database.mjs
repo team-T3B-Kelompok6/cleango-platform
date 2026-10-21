@@ -34,6 +34,58 @@ try {
       );
   }
 
+  async function ensureUniqueIndex(table, indexName, columns, dropIndexes = []) {
+    const [existing] = await connection.query(
+      `SELECT 1 FROM information_schema.statistics
+       WHERE table_schema = 'cleango' AND table_name = ? AND index_name = ?
+       LIMIT 1`,
+      [table, indexName],
+    );
+    if (existing[0]) return;
+    for (const drop of dropIndexes) {
+      const [found] = await connection.query(
+        `SELECT 1 FROM information_schema.statistics
+         WHERE table_schema = 'cleango' AND table_name = ? AND index_name = ?
+         LIMIT 1`,
+        [table, drop],
+      );
+      if (found[0]) {
+        await connection.query(
+          `ALTER TABLE cleango.\`${table}\` DROP INDEX \`${drop}\``,
+        );
+      }
+    }
+    await connection.query(
+      `ALTER TABLE cleango.\`${table}\` ADD UNIQUE KEY \`${indexName}\` (${columns})`,
+    );
+  }
+
+  await ensureColumn(
+    'service_categories',
+    'resource',
+    "`resource` ENUM('services','faqs') NOT NULL DEFAULT 'services' AFTER `name`",
+  );
+  // The name must be unique per resource, not globally, so "Kantor" can exist
+  // as both a service and a FAQ category.
+  await ensureUniqueIndex(
+    'service_categories',
+    'uq_categories_resource_name',
+    '`resource`, `name`',
+    ['uq_service_categories_name'],
+  );
+  // Existing FAQ categories live as free text on the faqs rows; promote them so
+  // the FAQ category panel is not empty and old FAQs keep matching.
+  await connection.query(
+    `INSERT INTO cleango.service_categories (name, resource, is_active)
+     SELECT DISTINCT f.category, 'faqs', 1
+     FROM cleango.faqs f
+     WHERE f.category IS NOT NULL AND TRIM(f.category) <> ''
+       AND NOT EXISTS (
+         SELECT 1 FROM cleango.service_categories c
+         WHERE c.resource = 'faqs' AND c.name = f.category
+       )`,
+  );
+
   await ensureColumn(
     'users',
     'password_changed_at',

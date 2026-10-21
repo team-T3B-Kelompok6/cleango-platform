@@ -52,12 +52,15 @@ CREATE TABLE IF NOT EXISTS addresses (
 CREATE TABLE IF NOT EXISTS service_categories (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
+  -- Categories are per resource: service categories and FAQ categories are
+  -- managed separately even though they share this table.
+  resource ENUM('services', 'faqs') NOT NULL DEFAULT 'services',
   description TEXT NULL,
   icon_url VARCHAR(500) NULL,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY uq_service_categories_name (name),
+  UNIQUE KEY uq_categories_resource_name (resource, name),
   INDEX idx_service_categories_active (is_active)
 ) ENGINE=InnoDB;
 

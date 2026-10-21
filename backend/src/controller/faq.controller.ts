@@ -9,6 +9,7 @@ import {
   type FaqCategory,
   type FaqInput,
 } from '../model/faq.model.js';
+import { listFaqCategoryNames } from '../model/category.model.js';
 import {
   booleanValue,
   positiveId,
@@ -17,19 +18,22 @@ import {
   validationError,
 } from './resource-validation.js';
 
-const categories: FaqCategory[] = ['Layanan', 'Pembayaran', 'Jadwal', 'SOP'];
 function inputFrom(
   body: Record<string, unknown>,
   partial: boolean,
+  faqCategories: string[],
 ): Partial<FaqInput> {
   let category: FaqCategory | undefined;
   if (!partial || body.category !== undefined) {
-    if (
-      typeof body.category !== 'string' ||
-      !categories.includes(body.category as FaqCategory)
-    )
-      validationError({ category: 'Kategori FAQ tidak valid.' });
-    category = body.category as FaqCategory;
+    const value = typeof body.category === 'string' ? body.category.trim() : '';
+    if (!value || !faqCategories.includes(value))
+      validationError({
+        category:
+          faqCategories.length > 0
+            ? `Kategori FAQ tidak valid. Pilih salah satu: ${faqCategories.join(', ')}.`
+            : 'Belum ada kategori FAQ. Tambahkan kategori terlebih dahulu.',
+      });
+    category = value;
   }
   const input: Partial<FaqInput> = {};
   const question = requiredText(body, 'question', 'Pertanyaan', 255, partial);
@@ -78,7 +82,11 @@ export async function createFaq(
 ): Promise<void> {
   try {
     const data = await insertFaq(
-      inputFrom(request.body as Record<string, unknown>, false) as FaqInput,
+      inputFrom(
+        request.body as Record<string, unknown>,
+        false,
+        await listFaqCategoryNames(),
+      ) as FaqInput,
     );
     response.status(201).json({ message: 'FAQ berhasil dibuat.', data });
   } catch (error) {
@@ -93,7 +101,11 @@ export async function updateFaq(
   try {
     const data = await updateFaqById(
       positiveId(request.params.id, 'ID FAQ'),
-      inputFrom(request.body as Record<string, unknown>, true),
+      inputFrom(
+        request.body as Record<string, unknown>,
+        true,
+        await listFaqCategoryNames(),
+      ),
     );
     if (!data) throw new AppError(404, 'FAQ tidak ditemukan.');
     response.status(200).json({ message: 'FAQ berhasil diperbarui.', data });

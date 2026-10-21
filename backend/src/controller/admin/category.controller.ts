@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import { AppError } from '../../lib/AppError.js';
 import {
-  deleteCategoryById,
+  deleteResourceCategoryById,
   findCategories,
   findCategoryById,
   insertCategory,
@@ -40,14 +40,15 @@ function categoryInput(body: Record<string, unknown>, partial: boolean): Partial
 
 export async function getCategories(_request: Request, response: Response, next: NextFunction): Promise<void> {
   try {
-    response.status(200).json({ data: await findCategories(false) });
+    response.status(200).json({ data: await findCategories(false, 'services') });
   } catch (error) { next(error); }
 }
 
 export async function getCategoryDetail(request: Request, response: Response, next: NextFunction): Promise<void> {
   try {
     const category = await findCategoryById(numericId(request.params.id), false);
-    if (!category) throw new AppError(404, 'Kategori tidak ditemukan');
+    if (!category || category.resource !== 'services')
+      throw new AppError(404, 'Kategori tidak ditemukan');
     response.status(200).json({ data: category });
   } catch (error) { next(error); }
 }
@@ -55,12 +56,15 @@ export async function getCategoryDetail(request: Request, response: Response, ne
 export async function createCategory(request: Request, response: Response, next: NextFunction): Promise<void> {
   try {
     const input = categoryInput(request.body as Record<string, unknown>, false) as CategoryInput;
-    response.status(201).json({ message: 'Kategori berhasil dibuat', data: await insertCategory(input) });
+    response.status(201).json({ message: 'Kategori berhasil dibuat', data: await insertCategory(input, 'services') });
   } catch (error) { next(error); }
 }
 
 export async function updateCategory(request: Request, response: Response, next: NextFunction): Promise<void> {
   try {
+    const existing = await findCategoryById(numericId(request.params.id), false);
+    if (!existing || existing.resource !== 'services')
+      throw new AppError(404, 'Kategori tidak ditemukan');
     const category = await updateCategoryById(
       numericId(request.params.id),
       categoryInput(request.body as Record<string, unknown>, true),
@@ -72,7 +76,24 @@ export async function updateCategory(request: Request, response: Response, next:
 
 export async function deleteCategory(request: Request, response: Response, next: NextFunction): Promise<void> {
   try {
-    if (!await deleteCategoryById(numericId(request.params.id))) throw new AppError(404, 'Kategori tidak ditemukan');
+    const deleteServices = request.query.deleteServices === 'true';
+    const result = await deleteResourceCategoryById(
+      numericId(request.params.id),
+      { deleteServices },
+    );
+    if (result === 'not_found') throw new AppError(404, 'Kategori tidak ditemukan');
+    if (result === 'in_use_by_services')
+      throw new AppError(
+        409,
+        'Kategori masih digunakan oleh layanan. Centang hapus semua layanan atau pindahkan layanannya terlebih dahulu.',
+        'CATEGORY_IN_USE',
+      );
+    if (result === 'in_use_by_orders')
+      throw new AppError(
+        409,
+        'Kategori tidak dapat dihapus karena layanannya sudah dipakai pada pesanan. Pindahkan layanan ke kategori lain.',
+        'CATEGORY_IN_USE',
+      );
     response.status(200).json({ message: 'Kategori berhasil dihapus' });
   } catch (error) { next(error); }
 }

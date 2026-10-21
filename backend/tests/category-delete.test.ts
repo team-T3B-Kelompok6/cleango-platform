@@ -3,6 +3,10 @@ import request from 'supertest';
 
 const categoryModel = vi.hoisted(() => ({
   findCategories: vi.fn(),
+  findCategoryById: vi.fn(),
+  listFaqCategoryNames: vi.fn(),
+  countFaqsUsingCategory: vi.fn(),
+  renameFaqCategory: vi.fn(),
   insertCategory: vi.fn(),
   updateCategoryById: vi.fn(),
   deleteCategoryById: vi.fn(),
@@ -20,6 +24,12 @@ const del = (path: string) =>
 
 beforeEach(() => {
   categoryModel.deleteResourceCategoryById.mockReset();
+  categoryModel.findCategoryById.mockReset();
+  categoryModel.findCategoryById.mockResolvedValue({
+    id: '5',
+    name: 'Kategori',
+    resource: 'services',
+  });
 });
 
 describe('DELETE /api/categories/:id', () => {

@@ -1,7 +1,9 @@
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { pool } from '../lib/db.js';
 
-export type FaqCategory = 'Layanan' | 'Pembayaran' | 'Jadwal' | 'SOP';
+// FAQ categories are managed in the admin dashboard (service_categories
+// with resource='faqs'), so this is plain text, not a fixed union.
+export type FaqCategory = string;
 export interface FaqInput {
   category: FaqCategory;
   question: string;
