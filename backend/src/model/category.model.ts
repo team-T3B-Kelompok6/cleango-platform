@@ -194,8 +194,9 @@ export interface PopularServiceCategory {
 }
 
 /**
- * Service categories ordered by how many bookings their services received.
- * Used by the mobile home screen ("Layanan" grid).
+ * Service categories ordered by how many *completed* bookings their services
+ * received. Every active category is returned (only the ranking changes), so the
+ * mobile home grid still shows categories without finished orders.
  */
 export async function listPopularServiceCategories(
   limit: number,
@@ -207,7 +208,7 @@ export async function listPopularServiceCategories(
          WHERE s.category_id = c.id AND s.is_active = TRUE) AS serviceCount,
        (SELECT COUNT(*) FROM bookings b
           INNER JOIN services s2 ON s2.id = b.service_id
-         WHERE s2.category_id = c.id) AS orderCount,
+         WHERE s2.category_id = c.id AND b.status = 'completed') AS orderCount,
        (SELECT s3.id FROM services s3
          WHERE s3.category_id = c.id AND s3.is_active = TRUE
          ORDER BY s3.id ASC LIMIT 1) AS firstServiceId
