@@ -6,10 +6,27 @@ import {
   listCustomers,
   updateCustomerById,
 } from '../../model/customer.model.js';
-import { positiveId, requiredText, booleanValue } from '../resource-validation.js';
+import { positiveId, requiredText, booleanValue, validationError } from '../resource-validation.js';
 
 function customerId(value: unknown): number {
   return positiveId(value, 'ID customer');
+}
+
+
+// Optional text that may be cleared by the admin (empty string is allowed).
+function optionalText(
+  body: Record<string, unknown>,
+  field: string,
+  label: string,
+  maxLength: number,
+): string | undefined {
+  if (body[field] === undefined) return undefined;
+  if (typeof body[field] !== 'string')
+    validationError({ [field]: `${label} harus berupa teks.` });
+  const value = (body[field] as string).trim();
+  if (value.length > maxLength)
+    validationError({ [field]: `${label} maksimal ${maxLength} karakter.` });
+  return value;
 }
 
 export async function getCustomers(
@@ -45,7 +62,13 @@ export async function updateCustomer(
 ): Promise<void> {
   try {
     const body = request.body as Record<string, unknown>;
-    const input: { name?: string; phone?: string; email?: string; active?: boolean } = {};
+    const input: {
+      name?: string;
+      phone?: string;
+      email?: string;
+      active?: boolean;
+      address?: string;
+    } = {};
     const name = requiredText(body, 'name', 'Nama customer', 120, true);
     if (name !== undefined) input.name = name;
     const phone = requiredText(body, 'phone', 'Nomor WhatsApp', 30, true);
@@ -54,6 +77,8 @@ export async function updateCustomer(
     if (email !== undefined) input.email = email;
     const active = booleanValue(body, 'active', 'Status akun', true);
     if (active !== undefined) input.active = active;
+    const address = optionalText(body, 'address', 'Alamat', 1000);
+    if (address !== undefined) input.address = address;
     const data = await updateCustomerById(customerId(request.params.id), input);
     if (!data) throw new AppError(404, 'Customer tidak ditemukan.');
     response.status(200).json({ message: 'Customer berhasil diperbarui.', data });

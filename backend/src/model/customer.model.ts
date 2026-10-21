@@ -65,7 +65,7 @@ function mapCustomer(row: CustomerRow): Customer {
 
 export async function updateCustomerById(
   id: number,
-  input: { name?: string; phone?: string; email?: string; active?: boolean },
+  input: { name?: string; phone?: string; email?: string; active?: boolean; address?: string },
 ): Promise<Customer | null> {
   const existing = await findCustomer(id);
   if (!existing) return null;
@@ -79,7 +79,37 @@ export async function updateCustomerById(
     values.push(id);
     await pool.execute(`UPDATE users SET ${fields.join(', ')} WHERE id = ? AND role = 'customer'`, values);
   }
+  if (input.address !== undefined) await syncPrimaryAddress(id, input.address);
   return findCustomer(id);
+}
+
+// The admin dashboard edits a single "address" text, which maps to the
+// customer's primary address. An empty value clears it; the row is kept because
+// bookings reference it (bookings.address_id is NOT NULL).
+async function syncPrimaryAddress(customerId: number, address: string): Promise<void> {
+  const value = address.trim();
+  const [rows] = await pool.execute<RowDataPacket[]>(
+    'SELECT id FROM addresses WHERE user_id = ? ORDER BY is_primary DESC, id ASC LIMIT 1',
+    [customerId],
+  );
+  const existingId = rows[0] ? Number(rows[0].id) : null;
+  if (existingId !== null) {
+    await pool.execute('UPDATE addresses SET street_address = ? WHERE id = ?', [value, existingId]);
+    return;
+  }
+  if (!value) return;
+  const [userRows] = await pool.execute<RowDataPacket[]>(
+    'SELECT name, phone FROM users WHERE id = ? LIMIT 1',
+    [customerId],
+  );
+  const recipientName = String(userRows[0]?.name ?? 'Pelanggan');
+  const recipientPhone = String(userRows[0]?.phone ?? '08000000000');
+  await pool.execute(
+    `INSERT INTO addresses
+       (user_id, label, recipient_name, recipient_phone, street_address, city, province, is_primary)
+     VALUES (?, 'Rumah', ?, ?, ?, 'Malang', 'Jawa Timur', TRUE)`,
+    [customerId, recipientName, recipientPhone, value],
+  );
 }
 
 export async function deleteCustomerById(id: number): Promise<boolean> {
