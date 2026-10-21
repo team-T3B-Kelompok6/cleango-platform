@@ -7,15 +7,16 @@ import vm from 'node:vm';
 const native = createRequire(import.meta.url),
   ts = native('typescript');
 const root = path.resolve(import.meta.dirname, '..');
-const output = path.join(
+const output = path.resolve(
   root,
-  process.argv.includes('--checklist')
-    ? 'docs/checklist-review-2026-10-17'
-    : process.argv.includes('--recheck')
-      ? 'docs/recheck-2026-10-17'
-      : process.argv.includes('--revision')
-        ? 'docs/ui-revision-2026-10-16'
-        : 'docs/uts-2026-10-16',
+  process.env.CLEANGO_QA_OUTPUT_DIR ??
+    (process.argv.includes('--checklist')
+      ? 'docs/checklist-review-2026-10-17'
+      : process.argv.includes('--recheck')
+        ? 'docs/recheck-2026-10-17'
+        : process.argv.includes('--revision')
+          ? 'docs/ui-revision-2026-10-16'
+          : 'docs/uts-2026-10-16'),
 );
 mkdirSync(output, { recursive: true });
 process.env.API_URL = 'http://127.0.0.1:4410/api';

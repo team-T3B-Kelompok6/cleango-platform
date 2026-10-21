@@ -1,0 +1,622 @@
+{
+  "fixture": true,
+  "mode": "normal",
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:04.729Z",
+      "mode": "normal",
+      "status": 401
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:09.734Z",
+      "mode": "normal",
+      "status": 401
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:14.726Z",
+      "mode": "normal",
+      "status": 401
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "time": "2026-10-21T01:10:21.951Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:10:21.983Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/cleaner-tasks",
+      "time": "2026-10-21T01:10:22.007Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:22.358Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:10:22.368Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:22.368Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/cleaner-tasks",
+      "time": "2026-10-21T01:10:22.383Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:10:22.417Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/cleaner-tasks",
+      "time": "2026-10-21T01:10:22.436Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:27.336Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:10:27.346Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:27.347Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/cleaner-tasks",
+      "time": "2026-10-21T01:10:27.365Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:32.349Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:10:32.36Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:32.36Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/cleaner-tasks",
+      "time": "2026-10-21T01:10:32.379Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:10:32.907Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/audit-logs",
+      "time": "2026-10-21T01:10:32.908Z",
+      "mode": "audit-unavailable",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:33.34Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:33.355Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:10:33.355Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:33.355Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:10:33.371Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:33.371Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/cleaner-tasks",
+      "time": "2026-10-21T01:10:33.375Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/cleaner-tasks",
+      "time": "2026-10-21T01:10:33.396Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:10:33.47Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/audit-logs",
+      "time": "2026-10-21T01:10:33.47Z",
+      "mode": "audit-unavailable",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:38.364Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:10:38.375Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:38.375Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/cleaner-tasks",
+      "time": "2026-10-21T01:10:38.394Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:43.361Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:10:43.372Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:43.373Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/cleaner-tasks",
+      "time": "2026-10-21T01:10:43.39Z",
+      "mode": "audit-unavailable",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:48.356Z",
+      "mode": "audit-error",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:10:48.368Z",
+      "mode": "audit-error",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:48.369Z",
+      "mode": "audit-error",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/cleaner-tasks",
+      "time": "2026-10-21T01:10:48.386Z",
+      "mode": "audit-error",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:10:49.337Z",
+      "mode": "audit-error",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/audit-logs",
+      "time": "2026-10-21T01:10:49.339Z",
+      "mode": "audit-error",
+      "status": 503
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:49.82Z",
+      "mode": "audit-error",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:49.832Z",
+      "mode": "audit-error",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:10:49.832Z",
+      "mode": "audit-error",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:49.833Z",
+      "mode": "audit-error",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:10:49.849Z",
+      "mode": "audit-error",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:49.849Z",
+      "mode": "audit-error",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/cleaner-tasks",
+      "time": "2026-10-21T01:10:49.862Z",
+      "mode": "audit-error",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/cleaner-tasks",
+      "time": "2026-10-21T01:10:49.866Z",
+      "mode": "audit-error",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:10:49.907Z",
+      "mode": "audit-error",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/audit-logs",
+      "time": "2026-10-21T01:10:49.907Z",
+      "mode": "audit-error",
+      "status": 503
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:54.831Z",
+      "mode": "audit-error",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:10:54.845Z",
+      "mode": "audit-error",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:54.845Z",
+      "mode": "audit-error",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/cleaner-tasks",
+      "time": "2026-10-21T01:10:54.865Z",
+      "mode": "audit-error",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:59.841Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:10:59.852Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:10:59.852Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/cleaner-tasks",
+      "time": "2026-10-21T01:10:59.869Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:11:02.624Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/audit-logs",
+      "time": "2026-10-21T01:11:02.625Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:11:03.244Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:11:03.258Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:11:03.258Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/cleaner-tasks",
+      "time": "2026-10-21T01:11:03.279Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:11:03.313Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/audit-logs",
+      "time": "2026-10-21T01:11:03.314Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:11:08.256Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:11:08.267Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:11:08.267Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/cleaner-tasks",
+      "time": "2026-10-21T01:11:08.286Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:11:13.252Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:11:13.263Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:11:13.263Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/cleaner-tasks",
+      "time": "2026-10-21T01:11:13.282Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:11:18.258Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:11:18.269Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:11:18.269Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/cleaner-tasks",
+      "time": "2026-10-21T01:11:18.288Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:11:23.255Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "time": "2026-10-21T01:11:23.267Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "time": "2026-10-21T01:11:23.267Z",
+      "mode": "normal",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/cleaner-tasks",
+      "time": "2026-10-21T01:11:23.298Z",
+      "mode": "normal",
+      "status": 200
+    }
+  ]
+}

@@ -14,6 +14,7 @@ const links: { href: string; label: string; icon: IconName }[] = [
   { href: '/customer', label: 'Kelola Data Customer', icon: 'customers' },
   { href: '/petugas', label: 'Kelola Data Petugas', icon: 'staff' },
   { href: '/laporan', label: 'Laporan', icon: 'report' },
+  { href: '/audit-log', label: 'Audit Log Admin', icon: 'clock' },
 ];
 function Links({ close }: { close?: () => void }) {
   const pathname = usePathname();

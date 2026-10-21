@@ -14,6 +14,7 @@ import './staff-profile.css';
 import './record-dialogs.css';
 import './cleaner.css';
 import './refinement.css';
+import './audit.css';
 const body = DM_Sans({
   subsets: ['latin'],
   variable: '--font-body',
