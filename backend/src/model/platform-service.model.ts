@@ -16,6 +16,7 @@ export interface PlatformServiceInput {
   durationMinutes: number;
   price: number;
   description: string;
+  imageUrl: string | null;
   active: boolean;
   features: string[];
 }
@@ -28,6 +29,7 @@ interface ServiceRow extends RowDataPacket {
   price: number;
   description: string;
   active: number;
+  imageUrl: string | null;
 }
 
 interface FeatureRow extends RowDataPacket {
@@ -42,6 +44,7 @@ export interface PlatformService {
   duration: string;
   price: number;
   description: string;
+  imageUrl: string | null;
   active: boolean;
   features: string[];
 }
@@ -64,6 +67,7 @@ async function attachFeatures(rows: ServiceRow[]): Promise<PlatformService[]> {
     price: row.price,
     description: row.description,
     active: Boolean(row.active),
+    imageUrl: row.imageUrl ?? null,
     features: features
       .filter((feature) => feature.serviceId === row.id)
       .map((feature) => feature.description),
@@ -72,7 +76,8 @@ async function attachFeatures(rows: ServiceRow[]): Promise<PlatformService[]> {
 
 const serviceSelect = `SELECT s.id, s.name, c.name AS category,
   COALESCE(s.duration_label, CONCAT(s.duration_minutes, ' menit')) AS duration,
-  s.price, COALESCE(s.description, '') AS description, s.is_active AS active
+  s.price, COALESCE(s.description, '') AS description, s.is_active AS active,
+  s.image_url AS imageUrl
   FROM services s INNER JOIN service_categories c ON c.id = s.category_id`;
 
 export type ServiceSort = 'name' | 'price' | 'category' | 'newest';
@@ -169,8 +174,8 @@ export async function insertPlatformService(
     const slug = `${slugBase}-${Date.now().toString(36)}`;
     const [result] = await connection.execute<ResultSetHeader>(
       `INSERT INTO services
-       (category_id, name, slug, description, price, duration_minutes, duration_label, is_active)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+       (category_id, name, slug, description, price, duration_minutes, duration_label, is_active, image_url)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         resolvedCategoryId,
         input.name,
@@ -180,6 +185,7 @@ export async function insertPlatformService(
         input.durationMinutes,
         input.duration,
         input.active,
+        input.imageUrl,
       ],
     );
     await replaceFeatures(connection, result.insertId, input.features);
@@ -218,7 +224,8 @@ export async function updatePlatformService(
       `UPDATE services SET
        name = IF(?, ?, name), category_id = IF(?, ?, category_id),
        duration_label = IF(?, ?, duration_label), duration_minutes = IF(?, ?, duration_minutes),
-       price = IF(?, ?, price), description = IF(?, ?, description), is_active = IF(?, ?, is_active)
+       price = IF(?, ?, price), description = IF(?, ?, description), is_active = IF(?, ?, is_active),
+       image_url = IF(?, ?, image_url)
        WHERE id = ?`,
       [
         input.name !== undefined,
@@ -235,6 +242,8 @@ export async function updatePlatformService(
         input.description ?? '',
         input.active !== undefined,
         input.active ?? false,
+        input.imageUrl !== undefined,
+        input.imageUrl ?? null,
         id,
       ],
     );

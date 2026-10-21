@@ -38,6 +38,26 @@ function durationMinutes(duration: string): number {
   return minutes;
 }
 
+
+// Local upload paths (from POST /uploads) or absolute http(s) URLs only.
+function imageUrlValue(body: Record<string, unknown>): string | null {
+  const raw = body.imageUrl;
+  if (raw === undefined || raw === null) return null;
+  if (typeof raw !== 'string') {
+    validationError({ imageUrl: 'Alamat foto tidak valid.' });
+  }
+  const value = (raw as string).trim();
+  if (!value) return null;
+  const local = /^\/(?!\/)[^\s\\]*$/.test(value);
+  const remote = /^https?:\/\/\S+$/.test(value);
+  if (!local && !remote)
+    validationError({
+      imageUrl: 'Alamat foto harus berupa tautan http/https atau path yang diawali /.',
+    });
+  if (value.length > 500) validationError({ imageUrl: 'Alamat foto terlalu panjang.' });
+  return value;
+}
+
 function inputFrom(
   body: Record<string, unknown>,
   partial: boolean,
@@ -84,6 +104,8 @@ function inputFrom(
       validationError({ features: 'Setiap fasilitas maksimal 255 karakter.' });
   }
   const active = booleanValue(body, 'active', 'Status publikasi', partial);
+  let imageUrl: string | null | undefined;
+  if (!partial || body.imageUrl !== undefined) imageUrl = imageUrlValue(body);
   const input: Partial<PlatformServiceInput> = {};
   if (name !== undefined) input.name = name;
   if (category !== undefined) input.category = category;
@@ -95,6 +117,7 @@ function inputFrom(
   if (description !== undefined) input.description = description;
   if (active !== undefined) input.active = active;
   if (features !== undefined) input.features = features;
+  if (imageUrl !== undefined) input.imageUrl = imageUrl;
   if (partial) requireChanges(input);
   return input;
 }
