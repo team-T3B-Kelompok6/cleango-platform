@@ -20,11 +20,6 @@ export async function addCategory(
   let name = String(form.get('name') ?? '')
     .trim()
     .replace(/\s+/g, ' ');
-  if (
-    resource === 'services' &&
-    name.toLocaleLowerCase('id') === 'sofa dan kasur'
-  )
-    name = 'Sofa';
   const values = { name };
   if (!name || name.length > 60)
     return {

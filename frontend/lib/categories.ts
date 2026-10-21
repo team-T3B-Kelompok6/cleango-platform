@@ -34,7 +34,7 @@ function categoryRecord(value: unknown, resource: CategoryResource): Category {
     throw new ApiError('Format kategori tidak sesuai.', 502);
   return {
     id: String(item.id),
-    name: native && item.name === 'Sofa dan Kasur' ? 'Sofa' : item.name,
+    name: item.name,
     resource,
   };
 }
@@ -46,10 +46,7 @@ export async function createCategoryRecord(
   const result = await request<{ data: unknown }>(categoryPath(resource), {
     method: 'POST',
     body: JSON.stringify({
-      name:
-        categoryPath(resource) === '/admin/categories' && name === 'Sofa'
-          ? 'Sofa dan Kasur'
-          : name,
+      name,
       resource,
     }),
   });
