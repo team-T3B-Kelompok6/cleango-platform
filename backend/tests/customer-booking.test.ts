@@ -102,7 +102,7 @@ describe('POST booking validation', () => {
   });
 
   it('rejects an off-slot time before touching the database', async () => {
-    const response = await auth('post', '/api/customer/bookings').send({ ...valid(), time: '09:00' });
+    const response = await auth('post', '/api/customer/bookings').send({ ...valid(), time: '09:30' });
     expect(response.status).toBe(400);
     expect(response.body.errors.time).toBe('Pilih salah satu slot yang tersedia.');
     expect(bookingModel.createBooking).not.toHaveBeenCalled();
