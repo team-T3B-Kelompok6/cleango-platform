@@ -1,6 +1,15 @@
 import jwt from 'jsonwebtoken';
 import request from 'supertest';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('../src/model/user.model.js', async (original) => ({
+  ...(await original<typeof import('../src/model/user.model.js')>()),
+  isTokenRevoked: vi.fn().mockResolvedValue(false),
+}));
+vi.mock('../src/model/platform-service.model.js', async (original) => ({
+  ...(await original<typeof import('../src/model/platform-service.model.js')>()),
+  insertPlatformService: vi.fn().mockRejectedValue(new Error('CATEGORY_NOT_FOUND')),
+}));
 import { createApp } from '../src/app.js';
 
 const app = createApp();
@@ -22,7 +31,7 @@ describe('admin resource contracts', () => {
     },
   );
 
-  it('validates the frontend service category before database access', async () => {
+  it('rejects a service category that is not registered', async () => {
     const response = await authorized('post', '/api/services').send({
       name: 'Tes Layanan',
       category: 'Tidak Ada',
@@ -34,7 +43,7 @@ describe('admin resource contracts', () => {
     });
 
     expect(response.status).toBe(400);
-    expect(response.body.errors.category).toBe('Kategori layanan tidak valid.');
+    expect(response.body.errors.category).toBe('Kategori layanan tidak ditemukan.');
   });
 
   it('validates FAQ publication as a boolean before database access', async () => {

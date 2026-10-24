@@ -12,5 +12,9 @@ coverage/
 .pgadmin-appdata/
 .DS_Store
 Thumbs.db
+uploads/
+/backend/.local/
+/frontend/.next-*/
+
 AGENTS.md
 docs/agents/

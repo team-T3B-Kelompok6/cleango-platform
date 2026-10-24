@@ -9,6 +9,8 @@
     "start": "next start --hostname 127.0.0.1",
     "typecheck": "tsc --noEmit",
     "check:demo": "node scripts/check-admin-demo.mjs",
+    "check:categories": "node scripts/check-categories.mjs",
+    "check:audit": "node scripts/check-audit.mjs",
     "check:promo": "node scripts/check-promo-pricing.mjs",
     "qa:api": "node scripts/uts-qa-api.mjs",
     "check:uts:http": "node scripts/check-uts-http.mjs",
@@ -17,10 +19,10 @@
   },
   "dependencies": {
     "leaflet": "^1.9.4",
-    "next": "16.4.0",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
-    "server-only": "0.0.1"
+    "next": "^16.4.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@types/leaflet": "^1.9.22",

@@ -5,14 +5,9 @@ import type {
 } from 'mysql2/promise';
 import { pool } from '../lib/db.js';
 
-export const SERVICE_CATEGORY_DATABASE_NAMES = {
-  Rumah: 'Rumah',
-  Kantor: 'Kantor',
-  Sofa: 'Sofa dan Kasur',
-  AC: 'AC',
-} as const;
-
-export type ServiceCategory = keyof typeof SERVICE_CATEGORY_DATABASE_NAMES;
+// Categories are managed in the `service_categories` table (admin dashboard can
+// add new ones), so the API accepts any name instead of a hardcoded whitelist.
+export type ServiceCategory = string;
 
 export interface PlatformServiceInput {
   name: string;
@@ -21,6 +16,7 @@ export interface PlatformServiceInput {
   durationMinutes: number;
   price: number;
   description: string;
+  imageUrl: string | null;
   active: boolean;
   features: string[];
 }
@@ -33,6 +29,7 @@ interface ServiceRow extends RowDataPacket {
   price: number;
   description: string;
   active: number;
+  imageUrl: string | null;
 }
 
 interface FeatureRow extends RowDataPacket {
@@ -47,14 +44,9 @@ export interface PlatformService {
   duration: string;
   price: number;
   description: string;
+  imageUrl: string | null;
   active: boolean;
   features: string[];
-}
-
-function apiCategory(databaseName: string): ServiceCategory {
-  return databaseName === 'Sofa dan Kasur'
-    ? 'Sofa'
-    : (databaseName as ServiceCategory);
 }
 
 async function attachFeatures(rows: ServiceRow[]): Promise<PlatformService[]> {
@@ -70,11 +62,12 @@ async function attachFeatures(rows: ServiceRow[]): Promise<PlatformService[]> {
   return rows.map((row) => ({
     id: String(row.id),
     name: row.name,
-    category: apiCategory(row.category),
+    category: row.category,
     duration: row.duration,
     price: row.price,
     description: row.description,
     active: Boolean(row.active),
+    imageUrl: row.imageUrl ?? null,
     features: features
       .filter((feature) => feature.serviceId === row.id)
       .map((feature) => feature.description),
@@ -83,12 +76,45 @@ async function attachFeatures(rows: ServiceRow[]): Promise<PlatformService[]> {
 
 const serviceSelect = `SELECT s.id, s.name, c.name AS category,
   COALESCE(s.duration_label, CONCAT(s.duration_minutes, ' menit')) AS duration,
-  s.price, COALESCE(s.description, '') AS description, s.is_active AS active
+  s.price, COALESCE(s.description, '') AS description, s.is_active AS active,
+  s.image_url AS imageUrl
   FROM services s INNER JOIN service_categories c ON c.id = s.category_id`;
 
-export async function listPlatformServices(): Promise<PlatformService[]> {
+export type ServiceSort = 'name' | 'price' | 'category' | 'newest';
+export const SERVICE_SORTS: ServiceSort[] = ['name', 'price', 'category', 'newest'];
+const SORT_SQL: Record<ServiceSort, string> = {
+  name: 's.name ASC',
+  price: 's.price ASC, s.name ASC',
+  category: 'c.name ASC, s.name ASC',
+  newest: 's.created_at DESC, s.id DESC',
+};
+
+export interface PlatformServiceFilters {
+  search?: string | null;
+  category?: ServiceCategory | null;
+  activeOnly?: boolean;
+  sort?: ServiceSort;
+}
+
+export async function listPlatformServices(
+  filters: PlatformServiceFilters = {},
+): Promise<PlatformService[]> {
+  const conditions: string[] = [];
+  const values: (string | number)[] = [];
+  if (filters.search) {
+    conditions.push("(s.name LIKE ? OR COALESCE(s.description, '') LIKE ?)");
+    values.push(`%${filters.search}%`, `%${filters.search}%`);
+  }
+  if (filters.category) {
+    conditions.push('c.name = ?');
+    values.push(filters.category);
+  }
+  if (filters.activeOnly) conditions.push('s.is_active = TRUE');
+  const where = conditions.length ? ` WHERE ${conditions.join(' AND ')}` : '';
+  const order = SORT_SQL[filters.sort ?? 'name'];
   const [rows] = await pool.query<ServiceRow[]>(
-    `${serviceSelect} ORDER BY s.name`,
+    `${serviceSelect}${where} ORDER BY ${order}`,
+    values,
   );
   return attachFeatures(rows);
 }
@@ -108,10 +134,10 @@ async function categoryId(
   category: ServiceCategory,
 ): Promise<number> {
   const [rows] = await connection.query<(RowDataPacket & { id: number })[]>(
-    'SELECT id FROM service_categories WHERE name = ? LIMIT 1',
-    [SERVICE_CATEGORY_DATABASE_NAMES[category]],
+    "SELECT id FROM service_categories WHERE name = ? AND resource = 'services' AND is_active = TRUE LIMIT 1",
+    [category],
   );
-  if (!rows[0]) throw new Error(`Kategori master ${category} belum tersedia`);
+  if (!rows[0]) throw new Error('CATEGORY_NOT_FOUND');
   return rows[0].id;
 }
 
@@ -148,8 +174,8 @@ export async function insertPlatformService(
     const slug = `${slugBase}-${Date.now().toString(36)}`;
     const [result] = await connection.execute<ResultSetHeader>(
       `INSERT INTO services
-       (category_id, name, slug, description, price, duration_minutes, duration_label, is_active)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+       (category_id, name, slug, description, price, duration_minutes, duration_label, is_active, image_url)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         resolvedCategoryId,
         input.name,
@@ -159,6 +185,7 @@ export async function insertPlatformService(
         input.durationMinutes,
         input.duration,
         input.active,
+        input.imageUrl,
       ],
     );
     await replaceFeatures(connection, result.insertId, input.features);
@@ -197,7 +224,8 @@ export async function updatePlatformService(
       `UPDATE services SET
        name = IF(?, ?, name), category_id = IF(?, ?, category_id),
        duration_label = IF(?, ?, duration_label), duration_minutes = IF(?, ?, duration_minutes),
-       price = IF(?, ?, price), description = IF(?, ?, description), is_active = IF(?, ?, is_active)
+       price = IF(?, ?, price), description = IF(?, ?, description), is_active = IF(?, ?, is_active),
+       image_url = IF(?, ?, image_url)
        WHERE id = ?`,
       [
         input.name !== undefined,
@@ -214,6 +242,8 @@ export async function updatePlatformService(
         input.description ?? '',
         input.active !== undefined,
         input.active ?? false,
+        input.imageUrl !== undefined,
+        input.imageUrl ?? null,
         id,
       ],
     );

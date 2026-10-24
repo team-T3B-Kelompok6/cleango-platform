@@ -5,6 +5,11 @@ interface DatabaseError {
   code?: string;
 }
 
+interface BodyParserError {
+  type?: string;
+  status?: number;
+}
+
 export const notFoundHandler: RequestHandler = (_request, response) => {
   response.status(404).json({ message: 'Endpoint tidak ditemukan' });
 };
@@ -21,6 +26,16 @@ export const globalErrorHandler: ErrorRequestHandler = (
       code: error.code,
       ...(error.errors ? { errors: error.errors } : {}),
     });
+    return;
+  }
+
+  const bodyError = error as BodyParserError;
+  if (bodyError.type === 'entity.too.large') {
+    response.status(413).json({ message: 'Ukuran data melebihi batas' });
+    return;
+  }
+  if (bodyError.type === 'entity.parse.failed' || error instanceof SyntaxError) {
+    response.status(400).json({ message: 'Permintaan tidak valid' });
     return;
   }
 

@@ -10,6 +10,8 @@ export interface AppEnv {
   DB_NAME: string;
   FRONTEND_ORIGIN: string;
   JWT_SECRET: string;
+  GOOGLE_CLIENT_ID?: string | undefined;
+  GOOGLE_ANDROID_CLIENT_ID?: string | undefined;
   OSRM_BASE_URL: string;
   AI_SERVICE_URL: string;
   AI_SERVICE_TOKEN: string;
@@ -51,6 +53,8 @@ export function getEnv(): AppEnv {
     DB_NAME: process.env.DB_NAME ?? 'cleango',
     FRONTEND_ORIGIN: process.env.FRONTEND_ORIGIN ?? 'http://localhost:3000',
     JWT_SECRET: jwtSecret,
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+    GOOGLE_ANDROID_CLIENT_ID: process.env.GOOGLE_ANDROID_CLIENT_ID,
     OSRM_BASE_URL:
       process.env.OSRM_BASE_URL ?? 'https://router.project-osrm.org',
     AI_SERVICE_URL: process.env.AI_SERVICE_URL ?? 'http://127.0.0.1:5000',
@@ -65,5 +69,5 @@ export function getEnv(): AppEnv {
       .map((model) => model.trim())
       .filter(Boolean),
   };
-  return cachedEnv;
+  return cachedEnv!;
 }

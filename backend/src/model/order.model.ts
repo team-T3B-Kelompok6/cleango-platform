@@ -1,4 +1,4 @@
-import type { RowDataPacket } from 'mysql2';
+import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { pool } from '../lib/db.js';
 
 type DatabaseOrderStatus =
@@ -43,6 +43,7 @@ export interface Order {
   status:
     | 'Menunggu Assign'
     | 'Menunggu Lokasi'
+    | 'Menuju Lokasi'
     | 'Sedang Dikerjakan'
     | 'Selesai'
     | 'Batal';
@@ -73,10 +74,21 @@ function apiStatus(status: DatabaseOrderStatus): Order['status'] {
   if (status === 'in_progress') return 'Sedang Dikerjakan';
   if (status === 'completed') return 'Selesai';
   if (status === 'cancelled') return 'Batal';
-  if (['assigned', 'departed', 'en_route'].includes(status))
-    return 'Menunggu Lokasi';
+  if (status === 'en_route' || status === 'departed') return 'Menuju Lokasi';
+  if (status === 'assigned') return 'Menunggu Lokasi';
   return 'Menunggu Assign';
 }
+
+const API_STATUS_TO_DATABASE: Record<string, DatabaseOrderStatus> = {
+  'Menunggu Assign': 'confirmed',
+  'Menunggu Lokasi': 'assigned',
+  'Menuju Lokasi': 'en_route',
+  'Sedang Dikerjakan': 'in_progress',
+  Selesai: 'completed',
+  Batal: 'cancelled',
+};
+
+export const ORDER_STATUSES = Object.keys(API_STATUS_TO_DATABASE);
 
 function mapOrder(row: OrderRow): Order {
   return {
@@ -110,3 +122,155 @@ export async function findOrder(id: number): Promise<Order | null> {
   );
   return rows[0] ? mapOrder(rows[0]) : null;
 }
+
+export interface OrderWriteInput {
+  customerId?: number;
+  customerName?: string;
+  serviceName?: string;
+  date?: string;
+  time?: string;
+  price?: number;
+  status?: string;
+  notes?: string;
+}
+
+function toDatabaseStatus(status: string | undefined): DatabaseOrderStatus | undefined {
+  if (status === undefined) return undefined;
+  return API_STATUS_TO_DATABASE[status];
+}
+
+async function resolveServiceId(name: string): Promise<number> {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    'SELECT id FROM services WHERE name = ? AND is_active = TRUE LIMIT 1',
+    [name],
+  );
+  if (!rows[0]) throw new Error('SERVICE_NOT_FOUND');
+  return Number(rows[0].id);
+}
+
+async function resolveAddressId(customerId: number): Promise<number> {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    'SELECT id FROM addresses WHERE user_id = ? AND is_primary = TRUE LIMIT 1',
+    [customerId],
+  );
+  if (!rows[0]) throw new Error('ADDRESS_NOT_FOUND');
+  return Number(rows[0].id);
+}
+
+export async function insertBooking(input: {
+  customerId: number;
+  customerName: string;
+  serviceName: string;
+  date: string;
+  time: string;
+  price: number;
+  status: string;
+  notes: string;
+}): Promise<Order> {
+  const serviceId = await resolveServiceId(input.serviceName);
+  const addressId = await resolveAddressId(input.customerId);
+  const code = `CG-${Date.now().toString(36).toUpperCase()}`;
+  const [result] = await pool.execute<ResultSetHeader>(
+    `INSERT INTO bookings
+       (booking_code, customer_id, service_id, address_id, scheduled_date,
+        scheduled_start_time, customer_notes, service_price, platform_fee,
+        discount_amount, total_amount, status)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?)`,
+    [
+      code,
+      input.customerId,
+      serviceId,
+      addressId,
+      input.date,
+      `${input.time}:00`,
+      input.notes || null,
+      input.price,
+      input.price,
+      toDatabaseStatus(input.status) ?? 'confirmed',
+    ],
+  );
+  const order = await findOrder(result.insertId);
+  if (!order) throw new Error('Pesanan gagal dibaca setelah dibuat');
+  return order;
+}
+
+export async function updateBookingById(
+  id: number,
+  input: OrderWriteInput,
+): Promise<Order | null> {
+  const existing = await findOrder(id);
+  if (!existing) return null;
+  const fields: string[] = [];
+  const values: (string | number)[] = [];
+
+  if (input.date !== undefined) {
+    fields.push('scheduled_date = ?');
+    values.push(input.date);
+  }
+  if (input.time !== undefined) {
+    fields.push('scheduled_start_time = ?');
+    values.push(`${input.time}:00`);
+  }
+  if (input.notes !== undefined) {
+    fields.push('customer_notes = ?');
+    values.push(input.notes);
+  }
+  if (input.price !== undefined) {
+    fields.push('service_price = ?', 'total_amount = ?');
+    values.push(input.price, input.price);
+  }
+  if (input.serviceName !== undefined) {
+    fields.push('service_id = ?');
+    values.push(await resolveServiceId(input.serviceName));
+  }
+  const status = toDatabaseStatus(input.status);
+  if (status !== undefined) {
+    fields.push('status = ?');
+    values.push(status);
+  }
+  if (!fields.length) return existing;
+
+  values.push(id);
+  await pool.execute(`UPDATE bookings SET ${fields.join(', ')} WHERE id = ?`, values);
+  return findOrder(id);
+}
+
+export type BookingDeleteResult = 'deleted' | 'not_found' | 'not_finished';
+
+// Only finished orders may be removed. Active orders keep their history until
+// they are completed or cancelled.
+const DELETABLE_STATUSES = ['completed', 'cancelled'];
+
+export async function deleteBookingById(id: number): Promise<BookingDeleteResult> {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const [rows] = await connection.execute<RowDataPacket[]>(
+      'SELECT status FROM bookings WHERE id = ? LIMIT 1',
+      [id],
+    );
+    if (!rows[0]) {
+      await connection.rollback();
+      return 'not_found';
+    }
+    if (!DELETABLE_STATUSES.includes(String(rows[0].status))) {
+      await connection.rollback();
+      return 'not_finished';
+    }
+
+    // payments and reviews reference the booking without ON DELETE CASCADE.
+    await connection.execute('DELETE FROM payments WHERE booking_id = ?', [id]);
+    await connection.execute('DELETE FROM reviews WHERE booking_id = ?', [id]);
+    await connection.execute('DELETE FROM bookings WHERE id = ?', [id]);
+
+    await connection.commit();
+    return 'deleted';
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+

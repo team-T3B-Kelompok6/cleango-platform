@@ -1,7 +1,9 @@
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { pool } from '../lib/db.js';
 
-export type FaqCategory = 'Layanan' | 'Pembayaran' | 'Jadwal' | 'SOP';
+// FAQ categories are managed in the admin dashboard (service_categories
+// with resource='faqs'), so this is plain text, not a fixed union.
+export type FaqCategory = string;
 export interface FaqInput {
   category: FaqCategory;
   question: string;
@@ -11,6 +13,7 @@ export interface FaqInput {
 interface FaqRow extends RowDataPacket {
   id: number;
   category: FaqCategory;
+  viewCount: number;
   question: string;
   answer: string;
   published: number;
@@ -19,6 +22,7 @@ interface FaqRow extends RowDataPacket {
 export interface Faq {
   id: string;
   category: FaqCategory;
+  viewCount: number;
   question: string;
   answer: string;
   published: boolean;
@@ -29,17 +33,24 @@ function mapFaq(row: FaqRow): Faq {
   return {
     id: String(row.id),
     category: row.category,
+    viewCount: Number(row.viewCount ?? 0),
     question: row.question,
     answer: row.answer,
     published: Boolean(row.published),
     updatedAt: row.updatedAt.toISOString(),
   };
 }
-const select = `SELECT id, category, question, answer, is_active AS published, updated_at AS updatedAt FROM faqs`;
+const select = `SELECT id, category, view_count AS viewCount, question, answer, is_active AS published, updated_at AS updatedAt FROM faqs`;
 
 export async function listFaqs(): Promise<Faq[]> {
   const [rows] = await pool.query<FaqRow[]>(
     `${select} ORDER BY sort_order, id`,
+  );
+  return rows.map(mapFaq);
+}
+export async function listPublishedFaqs(): Promise<Faq[]> {
+  const [rows] = await pool.query<FaqRow[]>(
+    `${select} WHERE is_active = TRUE ORDER BY sort_order, id`,
   );
   return rows.map(mapFaq);
 }
@@ -86,4 +97,18 @@ export async function deleteFaqById(id: number): Promise<boolean> {
     [id],
   );
   return result.affectedRows > 0;
+}
+
+/** Counts one read so the app can rank the most popular questions. */
+export async function incrementFaqView(id: number): Promise<number | null> {
+  const [result] = await pool.execute<ResultSetHeader>(
+    'UPDATE faqs SET view_count = view_count + 1 WHERE id = ?',
+    [id],
+  );
+  if (result.affectedRows === 0) return null;
+  const [rows] = await pool.query<RowDataPacket[]>(
+    'SELECT view_count AS viewCount FROM faqs WHERE id = ? LIMIT 1',
+    [id],
+  );
+  return Number(rows[0]?.viewCount ?? 0);
 }

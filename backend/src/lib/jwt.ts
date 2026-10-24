@@ -6,6 +6,8 @@ export interface TokenPayload {
   id: number;
   email: string;
   role: UserRole;
+  /** Issued-at (epoch seconds) from the JWT, used to revoke old tokens. */
+  issuedAt?: number;
 }
 
 export const ACCESS_TOKEN_EXPIRES_IN_SECONDS = 7 * 24 * 60 * 60;
@@ -28,5 +30,36 @@ export function verifyAccessToken(token: string): TokenPayload {
   ) {
     throw new Error('Payload token tidak valid');
   }
-  return { id: payload.id, email: payload.email, role: payload.role };
+  const result: TokenPayload = {
+    id: payload.id,
+    email: payload.email,
+    role: payload.role,
+  };
+  if (typeof payload.iat === 'number') result.issuedAt = payload.iat;
+  return result;
+}
+
+export interface ResetTokenPayload {
+  id: number;
+  purpose: 'password_reset';
+}
+
+export function createResetToken(userId: number): string {
+  return jwt.sign(
+    { id: userId, purpose: 'password_reset' } satisfies ResetTokenPayload,
+    getEnv().JWT_SECRET,
+    { expiresIn: 15 * 60 },
+  );
+}
+
+export function verifyResetToken(token: string): ResetTokenPayload {
+  const payload = jwt.verify(token, getEnv().JWT_SECRET);
+  if (
+    typeof payload === 'string'
+    || typeof payload.id !== 'number'
+    || (payload as { purpose?: unknown }).purpose !== 'password_reset'
+  ) {
+    throw new Error('Payload token reset tidak valid');
+  }
+  return { id: payload.id, purpose: 'password_reset' };
 }

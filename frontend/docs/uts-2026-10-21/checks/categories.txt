@@ -1,0 +1,5 @@
+
+> cleango-frontend@1.0.0 check:categories
+> node scripts/check-categories.mjs
+
+PASS category API mapping, aliases, create, delete, cascade consent, active/inactive services, conflict, refresh and malformed responses

@@ -1,0 +1,52 @@
+
+> cleango-backend@1.0.0 test
+> vitest run --configLoader runner --pool=threads --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v5.0.2 C:/Users/athlon/Documents/Codex/2026-10-20/jadi-aku-ada-tugas-ui-ux/work/cleango-platform/backend
+
+DELETE /api/admin/categories/9 401 1.816 ms - 62
+DELETE /api/admin/categories/9 403 1.476 ms - 55
+DELETE /api/admin/categories/9 200 0.933 ms - 39
+DELETE /api/admin/categories/9 404 0.474 ms - 57
+DELETE /api/admin/categories/9 409 0.650 ms - 58
+DELETE /api/admin/categories/9?deleteServices=true 200 0.506 ms - 39
+DELETE /api/admin/categories/9?deleteServices=true 409 0.570 ms - 119
+DELETE /api/admin/categories/9?deleteServices=true 409 0.413 ms - 119
+DELETE /api/admin/categories/9?deleteServices=true 404 0.463 ms - 57
+DELETE /api/admin/categories/9?deleteServices=yes 400 0.485 ms - 66
+DELETE /api/admin/categories/9?deleteServices=true 403 0.333 ms - 55
+PATCH /api/services/3 200 0.977 ms - 203
+PATCH /api/services/3 200 0.490 ms - 192
+PATCH /api/services/3 200 0.382 ms - 199
+PATCH /api/services/3 400 0.412 ms - 123
+GET /api/orders 401 1.930 ms - 62
+GET /api/services 401 0.323 ms - 62
+GET /api/faqs 401 0.208 ms - 62
+GET /api/staff 401 0.233 ms - 62
+POST /api/services 400 1.464 ms - 128
+PATCH /api/faqs/1 400 0.736 ms - 131
+POST /api/staff 400 0.558 ms - 124
+GET /api/orders/bukan-id 400 0.606 ms - 62
+GET /api/services/bukan-id 400 0.495 ms - 62
+GET /api/faqs/0 400 0.548 ms - 58
+GET /api/staff/-1 400 0.478 ms - 62
+GET /health 200 1.675 ms - 31
+GET /endpoint-tidak-ada 404 0.238 ms - 38
+GET /api/customer/categories/bukan-id 400 0.908 ms - 56
+GET /api/customer/services/0 400 0.514 ms - 55
+GET /api/customer/services?search=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 400 0.427 ms - 64
+POST /api/customer/auth/register 400 0.391 ms - 73
+GET /api/admin/services 401 0.338 ms - 62
+GET /api/admin/services 403 1.170 ms - 55
+POST /api/auth/login 200 3.923 ms - 230
+POST /api/auth/login 401 0.716 ms - 64
+
+ Test Files  5 passed (5)
+      Tests  36 passed (36)
+   Start at  00:46:41
+   Duration  1.83s (import 66%, tests 17%, transform 15%, worker 1%)
+
+    Isolate  5 workers spawned · ~86ms startup each (spawn + environment, per file)
+             at least ~343ms faster with isolate: false — reuses workers across files instead of one per file
+

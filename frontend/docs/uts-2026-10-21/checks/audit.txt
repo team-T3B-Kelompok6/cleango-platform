@@ -1,0 +1,14 @@
+
+> cleango-frontend@1.0.0 check:audit
+> node scripts/check-audit.mjs
+
+PASS Filters validate real dates, range, action, page and search length
+PASS Date filters include the full Jakarta day across UTC boundaries
+PASS Audit endpoints require authentication and reject writes
+PASS Example history is labeled, seeded once, sorted and paginated
+PASS Successful create/update/delete capture before and after without credentials
+PASS Failed mutations and GET requests do not invent audit entries
+PASS Core resources record actual changes, while audit reads remain immutable
+PASS Category cascade records each removed service and the category
+PASS API mode forwards filters/auth and handles missing, failing and malformed APIs without demo fallback
+9 audit groups passed.

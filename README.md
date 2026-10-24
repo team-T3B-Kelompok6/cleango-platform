@@ -1,21 +1,27 @@
-# CleanGo Platform
+# CleanGo
 
-Pemeriksaan frontend terbaru: [checklist 17–18 Oktober 2026](frontend/docs/checklist-review-2026-10-17/README.md). Pengujian memakai demo dan fixture HTTP lokal; API tim belum diterima pemilik frontend sehingga integrasi produksi belum dinyatakan selesai. Jalankan frontend dari folder `frontend` sesuai [panduannya](frontend/README.md).
+Web admin untuk mengelola layanan dan kegiatan operasional CleanGo.
 
-Monorepo CleanGo untuk backend Express + TypeScript dan frontend Next.js.
+## Alur penggunaan
 
-## Prasyarat
+1. Login sebagai admin, lalu lihat ringkasan pesanan di dashboard.
+2. Siapkan layanan, kategori, harga, dan promo melalui **Kelola Layanan**.
+3. Lengkapi data petugas dan atur shift melalui **Kelola Jadwal**.
+4. Buka pesanan yang masuk, periksa detailnya, lalu tentukan petugas yang tersedia.
+5. Gunakan **Pantau Petugas** untuk membuka tugas cleaner dan melihat progres pekerjaan.
+6. Kelola informasi customer dan pertanyaan pelanggan melalui menu **Customer** dan **FAQ**.
+7. Buka **Laporan** untuk melihat ringkasan pekerjaan dan mengunduh CSV.
+8. Periksa aktivitas serta perubahan data melalui **Audit Log Admin**.
+9. Pilih **Keluar akun** setelah selesai.
 
-- Node.js 20+
-- npm
-- MySQL 8+ atau MariaDB 10.6+
+Alur tiap menu dijelaskan di [README frontend](frontend/README.md).
 
 ## Instalasi
 
 ```powershell
 npm install
-Copy-Item backend/.env.example backend/.env
-Copy-Item frontend/.env.example frontend/.env.local
+if (-not (Test-Path backend/.env)) { Copy-Item backend/.env.example backend/.env }
+if (-not (Test-Path frontend/.env.local)) { Copy-Item frontend/.env.example frontend/.env.local }
 ```
 
 Jalankan aplikasi pada terminal terpisah:
@@ -25,15 +31,20 @@ npm run dev:backend
 npm run dev:frontend
 ```
 
-- Backend: `http://127.0.0.1:3001`
-- Health check: `GET http://127.0.0.1:3001/health`
+- Backend: mengikuti `PORT` di `backend/.env` (template tim: `3101`).
+- Health check: `GET http://127.0.0.1:3101/health` (sesuaikan port lokal).
 - Frontend: `http://localhost:3000`
+
+`frontend/.env.local` harus memakai `API_URL=http://127.0.0.1:<PORT>/api` sesuai
+backend yang berjalan. Flutter HP memakai IP LAN laptop melalui
+`--dart-define=API_URL=http://<IP_LAPTOP>:<PORT>/api`; bukan localhost HP.
+Konfigurasi lokal yang sudah ada tidak ditimpa oleh merge.
 
 ## Database backend
 
 1. Jalankan MySQL/MariaDB, misalnya melalui Laragon.
-2. Jalankan `npm run db:setup` atau import `backend/database.sql` melalui phpMyAdmin.
-3. Sesuaikan kredensial pada `backend/.env`.
+2. Sesuaikan kredensial pada `backend/.env`.
+3. Database baru/demo: jalankan `npm run db:setup` (termasuk seeder). Untuk database lokal `cleango` yang sudah berisi data, gunakan `npm run db:setup --workspace backend -- --schema-only` agar hanya struktur Putra yang diperbarui, tanpa menimpa data lama.
 
 Akun admin dummy lokal: `admin@cleango.id` / `321321`. Password tersimpan
 sebagai hash bcrypt di database, bukan teks biasa.
@@ -131,3 +142,6 @@ npm run typecheck:backend
 npm run test:backend
 npm run build:backend
 ```
+## Mode demo tanpa backend
+
+Untuk mencoba tanpa backend, gunakan mode demo dengan akun `admin` / `admin`. Data demo bukan data dari server backend.

@@ -1,9 +1,14 @@
 'use server';
 import { revalidatePath } from 'next/cache';
-import { ApiError, request } from '@/lib/api';
-import { listCategories, type CategoryResource } from '@/lib/categories';
+import { ApiError, list } from '@/lib/api';
+import {
+  createCategoryRecord,
+  deleteCategoryRecord,
+  listCategories,
+  type CategoryResource,
+} from '@/lib/categories';
 import { resources } from '@/lib/resources';
-import type { Category, FormState } from '@/types';
+import type { FormState } from '@/types';
 
 export async function addCategory(
   resource: CategoryResource,
@@ -12,7 +17,7 @@ export async function addCategory(
 ): Promise<FormState> {
   if (!['services', 'faqs'].includes(resource))
     return { message: 'Jenis kategori tidak valid.' };
-  const name = String(form.get('name') ?? '')
+  let name = String(form.get('name') ?? '')
     .trim()
     .replace(/\s+/g, ' ');
   const values = { name };
@@ -31,18 +36,9 @@ export async function addCategory(
     ) {
       return { errors: { name: 'Kategori ini sudah ada.' }, values };
     }
-    const result = await request<{ data: Category }>('/categories', {
-      method: 'POST',
-      body: JSON.stringify({ name, resource }),
-    });
+    const category = await createCategoryRecord(resource, name);
     revalidatePath(resources[resource].path);
-    if (
-      !result.data ||
-      typeof result.data.id !== 'string' ||
-      !result.data.id ||
-      result.data.name !== name ||
-      result.data.resource !== resource
-    )
+    if (category.name !== name)
       throw new ApiError(
         'Kategori belum tersimpan dengan benar. Muat ulang daftar kategori.',
         502,
@@ -53,4 +49,36 @@ export async function addCategory(
   }
   revalidatePath(resources[resource].path);
   return { success: true };
+}
+
+export async function removeCategory(
+  _state: FormState,
+  form: FormData,
+): Promise<FormState> {
+  const id = String(form.get('categoryId') ?? '').trim();
+  if (!id) return { message: 'Pilih kategori yang ingin dihapus.' };
+  const deleteServices = form.get('deleteServices') === 'on';
+  let name = '';
+  try {
+    const categories = await listCategories('services');
+    const category = categories.find((item) => item.id === id);
+    if (!category)
+      return { message: 'Kategori tidak ditemukan. Muat ulang halaman.' };
+    const services = await list('services');
+    if (
+      !deleteServices &&
+      services.some((item) => item.category === category.name)
+    )
+      return {
+        message:
+          'Kategori masih digunakan. Centang hapus semua layanan atau pindahkan layanan ke kategori lain terlebih dahulu.',
+      };
+    await deleteCategoryRecord('services', id, deleteServices);
+    name = category.name;
+  } catch (error) {
+    if (!(error instanceof ApiError)) throw error;
+    return { message: error.message };
+  }
+  revalidatePath(resources.services.path);
+  return { success: true, values: { name } };
 }

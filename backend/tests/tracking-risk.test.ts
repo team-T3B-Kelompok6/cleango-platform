@@ -1,5 +1,10 @@
 import jwt from 'jsonwebtoken';
 import request from 'supertest';
+
+vi.mock('../src/model/user.model.js', async (original) => ({
+  ...(await original<typeof import('../src/model/user.model.js')>()),
+  isTokenRevoked: vi.fn().mockResolvedValue(false),
+}));
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../src/app.js';
 

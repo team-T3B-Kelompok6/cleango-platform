@@ -165,7 +165,12 @@ export const resources: Record<
       { name: 'name', label: 'Nama customer', required: true },
       { name: 'phone', label: 'Nomor WhatsApp', required: true },
       { name: 'email', label: 'Email', kind: 'email', required: true },
-      { name: 'address', label: 'Alamat', kind: 'textarea', required: true },
+      {
+        name: 'address',
+        label: 'Alamat',
+        kind: 'textarea',
+        hint: 'Kosongkan lalu simpan untuk menghapus alamat pelanggan.',
+      },
       {
         name: 'joined',
         label: 'Tanggal bergabung',

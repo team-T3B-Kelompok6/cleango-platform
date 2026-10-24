@@ -191,9 +191,9 @@ export async function saveAction(
     if (
       hasImage &&
       (!['image/jpeg', 'image/png'].includes(imageFile.type) ||
-        imageFile.size > 5 * 1024 * 1024)
+        imageFile.size > 2 * 1024 * 1024)
     )
-      errors.serviceImage = 'Gunakan JPG atau PNG, maksimal 5 MB.';
+      errors.serviceImage = 'Gunakan JPG atau PNG, maksimal 2 MB.';
     if (form.get('removeImage') === 'true') data.imageUrl = null;
   }
   if (Object.keys(errors).length) return { errors, values };

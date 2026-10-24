@@ -17,7 +17,9 @@ CREATE TABLE IF NOT EXISTS users (
   phone VARCHAR(30) NULL,
   password_hash VARCHAR(255) NOT NULL,
   role ENUM('customer', 'admin') NOT NULL DEFAULT 'customer',
+  auth_provider ENUM('local', 'google', 'facebook') NOT NULL DEFAULT 'local',
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  password_changed_at DATETIME NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY uq_users_email (email),
@@ -50,12 +52,15 @@ CREATE TABLE IF NOT EXISTS addresses (
 CREATE TABLE IF NOT EXISTS service_categories (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
+  -- Categories are per resource: service categories and FAQ categories are
+  -- managed separately even though they share this table.
+  resource ENUM('services', 'faqs') NOT NULL DEFAULT 'services',
   description TEXT NULL,
   icon_url VARCHAR(500) NULL,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY uq_service_categories_name (name),
+  UNIQUE KEY uq_categories_resource_name (resource, name),
   INDEX idx_service_categories_active (is_active)
 ) ENGINE=InnoDB;
 
@@ -123,6 +128,10 @@ CREATE TABLE IF NOT EXISTS promos (
   starts_at DATETIME NOT NULL,
   ends_at DATETIME NOT NULL,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  scope ENUM('all', 'services') NOT NULL DEFAULT 'all',
+  service_ids TEXT NULL,
+  per_customer_limit INT UNSIGNED NOT NULL DEFAULT 1,
+  stackable BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT chk_promos_value CHECK (discount_value > 0),
@@ -207,6 +216,41 @@ CREATE TABLE IF NOT EXISTS cleaner_assignments (
   INDEX idx_assignments_link_status (link_status, link_expires_at)
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS banners (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  image_url VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_banners_image_url (image_url)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS cleaner_task_stages (
+  assignment_id BIGINT UNSIGNED PRIMARY KEY,
+  departed_at DATETIME NULL,
+  arrived_at DATETIME NULL,
+  started_at DATETIME NULL,
+  completed_at DATETIME NULL,
+  summary VARCHAR(2000) NULL,
+  report_checked BOOLEAN NULL,
+  latitude DECIMAL(10,7) NULL,
+  longitude DECIMAL(10,7) NULL,
+  location_updated_at DATETIME NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_task_stages_assignment
+    FOREIGN KEY (assignment_id) REFERENCES cleaner_assignments(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS cleaner_task_photos (
+  id CHAR(36) PRIMARY KEY,
+  assignment_id BIGINT UNSIGNED NOT NULL,
+  mime_type ENUM('image/png', 'image/jpeg') NOT NULL,
+  storage_path VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_task_photos_assignment
+    FOREIGN KEY (assignment_id) REFERENCES cleaner_assignments(id) ON DELETE CASCADE,
+  INDEX idx_task_photos_assignment (assignment_id, created_at)
+) ENGINE=InnoDB;
+
 CREATE TABLE IF NOT EXISTS cleaner_schedules (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   cleaner_id BIGINT UNSIGNED NOT NULL,
@@ -224,6 +268,21 @@ CREATE TABLE IF NOT EXISTS cleaner_schedules (
   CONSTRAINT chk_cleaner_schedules_time CHECK (end_time > start_time),
   UNIQUE KEY uq_cleaner_schedules_booking (booking_id),
   INDEX idx_cleaner_schedules_slot (cleaner_id, schedule_date, start_time, end_time)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS staff_shifts (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  cleaner_id BIGINT UNSIGNED NOT NULL,
+  schedule_date DATE NOT NULL,
+  start_time TIME NOT NULL,
+  end_time TIME NOT NULL,
+  status VARCHAR(40) NOT NULL DEFAULT 'Terjadwal',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_staff_shifts_cleaner
+    FOREIGN KEY (cleaner_id) REFERENCES cleaners(id) ON DELETE CASCADE,
+  CONSTRAINT chk_staff_shifts_time CHECK (end_time > start_time),
+  INDEX idx_staff_shifts_slot (cleaner_id, schedule_date, start_time)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS booking_status_history (
@@ -383,6 +442,8 @@ CREATE TABLE IF NOT EXISTS booking_risk_alerts (
 CREATE TABLE IF NOT EXISTS faqs (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   category VARCHAR(100) NULL,
+  -- Read counter: drives the "popular questions" list in the mobile app.
+  view_count INT UNSIGNED NOT NULL DEFAULT 0,
   question VARCHAR(255) NOT NULL,
   answer TEXT NOT NULL,
   sort_order SMALLINT UNSIGNED NOT NULL DEFAULT 0,

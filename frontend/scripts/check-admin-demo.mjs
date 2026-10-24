@@ -554,6 +554,72 @@ await check(
   },
 );
 await check(
+  'Category deletion protects linked services and persists unused deletions',
+  async () => {
+    const category = (await request('/categories?resource=services')).data.find(
+      (item) => item.name === 'Rumah',
+    );
+    assert.ok(category);
+    await assert.rejects(request('/categories/' + category.id, 'DELETE'), {
+      status: 409,
+    });
+    assert.ok(
+      (await request('/categories?resource=services')).data.some(
+        (item) => item.id === category.id,
+      ),
+    );
+    const created = (
+      await request('/categories', 'POST', {
+        name: 'Kategori kosong',
+        resource: 'services',
+      })
+    ).data;
+    await request('/categories/' + created.id, 'DELETE');
+    assert.ok(
+      !(await request('/categories?resource=services')).data.some(
+        (item) => item.id === created.id,
+      ),
+    );
+    await assert.rejects(request('/categories/' + created.id, 'DELETE'), {
+      status: 404,
+    });
+  },
+);
+await check(
+  'Category cascade requires consent and only deletes services in the chosen category',
+  async () => {
+    const category = (
+      await request('/categories', 'POST', {
+        name: 'Kategori hapus bersama',
+        resource: 'services',
+      })
+    ).data;
+    const before = (await request('/services')).data.length;
+    for (const active of [true, false])
+      await request('/services', 'POST', {
+        name: 'Layanan hapus ' + active,
+        category: category.name,
+        active,
+      });
+    await assert.rejects(request('/categories/' + category.id, 'DELETE'), {
+      status: 409,
+    });
+    assert.equal((await request('/services')).data.length, before + 2);
+    await request(
+      '/categories/' + category.id + '?deleteServices=true',
+      'DELETE',
+    );
+    const remaining = (await request('/services')).data;
+    assert.equal(remaining.length, before);
+    assert.ok(!remaining.some((service) => service.category === category.name));
+    assert.ok(
+      !(await request('/categories?resource=services')).data.some(
+        (item) => item.id === category.id,
+      ),
+    );
+  },
+);
+await check(
   'Disabled and production modes cannot serve demo authentication/data',
   async () => {
     process.env.ADMIN_DEMO_ENABLED = 'false';

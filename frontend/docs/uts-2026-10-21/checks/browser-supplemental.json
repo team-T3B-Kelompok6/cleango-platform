@@ -1,0 +1,88 @@
+{
+  "date": "2026-10-21",
+  "environment": "Demo terisolasi dan HTTP fixture loopback; bukan API produksi",
+  "checks": [
+    {
+      "name": "Audit gabungan pencarian/admin/tanggal/jenis",
+      "result": "pass",
+      "mode": "isolated demo UI",
+      "evidence": "Satu perubahan QA Layanan UTS pada 21 Oktober oleh Admin Operasional."
+    },
+    {
+      "name": "Audit detail before/after harga",
+      "result": "pass",
+      "mode": "isolated demo UI",
+      "evidence": "Harga 123000 menjadi 140000, dialog terbaca pada 360px."
+    },
+    {
+      "name": "Audit filter tetap setelah dialog ditutup",
+      "result": "pass",
+      "mode": "isolated demo UI"
+    },
+    {
+      "name": "Audit pencarian tanpa hasil",
+      "result": "pass",
+      "mode": "isolated demo UI"
+    },
+    {
+      "name": "Audit reset filter",
+      "result": "pass",
+      "mode": "isolated demo UI",
+      "evidence": "Semua filter kosong dan 13 aktivitas kembali."
+    },
+    {
+      "name": "Audit pagination",
+      "result": "pass",
+      "mode": "isolated demo UI",
+      "evidence": "Halaman 2 menampilkan 9–13 dari 13; Berikutnya disabled."
+    },
+    {
+      "name": "Kategori kosong menonaktifkan checklist",
+      "result": "pass",
+      "mode": "isolated demo UI",
+      "evidence": "Checkbox disabled/abu-abu, tombol hapus kategori tetap aktif."
+    },
+    {
+      "name": "Kategori terisi wajib checklist sebelum hapus",
+      "result": "pass",
+      "mode": "isolated demo UI",
+      "evidence": "Submit dalam dialog disabled sebelum checklist dan aktif setelah dicentang."
+    },
+    {
+      "name": "Ganti kategori mereset persetujuan hapus",
+      "result": "pass",
+      "mode": "isolated demo UI",
+      "evidence": "Checkbox tidak tetap tercentang setelah pindah kategori."
+    },
+    {
+      "name": "Hapus kategori sekaligus layanan bertahan setelah refresh",
+      "result": "pass",
+      "mode": "isolated demo UI",
+      "evidence": "QA Hapus UTS tidak ada pada dropdown kategori; QA Cascade UTS tidak ada pada daftar layanan."
+    },
+    {
+      "name": "Mutasi kategori masuk riwayat audit demo",
+      "result": "pass",
+      "mode": "isolated demo UI",
+      "evidence": "Dua aktivitas kategori QA Hapus UTS: tambah dan hapus; berlabel Aktivitas demo."
+    },
+    {
+      "name": "HTTP audit 404 tanpa fallback demo",
+      "result": "pass",
+      "mode": "HTTP fixture, demo frontend off",
+      "evidence": "Riwayat aktivitas belum tersedia; metrik —; tidak ada data contoh."
+    },
+    {
+      "name": "HTTP audit 503 tertangani",
+      "result": "pass",
+      "mode": "HTTP fixture, demo frontend off",
+      "evidence": "Pesan gagal memuat dan Coba lagi; halaman admin tetap dapat digunakan."
+    },
+    {
+      "name": "HTTP audit Coba lagi memulihkan daftar",
+      "result": "pass",
+      "mode": "HTTP fixture, demo frontend off",
+      "evidence": "Setelah mode normal, Coba lagi menampilkan 9 aktivitas dari respons fixture, bukan fallback frontend."
+    }
+  ]
+}

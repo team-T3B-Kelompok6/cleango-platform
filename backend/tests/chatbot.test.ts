@@ -2,6 +2,11 @@ import jwt from 'jsonwebtoken';
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+vi.mock('../src/model/user.model.js', async (original) => ({
+  ...(await original<typeof import('../src/model/user.model.js')>()),
+  isTokenRevoked: vi.fn().mockResolvedValue(false),
+}));
+
 const models = vi.hoisted(() => ({
   faqs: vi.fn(),
   services: vi.fn(),

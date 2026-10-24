@@ -18,6 +18,8 @@ import { adminSeed } from './admin-seed';
 import { sampleContact } from './contacts';
 import { scheduleShifts, shiftOf } from '../resources';
 import { linkedOrders, overlaps, scheduleIssue } from '../staff-schedules';
+import { recordDemoAudit, seedAuditExamples } from './audit-store';
+import { auditFilters, filterAuditLogs } from '../audit';
 
 const core = ['orders', 'staff', 'customers'];
 function addFreshOrders(
@@ -63,6 +65,7 @@ async function initialize() {
   if (
     await demoTransaction((store) => {
       if (!store.admin) return false;
+      seedAuditExamples(store.admin);
       if (store.admin.contentRevision !== 1) {
         const replacements = new Map([
           [
@@ -250,6 +253,7 @@ async function initialize() {
       sessionToken: 'admin-demo-' + randomBytes(32).toString('hex'),
       records: seed.records,
     };
+    seedAuditExamples(store.admin);
     store.entities.orders.push(...seed.historical);
     // Keep three fresh unassigned orders even if earlier cleaner scenarios have
     // already been assigned/completed by the user.
@@ -377,12 +381,34 @@ export async function adminDemoRequest(
     if (input.username !== 'admin' || input.password !== 'admin')
       throw new TaskError('Gunakan akun demo: admin / admin.', 401);
     await initialize();
-    return demoTransaction((store) => ({
-      accessToken: store.admin!.sessionToken,
-      expiresIn: 86400,
-    }));
+    return demoTransaction((store) => {
+      recordDemoAudit(store.admin!, 'login', 'auth', 'demo-admin', null, null);
+      return { accessToken: store.admin!.sessionToken, expiresIn: 86400 };
+    });
   }
   await authorize(token);
+  if (url.pathname === '/audit-logs') {
+    if (method !== 'GET')
+      throw new TaskError('Riwayat aktivitas hanya dapat dibaca.', 405);
+    const { filters, error } = auditFilters(
+      Object.fromEntries(url.searchParams),
+    );
+    if (error) throw new TaskError(error, 400);
+    return demoTransaction((store) => {
+      const logs = store.admin!.auditLogs ?? [];
+      const visible = filterAuditLogs(logs, filters);
+      const pageSize = 8;
+      return {
+        data: structuredClone(
+          visible.slice((filters.page - 1) * pageSize, filters.page * pageSize),
+        ),
+        admins: [
+          ...new Map(logs.map((log) => [log.admin.id, log.admin])).values(),
+        ].sort((left, right) => left.name.localeCompare(right.name)),
+        meta: { total: visible.length, page: filters.page, pageSize },
+      };
+    });
+  }
   if (url.pathname === '/cleaner-tasks' && method === 'GET')
     return { data: [] };
   if (url.pathname === '/uploads' && method === 'POST') {
@@ -494,13 +520,57 @@ export async function adminDemoRequest(
         isDemo: true,
       };
       records.push(created);
+      recordDemoAudit(
+        store.admin!,
+        'create',
+        resource,
+        created.id,
+        null,
+        created,
+      );
       return { data: structuredClone(created) };
     }
     if (index < 0) throw new TaskError('Data uji tidak ditemukan.', 404);
     if (method === 'DELETE') {
+      if (resource === 'categories' && records[index].resource === 'services') {
+        const linkedServices = store.admin!.records.services.filter(
+          (service) => service.category === records[index].name,
+        );
+        if (
+          linkedServices.length &&
+          url.searchParams.get('deleteServices') !== 'true'
+        )
+          throw new TaskError(
+            'Kategori masih digunakan oleh layanan dan tidak dapat dihapus.',
+            409,
+          );
+        if (url.searchParams.get('deleteServices') === 'true') {
+          for (const service of linkedServices)
+            recordDemoAudit(
+              store.admin!,
+              'delete',
+              'services',
+              service.id,
+              service,
+              null,
+            );
+          store.admin!.records.services = store.admin!.records.services.filter(
+            (service) => service.category !== records[index].name,
+          );
+        }
+      }
+      recordDemoAudit(
+        store.admin!,
+        'delete',
+        resource,
+        id!,
+        records[index],
+        null,
+      );
       records.splice(index, 1);
       return { message: 'Data uji dihapus.' };
     }
+    const previous = records[index];
     const updated = {
       ...records[index],
       ...body,
@@ -509,6 +579,7 @@ export async function adminDemoRequest(
       isDemo: true,
     };
     records[index] = updated;
+    recordDemoAudit(store.admin!, 'update', resource, id!, previous, updated);
     return { data: structuredClone(updated) };
   });
 }

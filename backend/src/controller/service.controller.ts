@@ -5,7 +5,8 @@ import {
   findPlatformService,
   insertPlatformService,
   listPlatformServices,
-  SERVICE_CATEGORY_DATABASE_NAMES,
+  SERVICE_SORTS,
+  type ServiceSort,
   updatePlatformService,
   type PlatformServiceInput,
   type ServiceCategory,
@@ -37,6 +38,26 @@ function durationMinutes(duration: string): number {
   return minutes;
 }
 
+
+// Local upload paths (from POST /uploads) or absolute http(s) URLs only.
+function imageUrlValue(body: Record<string, unknown>): string | null {
+  const raw = body.imageUrl;
+  if (raw === undefined || raw === null) return null;
+  if (typeof raw !== 'string') {
+    validationError({ imageUrl: 'Alamat foto tidak valid.' });
+  }
+  const value = (raw as string).trim();
+  if (!value) return null;
+  const local = /^\/(?!\/)[^\s\\]*$/.test(value);
+  const remote = /^https?:\/\/\S+$/.test(value);
+  if (!local && !remote)
+    validationError({
+      imageUrl: 'Alamat foto harus berupa tautan http/https atau path yang diawali /.',
+    });
+  if (value.length > 500) validationError({ imageUrl: 'Alamat foto terlalu panjang.' });
+  return value;
+}
+
 function inputFrom(
   body: Record<string, unknown>,
   partial: boolean,
@@ -52,13 +73,13 @@ function inputFrom(
   );
   let category: ServiceCategory | undefined;
   if (!partial || body.category !== undefined) {
-    if (
-      typeof body.category !== 'string' ||
-      !(body.category in SERVICE_CATEGORY_DATABASE_NAMES)
-    ) {
-      validationError({ category: 'Kategori layanan tidak valid.' });
+    if (typeof body.category !== 'string' || !body.category.trim()) {
+      validationError({ category: 'Kategori layanan wajib diisi.' });
     }
-    category = body.category as ServiceCategory;
+    const value = (body.category as string).trim();
+    if (value.length > 100)
+      validationError({ category: 'Kategori maksimal 100 karakter.' });
+    category = value;
   }
   let price: number | undefined;
   if (!partial || body.price !== undefined) {
@@ -83,6 +104,8 @@ function inputFrom(
       validationError({ features: 'Setiap fasilitas maksimal 255 karakter.' });
   }
   const active = booleanValue(body, 'active', 'Status publikasi', partial);
+  let imageUrl: string | null | undefined;
+  if (!partial || body.imageUrl !== undefined) imageUrl = imageUrlValue(body);
   const input: Partial<PlatformServiceInput> = {};
   if (name !== undefined) input.name = name;
   if (category !== undefined) input.category = category;
@@ -94,17 +117,60 @@ function inputFrom(
   if (description !== undefined) input.description = description;
   if (active !== undefined) input.active = active;
   if (features !== undefined) input.features = features;
+  if (imageUrl !== undefined) input.imageUrl = imageUrl;
   if (partial) requireChanges(input);
   return input;
 }
 
+
+// A category that is not registered (or is inactive) is a client mistake, not a
+// server fault.
+function categoryError(error: unknown): unknown {
+  if (error instanceof Error && error.message === 'CATEGORY_NOT_FOUND') {
+    return new AppError(400, 'Periksa kembali data yang dikirim.', 'VALIDATION_ERROR', {
+      category: 'Kategori layanan tidak ditemukan.',
+    });
+  }
+  return error;
+}
+
 export async function getServices(
-  _request: Request,
+  request: Request,
   response: Response,
   next: NextFunction,
 ): Promise<void> {
   try {
-    response.status(200).json({ data: await listPlatformServices() });
+    const search =
+      typeof request.query.search === 'string' && request.query.search.trim()
+        ? request.query.search.trim()
+        : null;
+    if (search && search.length > 100)
+      validationError({ search: 'Pencarian maksimal 100 karakter.' });
+
+    let category: ServiceCategory | null = null;
+    if (request.query.category !== undefined && request.query.category !== '') {
+      if (typeof request.query.category !== 'string')
+        validationError({ category: 'Kategori layanan tidak valid.' });
+      const value = (request.query.category as string).trim();
+      if (!value || value.length > 100)
+        validationError({ category: 'Kategori layanan tidak valid.' });
+      category = value;
+    }
+
+    let sort: ServiceSort = 'name';
+    if (request.query.sort !== undefined && request.query.sort !== '') {
+      if (
+        typeof request.query.sort !== 'string' ||
+        !SERVICE_SORTS.includes(request.query.sort as ServiceSort)
+      )
+        validationError({ sort: 'Pengurutan tidak valid.' });
+      sort = request.query.sort as ServiceSort;
+    }
+
+    const activeOnly = request.query.active === 'true';
+    response.status(200).json({
+      data: await listPlatformServices({ search, category, activeOnly, sort }),
+    });
   } catch (error) {
     next(error);
   }
@@ -138,7 +204,7 @@ export async function createService(
     );
     response.status(201).json({ message: 'Layanan berhasil dibuat.', data });
   } catch (error) {
-    next(error);
+    next(categoryError(error));
   }
 }
 export async function updateService(
@@ -156,7 +222,7 @@ export async function updateService(
       .status(200)
       .json({ message: 'Layanan berhasil diperbarui.', data });
   } catch (error) {
-    next(error);
+    next(categoryError(error));
   }
 }
 export async function deleteService(

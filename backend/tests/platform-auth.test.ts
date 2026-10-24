@@ -3,6 +3,7 @@ import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const userModel = vi.hoisted(() => ({
+  isTokenRevoked: vi.fn().mockResolvedValue(false),
   findUserByEmail: vi.fn(),
   findUserById: vi.fn(),
 }));

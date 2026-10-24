@@ -1,11 +1,12 @@
 import type { NextConfig } from 'next';
+import { fileURLToPath } from 'node:url';
 const config: NextConfig = {
   distDir: process.env.CLEANGO_QA_DIST_DIR || '.next',
   poweredByHeader: false,
   outputFileTracingExcludes: { '/*': ['./.local/**/*'] },
   devIndicators: false,
   experimental: { serverActions: { bodySizeLimit: '8mb' } },
-  turbopack: { root: process.cwd() },
+  turbopack: { root: fileURLToPath(new URL('..', import.meta.url)) },
   async headers() {
     return [
       {
