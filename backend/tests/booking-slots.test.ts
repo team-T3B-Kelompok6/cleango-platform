@@ -15,8 +15,9 @@ function jakartaToday(): string {
 describe('booking slot rules', () => {
   it('accepts only whitelisted slots', () => {
     expect(isValidSlot('08:00')).toBe(true);
+    expect(isValidSlot('09:00')).toBe(true);
     expect(isValidSlot('16:00')).toBe(true);
-    expect(isValidSlot('09:00')).toBe(false);
+    expect(isValidSlot('09:30')).toBe(false);
     expect(isValidSlot('23:59')).toBe(false);
     expect(isValidSlot(8)).toBe(false);
   });

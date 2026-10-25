@@ -1,31 +1,24 @@
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { pool } from '../lib/db.js';
 
-export const BOOKING_SLOTS = ['08:00', '10:00', '12:00', '14:00', '16:00'] as const;
+// Hourly slots so customers have more choice; matches the mobile selector.
+export const BOOKING_SLOTS = [
+  '08:00',
+  '09:00',
+  '10:00',
+  '11:00',
+  '12:00',
+  '13:00',
+  '14:00',
+  '15:00',
+  '16:00',
+] as const;
 export type BookingSlot = (typeof BOOKING_SLOTS)[number];
 
 export const BOOKING_SLOT_MINUTES = 120;
 export const BOOKING_MAX_DAYS_AHEAD = 30;
 export const BOOKING_MIN_LEAD_MINUTES = 60;
 export const PLATFORM_FEE = 5000;
-
-const CAPACITY_SQL = `SELECT
-   SUM(scheduled_start_time = '08:00:00') AS s0800,
-   SUM(scheduled_start_time = '10:00:00') AS s1000,
-   SUM(scheduled_start_time = '12:00:00') AS s1200,
-   SUM(scheduled_start_time = '14:00:00') AS s1400,
-   SUM(scheduled_start_time = '16:00:00') AS s1600
-   FROM bookings
-   WHERE scheduled_date = ?
-     AND status NOT IN ('cancelled', 'rescheduled')`;
-
-interface CapacityRow extends RowDataPacket {
-  s0800: number | null;
-  s1000: number | null;
-  s1200: number | null;
-  s1400: number | null;
-  s1600: number | null;
-}
 
 const CAPACITY_PER_SLOT = 3;
 
@@ -100,16 +93,24 @@ export function isSlotLeadTimePassed(isoDate: string, slot: BookingSlot): boolea
   return jakartaNowMinutes() + BOOKING_MIN_LEAD_MINUTES > slotStartMinutes(slot);
 }
 
-export async function slotUsage(isoDate: string): Promise<Record<BookingSlot, number>> {
-  const [rows] = await pool.execute<CapacityRow[]>(CAPACITY_SQL, [isoDate]);
-  const row = rows[0];
-  return {
-    '08:00': Number(row?.s0800 ?? 0),
-    '10:00': Number(row?.s1000 ?? 0),
-    '12:00': Number(row?.s1200 ?? 0),
-    '14:00': Number(row?.s1400 ?? 0),
-    '16:00': Number(row?.s1600 ?? 0),
-  };
+export async function slotUsage(
+  isoDate: string,
+): Promise<Record<BookingSlot, number>> {
+  const [rows] = await pool.execute<RowDataPacket[]>(
+    `SELECT TIME_FORMAT(scheduled_start_time, '%H:%i') AS slot, COUNT(*) AS total
+     FROM bookings
+     WHERE scheduled_date = ? AND status NOT IN ('cancelled', 'rescheduled')
+     GROUP BY slot`,
+    [isoDate],
+  );
+  const usage = Object.fromEntries(
+    BOOKING_SLOTS.map((slot) => [slot, 0]),
+  ) as Record<BookingSlot, number>;
+  for (const row of rows) {
+    const slot = String(row.slot);
+    if (slot in usage) usage[slot as BookingSlot] = Number(row.total ?? 0);
+  }
+  return usage;
 }
 
 export async function listAvailability(
