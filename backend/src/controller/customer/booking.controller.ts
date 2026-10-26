@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
+import { estimateWorkCompletion } from '../../lib/work-estimate.js';
 import { AppError } from '../../lib/AppError.js';
 import {
-  BOOKING_MAX_DAYS_AHEAD,
   BookingConflictError,
   createBooking,
   findBookableService,
@@ -177,8 +177,6 @@ export async function getCustomerBooking(
   }
 }
 
-export const BOOKING_LIMITS = { maxDaysAhead: BOOKING_MAX_DAYS_AHEAD };
-
 // Mirrors the admin order status labels used across the apps.
 function apiStatus(status: string): string {
   if (status === 'in_progress') return 'Sedang Dikerjakan';
@@ -203,6 +201,10 @@ export async function listMyBookings(
         date: row.date,
         time: row.time,
         service: row.service,
+        serviceDurationMinutes: Number(row.serviceDurationMinutes) || null,
+        startedAt: row.startedAt ? new Date(row.startedAt).toISOString() : null,
+        estimatedCompletedAt: row.databaseStatus === 'in_progress'
+          ? estimateWorkCompletion(row.startedAt, Number(row.serviceDurationMinutes)) : null,
         servicePrice: Number(row.servicePrice),
         platformFee: Number(row.platformFee),
         discountAmount: Number(row.discountAmount),

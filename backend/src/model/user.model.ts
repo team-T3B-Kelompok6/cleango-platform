@@ -39,14 +39,6 @@ export async function findUserByPhone(phone: string): Promise<User | null> {
   return rows[0] ?? null;
 }
 
-export async function findUserByIdentifier(identifier: string): Promise<User | null> {
-  const clean = identifier.trim().toLowerCase();
-  if (clean.includes('@')) {
-    return findUserByEmail(clean);
-  }
-  return findUserByPhone(clean);
-}
-
 export async function findUserById(id: number): Promise<User | null> {
   const [rows] = await pool.query<User[]>(
     `SELECT ${USER_COLUMNS} FROM users WHERE id = ? LIMIT 1`,

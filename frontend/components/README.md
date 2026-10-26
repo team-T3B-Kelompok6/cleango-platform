@@ -8,4 +8,4 @@ DeleteRecordButton menyatukan dialog konfirmasi nama/ID dan Server Action pengha
 
 OrderList, ScheduleList, ServiceList, PeopleList dan FaqList menjaga komposisi tiap halaman terpisah. ReportView adalah Server Component untuk ringkasan periode, metode pembayaran dan pengelompokan laporan. Metadata dan searchParams tetap ditangani page.tsx; semua data awal melalui lib/api.ts.
 
-TrackingButton/TrackingPanel menangani dialog tracking simulasi. TrackingMap dimuat dinamis tanpa SSR karena Leaflet memakai DOM. Page/layout tetap RSC. Data contoh dipisahkan di lib/demo/tracking.ts; kontrol hanya mengubah state lokal dan tidak mengubah data API. Tracking belum memakai GPS aktual.
+TrackingButton/TrackingPanel menangani dialog penugasan dan lokasi terakhir petugas melalui `/api/admin/cleaner-tasks`. Lokasi berasal dari halaman tugas cleaner; ETA memakai rute OSRM dan risiko memakai aturan jadwal. Mode demo yang masih aktif tetap memakai `lib/cleaner/demo-store.ts`, bukan peta simulasi lama. Page/layout tetap RSC.

@@ -8,7 +8,6 @@ const userModel = vi.hoisted(() => ({
   findUserByEmail: vi.fn(),
   findUserById: vi.fn(),
   findUserByPhone: vi.fn(),
-  findUserByIdentifier: vi.fn(),
   insertCustomer: vi.fn(),
   findOrCreateSocialCustomer: vi.fn(),
   updateUserPassword: vi.fn(),
@@ -30,7 +29,6 @@ beforeEach(() => {
   userModel.findUserByEmail.mockReset();
   userModel.findUserById.mockReset();
   userModel.findUserByPhone.mockReset();
-  userModel.findUserByIdentifier.mockReset();
   userModel.insertCustomer.mockReset();
   userModel.findOrCreateSocialCustomer.mockReset();
   userModel.updateUserPassword.mockReset();
@@ -362,6 +360,18 @@ describe('token revocation after a password change', () => {
 
     expect(response.status).toBe(401);
     expect(response.body.code).toBe('SESSION_REVOKED');
+  });
+
+  it('does not bypass revocation checks when the database is unavailable', async () => {
+    userModel.isTokenRevoked.mockRejectedValue(new Error('database unavailable'));
+    const response = await request(app)
+      .get('/api/customer/profile')
+      .set('Authorization', `Bearer ${token()}`);
+
+    expect(response.status).toBe(503);
+    expect(response.body.code).toBe('AUTH_UNAVAILABLE');
+    expect(userModel.findUserById).not.toHaveBeenCalled();
+    expect(JSON.stringify(response.body)).not.toContain('database unavailable');
   });
 
   it('accepts a token issued after the password change', async () => {

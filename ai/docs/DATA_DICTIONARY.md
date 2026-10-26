@@ -1,5 +1,9 @@
 # Kamus Data AI-00
 
+> Kamus dataset eksperimen lama; dataset ini tidak dipakai runtime aplikasi aktif.
+> Pipeline ML dihapus setelah revisi 25 Oktober 2026. Data dan metrik tetap disimpan;
+> [CS AI dan algoritma](CS_AI_DAN_ALGORITMA.md) menjelaskan implementasi saat ini.
+
 ## `trips.csv`
 
 | Kolom | Arti |

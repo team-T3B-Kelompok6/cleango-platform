@@ -4,6 +4,7 @@ import path from 'node:path';
 import type { RowDataPacket } from 'mysql2';
 import type { NextFunction, Request, Response } from 'express';
 import { AppError } from '../lib/AppError.js';
+import { estimateWorkCompletion } from '../lib/work-estimate.js';
 import { pool } from '../lib/db.js';
 import {
   assertUsable,
@@ -23,7 +24,6 @@ import {
   stageOf,
   syncBookingStatus,
   touchLocationSharing,
-  type TaskPhotoRow,
   type TaskRow,
   type TaskStage,
 } from '../model/cleaner-task.model.js';
@@ -40,20 +40,49 @@ function linkDelivery(linkStatus: string, expiresAt: Date) {
   const expired = new Date(expiresAt).getTime() <= Date.now();
   const status = expired ? 'expired' : linkStatus;
   if (status === 'revoked')
-    return { status: 'manual_ready' as const, mode: 'manual' as const, attempts: 0, message: 'Tautan dicabut, minta link baru.' };
+    return {
+      status: 'manual_ready' as const,
+      mode: 'manual' as const,
+      attempts: 0,
+      message: 'Tautan dicabut, minta link baru.',
+    };
   if (status === 'expired')
-    return { status: 'failed' as const, mode: 'manual' as const, attempts: 1, message: 'Tautan kedaluwarsa, minta link baru.' };
-  return { status: 'manual_ready' as const, mode: 'manual' as const, attempts: 1, draftUrl: undefined };
+    return {
+      status: 'failed' as const,
+      mode: 'manual' as const,
+      attempts: 1,
+      message: 'Tautan kedaluwarsa, minta link baru.',
+    };
+  return {
+    status: 'manual_ready' as const,
+    mode: 'manual' as const,
+    attempts: 1,
+    draftUrl: undefined,
+  };
 }
 
-export function publicTask(row: TaskRow, photos: { id: string; mimeType: string }[]) {
+export function publicTask(
+  row: TaskRow,
+  photos: { id: string; mimeType: string }[],
+) {
   const stage = stageOf(row);
   const report = row.summary
     ? { summary: row.summary, checked: row.reportChecked === 1 }
     : undefined;
   const location =
-    row.locationSharingStartedAt !== null
-      ? undefined
+    typeof row.latitude === 'number' &&
+    Number.isFinite(row.latitude) &&
+    Math.abs(row.latitude) <= 90 &&
+    typeof row.longitude === 'number' &&
+    Number.isFinite(row.longitude) &&
+    Math.abs(row.longitude) <= 180 &&
+    row.locationUpdatedAt != null &&
+    Number.isFinite(new Date(row.locationUpdatedAt).getTime())
+      ? {
+          latitude: row.latitude,
+          longitude: row.longitude,
+          updatedAt: new Date(row.locationUpdatedAt).toISOString(),
+        }
       : undefined;
   return {
     id: String(row.assignmentId),
@@ -66,6 +95,11 @@ export function publicTask(row: TaskRow, photos: { id: string; mimeType: string 
     date: row.orderDate,
     time: row.orderTime,
     service: row.serviceName,
+    serviceDurationMinutes: row.serviceDurationMinutes,
+    estimatedCompletedAt:
+      stage === 'working'
+        ? estimateWorkCompletion(row.startedAt, row.serviceDurationMinutes)
+        : null,
     notes: row.notes ?? '',
     orderStatus: row.orderStatus,
     stage,
@@ -80,7 +114,8 @@ export function publicTask(row: TaskRow, photos: { id: string; mimeType: string 
     photos: photos.map((photo) => ({ id: photo.id, type: photo.mimeType })),
     linkDelivery: linkDelivery(row.linkStatus, row.linkExpiresAt),
     reportDelivery: {
-      status: (row.completedAt ? 'manual_ready' : 'not_sent') as 'manual_ready' | 'not_sent',
+      status: (row.completedAt ? 'manual_ready' : 'not_sent') as
+        'manual_ready' | 'not_sent',
       mode: 'manual' as const,
       attempts: row.completedAt ? 1 : 0,
     },
@@ -88,7 +123,7 @@ export function publicTask(row: TaskRow, photos: { id: string; mimeType: string 
   };
 }
 
-function isoOrUndefined(value: Date | null): string | undefined {
+function isoOrUndefined(value: Date | number | null): string | undefined {
   return value ? new Date(value).toISOString() : undefined;
 }
 
@@ -123,34 +158,72 @@ export async function postCleanerEvent(
   try {
     const key = request.header('idempotency-key');
     if (!key || !/^[a-zA-Z0-9_-]{8,100}$/.test(key))
-      throw new AppError(400, 'ID tindakan tidak valid. Muat ulang halaman.', 'VALIDATION_ERROR');
+      throw new AppError(
+        400,
+        'ID tindakan tidak valid. Muat ulang halaman.',
+        'VALIDATION_ERROR',
+      );
 
     const token = bearerToken(request);
     const row = await taskByToken(token);
+    if (
+      !request.body ||
+      typeof request.body !== 'object' ||
+      Array.isArray(request.body)
+    )
+      throw new AppError(
+        400,
+        'Data tindakan harus berupa objek.',
+        'VALIDATION_ERROR',
+      );
     const body = request.body as Record<string, unknown>;
     const kind = typeof body.kind === 'string' ? body.kind : '';
     const current = stageOf(row);
 
     if (kind === 'location') {
-      const latitude = Number(body.latitude);
-      const longitude = Number(body.longitude);
-      if (!Number.isFinite(latitude) || !Number.isFinite(longitude))
+      const latitude = body.latitude;
+      const longitude = body.longitude;
+      if (
+        typeof latitude !== 'number' ||
+        !Number.isFinite(latitude) ||
+        Math.abs(latitude) > 90 ||
+        typeof longitude !== 'number' ||
+        !Number.isFinite(longitude) ||
+        Math.abs(longitude) > 180
+      )
         throw new AppError(400, 'Lokasi tidak valid.', 'VALIDATION_ERROR');
       await touchLocationSharing(row.assignmentId);
       await saveLocation(row.assignmentId, latitude, longitude);
     } else if (kind === 'depart') {
       await advance(row, current, 'en_route');
     } else if (kind === 'arrive') {
-      if (current === 'assigned')
-        await advance(row, current, 'en_route');
-      await advance(row, 'en_route', 'working');
-    } else if (kind === 'complete') {
       if (current === 'assigned') await advance(row, current, 'en_route');
-      if (current !== 'working') await advance(row, 'en_route', 'working');
-      const summary = typeof body.summary === 'string' ? body.summary.trim() : '';
-      if (!summary) throw new AppError(400, 'Laporan kerja wajib diisi.', 'VALIDATION_ERROR');
-      await saveStage(row.assignmentId, 'completed', summary, body.checked === true);
-      await syncBookingStatus(row.bookingId, 'completed');
+      if (current === 'assigned' || current === 'en_route')
+        await advance(row, 'en_route', 'working');
+    } else if (kind === 'complete') {
+      const summary =
+        typeof body.summary === 'string' ? body.summary.trim() : '';
+      if (!summary)
+        throw new AppError(
+          400,
+          'Laporan kerja wajib diisi.',
+          'VALIDATION_ERROR',
+        );
+      if (current !== 'working' && current !== 'completed')
+        throw new AppError(
+          409,
+          'Mulai pekerjaan sebelum mengonfirmasi selesai.',
+          'INVALID_TASK_STAGE',
+        );
+      if (current !== 'completed') {
+        await saveStage(
+          row.assignmentId,
+          'completed',
+          summary,
+          body.checked === true,
+        );
+        await syncBookingStatus(row.bookingId, 'completed');
+      }
     } else if (kind === 'remove_photo') {
       const photoId = typeof body.photoId === 'string' ? body.photoId : '';
       if (!/^[a-zA-Z0-9_-]{1,100}$/.test(photoId))
@@ -166,7 +239,8 @@ export async function postCleanerEvent(
     }
 
     const updated = await findAssignmentByTokenHash(hashToken(token));
-    if (!updated) throw new AppError(404, 'Link tugas tidak tersedia.', 'TASK_NOT_FOUND');
+    if (!updated)
+      throw new AppError(404, 'Link tugas tidak tersedia.', 'TASK_NOT_FOUND');
     const photos = await listPhotos(updated.assignmentId);
     response.status(200).json({ data: publicTask(updated, photos) });
   } catch (error) {
@@ -174,7 +248,11 @@ export async function postCleanerEvent(
   }
 }
 
-async function advance(row: TaskRow, from: TaskStage, to: TaskStage): Promise<void> {
+async function advance(
+  row: TaskRow,
+  from: TaskStage,
+  to: TaskStage,
+): Promise<void> {
   const order: TaskStage[] = ['assigned', 'en_route', 'working', 'completed'];
   if (order.indexOf(to) <= order.indexOf(from)) return;
   await saveStage(row.assignmentId, to);
@@ -196,7 +274,11 @@ export async function postCleanerPhoto(
       throw new AppError(400, 'Ukuran foto melebihi 2 MB.', 'VALIDATION_ERROR');
     const mimeType = ALLOWED[request.header('content-type') ?? ''];
     if (!mimeType)
-      throw new AppError(400, 'Format foto harus PNG atau JPEG.', 'VALIDATION_ERROR');
+      throw new AppError(
+        400,
+        'Format foto harus PNG atau JPEG.',
+        'VALIDATION_ERROR',
+      );
 
     await mkdir(UPLOAD_DIR, { recursive: true });
     const id = randomUUID();
@@ -205,7 +287,8 @@ export async function postCleanerPhoto(
     await insertPhoto(row.assignmentId, mimeType, storagePath);
 
     const updated = await findAssignmentByTokenHash(hashToken(token));
-    if (!updated) throw new AppError(404, 'Link tugas tidak tersedia.', 'TASK_NOT_FOUND');
+    if (!updated)
+      throw new AppError(404, 'Link tugas tidak tersedia.', 'TASK_NOT_FOUND');
     const photos = await listPhotos(updated.assignmentId);
     response.status(200).json({ data: publicTask(updated, photos) });
   } catch (error) {
@@ -245,10 +328,23 @@ export async function getAdminTaskBoard(
         staffName: row.staffName,
         staffId: String(row.cleanerId),
         service: row.serviceName,
+        serviceDurationMinutes: row.serviceDurationMinutes,
+        estimatedCompletedAt:
+          stageOf(row) === 'working'
+            ? estimateWorkCompletion(row.startedAt, row.serviceDurationMinutes)
+            : null,
         address: row.address ?? '',
         date: row.orderDate,
         time: row.orderTime,
         orderStatus: row.orderStatus,
+        task: publicTask(row, []),
+        destinationLocation:
+          row.destinationLatitude !== null && row.destinationLongitude !== null
+            ? {
+                latitude: row.destinationLatitude,
+                longitude: row.destinationLongitude,
+              }
+            : undefined,
         demo: false,
         startedAt: isoOrUndefined(row.startedAt),
         completedAt: isoOrUndefined(row.completedAt),
@@ -274,10 +370,18 @@ export async function resendAdminLink(
     const rows = await listActiveAssignments();
     const row = rows.find((item) => item.bookingId === orderId);
     if (!row)
-      throw new AppError(404, 'Penugasan tidak ditemukan.', 'ASSIGNMENT_NOT_FOUND');
+      throw new AppError(
+        404,
+        'Penugasan tidak ditemukan.',
+        'ASSIGNMENT_NOT_FOUND',
+      );
     const { token, expiresAt } = await rotateLink(row.assignmentId);
     response.status(200).json({
-      data: { token, expiresAt: new Date(expiresAt).toISOString(), orderId: String(orderId) },
+      data: {
+        token,
+        expiresAt: new Date(expiresAt).toISOString(),
+        orderId: String(orderId),
+      },
     });
   } catch (error) {
     next(error);
@@ -294,7 +398,11 @@ export async function revokeOrderLink(
     const rows = await listActiveAssignments();
     const row = rows.find((item) => item.bookingId === orderId);
     if (!row)
-      throw new AppError(404, 'Penugasan tidak ditemukan.', 'ASSIGNMENT_NOT_FOUND');
+      throw new AppError(
+        404,
+        'Penugasan tidak ditemukan.',
+        'ASSIGNMENT_NOT_FOUND',
+      );
     await revokeAssignment(row.assignmentId);
     response.status(200).json({ message: 'Tautan tugas dicabut.' });
   } catch (error) {
@@ -310,7 +418,8 @@ export async function dispatchAssignment(
   try {
     const bookingId = positiveId(request.params.id, 'ID pesanan');
     const body = request.body as Record<string, unknown>;
-    const staffName = typeof body.staffName === 'string' ? body.staffName.trim() : '';
+    const staffName =
+      typeof body.staffName === 'string' ? body.staffName.trim() : '';
     if (!staffName)
       throw new AppError(400, 'Petugas wajib diisi.', 'VALIDATION_ERROR');
 
@@ -323,7 +432,8 @@ export async function dispatchAssignment(
       throw new AppError(400, 'Petugas tidak ditemukan.', 'VALIDATION_ERROR');
 
     const adminId = request.user?.id;
-    if (!adminId) throw new AppError(401, 'Authentication diperlukan', 'AUTH_REQUIRED');
+    if (!adminId)
+      throw new AppError(401, 'Authentication diperlukan', 'AUTH_REQUIRED');
     const expiresAt = linkExpiresAt();
     await pool.execute(
       `INSERT INTO cleaner_assignments
@@ -341,7 +451,12 @@ export async function dispatchAssignment(
     await syncBookingStatus(bookingId, 'assigned');
     response.status(200).json({
       message: 'Petugas ditugaskan.',
-      data: { orderId: String(bookingId), staffName, token, expiresAt: new Date(expiresAt).toISOString() },
+      data: {
+        orderId: String(bookingId),
+        staffName,
+        token,
+        expiresAt: new Date(expiresAt).toISOString(),
+      },
     });
   } catch (error) {
     next(error);
@@ -351,6 +466,7 @@ export async function dispatchAssignment(
 function bearerToken(request: Request): string {
   const header = request.header('authorization');
   const match = header?.match(/^Bearer\s+(.+)$/i);
-  if (!match?.[1]) throw new AppError(401, 'Link tugas tidak berlaku.', 'TASK_TOKEN_REQUIRED');
+  if (!match?.[1])
+    throw new AppError(401, 'Link tugas tidak berlaku.', 'TASK_TOKEN_REQUIRED');
   return match[1].trim();
 }

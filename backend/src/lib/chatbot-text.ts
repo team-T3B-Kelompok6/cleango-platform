@@ -122,7 +122,7 @@ export function smallTalkReply(value: string): string | null {
     ) ||
     /^👋[\uFE0F\p{Emoji_Modifier}\s]*$/u.test(value)
   )
-    return 'Halo! Saya Boo, asisten informasi CleanGo. Ada yang ingin ditanyakan tentang layanan, booking, pembayaran, atau tracking?';
+    return 'Halo! Saya Boo, Customer Service AI CleanGo. Saya bisa membantu informasi layanan, panduan booking, pembayaran, atau kendala pesanan. Ada yang bisa saya bantu?';
   if (/^(?:terima kasih)(?: (?:boo|kak|min|admin))?$/.test(text))
     return 'Sama-sama! Kalau ada pertanyaan lain seputar CleanGo, saya siap membantu.';
   return null;

@@ -23,7 +23,7 @@ export interface TaskRow extends RowDataPacket {
   linkExpiresAt: Date;
   departedAt: Date | null;
   arrivedAt: Date | null;
-  startedAt: Date | null;
+  startedAt: Date | number | null;
   completedAt: Date | null;
   updatedAt: Date;
   orderStatus: string;
@@ -31,11 +31,17 @@ export interface TaskRow extends RowDataPacket {
   customerPhone: string | null;
   address: string | null;
   serviceName: string;
+  serviceDurationMinutes: number;
   staffName: string;
   orderDate: string;
   orderTime: string;
   notes: string | null;
   locationSharingStartedAt: Date | null;
+  latitude: number | null;
+  longitude: number | null;
+  locationUpdatedAt: number | null;
+  destinationLatitude: number | null;
+  destinationLongitude: number | null;
   summary: string | null;
   reportChecked: number | null;
 }
@@ -45,13 +51,17 @@ const TASK_SELECT = `SELECT ca.id AS assignmentId, b.id AS bookingId, b.customer
   ca.updated_at AS updatedAt,
   b.status AS orderStatus, u.name AS customerName, u.phone AS customerPhone,
   CONCAT_WS(', ', a.street_address, a.city, a.province) AS address,
-  s.name AS serviceName, cl.name AS staffName, DATE_FORMAT(b.scheduled_date, '%Y-%m-%d') AS orderDate,
+  s.name AS serviceName, s.duration_minutes AS serviceDurationMinutes,
+  cl.name AS staffName, DATE_FORMAT(b.scheduled_date, '%Y-%m-%d') AS orderDate,
   TIME_FORMAT(b.scheduled_start_time, '%H:%i') AS orderTime,
   COALESCE(b.customer_notes, '') AS notes,
   ca.location_sharing_started_at AS locationSharingStartedAt,
   bs.departed_at AS departedAt, bs.arrived_at AS arrivedAt,
-  bs.started_at AS startedAt, bs.completed_at AS completedAt,
-  bs.summary, bs.report_checked AS reportChecked
+  UNIX_TIMESTAMP(bs.started_at) * 1000 AS startedAt, bs.completed_at AS completedAt,
+  bs.summary, bs.report_checked AS reportChecked,
+  bs.latitude, bs.longitude,
+  UNIX_TIMESTAMP(bs.location_updated_at) * 1000 AS locationUpdatedAt,
+  a.latitude AS destinationLatitude, a.longitude AS destinationLongitude
   FROM cleaner_assignments ca
   INNER JOIN bookings b ON b.id = ca.booking_id
   INNER JOIN users u ON u.id = b.customer_id
@@ -61,10 +71,6 @@ const TASK_SELECT = `SELECT ca.id AS assignmentId, b.id AS bookingId, b.customer
   LEFT JOIN cleaner_task_stages bs ON bs.assignment_id = ca.id
   WHERE ca.link_token_hash = ?
   LIMIT 1`;
-
-function iso(value: Date | null | undefined): string | undefined {
-  return value ? new Date(value).toISOString() : undefined;
-}
 
 export function hashToken(token: string): string {
   return createHash('sha256').update(token).digest('hex');
@@ -87,6 +93,20 @@ export async function listActiveAssignments(): Promise<TaskRow[]> {
      ORDER BY ca.assigned_at DESC LIMIT 200`,
   );
   return rows;
+}
+
+export async function findCustomerTask(
+  customerId: number,
+  bookingId: number,
+): Promise<TaskRow | null> {
+  const [rows] = await pool.query<TaskRow[]>(
+    TASK_SELECT.replace(
+      'WHERE ca.link_token_hash = ?',
+      'WHERE b.customer_id = ? AND b.id = ?',
+    ),
+    [customerId, bookingId],
+  );
+  return rows[0] ?? null;
 }
 
 export function stageOf(row: TaskRow): TaskStage {
@@ -118,7 +138,7 @@ export async function saveStage(
 ): Promise<void> {
   const column = STAGE_COLUMNS[stage];
   if (!column) return;
-  const sets = [`${column} = NOW()`, 'updated_at = NOW()'];
+  const sets = [`${column} = COALESCE(${column}, NOW())`, 'updated_at = NOW()'];
   const values: (string | number | null)[] = [];
   if (summary !== undefined) {
     sets.push('summary = ?');
@@ -128,7 +148,6 @@ export async function saveStage(
     sets.push('report_checked = ?');
     values.push(checked ? 1 : 0);
   }
-  values.push(assignmentId);
   await pool.execute(
     `INSERT INTO cleaner_task_stages (assignment_id, ${column})
      VALUES (?, NOW())
@@ -163,7 +182,9 @@ export async function rotateLink(
   return { token, expiresAt };
 }
 
-export async function touchLocationSharing(assignmentId: number): Promise<void> {
+export async function touchLocationSharing(
+  assignmentId: number,
+): Promise<void> {
   await pool.execute(
     `UPDATE cleaner_assignments
      SET location_sharing_started_at = COALESCE(location_sharing_started_at, NOW())
@@ -256,7 +277,16 @@ export async function revokeAssignment(assignmentId: number): Promise<boolean> {
 
 export function assertUsable(row: TaskRow): void {
   if (row.linkStatus === 'revoked')
-    throw new AppError(410, 'Link tugas sudah tidak berlaku. Minta link baru kepada admin.');
-  if (row.linkStatus === 'expired' || new Date(row.linkExpiresAt).getTime() <= Date.now())
-    throw new AppError(410, 'Link tugas sudah kedaluwarsa. Minta link baru kepada admin.');
+    throw new AppError(
+      410,
+      'Link tugas sudah tidak berlaku. Minta link baru kepada admin.',
+    );
+  if (
+    row.linkStatus === 'expired' ||
+    new Date(row.linkExpiresAt).getTime() <= Date.now()
+  )
+    throw new AppError(
+      410,
+      'Link tugas sudah kedaluwarsa. Minta link baru kepada admin.',
+    );
 }

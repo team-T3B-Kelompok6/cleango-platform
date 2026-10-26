@@ -2,11 +2,11 @@ import type { ChatSource } from './groq-chat.js';
 import { chatSearchText } from './chatbot-text.js';
 
 export function chatCapabilities(databaseEnabled = false): string {
-  return `Saya Boo, asisten informasi CleanGo. Saya dapat membantu:
+  return `Saya Boo, Customer Service AI CleanGo, bukan petugas manusia. Saya dapat membantu:
 • Mengenal CleanGo dan cara menggunakan aplikasi.
 • Menjelaskan langkah memilih layanan, booking, alamat, checkout, dan pembayaran.
 • Menjelaskan arti status pesanan, tracking cleaner, ETA kedatangan, dan estimasi selesai cleaning.
-• Memberi panduan saat cleaner terlambat, lokasi belum diperbarui, atau ada kendala.
+• Membantu menelusuri kendala aplikasi, menanggapi keluhan layanan, dan memberi panduan saat cleaner terlambat atau lokasi belum diperbarui.
 • Menjelaskan batas informasi pembatalan, perubahan jadwal, ulasan, dan pemesanan ulang.
 ${databaseEnabled ? 'Saya juga dapat membaca katalog, harga, FAQ, dan promo terbaru yang tersedia di server. Pengecekan status serta pembayaran pesanan memerlukan akun pelanggan yang terhubung ke server dan hanya untuk pesanan milik Anda. Lokasi langsung cleaner belum dibaca melalui chat.' : 'Saat ini koneksi data chatbot masih pending: saya belum dapat memastikan harga/promo terkini atau membaca pesanan pribadi.'} Saya tidak membuat, mengubah, membatalkan, membayar pesanan, maupun menghubungi admin untuk Anda. Gunakan fitur aplikasi atau Pusat Bantuan untuk tindakan tersebut. Saya menerima pesan teks saja.`;
 }
@@ -129,20 +129,20 @@ const knowledge: (ChatSource & { matches: RegExp })[] = [
     title: 'Cleaner dan tracking',
     matches:
       /tracking|lacak|gps|peta|map|posisi|koordinat|lokasi cleaner|lokasi petugas|link|tautan|whatsapp|\bwa\b/i,
-    text: 'Dalam konsep CleanGo, admin menugaskan cleaner internal, membuat tautan unik pesanan, lalu mengirimkannya melalui WhatsApp. Cleaner membuka tautan dan mengizinkan lokasi pada perangkatnya. GPS memberikan posisi; model AI tidak menciptakan atau menentukan posisi cleaner. Tracking memerlukan lokasi nyata, izin, dan koneksi yang memadai. Boo tidak membaca lokasi langsung dan tidak membuat/membagikan tautan akses cleaner.',
+    text: 'Dalam konsep CleanGo, admin menugaskan cleaner internal, membuat tautan unik pesanan, lalu mengirimkannya melalui WhatsApp. Cleaner membuka tautan dan mengizinkan lokasi pada perangkatnya. GPS memberikan posisi, bukan AI. Tracking memerlukan lokasi nyata, izin, dan koneksi yang memadai. Boo tidak membaca lokasi langsung dan tidak membuat/membagikan tautan akses cleaner.',
   },
   {
     id: 'knowledge:ai',
     title: 'Boo dan penggunaan AI di CleanGo',
     matches: /\bai\b|llm|rag|generative ai|kamu.*(?:robot|manusia)/i,
-    text: 'Boo adalah asisten AI, bukan manusia. Boo memakai LLM melalui Groq untuk membantu menjelaskan informasi resmi CleanGo. Sistem mencari sumber pengetahuan, FAQ, atau katalog yang relevan lalu memberikan konteks itu kepada model; pencarian saat ini berbasis kata kunci, bukan vector database. Ini berbeda dari model regresi ETA perjalanan/durasi pengerjaan dan klasifikasi risiko keterlambatan. GPS memberikan posisi, bukan AI. Boo dapat salah memahami pertanyaan dan tidak memiliki akses bebas untuk mengubah database atau melakukan transaksi.',
+    text: 'Boo adalah Customer Service AI, bukan manusia. Boo memakai LLM melalui Groq dengan sumber pengetahuan dan data resmi CleanGo yang dipilih server. Pencarian sumber saat ini berbasis kata kunci, bukan vector database. Estimasi perjalanan menggunakan hasil routing OSRM, estimasi selesai menggunakan waktu mulai ditambah durasi layanan, dan risiko keterlambatan menggunakan aturan jadwal, bukan machine learning. GPS memberikan posisi, bukan AI. Boo tidak memiliki akses bebas untuk mengubah database atau melakukan transaksi.',
   },
   {
     id: 'knowledge:eta',
     title: 'ETA kedatangan dan estimasi selesai',
     matches:
       /\beta\b|estimasi|durasi|berapa lama|jam berapa|waktu tiba|waktu selesai|prediksi|machine learning/i,
-    text: 'ETA kedatangan adalah perkiraan sisa waktu cleaner menuju alamat pembersihan, bukan jaminan waktu tiba. Estimasi selesai cleaning berbeda: dihitung dari waktu mulai pengerjaan dan durasi pekerjaan yang diperkirakan. ETA perjalanan tidak dipakai sebagai durasi membersihkan rumah. Lokasi, rute, keadaan perjalanan, dan waktu pembaruan memengaruhi perkiraan. Boo belum dapat mengambil prediksi langsung untuk pesanan tertentu.',
+    text: 'ETA kedatangan adalah perkiraan sisa waktu cleaner menuju alamat pembersihan dari perhitungan rute OSRM. Estimasi selesai berbeda: waktu mulai pengerjaan yang tercatat ditambah durasi layanan/SOP. Keduanya memakai algoritma biasa, bukan model machine learning, dan bukan jaminan waktu tiba atau selesai. OSRM yang dipakai tidak memberi data kemacetan atau hujan langsung. Estimasi tidak otomatis mengubah status menjadi selesai. Boo belum mengambil estimasi langsung pesanan tertentu melalui chat.',
   },
   {
     id: 'knowledge:delay',
@@ -183,6 +183,13 @@ const knowledge: (ChatSource & { matches: RegExp })[] = [
     matches:
       /privasi|data pribadi|aman|riwayat chat|riwayat percakapan|chat.*(?:simpan|hilang)|disimpan|otp|password|kata sandi|\bpin\b|api key/i,
     text: 'Boo menerima teks. Riwayat Boo disimpan lokal melalui penyimpanan aman perangkat, maksimal enam puluh pesan, dan dipisahkan per sesi login; belum disinkronkan lintas perangkat. Pertanyaan yang diperlukan untuk jawaban AI dapat dikirim ke Groq setelah minimisasi data; jangan menulis informasi rahasia atau pribadi yang tidak dibutuhkan. Boo tidak memiliki akses bebas ke database, kamera, mikrofon, atau berkas perangkat.',
+  },
+  {
+    id: 'knowledge:complaint',
+    title: 'Penanganan keluhan layanan',
+    matches:
+      /komplain|keluhan|kecewa|kerusakan|rusak|kasar|tidak sopan|belum bersih|kurang bersih|masih kotor|hasil.*(?:jelek|buruk)|barang hilang/i,
+    text: 'Maaf atas ketidaknyamanannya, ya. Saya Boo, CS AI CleanGo, siap membantu memahami keluhannya. Jelaskan bagian layanan yang bermasalah tanpa menyertakan alamat lengkap atau data pribadi. Untuk hasil yang belum sesuai, periksa detail cakupan layanan di pesanan dan simpan bukti untuk ditunjukkan lewat jalur bantuan resmi. Jika ada kerusakan, kehilangan, atau keselamatan terancam, hentikan aktivitas yang tidak aman dan gunakan kontak resmi di Pusat Bantuan untuk tindak lanjut petugas. Chat ini belum membuat tiket, mengirim laporan ke admin, menjanjikan ganti rugi, atau menyetujui refund. Bagian layanan mana yang bermasalah?',
   },
   {
     id: 'knowledge:support',

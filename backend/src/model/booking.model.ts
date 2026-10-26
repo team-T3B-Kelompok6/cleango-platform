@@ -15,7 +15,6 @@ export const BOOKING_SLOTS = [
 ] as const;
 export type BookingSlot = (typeof BOOKING_SLOTS)[number];
 
-export const BOOKING_SLOT_MINUTES = 120;
 export const BOOKING_MAX_DAYS_AHEAD = 30;
 export const BOOKING_MIN_LEAD_MINUTES = 60;
 export const PLATFORM_FEE = 5000;
@@ -355,6 +354,8 @@ export interface CustomerBookingRow extends RowDataPacket {
   date: string;
   time: string;
   service: string;
+  serviceDurationMinutes: number;
+  startedAt: Date | number | null;
   servicePrice: number;
   platformFee: number;
   discountAmount: number;
@@ -375,7 +376,8 @@ export async function listCustomerBookings(
     `SELECT b.id, b.booking_code AS code,
        DATE_FORMAT(b.scheduled_date, '%Y-%m-%d') AS date,
        TIME_FORMAT(b.scheduled_start_time, '%H:%i') AS time,
-       s.name AS service, b.service_price AS servicePrice,
+       s.name AS service, s.duration_minutes AS serviceDurationMinutes,
+       UNIX_TIMESTAMP(bs.started_at) * 1000 AS startedAt, b.service_price AS servicePrice,
        b.platform_fee AS platformFee, b.discount_amount AS discountAmount,
        b.total_amount AS totalAmount, b.status AS databaseStatus,
        COALESCE(b.customer_notes, '') AS notes,
@@ -385,6 +387,8 @@ export async function listCustomerBookings(
      FROM bookings b
      INNER JOIN services s ON s.id = b.service_id
      INNER JOIN addresses a ON a.id = b.address_id
+     LEFT JOIN cleaner_assignments ca ON ca.booking_id = b.id
+     LEFT JOIN cleaner_task_stages bs ON bs.assignment_id = ca.id
      WHERE b.customer_id = ?
      ORDER BY b.scheduled_date DESC, b.scheduled_start_time DESC, b.id DESC`,
     [customerId],

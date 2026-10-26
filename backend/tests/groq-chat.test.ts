@@ -34,6 +34,25 @@ beforeEach(() => {
 });
 afterEach(() => vi.unstubAllGlobals());
 describe('Groq bounded fallback and validation', () => {
+  it.each([
+    'Tiket keluhan Anda sudah dibuat.',
+    'Saya sudah meneruskan laporan ke admin.',
+    'Saya dapat membuat tiket untuk Anda.',
+  ])('rejects unsupported CS actions: %s', async (answer) => {
+    fetchMock.mockImplementation(() =>
+      Response.json({
+        choices: [
+          {
+            finish_reason: 'stop',
+            message: {
+              content: JSON.stringify({ answer, sourceIds: ['service:1'] }),
+            },
+          },
+        ],
+      }),
+    );
+    expect(await askGroq('Saya komplain', [], sources)).toBeNull();
+  });
   it('rejects an unsolicited refund guarantee even in a response to a price question', async () => {
     fetchMock.mockImplementation(
       () =>

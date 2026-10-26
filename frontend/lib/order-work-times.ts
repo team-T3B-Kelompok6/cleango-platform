@@ -23,11 +23,14 @@ const workRecords = cache(async (): Promise<WorkRecord[]> => {
     : [];
   if (adminDemoEnabled()) return records;
   try {
-    const response = await request<{ data: { task: WorkRecord }[] }>(
-      '/cleaner-tasks',
-    );
-    if (Array.isArray(response.data))
-      for (const item of response.data) {
+    const response = await request<{
+      data: { task: WorkRecord }[] | { items: { task: WorkRecord }[] };
+    }>('/cleaner-tasks');
+    const items = Array.isArray(response.data)
+      ? response.data
+      : response.data?.items;
+    if (Array.isArray(items))
+      for (const item of items) {
         const task = item?.task;
         if (
           task &&

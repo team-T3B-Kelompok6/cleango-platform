@@ -13,8 +13,6 @@ export interface AppEnv {
   GOOGLE_CLIENT_ID?: string | undefined;
   GOOGLE_ANDROID_CLIENT_ID?: string | undefined;
   OSRM_BASE_URL: string;
-  AI_SERVICE_URL: string;
-  AI_SERVICE_TOKEN: string;
   GROQ_API_KEY: string;
   GROQ_MODEL: string;
   GROQ_FALLBACK_MODELS: string[];
@@ -57,8 +55,6 @@ export function getEnv(): AppEnv {
     GOOGLE_ANDROID_CLIENT_ID: process.env.GOOGLE_ANDROID_CLIENT_ID,
     OSRM_BASE_URL:
       process.env.OSRM_BASE_URL ?? 'https://router.project-osrm.org',
-    AI_SERVICE_URL: process.env.AI_SERVICE_URL ?? 'http://127.0.0.1:5000',
-    AI_SERVICE_TOKEN: process.env.AI_SERVICE_TOKEN ?? '',
     GROQ_API_KEY: process.env.GROQ_API_KEY?.trim() ?? '',
     CHATBOT_DATABASE_ENABLED: chatDatabase === 'true',
     GROQ_MODEL: process.env.GROQ_MODEL?.trim() || 'openai/gpt-oss-20b',

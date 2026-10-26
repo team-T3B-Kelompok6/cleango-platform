@@ -65,7 +65,10 @@ const row = {
 
 beforeEach(() => {
   Object.values(taskModel).forEach((mock: unknown) => {
-    if (mock && typeof (mock as { mockReset?: unknown }).mockReset === 'function') {
+    if (
+      mock &&
+      typeof (mock as { mockReset?: unknown }).mockReset === 'function'
+    ) {
       (mock as ReturnType<typeof vi.fn>).mockReset();
     }
   });
@@ -145,6 +148,60 @@ describe('cleaner task page token', () => {
     expect(response.status).toBe(400);
   });
 
+  it.each([null, '', true, 91, '0'])(
+    'rejects invalid GPS latitude %j without saving it',
+    async (latitude) => {
+      const response = await request(app)
+        .post('/api/cleaner-task/events')
+        .set('Authorization', 'Bearer good-token')
+        .set('Idempotency-Key', 'gps-test-123')
+        .send({ kind: 'location', latitude, longitude: 112.61 });
+      expect(response.status).toBe(400);
+      expect(taskModel.saveLocation).not.toHaveBeenCalled();
+    },
+  );
+
+  it('returns the saved GPS with its real timestamp', async () => {
+    taskModel.findAssignmentByTokenHash.mockResolvedValue({
+      ...row,
+      latitude: -7.97,
+      longitude: 112.61,
+      locationUpdatedAt: Date.parse('2026-10-25T02:00:00Z'),
+    });
+    const response = await request(app)
+      .get('/api/cleaner-task')
+      .set('Authorization', 'Bearer good-token');
+    expect(response.body.data.location).toEqual({
+      latitude: -7.97,
+      longitude: 112.61,
+      updatedAt: '2026-10-25T02:00:00.000Z',
+    });
+  });
+
+  it('does not restart working or completed tasks on repeated arrival', async () => {
+    for (const stage of ['working', 'completed']) {
+      taskModel.stageOf.mockReturnValue(stage);
+      const response = await request(app)
+        .post('/api/cleaner-task/events')
+        .set('Authorization', 'Bearer good-token')
+        .set('Idempotency-Key', 'arrive-test-123')
+        .send({ kind: 'arrive' });
+      expect(response.status).toBe(200);
+    }
+    expect(taskModel.saveStage).not.toHaveBeenCalled();
+    expect(taskModel.syncBookingStatus).not.toHaveBeenCalled();
+  });
+
+  it('does not manufacture a work start when completing before work begins', async () => {
+    const response = await request(app)
+      .post('/api/cleaner-task/events')
+      .set('Authorization', 'Bearer good-token')
+      .set('Idempotency-Key', 'complete-test-123')
+      .send({ kind: 'complete', summary: 'Uji laporan' });
+    expect(response.status).toBe(409);
+    expect(taskModel.saveStage).not.toHaveBeenCalled();
+  });
+
   it('rejects a non image upload', async () => {
     const response = await request(app)
       .post('/api/cleaner-task/photos')
@@ -162,7 +219,10 @@ describe('cleaner task admin', () => {
   });
 
   it('forbids a customer token on the task board', async () => {
-    const customerToken = jwt.sign({ id: 10, email: 'c@e.com', role: 'customer' }, secret);
+    const customerToken = jwt.sign(
+      { id: 10, email: 'c@e.com', role: 'customer' },
+      secret,
+    );
     const response = await request(app)
       .get('/api/cleaner-tasks')
       .set('Authorization', `Bearer ${customerToken}`);
@@ -174,7 +234,10 @@ describe('cleaner task admin', () => {
       .get('/api/cleaner-tasks')
       .set('Authorization', `Bearer ${adminToken}`);
     expect(response.status).toBe(200);
-    expect(response.body.data.items[0]).toMatchObject({ orderId: '9', staffName: 'Sari' });
+    expect(response.body.data.items[0]).toMatchObject({
+      orderId: '9',
+      staffName: 'Sari',
+    });
   });
 
   it('creates an assignment with a hashed token on dispatch', async () => {
@@ -184,7 +247,7 @@ describe('cleaner task admin', () => {
       .send({ staffName: 'Sari' });
     expect(response.status, JSON.stringify(response.body)).toBe(200);
     const params = db.pool.execute.mock.calls.at(-1)?.[1] as unknown[];
-expect(params).toContain('hash:token-raw');
+    expect(params).toContain('hash:token-raw');
     expect(params).not.toContain('token-raw');
   });
 

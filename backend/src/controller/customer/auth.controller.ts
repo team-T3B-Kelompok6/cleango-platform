@@ -12,7 +12,6 @@ import {
   findOrCreateSocialCustomer,
   findUserByEmail,
   findUserById,
-  findUserByIdentifier,
   findUserByPhone,
   insertCustomer,
   updateUserPassword,

@@ -48,18 +48,44 @@ export async function getRoute(
       'ROUTING_FAILED',
     );
   }
-  const payload = (await response.json()) as OsrmResponse;
+  let payload: OsrmResponse;
+  try {
+    const value: unknown = await response.json();
+    if (!value || typeof value !== 'object' || Array.isArray(value))
+      throw new Error('Invalid route');
+    payload = value as OsrmResponse;
+  } catch {
+    throw new AppError(
+      502,
+      'Respons rute OSRM tidak valid.',
+      'INVALID_ROUTING_RESPONSE',
+    );
+  }
   const route = payload.routes?.[0];
   const distance = Number(route?.distance);
   const duration = Number(route?.duration);
   const coordinatesPath = route?.geometry?.coordinates;
   if (
     payload.code !== 'Ok' ||
+    typeof route?.distance !== 'number' ||
     !Number.isFinite(distance) ||
     distance < 0 ||
+    typeof route?.duration !== 'number' ||
     !Number.isFinite(duration) ||
     duration <= 0 ||
-    !Array.isArray(coordinatesPath)
+    !Array.isArray(coordinatesPath) ||
+    !coordinatesPath.length ||
+    !coordinatesPath.every(
+      (point) =>
+        Array.isArray(point) &&
+        point.length >= 2 &&
+        typeof point[0] === 'number' &&
+        Number.isFinite(point[0]) &&
+        Math.abs(point[0]) <= 180 &&
+        typeof point[1] === 'number' &&
+        Number.isFinite(point[1]) &&
+        Math.abs(point[1]) <= 90,
+    )
   ) {
     throw new AppError(
       502,

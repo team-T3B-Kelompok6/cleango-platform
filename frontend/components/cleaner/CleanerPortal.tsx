@@ -426,6 +426,20 @@ export function CleanerPortal({
                     'Belum tercatat'
                   )}
                 </strong>
+                {task.stage === 'working' && task.estimatedCompletedAt && (
+                  <small>
+                    Perkiraan selesai{' '}
+                    {new Date(task.estimatedCompletedAt).toLocaleTimeString(
+                      'id-ID',
+                      {
+                        timeZone: 'Asia/Jakarta',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      },
+                    )}{' '}
+                    WIB · sesuai durasi layanan
+                  </small>
+                )}
               </div>
             </section>
             <section className="cleaner-card">

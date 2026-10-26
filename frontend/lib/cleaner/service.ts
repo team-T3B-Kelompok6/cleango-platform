@@ -149,6 +149,17 @@ function validateTask(task: CleanerTask): CleanerTask {
     departedAt: text(task.departedAt, 50) || undefined,
     arrivedAt: text(task.arrivedAt, 50) || undefined,
     startedAt: text(task.startedAt, 50) || undefined,
+    serviceDurationMinutes:
+      typeof task.serviceDurationMinutes === 'number' &&
+      task.serviceDurationMinutes > 0
+        ? task.serviceDurationMinutes
+        : undefined,
+    estimatedCompletedAt:
+      task.stage === 'working' &&
+      typeof task.estimatedCompletedAt === 'string' &&
+      !Number.isNaN(Date.parse(task.estimatedCompletedAt))
+        ? task.estimatedCompletedAt
+        : undefined,
     completedAt: text(task.completedAt, 50) || undefined,
     updatedAt: text(task.updatedAt, 50),
     expiresAt: task.expiresAt,
@@ -338,16 +349,25 @@ export async function adminTaskBoard(origin: string): Promise<TaskBoard> {
     list<Order>('orders'),
     list<Staff>('staff'),
   ]);
-  const tasks = demoEnabled() ? await demoTaskSummaries() : [];
+  const tasks: { task: CleanerTask; publicPath?: string }[] = demoEnabled()
+    ? await demoTaskSummaries()
+    : [];
   const recordedTimes: WorkRecord[] = tasks.map(({ task }) => task);
   let integrationMessage = '';
   try {
     const response = await request<{
-      data: { task: CleanerTask; publicPath: string }[];
+      data:
+        | { task: CleanerTask; publicPath?: string }[]
+        | {
+            items: { task: CleanerTask; publicPath?: string }[];
+          };
     }>('/cleaner-tasks');
-    if (!Array.isArray(response.data))
+    const records = Array.isArray(response.data)
+      ? response.data
+      : response.data?.items;
+    if (!Array.isArray(records))
       throw new TaskError('Respons tugas tidak valid.', 502);
-    for (const item of response.data) {
+    for (const item of records) {
       if (
         item.task &&
         typeof item.task.orderId === 'string' &&
@@ -356,7 +376,10 @@ export async function adminTaskBoard(origin: string): Promise<TaskBoard> {
         recordedTimes.push(item.task);
       try {
         const task = validateTask(item.task);
-        if (!/^\/tugas\/[a-zA-Z0-9._~-]+$/.test(item.publicPath))
+        if (
+          item.publicPath !== undefined &&
+          !/^\/tugas\/[a-zA-Z0-9._~-]+$/.test(item.publicPath)
+        )
           throw new TaskError('Tautan tugas tidak valid.', 502);
         tasks.push({ task, publicPath: item.publicPath });
       } catch (error) {
@@ -369,7 +392,7 @@ export async function adminTaskBoard(origin: string): Promise<TaskBoard> {
     if (!(error instanceof ApiError) && !(error instanceof TaskError))
       throw error;
     integrationMessage =
-      'Chatbot/halaman tugas pada API tim belum tersedia. Data [UJI] memakai simulasi tersimpan; pesan sungguhan tidak dikirim.';
+      'Integrasi halaman tugas belum lengkap. Data [UJI] adalah simulasi tersimpan; bukan pengiriman pesan sungguhan.';
   }
   const timedOrders = await withOrderWorkTimes(orders, recordedTimes);
   const items: AdminCleanerTask[] = timedOrders

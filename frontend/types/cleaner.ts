@@ -25,6 +25,8 @@ export interface CleanerTask {
   date: string;
   time: string;
   service: string;
+  serviceDurationMinutes?: number;
+  estimatedCompletedAt?: string | null;
   notes: string;
   orderStatus: string;
   stage: TaskStage;
@@ -42,6 +44,7 @@ export interface CleanerTask {
   location?: { latitude: number; longitude: number; updatedAt: string };
 }
 export interface AdminCleanerTask {
+  estimatedCompletedAt?: string | null;
   startedAt?: string;
   completedAt?: string;
   orderId: string;

@@ -85,6 +85,38 @@ beforeEach(() => {
 });
 
 describe('chatbot grounding and access', () => {
+  it('introduces Boo transparently as Customer Service AI', async () => {
+    expect((await replyToChat(input('kamu bisa apa?'))).answer).toContain(
+      'Customer Service AI',
+    );
+  });
+  it('helps with complaints without confusing them with a purchase or private-status lookup', async () => {
+    const result = await replyToChat(
+      input('Saya kecewa cleaner saya kasar dan hasilnya masih kotor'),
+    );
+    expect(result.answer).toContain('Maaf');
+    expect(result.sources.map((source) => source.id)).toContain(
+      'knowledge:complaint',
+    );
+    expect(models.services).not.toHaveBeenCalled();
+    expect(models.order).not.toHaveBeenCalled();
+    expect(models.groq).toHaveBeenCalled();
+  });
+  it('uses the LLM for a grounded customer service complaint response', async () => {
+    models.groq.mockResolvedValue({
+      answer: 'Maaf atas ketidaknyamanannya. Bagian mana yang masih kotor?',
+      sourceIds: ['knowledge:complaint'],
+      model: 'test-provider',
+      attempts: 1,
+      promptTokens: 20,
+      completionTokens: 10,
+    });
+    const result = await replyToChat(
+      input('Saya komplain karena hasilnya kurang bersih'),
+    );
+    expect(result.source).toBe('groq');
+    expect(result.answer).toContain('Bagian mana');
+  });
   it('keeps payment fallback on payment instructions instead of repeating booking steps', async () => {
     const result = await replyToChat(input('Bagaimana cara bayar layanan?'));
     expect(result.answer).toBe(

@@ -208,6 +208,8 @@ export function TrackingPanel({
     : null;
   const trackedLocation = trackedItem?.task?.location;
   const destination = trackedItem?.destinationLocation;
+  // Board polling must age the GPS even when its coordinates/timestamp stop changing.
+  const riskRefreshWindow = Math.floor(Date.now() / 30_000);
   useEffect(() => {
     const controller = new AbortController();
     setPrediction(null);
@@ -234,6 +236,15 @@ export function TrackingPanel({
     const predictionAt = new Date();
     const departedAt = Date.parse(trackedItem.task.departedAt ?? '');
     const locationUpdatedAt = Date.parse(trackedLocation.updatedAt);
+    if (
+      !Number.isFinite(locationUpdatedAt) ||
+      locationUpdatedAt > predictionAt.getTime()
+    ) {
+      setPredictionError(
+        'Waktu GPS tidak valid. Menunggu pembaruan lokasi petugas.',
+      );
+      return () => controller.abort();
+    }
     setPredictionBusy(true);
     void fetch('/api/tracking/risk', {
       method: 'POST',
@@ -262,7 +273,7 @@ export function TrackingPanel({
         };
         if (!response.ok || !payload.data)
           throw new Error(payload.message ?? 'Prediksi belum tersedia.');
-        setPrediction(payload.data);
+        if (!controller.signal.aborted) setPrediction(payload.data);
       })
       .catch((error: unknown) => {
         if (controller.signal.aborted) return;
@@ -275,6 +286,7 @@ export function TrackingPanel({
       });
     return () => controller.abort();
   }, [
+    riskRefreshWindow,
     destination?.latitude,
     destination?.longitude,
     trackedItem?.date,
@@ -668,11 +680,8 @@ export function TrackingPanel({
                       <div>
                         <dt>ETA perjalanan</dt>
                         <dd>
-                          {Math.max(1, Math.round(prediction.etaSeconds / 60))}{' '}
-                          menit ·{' '}
-                          {prediction.etaSource === 'ml'
-                            ? 'Model ML'
-                            : 'Rute OSRM'}
+                          {Math.max(1, Math.ceil(prediction.etaSeconds / 60))}{' '}
+                          menit · Rute OSRM
                         </dd>
                       </div>
                       <div>

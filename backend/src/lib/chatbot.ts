@@ -202,6 +202,15 @@ export async function replyToChat(
     );
   const databaseEnabled = getEnv().CHATBOT_DATABASE_ENABLED;
   if (capabilityQuestion) return reply(chatCapabilities(databaseEnabled));
+  const complaintSources = knowledgeFor(question).filter(
+    (source) => source.id === 'knowledge:complaint',
+  );
+  if (
+    complaintSources.length &&
+    !/\b(?:harga|tarif|promo|status|cek|lacak|tracking)\b/i.test(question)
+  ) {
+    return respondFromSources(complaintSources, complaintSources, []);
+  }
   const contextQuestion = chatSearchText(
     [question, ...contextHistory].join(' '),
   );

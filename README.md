@@ -90,7 +90,7 @@ Customer/public:
 - `GET /api/customer/categories/:id`
 - `GET /api/customer/services?search=&category=`
 - `GET /api/customer/services/:id`
-- `POST /api/customer/chat` — Boo: FAQ, katalog, promo; JWT customer diperlukan untuk pesanan pribadi.
+- `POST /api/customer/chat` — CS AI Boo: panduan, kendala, keluhan, FAQ, katalog, promo; JWT customer diperlukan untuk pesanan pribadi.
 
 Admin:
 
@@ -102,27 +102,31 @@ Admin:
 - CRUD `/api/services` (kontrak web admin terbaru)
 - CRUD `/api/faqs`
 - CRUD `/api/staff`
-- `POST /api/tracking/eta` — ETA perjalanan dari AI-01 dengan fallback OSRM.
-- `POST /api/tracking/risk` — risiko terlambat AI-02 dengan fallback aturan.
-- `POST /api/tracking/work-duration` — estimasi selesai pengerjaan dengan fallback durasi SOP.
+- `POST /api/tracking/eta` — hasil algoritma rute OSRM, tanpa model ML.
+- `POST /api/tracking/risk` — risiko operasional dari jadwal, ETA, keberangkatan, dan umur GPS.
+- `POST /api/tracking/work-duration` — waktu mulai + durasi layanan/SOP, tanpa regresi.
 
 Endpoint admin selain login membutuhkan header `Authorization: Bearer <token>`.
 Kontrak API selengkapnya tersedia di `backend/docs/API.md`.
 
-## Layanan AI tracking
+## CS AI dan estimasi tanpa ML
 
-Model ETA dan risiko berjalan sebagai layanan Python internal. Dari folder `ai/`:
+Boo menjadi **Customer Service AI** melalui Groq untuk informasi dan kendala pelanggan.
+Harga/promo/kebijakan bisnis mengikuti sumber database resmi; pesanan pribadi hanya
+dapat dibaca setelah validasi akun dan kepemilikan. CS tidak membuat tiket atau
+mengubah pembayaran/status lewat chat. Jawaban aman tetap tersedia jika provider gagal.
 
-```powershell
-python -m pip install -r requirements.txt
-python train_eta.py
-python train_risk.py
-python train_work_duration.py --source "C:\coding\s3\PBL\datasets\CleanGo-pengerjaan\CleanGo_Prediksi_Durasi_Pengerjaan_SIMULASI\dataset_durasi_cleaning_SIMULASI.csv"
-$env:ALLOW_SYNTHETIC_WORK_DURATION_MODEL="true"
-python service.py
-```
+Perjalanan memakai routing OSRM. Risiko membandingkan waktu yang tersisa menuju
+jadwal dengan durasi rute, disertai pemeriksaan keberangkatan dan kesegaran GPS.
+Pengerjaan memakai **waktu mulai aktual + durasi layanan**. Tidak ada pelatihan,
+Joblib, server Flask, pengali harga berdasarkan foto, atau probabilitas ML dalam alur aktif.
+Status selesai tetap dikonfirmasi cleaner, bukan otomatis karena estimasi habis.
 
-Dokumentasi eksperimen dan keterbatasannya tersedia di `ai/docs/AI-01.md` dan `ai/docs/AI-02.md`. Data saat ini adalah proxy LaDe dengan jadwal simulasi, sehingga belum boleh dianggap akurat untuk operasional nyata.
+Jalankan backend dan frontend seperti biasa; **tidak perlu menyalakan Python**.
+Kode Python/Flask dan notebook pemanggil ML lama sudah dihapus; tersedia di riwayat Git.
+Dataset, artefak model, metrik, dan dokumentasi eksperimen tetap disimpan sebagai arsip,
+tidak dipakai runtime.
+Penjelasan lengkap: [CS AI dan algoritma](ai/docs/CS_AI_DAN_ALGORITMA.md).
 
 ## Verifikasi backend
 

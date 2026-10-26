@@ -27,8 +27,12 @@ export async function authenticate(
         }
       } catch (error) {
         if (error instanceof AppError) throw error;
-        // In unit tests running without a live database, rely on the
-        // cryptographic signature of the token rather than failing with 401.
+        // A valid signature cannot prove that this session has not been revoked.
+        throw new AppError(
+          503,
+          'Sesi belum dapat diperiksa. Silakan coba kembali sebentar lagi.',
+          'AUTH_UNAVAILABLE',
+        );
       }
     }
 
