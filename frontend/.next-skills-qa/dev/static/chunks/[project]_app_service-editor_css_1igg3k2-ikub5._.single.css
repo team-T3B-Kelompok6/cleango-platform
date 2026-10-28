@@ -1,0 +1,562 @@
+/* [project]/app/service-editor.css [app-client] (css) */
+.modal.service-form-dialog {
+  width: min(1000px, 100vw - 32px);
+  height: min(850px, 100dvh - 40px);
+}
+
+.service-editor-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+  display: grid;
+}
+
+.service-editor-column {
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  display: flex;
+}
+
+.service-editor .service-section-label {
+  font-size: var(--text-12);
+  color: var(--ui-accent);
+  border-bottom: 1px solid var(--border);
+  margin: 0;
+  padding-bottom: 10px;
+  font-weight: 700;
+}
+
+.service-section-heading {
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  display: flex;
+}
+
+.service-section-heading strong, .service-section-heading h4, .service-pricing h4 {
+  font-size: var(--text-12);
+  margin: 0;
+  font-weight: 600;
+}
+
+.service-section-heading small {
+  font-size: var(--text-10);
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.service-photo-box, .service-pricing {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.service-icon-box .service-section-heading strong {
+  color: var(--service-field-label);
+}
+
+.service-icon-content {
+  align-items: center;
+  gap: 14px;
+  display: flex;
+}
+
+.service-icon-preview {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  width: 64px;
+  height: 64px;
+  color: var(--muted);
+  border-radius: 8px;
+  flex-shrink: 0;
+  place-items: center;
+  display: grid;
+}
+
+.service-icon-preview img {
+  object-fit: contain;
+  width: 48px;
+  height: 48px;
+}
+
+.service-icon-preview svg {
+  width: 28px;
+  height: 28px;
+}
+
+.service-icon-controls {
+  min-width: 0;
+}
+
+.service-icon-controls .field-hint {
+  margin: 0 0 8px;
+}
+
+.service-icon-actions, .service-icon-presets > div {
+  flex-wrap: wrap;
+  gap: 8px;
+  display: flex;
+}
+
+.service-icon-presets {
+  margin-top: 16px;
+}
+
+.service-icon-presets > span {
+  margin-bottom: 8px;
+  display: block;
+}
+
+.service-icon-option {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  border-radius: 8px;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  display: flex;
+}
+
+.service-icon-option img {
+  object-fit: contain;
+}
+
+.service-icon-option[aria-pressed="true"] {
+  border-color: var(--ui-accent);
+  background: var(--service-form-tint);
+}
+
+.service-name-with-icon {
+  align-items: center;
+  gap: 10px;
+  display: flex;
+}
+
+.service-saved-icon {
+  border: 1px solid var(--border);
+  background: var(--service-form-tint);
+  border-radius: 10px;
+  flex-shrink: 0;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  display: inline-grid;
+}
+
+.service-saved-icon img {
+  object-fit: contain;
+  width: 32px;
+  height: 32px;
+}
+
+@media (max-width: 400px) {
+  .service-icon-content {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+}
+
+.service-photo-preview {
+  background: var(--service-photo-bg);
+  border-radius: 8px;
+  height: 160px;
+  position: relative;
+  overflow: hidden;
+}
+
+.service-photo-preview > img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.service-photo-empty {
+  height: 100%;
+  color: var(--muted);
+  text-align: center;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  display: flex;
+}
+
+.service-photo-empty svg {
+  width: 30px;
+  height: 30px;
+}
+
+.service-photo-toolbar {
+  background: linear-gradient(transparent, var(--service-photo-overlay));
+  color: var(--color-007);
+  align-items: center;
+  gap: 6px;
+  padding: 10px;
+  display: flex;
+  position: absolute;
+  inset: auto 0 0;
+}
+
+.service-photo-toolbar > span {
+  font-size: var(--text-10);
+  flex: 1;
+}
+
+.service-photo-toolbar .button {
+  background: var(--surface);
+  min-height: 32px;
+  font-size: var(--text-10);
+  padding: 6px 10px;
+}
+
+.service-photo-drop, .service-add-feature {
+  border: 1px dashed var(--service-upload-border);
+  background: var(--service-form-tint);
+  width: 100%;
+  font: inherit;
+  font-size: var(--text-12);
+  color: var(--ui-accent);
+  cursor: pointer;
+  border-radius: 8px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  transition: background .18s, border-color .18s;
+  display: flex;
+}
+
+.service-photo-drop {
+  margin-top: 12px;
+}
+
+.service-photo-drop:hover, .service-photo-drop.dragging, .service-add-feature:hover {
+  background: var(--service-form-hover);
+  border-color: var(--ui-accent);
+}
+
+.service-file-input {
+  display: none;
+}
+
+.service-fields-pair {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  display: grid;
+}
+
+.service-field {
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  display: flex;
+}
+
+.service-field > label {
+  font-size: var(--text-12);
+  color: var(--service-field-label);
+  font-weight: 600;
+}
+
+.service-field input, .service-field select, .service-field textarea {
+  width: 100%;
+  min-width: 0;
+}
+
+.service-field textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+.service-pricing {
+  background: var(--service-form-tint);
+  flex-direction: column;
+  gap: 10px;
+  display: flex;
+}
+
+.service-pricing h4 {
+  color: var(--ui-accent);
+}
+
+.service-price-preview {
+  background: var(--surface);
+  border: 1px solid var(--service-price-border);
+  border-radius: 8px;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  display: flex;
+}
+
+.service-price-preview > span {
+  font-size: var(--text-10);
+  color: var(--muted);
+}
+
+.service-price-preview strong {
+  font-size: var(--text-22);
+  color: var(--ui-accent);
+}
+
+.service-price-preview strong small {
+  font-size: var(--text-10);
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.service-price-preview p {
+  font-size: var(--text-10);
+  color: var(--ui-accent);
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+  display: flex;
+}
+
+.service-price-preview del {
+  color: var(--muted);
+}
+
+.service-feature-rows {
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+  display: flex;
+}
+
+.service-feature-row {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  display: flex;
+}
+
+.service-feature-row > svg {
+  color: var(--ui-accent);
+  flex-shrink: 0;
+  width: 18px;
+}
+
+.service-feature-row input {
+  background: none;
+  border: 0;
+  flex: 1;
+  min-width: 0;
+  padding: 6px;
+}
+
+.service-feature-row button {
+  flex-shrink: 0;
+}
+
+.service-facilities-empty {
+  color: var(--muted);
+  font-size: var(--text-12);
+  margin: 0 0 12px;
+}
+
+.service-status {
+  border: 1px solid var(--border);
+  cursor: pointer;
+  border-radius: 10px;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  display: flex;
+  position: relative;
+}
+
+.service-status > span:first-child {
+  flex-direction: column;
+  flex: 1;
+  gap: 4px;
+  display: flex;
+}
+
+.service-status strong {
+  font-size: var(--text-12);
+}
+
+.service-status small {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: var(--text-10);
+}
+
+.service-status input {
+  opacity: 0;
+  width: 44px;
+  height: 24px;
+  position: absolute;
+  right: 16px;
+}
+
+.service-switch-track {
+  background: var(--service-switch-off);
+  border-radius: 20px;
+  flex-shrink: 0;
+  width: 40px;
+  height: 24px;
+  padding: 3px;
+  transition: background .2s;
+}
+
+.service-switch-track:after {
+  content: "";
+  background: var(--surface);
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  transition: transform .2s;
+  display: block;
+}
+
+.service-status input:checked + .service-switch-track {
+  background: var(--ui-accent);
+}
+
+.service-status input:checked + .service-switch-track:after {
+  transform: translateX(16px);
+}
+
+.service-status input:focus-visible + .service-switch-track {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 4px;
+}
+
+.service-editor-note {
+  border-left: 3px solid var(--service-note-border);
+  color: var(--muted);
+  font-size: var(--text-12);
+  margin: auto 0 0;
+  padding: 4px 0 4px 14px;
+  line-height: 1.7;
+}
+
+.service-editor-footer > span {
+  font-size: var(--text-10);
+  margin-right: auto;
+}
+
+.service-editor-footer .button {
+  white-space: normal;
+}
+
+.service-list-image {
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+  width: 112px;
+  height: 84px;
+}
+
+.figma-service-top > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.figma-service-top {
+  gap: 18px;
+}
+
+.service-list-description {
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  max-width: 70ch;
+  display: -webkit-box;
+  overflow: hidden;
+}
+
+.service-price del {
+  font-size: var(--text-12);
+  color: var(--muted);
+}
+
+.service-promo-badge {
+  background: var(--ui-accent-soft);
+  color: var(--ui-accent);
+  border-radius: 6px;
+  margin-left: 8px;
+  padding: 3px 8px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.service-detail-image {
+  object-fit: cover;
+  border-radius: 12px;
+  width: min(100%, 560px);
+  height: auto;
+  max-height: 320px;
+  display: block;
+}
+
+@media (max-width: 700px) {
+  .service-editor-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .service-editor-column {
+    gap: 16px;
+  }
+
+  .service-editor-footer {
+    gap: 8px;
+  }
+
+  .service-editor-footer > span {
+    display: none;
+  }
+
+  .service-editor-footer .button.primary {
+    white-space: nowrap;
+    flex: auto;
+  }
+
+  .service-editor-footer > .button:not(.primary) {
+    flex: none;
+  }
+
+  .service-section-heading {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .service-list-image {
+    width: 72px;
+    height: 72px;
+  }
+
+  .figma-service-top {
+    flex-wrap: wrap;
+  }
+
+  .figma-service-top > small {
+    flex-basis: 100%;
+  }
+}
+
+@media (max-width: 400px) {
+  .service-fields-pair {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .service-switch-track, .service-switch-track:after, .service-photo-drop, .service-add-feature {
+    transition: none;
+  }
+}
+
+/*# sourceMappingURL=%5Bproject%5D_app_service-editor_css_1igg3k2-ikub5._.single.css.map*/

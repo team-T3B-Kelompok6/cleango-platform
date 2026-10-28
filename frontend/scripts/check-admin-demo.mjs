@@ -620,6 +620,35 @@ await check(
   },
 );
 await check(
+  'Service icons persist independently of photos, survive edits, and can be cleared',
+  async () => {
+    const service = (await request('/services')).data[0];
+    const photo = service.imageUrl;
+    const withIcon = (
+      await request('/services/' + service.id, 'PATCH', {
+        iconUrl: '/demo/icon-test.png',
+      })
+    ).data;
+    assert.equal(withIcon.iconUrl, '/demo/icon-test.png');
+    assert.equal(withIcon.imageUrl, photo);
+    await request('/services/' + service.id, 'PATCH', { name: service.name });
+    assert.equal(
+      (await request('/services/' + service.id)).data.iconUrl,
+      '/demo/icon-test.png',
+    );
+    const cleared = (
+      await request('/services/' + service.id, 'PATCH', { iconUrl: null })
+    ).data;
+    assert.equal(cleared.iconUrl, null);
+    assert.equal(cleared.imageUrl, photo);
+    const { unsavedFields } = load(path.join(root, 'lib/saved-fields.ts'));
+    assert.ok(
+      unsavedFields('services', { iconUrl: '/new.png' }, service).serviceIcon,
+    );
+    assert.deepEqual(unsavedFields('services', { iconUrl: null }, cleared), {});
+  },
+);
+await check(
   'Disabled and production modes cannot serve demo authentication/data',
   async () => {
     process.env.ADMIN_DEMO_ENABLED = 'false';

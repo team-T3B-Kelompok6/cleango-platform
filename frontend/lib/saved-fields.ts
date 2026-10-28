@@ -25,6 +25,13 @@ export function unsavedFields(
   }
   if (resource === 'services') {
     if (
+      'iconUrl' in sent &&
+      (!Object.hasOwn(saved, 'iconUrl') ||
+        (saved.iconUrl ?? null) !== sent.iconUrl)
+    )
+      errors.serviceIcon =
+        'Perubahan ikon belum tersimpan pada layanan. Periksa dukungan ikon pada API.';
+    if (
       'discountPrice' in sent &&
       (saved.discountPrice == null ? null : Number(saved.discountPrice)) !==
         (sent.discountPrice ?? null)
@@ -38,10 +45,18 @@ export function unsavedFields(
     )
       errors.serviceImage = 'Perubahan foto belum tersimpan pada layanan.';
   }
+  if (
+    resource === 'staff' &&
+    'photoUrl' in sent &&
+    (!Object.hasOwn(saved, 'photoUrl') ||
+      (saved.photoUrl ?? null) !== sent.photoUrl)
+  )
+    errors.staffPhoto = 'Perubahan foto petugas belum tersimpan.';
   if (resource === 'staff' && Array.isArray(sent.skills)) {
     if (
       !Array.isArray(saved.skills) ||
-      JSON.stringify(saved.skills) !== JSON.stringify(sent.skills)
+      JSON.stringify([...saved.skills].sort()) !==
+        JSON.stringify([...sent.skills].sort())
     )
       errors.skills =
         'Keahlian petugas belum tersimpan. Data petugas lainnya mungkin sudah diperbarui.';

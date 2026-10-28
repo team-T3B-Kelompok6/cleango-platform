@@ -1,0 +1,673 @@
+/* [project]/app/tracking.css [app-client] (css) */
+:root {
+  --tracking-dialog-width: 88rem;
+  --tracking-dialog-height: 65rem;
+  --tracking-list-width: 24rem;
+  --tracking-map-height: 20rem;
+  --tracking-muted: var(--color-020);
+  --tracking-border: var(--color-004);
+  --tracking-ink: var(--color-001);
+  --tracking-green: var(--color-023);
+  --tracking-accent: var(--color-095);
+}
+
+.modal.tracking-dialog {
+  width: min(var(--tracking-dialog-width), calc(100vw - var(--space-32)));
+  height: min(var(--tracking-dialog-height), calc(100dvh - var(--space-48)));
+  border-radius: var(--space-12);
+  max-height: none;
+  padding: 0;
+}
+
+.tracking-dialog > .modal-header {
+  padding: var(--space-20) var(--space-24);
+}
+
+.tracking-dialog .modal-header h2 {
+  font-size: var(--text-20);
+}
+
+.tracking-dialog .modal-header p {
+  font-size: var(--text-11);
+}
+
+.tracking-trigger {
+  gap: var(--space-6);
+}
+
+.tracking-trigger .ui-icon {
+  width: var(--space-16);
+  height: var(--space-16);
+}
+
+.tracking-content {
+  padding: var(--space-18) var(--space-24);
+  overscroll-behavior: contain;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.tracking-note {
+  align-items: center;
+  gap: var(--space-10);
+  margin-bottom: var(--space-18);
+  display: flex;
+}
+
+.tracking-note p {
+  color: var(--tracking-muted);
+  font-size: var(--text-11);
+  margin: 0;
+}
+
+.tracking-demo-label {
+  padding: var(--space-4) var(--space-7);
+  font-size: var(--text-10);
+  background: var(--color-039);
+  color: var(--color-038);
+  border-radius: var(--space-5);
+  font-weight: 600;
+}
+
+.tracking-workspace {
+  grid-template-columns: var(--tracking-list-width) minmax(0, 1fr);
+  gap: var(--space-20);
+  align-items: start;
+  display: grid;
+}
+
+.tracking-roster {
+  min-width: 0;
+}
+
+.tracking-roster-heading {
+  margin-bottom: var(--space-12);
+  justify-content: space-between;
+  align-items: center;
+  display: flex;
+}
+
+.tracking-roster-heading h3 {
+  font-size: var(--text-13);
+}
+
+.tracking-roster-heading > span {
+  font-size: var(--text-10);
+  color: var(--tracking-muted);
+}
+
+.tracking-search {
+  align-items: center;
+  gap: var(--space-8);
+  border: 1px solid var(--tracking-border);
+  border-radius: var(--space-7);
+  padding: var(--space-9) var(--space-10);
+  display: flex;
+}
+
+.tracking-search .ui-icon {
+  width: var(--space-15);
+  height: var(--space-15);
+  color: var(--color-008);
+  flex-shrink: 0;
+}
+
+.tracking-search input {
+  width: 100%;
+  min-width: 0;
+  font-size: var(--text-11);
+  background: none;
+  border: 0;
+  outline: none;
+  min-height: 0;
+  padding: 0;
+}
+
+.tracking-search:focus-within {
+  outline: 2px solid var(--color-028);
+}
+
+.tracking-roster > select {
+  border: 1px solid var(--tracking-border);
+  border-radius: var(--space-7);
+  background: var(--color-007);
+  color: var(--tracking-muted);
+  width: 100%;
+  padding: var(--space-9) var(--space-10);
+  margin-top: var(--space-8);
+  font-size: var(--text-11);
+}
+
+.tracking-roster-list {
+  gap: var(--space-6);
+  margin-top: var(--space-12);
+  display: grid;
+}
+
+.tracking-person {
+  align-items: flex-start;
+  gap: var(--space-10);
+  text-align: left;
+  border-radius: var(--space-8);
+  width: 100%;
+  padding: var(--space-12) var(--space-10);
+  border: 1px solid #0000;
+  transition: background .18s, border-color .18s;
+  display: flex;
+}
+
+.tracking-person:hover {
+  background: var(--color-002);
+}
+
+.tracking-person.is-selected {
+  border-color: var(--color-028);
+  background: var(--color-010);
+}
+
+.tracking-avatar {
+  width: var(--space-32);
+  height: var(--space-32);
+  background: var(--color-026);
+  color: var(--color-013);
+  font-size: var(--text-11);
+  border-radius: 50%;
+  flex-shrink: 0;
+  place-items: center;
+  font-weight: 600;
+  display: grid;
+}
+
+.tracking-person-copy {
+  gap: var(--space-4);
+  flex: 1;
+  min-width: 0;
+  display: grid;
+}
+
+.tracking-person-copy strong {
+  font-size: var(--text-12);
+  font-weight: 600;
+}
+
+.tracking-person-copy small {
+  font-size: var(--text-10);
+  color: var(--tracking-muted);
+}
+
+.tracking-person > .ui-icon {
+  width: var(--space-12);
+  height: var(--space-12);
+  color: var(--color-008);
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.tracking-status {
+  align-items: center;
+  gap: var(--space-5);
+  color: var(--tracking-green);
+  font-size: var(--text-10);
+  white-space: nowrap;
+  display: inline-flex;
+}
+
+.tracking-status i {
+  width: var(--space-5);
+  height: var(--space-5);
+  background: currentColor;
+  border-radius: 50%;
+}
+
+.tracking-status.moving {
+  color: var(--color-036);
+}
+
+.tracking-status.stale {
+  color: var(--color-038);
+}
+
+.tracking-roster-footnote {
+  align-items: center;
+  gap: var(--space-5);
+  color: var(--color-008);
+  font-size: var(--text-9);
+  margin-top: var(--space-14);
+  line-height: 1.5;
+  display: flex;
+}
+
+.tracking-roster-footnote .ui-icon {
+  width: var(--space-12);
+  height: var(--space-12);
+  flex-shrink: 0;
+}
+
+.tracking-empty {
+  font-size: var(--text-11);
+  padding: var(--space-18) var(--space-10);
+  color: var(--tracking-muted);
+  line-height: 1.8;
+}
+
+.tracking-empty button {
+  color: var(--tracking-green);
+  text-decoration: underline;
+  display: block;
+}
+
+.tracking-detail {
+  min-width: 0;
+}
+
+.tracking-map-wrap {
+  border: 1px solid var(--tracking-border);
+  border-radius: var(--space-9);
+  position: relative;
+  overflow: hidden;
+}
+
+.tracking-map, .tracking-map-loading {
+  height: var(--tracking-map-height);
+  background: var(--color-026);
+  width: 100%;
+}
+
+.tracking-map-loading {
+  color: var(--tracking-muted);
+  font-size: var(--text-12);
+  border-radius: var(--space-9);
+  place-items: center;
+  display: grid;
+}
+
+.tracking-map .leaflet-tile-pane {
+  filter: saturate(.35);
+}
+
+.tracking-map .leaflet-control-attribution {
+  font-family: var(--font-body), sans-serif;
+  font-size: var(--text-9);
+}
+
+.tracking-map .leaflet-control-attribution a {
+  color: var(--tracking-green);
+}
+
+.tracking-map-marker {
+  border: 2px solid var(--color-007);
+  background: var(--color-043);
+  color: var(--color-007);
+  box-shadow: 0 2px 8px var(--color-046);
+  font: 700 var(--text-11) var(--font-body),
+    sans-serif;
+  border-radius: 50%;
+  place-items: center;
+  display: grid;
+}
+
+.tracking-map-marker.is-selected {
+  background: var(--tracking-accent);
+  box-shadow: 0 0 0 var(--space-5) var(--color-019);
+}
+
+.tracking-map-marker.is-stale {
+  background: var(--color-038);
+}
+
+.tracking-map-focus {
+  z-index: 800;
+  top: var(--space-12);
+  right: var(--space-12);
+  font-size: var(--text-10);
+  min-height: var(--space-32);
+  padding: var(--space-7) var(--space-10);
+  background: var(--color-007);
+  gap: var(--space-5);
+  position: absolute;
+}
+
+.tracking-map-focus .ui-icon {
+  width: var(--space-13);
+  height: var(--space-13);
+}
+
+.tracking-map-caption {
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-8) var(--space-10);
+  color: var(--tracking-muted);
+  background: var(--color-007);
+  font-size: var(--text-9);
+  flex-wrap: wrap;
+  display: flex;
+}
+
+.tracking-map-error {
+  z-index: 800;
+  inset: auto var(--space-12) var(--space-40);
+  background: var(--color-007);
+  padding: var(--space-8);
+  border: 1px solid var(--tracking-border);
+  border-radius: var(--space-6);
+  font-size: var(--text-10);
+  position: absolute;
+}
+
+.tracking-map-error button {
+  color: var(--tracking-green);
+  margin-left: var(--space-8);
+  text-decoration: underline;
+}
+
+.tracking-assignment {
+  padding: var(--space-18) 0 0;
+  animation: .22s both admin-content-in;
+}
+
+.tracking-assignment-heading {
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-12);
+  display: flex;
+}
+
+.tracking-assignment-heading small {
+  font-size: var(--text-10);
+  color: var(--tracking-muted);
+}
+
+.tracking-assignment-heading h3 {
+  font-size: var(--text-16);
+  margin-top: var(--space-3);
+  line-height: 1.5;
+}
+
+.tracking-assignment-heading .tracking-status {
+  margin-top: var(--space-5);
+}
+
+.tracking-assignment > p {
+  font-size: var(--text-11);
+  color: var(--tracking-muted);
+  margin-top: var(--space-5);
+}
+
+.tracking-address {
+  gap: var(--space-5);
+  align-items: center;
+  display: flex;
+}
+
+.tracking-address .ui-icon {
+  width: var(--space-13);
+  height: var(--space-13);
+  flex-shrink: 0;
+}
+
+.tracking-last-update {
+  gap: var(--space-6);
+  font-size: var(--text-10);
+  color: var(--tracking-muted);
+  margin: var(--space-14) 0;
+  align-items: center;
+  display: flex;
+}
+
+.tracking-last-update .ui-icon {
+  width: var(--space-13);
+  height: var(--space-13);
+}
+
+.tracking-last-update.is-stale {
+  color: var(--color-038);
+}
+
+.tracking-timeline {
+  padding: var(--space-14) 0;
+  border-block: 1px solid var(--tracking-border);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 0;
+  list-style: none;
+  display: grid;
+}
+
+.tracking-timeline li {
+  gap: var(--space-8);
+  font-size: var(--text-9);
+  color: var(--color-008);
+  text-align: center;
+  align-content: start;
+  justify-items: center;
+  display: grid;
+  position: relative;
+}
+
+.tracking-timeline li:not(:last-child):after {
+  content: "";
+  z-index: 0;
+  left: calc(50% + var(--space-12));
+  right: calc(-50% + var(--space-12));
+  top: var(--space-11);
+  background: var(--tracking-border);
+  height: 1px;
+  position: absolute;
+}
+
+.tracking-step-icon {
+  z-index: 1;
+  width: var(--space-22);
+  height: var(--space-22);
+  background: var(--color-002);
+  border: 1px solid var(--tracking-border);
+  border-radius: 50%;
+  place-items: center;
+  display: grid;
+  position: relative;
+}
+
+.tracking-step-icon .ui-icon {
+  width: var(--space-12);
+  height: var(--space-12);
+}
+
+.tracking-timeline .is-done {
+  color: var(--tracking-green);
+}
+
+.tracking-timeline .is-done .tracking-step-icon {
+  background: var(--color-022);
+  border-color: var(--color-028);
+}
+
+.tracking-timeline li[aria-current] .tracking-step-icon {
+  background: var(--tracking-green);
+  border-color: var(--tracking-green);
+  color: var(--color-007);
+}
+
+.tracking-timeline li[aria-current] > span:last-child {
+  font-weight: 700;
+}
+
+.tracking-assignment-actions {
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-12);
+  padding-top: var(--space-14);
+  display: flex;
+}
+
+.tracking-assignment-actions .button {
+  font-size: var(--text-11);
+  min-height: var(--space-32);
+  gap: var(--space-6);
+}
+
+.tracking-assignment-actions .ui-icon {
+  width: var(--space-13);
+  height: var(--space-13);
+}
+
+.tracking-assignment-actions .text-action {
+  align-items: center;
+  gap: var(--space-5);
+  font-size: var(--text-11);
+  display: flex;
+}
+
+.tracking-footer {
+  padding: var(--space-14) var(--space-24);
+  justify-content: space-between;
+  gap: var(--space-12);
+  background: var(--color-007);
+  flex-shrink: 0;
+}
+
+.tracking-footer > div:first-child {
+  gap: var(--space-3);
+  font-size: var(--text-11);
+  display: grid;
+}
+
+.tracking-footer small {
+  font-size: var(--text-10);
+  color: var(--tracking-muted);
+}
+
+.tracking-footer > div:last-child {
+  align-items: center;
+  gap: var(--space-8);
+  display: flex;
+}
+
+.tracking-footer .button {
+  font-size: var(--text-12);
+  min-height: var(--space-36);
+}
+
+.tracking-location-action {
+  font-size: var(--text-11);
+  align-items: center;
+  display: inline-flex;
+}
+
+.tracking-done {
+  display: none;
+}
+
+@media (max-width: 800px) {
+  .tracking-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tracking-roster-list {
+    padding-bottom: var(--space-5);
+    scroll-snap-type: x proximity;
+    display: flex;
+    overflow-x: auto;
+  }
+
+  .tracking-person {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+    width: 19rem;
+    min-width: 19rem;
+    max-width: 23rem;
+  }
+
+  .tracking-roster-footnote {
+    display: none;
+  }
+
+  .tracking-roster {
+    gap: var(--space-8);
+    grid-template-columns: minmax(0, 1fr) auto;
+    display: grid;
+  }
+
+  .tracking-roster-heading, .tracking-roster-list {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+
+  .tracking-roster > select {
+    width: auto;
+    max-width: 13rem;
+    margin: 0;
+  }
+
+  .tracking-content, .tracking-dialog > .modal-header {
+    padding: var(--space-16);
+  }
+
+  .tracking-footer {
+    padding: var(--space-12) var(--space-16);
+  }
+
+  .tracking-footer > div:first-child small {
+    display: none;
+  }
+
+  .tracking-map, .tracking-map-loading {
+    height: 23rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal.tracking-dialog {
+    width: calc(100vw - var(--space-16));
+    height: calc(100dvh - var(--space-24));
+  }
+
+  .tracking-note {
+    align-items: flex-start;
+  }
+
+  .tracking-note p {
+    font-size: var(--text-10);
+    line-height: 1.5;
+  }
+
+  .tracking-assignment-heading {
+    gap: var(--space-3);
+    flex-direction: column;
+  }
+
+  .tracking-footer {
+    align-items: stretch;
+    gap: var(--space-8);
+    flex-direction: column;
+  }
+
+  .tracking-footer > div:first-child {
+    display: none;
+  }
+
+  .tracking-footer > div:last-child {
+    justify-content: space-between;
+  }
+
+  .tracking-footer .button {
+    padding: var(--space-8) var(--space-10);
+    font-size: var(--text-11);
+  }
+
+  .tracking-done {
+    display: inline-flex;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tracking-assignment {
+    animation: none;
+  }
+
+  .tracking-person {
+    transition: none;
+  }
+}
+
+/*# sourceMappingURL=%5Bproject%5D_app_tracking_css_1igg3k2-ikub5._.single.css.map*/

@@ -140,11 +140,11 @@ export const resources: Record<
       {
         name: 'skills',
         label: 'Keahlian petugas',
-        kind: 'textarea',
+        kind: 'multiselect',
         required: true,
-        lines: true,
-        placeholder: 'Deep cleaning\nCuci AC\nCuci sofa',
-        hint: 'Tulis satu keahlian per baris.',
+        options: [],
+        hint: 'Pilih layanan yang dikuasai. Bisa lebih dari satu.',
+        emptyMessage: 'Belum ada layanan. Tambahkan layanan di Kelola Layanan.',
       },
       {
         name: 'status',

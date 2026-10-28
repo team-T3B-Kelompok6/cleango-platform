@@ -1,0 +1,480 @@
+/* [project]/app/staff-profile.css [app-client] (css) */
+.modal.staff-profile-dialog {
+  width: min(580px, 100vw - 32px);
+}
+
+.staff-profile-dialog > .modal-header {
+  background: var(--surface);
+  padding: 24px;
+}
+
+.staff-profile-dialog .modal-heading {
+  align-items: center;
+}
+
+.staff-profile-dialog .modal-heading-icon {
+  border-radius: 14px;
+  width: 44px;
+  height: 44px;
+}
+
+.staff-profile-dialog .modal-heading-icon .ui-icon {
+  width: 23px;
+  height: 23px;
+}
+
+.staff-profile-dialog .modal-header p {
+  line-height: 1.55;
+}
+
+.staff-profile-body {
+  overscroll-behavior: contain;
+  flex-direction: column;
+  gap: 18px;
+  padding: 24px;
+  display: flex;
+}
+
+.staff-profile-summary {
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-card);
+  background: var(--surface-soft);
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  display: flex;
+}
+
+.staff-profile-avatar {
+  border: 1px solid var(--color-053);
+  width: 50px;
+  height: 50px;
+  color: var(--ui-accent);
+  background: var(--ui-accent-soft);
+  border-radius: 14px;
+  flex-shrink: 0;
+  place-items: center;
+  font-size: 17px;
+  font-weight: 700;
+  display: grid;
+}
+
+.staff-profile-identity {
+  flex: 1;
+  min-width: 0;
+}
+
+.staff-profile-name {
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 5px 8px;
+  display: flex;
+}
+
+.staff-profile-name h3 {
+  font-size: var(--ui-text-record);
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+
+.staff-profile-id {
+  border: 1px solid var(--color-053);
+  background: var(--ui-accent-soft);
+  color: var(--ui-accent);
+  font-size: var(--ui-text-small);
+  overflow-wrap: anywhere;
+  border-radius: 20px;
+  padding: 1px 7px;
+  line-height: 1.65;
+}
+
+.staff-profile-summary > .status-badge {
+  margin-left: 64px;
+}
+
+.staff-profile-phone {
+  color: var(--ui-muted);
+  font-size: var(--ui-text-meta);
+  overflow-wrap: anywhere;
+  align-items: center;
+  gap: 5px;
+  line-height: 1.65;
+  display: flex;
+}
+
+.staff-profile-phone > .ui-icon {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+}
+
+.staff-copy-link {
+  width: 30px;
+  height: 30px;
+  color: var(--ui-accent);
+  border-radius: 7px;
+  flex-shrink: 0;
+  place-items: center;
+  display: grid;
+}
+
+.staff-copy-link:hover {
+  background: var(--ui-accent-soft);
+}
+
+.staff-copy-link .ui-icon {
+  width: 15px;
+  height: 15px;
+}
+
+.staff-profile-contact small {
+  color: var(--ui-muted);
+  font-size: var(--ui-text-small);
+  line-height: 1.55;
+  display: block;
+}
+
+.staff-profile-contact .staff-contact-warning {
+  color: var(--ui-amber);
+}
+
+.staff-profile-history {
+  color: var(--ui-muted);
+  font-size: var(--ui-text-small);
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  line-height: 1.55;
+  display: flex;
+}
+
+.staff-profile-history span {
+  align-items: center;
+  gap: 4px;
+  display: inline-flex;
+}
+
+.staff-profile-history .ui-icon {
+  color: var(--ui-amber);
+  width: 13px;
+  height: 13px;
+}
+
+.staff-profile-facts {
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 0;
+  display: grid;
+}
+
+.staff-profile-facts > div {
+  border: 1px solid var(--ui-border);
+  background: var(--surface-soft);
+  border-radius: 11px;
+  min-width: 0;
+  padding: 13px 14px;
+}
+
+.staff-profile-facts dt {
+  color: var(--ui-muted);
+  font-size: var(--ui-text-meta);
+  margin-bottom: 5px;
+  line-height: 1.5;
+}
+
+.staff-profile-facts dd {
+  font-size: var(--ui-text-control);
+  overflow-wrap: anywhere;
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.staff-profile-facts dd .muted {
+  font-weight: 400;
+}
+
+.staff-profile-task {
+  border: 1px solid var(--color-053);
+  border-radius: var(--ui-radius-card);
+  background: var(--color-048);
+  font-size: var(--ui-text-meta);
+  padding: 16px;
+  line-height: 1.65;
+}
+
+.staff-profile-section-heading {
+  color: var(--ui-accent);
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px 12px;
+  margin-bottom: 9px;
+  display: flex;
+}
+
+.staff-profile-section-heading h3 {
+  font-size: var(--ui-text-small);
+  text-transform: uppercase;
+  letter-spacing: .035em;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.6;
+  display: flex;
+}
+
+.staff-profile-section-heading i {
+  background: var(--ui-accent);
+  border-radius: 50%;
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+}
+
+.staff-profile-task strong {
+  font-size: var(--ui-text-control);
+  line-height: 1.6;
+  display: block;
+}
+
+.staff-profile-task p {
+  color: var(--ui-muted);
+  overflow-wrap: anywhere;
+  margin-top: 4px;
+}
+
+.staff-profile-task-footer {
+  color: var(--ui-muted);
+  font-size: var(--ui-text-small);
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px 12px;
+  margin-top: 10px;
+  display: flex;
+}
+
+.staff-profile-task a {
+  color: var(--ui-accent);
+  align-items: center;
+  gap: 3px;
+  font-weight: 600;
+  display: inline-flex;
+}
+
+.staff-profile-task a:hover {
+  text-decoration: underline;
+}
+
+.staff-profile-task .ui-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.staff-profile-task .staff-profile-schedule-link {
+  margin-top: 12px;
+}
+
+.staff-profile-task .staff-profile-data-note {
+  color: var(--ui-amber);
+}
+
+.staff-profile-note {
+  background: var(--ui-accent-soft);
+  border: 1px solid var(--color-053);
+  border-radius: var(--ui-radius-card);
+  font-size: var(--ui-text-meta);
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  line-height: 1.7;
+  display: flex;
+}
+
+.staff-profile-note img {
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.staff-profile-note strong {
+  color: var(--ui-accent-hover);
+  font-weight: 600;
+}
+
+.staff-profile-note p {
+  color: var(--ui-muted);
+  margin-top: 4px;
+}
+
+.staff-profile-footer {
+  background: var(--surface-soft);
+  flex-shrink: 0;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 20px;
+}
+
+.staff-profile-footer .button {
+  font-size: var(--ui-text-control);
+  white-space: nowrap;
+  min-height: 42px;
+  padding: 10px 12px;
+}
+
+.staff-profile-close {
+  background: none;
+  border-color: #0000;
+  margin-right: auto;
+}
+
+.staff-profile-footer .staff-whatsapp-action {
+  background: var(--ui-accent-soft);
+  color: var(--ui-accent);
+  border-color: var(--color-053);
+}
+
+.staff-profile-footer .staff-whatsapp-action:hover {
+  background: var(--color-058);
+}
+
+.staff-profile-dialog .next-form .form-grid {
+  grid-template-columns: 1fr;
+}
+
+@media (max-width: 560px) {
+  .staff-profile-dialog > .modal-header, .staff-profile-body {
+    padding: 18px;
+  }
+
+  .staff-profile-dialog .modal-heading {
+    gap: 10px;
+  }
+
+  .staff-profile-dialog .modal-heading-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .staff-profile-footer {
+    grid-template-columns: 1fr 1fr;
+    padding: 14px;
+    display: grid;
+  }
+
+  .staff-profile-footer .button {
+    white-space: normal;
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  .staff-profile-close {
+    grid-area: 2 / 1 / auto / -1;
+    margin-right: 0;
+  }
+}
+
+@media (max-width: 400px) {
+  .staff-profile-facts {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .staff-profile-note {
+    gap: 10px;
+    padding: 14px;
+  }
+}
+
+.service-skills {
+  max-height: 240px;
+  margin-bottom: 0;
+  overflow-y: auto;
+}
+
+.service-skills label {
+  min-width: 0;
+}
+
+.service-skills input {
+  flex-shrink: 0;
+}
+
+.service-skills .staff-option-copy {
+  overflow-wrap: anywhere;
+}
+
+.staff-photo {
+  border: 1px solid var(--border);
+  background: var(--ui-accent-soft);
+  width: 40px;
+  height: 40px;
+  color: var(--ui-accent);
+  border-radius: 50%;
+  flex-shrink: 0;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-grid;
+  overflow: hidden;
+}
+
+.staff-photo img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.staff-photo-large {
+  width: 72px;
+  height: 72px;
+  font-size: 22px;
+}
+
+.staff-photo-small {
+  width: 28px;
+  height: 28px;
+  font-size: 11px;
+}
+
+.staff-photo-field {
+  margin-bottom: 22px;
+}
+
+.staff-photo-field > strong {
+  color: var(--service-field-label);
+  font-size: var(--text-12);
+  margin-bottom: 10px;
+  font-weight: 600;
+  display: block;
+}
+
+.staff-photo-controls, .staff-photo-actions, .staff-name-with-photo, .order-assigned-staff, .assigned-staff-person {
+  align-items: center;
+  gap: 10px;
+  display: flex;
+}
+
+.staff-photo-controls {
+  gap: 16px;
+}
+
+.staff-photo-controls .field-hint {
+  margin-top: 8px;
+  display: block;
+}
+
+.order-assigned-staff {
+  flex-wrap: wrap;
+}
+
+.assigned-staff-person {
+  gap: 7px;
+}
+
+.compact-staff .staff-option-copy {
+  flex: 1;
+}
+
+/*# sourceMappingURL=%5Bproject%5D_app_staff-profile_css_1igg3k2-ikub5._.single.css.map*/

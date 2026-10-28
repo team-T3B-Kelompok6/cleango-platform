@@ -36,6 +36,7 @@ function categoryRecord(value: unknown, resource: CategoryResource): Category {
     id: String(item.id),
     name: native && item.name === 'Sofa dan Kasur' ? 'Sofa' : item.name,
     resource,
+    icon: typeof item.icon === 'string' ? item.icon : null,
   };
 }
 

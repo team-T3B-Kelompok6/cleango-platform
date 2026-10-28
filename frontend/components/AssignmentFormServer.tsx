@@ -7,6 +7,7 @@ import { assignmentIssue } from '@/lib/staff-schedules';
 import { isDemoId } from '@/lib/cleaner/demo-store';
 import { recommendedSkills } from '@/lib/staff-availability';
 import { withOrderWorkTimes } from '@/lib/order-work-times';
+import { staffPhotoSource } from '@/lib/staff-photo';
 export async function AssignmentFormServer({ order }: { order: Order }) {
   const [staff, schedules, orders] = await Promise.all([
     list<Staff>('staff'),
@@ -48,6 +49,12 @@ export async function AssignmentFormServer({ order }: { order: Order }) {
             label: 'Petugas sesuai jadwal',
             kind: 'multiselect',
             options: available.map((person) => person.name),
+            optionPhotos: Object.fromEntries(
+              available.map((person) => [
+                person.name,
+                staffPhotoSource(person.photoUrl),
+              ]),
+            ),
             recommendedOptions: available
               .filter((person) => recommendedSkills(person, order).length > 0)
               .map((person) => person.name),

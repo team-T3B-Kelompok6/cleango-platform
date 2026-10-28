@@ -1,0 +1,342 @@
+/* [project]/app/overrides.css [app-client] (css) */
+.login-submit > .button {
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.login-panda {
+  place-items: center;
+  display: grid;
+}
+
+.notification-popover {
+  flex-direction: column;
+  max-height: calc(100dvh - 7rem);
+  display: flex;
+}
+
+.notification-body {
+  overscroll-behavior: contain;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.notification-item {
+  padding: var(--space-15) var(--space-21);
+  border-bottom: 1px solid var(--border);
+  line-height: 1.6;
+}
+
+.notification-item:hover {
+  background: var(--color-156);
+}
+
+.notification-popover > .modal-footer {
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.next-form .form-grid > div {
+  gap: var(--space-7-2);
+  flex-direction: column;
+  min-width: 0;
+  display: flex;
+}
+
+.next-form .form-grid > div > label {
+  color: var(--color-126);
+  font-weight: 600;
+}
+
+.next-form .form-grid > .full-width {
+  grid-column: 1 / -1;
+}
+
+.next-form .field-hint {
+  color: var(--design-muted);
+  font-size: var(--text-10);
+  line-height: 1.5;
+}
+
+.modal[open]:not(.sop-dialog) {
+  flex-direction: column;
+  display: flex;
+  overflow: hidden;
+}
+
+.modal:not(.sop-dialog) > .modal-header {
+  flex-shrink: 0;
+}
+
+.modal:not(.sop-dialog) > .next-form {
+  flex-flow: column;
+  flex: 1;
+  align-items: stretch;
+  gap: 0;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+}
+
+.modal:not(.sop-dialog) .next-form > .modal-body {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  overflow-y: auto;
+}
+
+.modal:not(.sop-dialog) > .modal-body {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.modal .next-form > .modal-footer {
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.activity-list {
+  gap: var(--space-12);
+  flex-direction: column;
+  display: flex;
+}
+
+.next-filter {
+  gap: var(--space-18);
+  margin-top: var(--space-18);
+  margin-bottom: var(--space-18);
+  flex-direction: column;
+  display: flex;
+}
+
+.next-filter .date-filter-anchor {
+  align-self: flex-end;
+}
+
+.global-search {
+  width: min(32.5rem, 100%);
+  min-width: 0;
+}
+
+.order-list {
+  min-width: 0;
+}
+
+.record-detail {
+  line-height: 1.7;
+}
+
+.record-detail dd {
+  white-space: pre-line;
+}
+
+.admin-heading-actions > form {
+  align-items: center;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+  display: flex;
+}
+
+.admin-heading-actions > form input {
+  padding: var(--space-7-8);
+  border: 1px solid var(--border);
+  border-radius: .5rem;
+}
+
+.faq-design-row {
+  min-width: 0;
+}
+
+.faq-design-row strong, .figma-person-main p, .figma-service-top h3, .finance-metrics .metric-value {
+  overflow-wrap: anywhere;
+}
+
+.mobile-nav-panel .nav-link.active {
+  color: var(--color-007);
+}
+
+@media (max-width: 700px) {
+  .header {
+    padding: 0 var(--space-15);
+    gap: var(--space-12);
+  }
+
+  .header .mobile-toggle {
+    display: block;
+  }
+
+  .header-right {
+    gap: var(--space-9);
+    margin-left: auto;
+  }
+
+  .global-search {
+    display: none;
+  }
+
+  .page-title {
+    flex-wrap: wrap;
+  }
+
+  .next-filter .date-filter-anchor {
+    align-self: flex-start;
+  }
+
+  .order-actions, .order-info {
+    flex-wrap: wrap;
+  }
+
+  .order-info > span {
+    overflow-wrap: anywhere;
+    flex-basis: 100%;
+    min-width: 0;
+  }
+
+  .order-card-top {
+    flex-wrap: wrap;
+  }
+
+  .notification-popover {
+    width: min(35rem, 100vw - 2rem);
+    right: -5rem;
+  }
+
+  .date-popover {
+    width: min(29rem, 100vw - 3rem);
+  }
+
+  .record-page .page-title .button {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .finance-order-row {
+    gap: var(--space-12);
+    flex-wrap: wrap;
+  }
+}
+
+.staff-fieldset {
+  border: 0;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.staff-fieldset legend {
+  color: var(--color-126);
+  margin-bottom: var(--space-9-6);
+  font-weight: 600;
+}
+
+.compact-staff {
+  gap: var(--space-9);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: grid;
+}
+
+.compact-staff label {
+  gap: var(--space-8-4);
+  padding: var(--space-12);
+  border: 1px solid var(--border);
+  background: var(--color-067);
+  border-radius: .65rem;
+  align-items: center;
+  display: flex;
+}
+
+.compact-staff input {
+  width: auto;
+  accent-color: var(--green);
+}
+
+.assignment-summary {
+  padding: var(--space-18) var(--space-24);
+  border-bottom: 1px solid var(--border);
+  background: var(--color-067);
+  flex-shrink: 0;
+}
+
+.assignment-summary p {
+  color: var(--muted);
+  margin-top: var(--space-6);
+}
+
+.modal.order-form-dialog > .next-form {
+  flex: 1;
+}
+
+.mobile-search {
+  display: none;
+}
+
+.next-filter[aria-busy="true"] .order-tabs {
+  opacity: .65;
+}
+
+@media (max-width: 700px) {
+  .mobile-search.global-search {
+    width: 100%;
+    margin-bottom: var(--space-18);
+    display: flex;
+  }
+
+  .compact-staff {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mobile-toggle {
+  padding: var(--space-9);
+  color: var(--text);
+  border-radius: .65rem;
+}
+
+.mobile-toggle:hover {
+  background: var(--surface-soft);
+}
+
+.next-date-filter {
+  position: relative;
+}
+
+.admin-heading-actions {
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  display: flex;
+}
+
+.faq-filter-bar .next-filter {
+  flex: 1;
+  gap: 0;
+  min-width: 0;
+  margin: 0;
+}
+
+.faq-in-page-search, .faq-filter-bar .order-tabs {
+  margin: 0;
+}
+
+@media (max-width: 700px) {
+  .admin-heading-actions {
+    width: 100%;
+  }
+
+  .admin-heading-actions > .admin-add {
+    flex: 1;
+  }
+
+  .next-date-filter .date-popover {
+    left: 0;
+    right: auto;
+  }
+
+  .faq-filter-bar .next-filter {
+    flex-basis: 100%;
+    width: 100%;
+  }
+}
+
+/*# sourceMappingURL=%5Bproject%5D_app_overrides_css_1igg3k2-ikub5._.single.css.map*/

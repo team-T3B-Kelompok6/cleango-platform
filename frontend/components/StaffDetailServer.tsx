@@ -7,6 +7,8 @@ import { Badge } from './StatusBadge';
 import { UiIcon } from './UiIcon';
 import { StaffDetailModal, StaffPhone } from './StaffDetailModal';
 import { ResourceFormServer } from './ResourceFormServer';
+import { StaffAvatar } from './StaffAvatar';
+import { staffPhotoSource } from '@/lib/staff-photo';
 import { orderTimeText } from '@/lib/order-flow';
 import { withOrderWorkTimes } from '@/lib/order-work-times';
 import {
@@ -71,14 +73,6 @@ export async function StaffDetailServer({
   const skills = Array.isArray(staff.skills)
     ? staff.skills.filter((skill) => typeof skill === 'string' && skill.trim())
     : [];
-  const initials =
-    staff.name
-      .trim()
-      .split(/\s+/)
-      .slice(0, 2)
-      .map((name) => name[0])
-      .join('')
-      .toUpperCase() || 'PT';
   const status = staffOperationalStatus(staff, orders ?? []);
   const phone = typeof staff.phone === 'string' ? staff.phone : '';
   const href = staff.id.startsWith('DEMO-')
@@ -92,9 +86,11 @@ export async function StaffDetailServer({
   const profile = (
     <>
       <section className="staff-profile-summary" aria-label="Profil petugas">
-        <span className="staff-profile-avatar" aria-hidden="true">
-          {initials}
-        </span>
+        <StaffAvatar
+          name={staff.name}
+          src={staffPhotoSource(staff.photoUrl)}
+          className="staff-profile-avatar"
+        />
         <div className="staff-profile-identity">
           <div className="staff-profile-name">
             <h3>{staff.name}</h3>
