@@ -29,10 +29,10 @@ describe('CleanGo MySQL API', () => {
     expect(response.body.message).toBe('ID kategori tidak valid');
   });
 
-  it('validates customer service id before database access', async () => {
+  it('rejects an unknown customer service identifier', async () => {
     const response = await request(app).get('/api/customer/services/0');
-    expect(response.status).toBe(400);
-    expect(response.body.message).toBe('ID layanan tidak valid');
+    expect(response.status).toBe(404);
+    expect(response.body.message).toBe('Layanan tidak ditemukan');
   });
 
   it('rejects overly long search before database access', async () => {

@@ -95,6 +95,98 @@ export async function findServiceInclusions(
   return rows;
 }
 
+export interface ServiceReviewStats {
+  rating: number | null;
+  reviewCount: number;
+  satisfactionPercentage: number;
+}
+
+export interface PublicServiceReview {
+  id: string;
+  name: string;
+  avatarUrl: string | null;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  photos: string[];
+}
+
+interface ServiceReviewRow extends RowDataPacket {
+  id: number;
+  name: string;
+  avatarUrl: string | null;
+  rating: number;
+  comment: string | null;
+  createdAt: Date;
+}
+
+export async function findServiceReviewStats(
+  serviceId: number,
+): Promise<ServiceReviewStats> {
+  const [rows] = await pool.execute<RowDataPacket[]>(
+    `SELECT COUNT(*) AS reviewCount, AVG(r.rating) AS rating,
+            ROUND(AVG(r.rating >= 4) * 100) AS satisfactionPercentage
+     FROM reviews r
+     INNER JOIN bookings b ON b.id = r.booking_id
+     WHERE r.service_id = ? AND b.status = 'completed'`,
+    [serviceId],
+  );
+  const row = rows[0];
+  return {
+    rating: row?.rating === null || row?.rating === undefined
+      ? null
+      : Number(row.rating),
+    reviewCount: Number(row?.reviewCount ?? 0),
+    satisfactionPercentage: Number(row?.satisfactionPercentage ?? 0),
+  };
+}
+
+export async function listServiceReviews(
+  serviceId: number,
+  page: number,
+  limit: number,
+): Promise<PublicServiceReview[]> {
+  const offset = (page - 1) * limit;
+  const [rows] = await pool.execute<ServiceReviewRow[]>(
+    `SELECT r.id, u.name, u.avatar_url AS avatarUrl, r.rating,
+            r.comment, r.created_at AS createdAt
+     FROM reviews r
+     INNER JOIN users u ON u.id = r.customer_id
+     INNER JOIN bookings b ON b.id = r.booking_id
+     WHERE r.service_id = ? AND b.status = 'completed'
+     ORDER BY r.created_at DESC, r.id DESC
+     LIMIT ? OFFSET ?`,
+    [serviceId, limit, offset],
+  );
+  if (rows.length === 0) return [];
+
+  const reviewIds = rows.map((row) => Number(row.id));
+  const [photoRows] = await pool.query<RowDataPacket[]>(
+    `SELECT review_id AS reviewId, photo_url AS url
+     FROM review_photos
+     WHERE review_id IN (?)
+     ORDER BY sort_order ASC, id ASC`,
+    [reviewIds],
+  );
+  const photos = new Map<number, string[]>();
+  for (const photo of photoRows) {
+    const reviewId = Number(photo.reviewId);
+    const list = photos.get(reviewId) ?? [];
+    list.push(String(photo.url));
+    photos.set(reviewId, list);
+  }
+
+  return rows.map((row) => ({
+    id: String(row.id),
+    name: row.name,
+    avatarUrl: row.avatarUrl ?? null,
+    rating: Number(row.rating),
+    comment: row.comment ?? '',
+    createdAt: new Date(row.createdAt).toISOString(),
+    photos: photos.get(Number(row.id)) ?? [],
+  }));
+}
+
 export async function insertService(input: ServiceInput): Promise<Service> {
   const slug = `${
     input.name

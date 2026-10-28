@@ -1,5 +1,8 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
+import type { PoolConnection } from 'mysql2/promise';
+import { canTransition, type BookingStatus } from '../lib/order-status.js';
+import { decryptLinkToken, encryptLinkToken } from '../lib/link-token.js';
 import { pool } from '../lib/db.js';
 import { AppError } from '../lib/AppError.js';
 
@@ -21,6 +24,7 @@ export interface TaskRow extends RowDataPacket {
   cleanerId: number;
   linkStatus: LinkStatus;
   linkExpiresAt: Date;
+  linkTokenEnc: string | null;
   departedAt: Date | null;
   arrivedAt: Date | null;
   startedAt: Date | number | null;
@@ -48,10 +52,12 @@ export interface TaskRow extends RowDataPacket {
 
 const TASK_SELECT = `SELECT ca.id AS assignmentId, b.id AS bookingId, b.customer_id AS customerId,
   ca.cleaner_id AS cleanerId, ca.link_status AS linkStatus, ca.link_expires_at AS linkExpiresAt,
+  ca.link_token_enc AS linkTokenEnc,
   ca.updated_at AS updatedAt,
   b.status AS orderStatus, u.name AS customerName, u.phone AS customerPhone,
   CONCAT_WS(', ', a.street_address, a.city, a.province) AS address,
-  s.name AS serviceName, s.duration_minutes AS serviceDurationMinutes,
+  s.name AS serviceName,
+  COALESCE(b.service_duration_minutes, s.duration_minutes) AS serviceDurationMinutes,
   cl.name AS staffName, DATE_FORMAT(b.scheduled_date, '%Y-%m-%d') AS orderDate,
   TIME_FORMAT(b.scheduled_start_time, '%H:%i') AS orderTime,
   COALESCE(b.customer_notes, '') AS notes,
@@ -156,16 +162,86 @@ export async function saveStage(
   );
 }
 
+async function settleCashOnCompletion(
+  connection: PoolConnection,
+  bookingId: number,
+  total: number,
+): Promise<void> {
+  const [rows] = await connection.execute<RowDataPacket[]>(
+    'SELECT id, method, status FROM payments WHERE booking_id = ? FOR UPDATE',
+    [bookingId],
+  );
+  const payment = rows[0];
+  if (!payment) {
+    await connection.execute(
+      `INSERT INTO payments (booking_id, method, amount, status, paid_at)
+       VALUES (?, 'cash', ?, 'paid', NOW())`,
+      [bookingId, total],
+    );
+    return;
+  }
+  if (String(payment.method) === 'cash' && String(payment.status) !== 'paid') {
+    await connection.execute(
+      "UPDATE payments SET status = 'paid', paid_at = NOW() WHERE id = ?",
+      [Number(payment.id)],
+    );
+  }
+}
+
 export async function syncBookingStatus(
   bookingId: number,
   stage: TaskStage,
+  actor: {
+    type: 'cleaner' | 'admin' | 'system';
+    userId?: number | null;
+    cleanerId?: number | null;
+  } = { type: 'system' },
 ): Promise<void> {
-  await pool.execute(
-    `UPDATE bookings SET status = ?,
-       completed_at = CASE WHEN ? = 'completed' AND completed_at IS NULL THEN NOW() ELSE completed_at END
-     WHERE id = ?`,
-    [STAGE_STATUS[stage], stage, bookingId],
-  );
+  const next = STAGE_STATUS[stage] as BookingStatus;
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [rows] = await connection.execute<RowDataPacket[]>(
+      'SELECT status, total_amount AS total FROM bookings WHERE id = ? FOR UPDATE',
+      [bookingId],
+    );
+    if (!rows[0]) {
+      await connection.rollback();
+      return;
+    }
+    const current = rows[0].status as BookingStatus;
+    // Repeated or late cleaner events keep the current stage instead of
+    // reopening an earlier one.
+    if (current === next || !canTransition(current, next)) {
+      await connection.rollback();
+      return;
+    }
+    await connection.execute(
+      `UPDATE bookings SET status = ?,
+         completed_at = CASE WHEN ? = 'completed' AND completed_at IS NULL THEN NOW() ELSE completed_at END
+       WHERE id = ?`,
+      [next, next, bookingId],
+    );
+    if (next === 'completed') {
+      await settleCashOnCompletion(connection, bookingId, Number(rows[0].total));
+    }
+    await connection.execute(
+      `INSERT INTO booking_status_history
+         (booking_id, status, actor_type, actor_user_id, actor_cleaner_id)
+       VALUES (?, ?, ?, ?, ?)`,
+      [bookingId, next, actor.type, actor.userId ?? null, actor.cleanerId ?? null],
+    );
+    await connection.commit();
+  } catch (error) {
+    try {
+      await connection.rollback();
+    } catch {
+      // rollback after an explicit rollback is a no-op
+    }
+    throw error;
+  } finally {
+    connection.release();
+  }
 }
 
 export async function rotateLink(
@@ -175,9 +251,9 @@ export async function rotateLink(
   const expiresAt = linkExpiresAt();
   await pool.execute(
     `UPDATE cleaner_assignments
-     SET link_token_hash = ?, link_expires_at = ?, link_status = 'active'
+     SET link_token_hash = ?, link_token_enc = ?, link_expires_at = ?, link_status = 'active'
      WHERE id = ?`,
-    [hashToken(token), expiresAt, assignmentId],
+    [hashToken(token), encryptLinkToken(token), expiresAt, assignmentId],
   );
   return { token, expiresAt };
 }
@@ -289,4 +365,153 @@ export function assertUsable(row: TaskRow): void {
       410,
       'Link tugas sudah kedaluwarsa. Minta link baru kepada admin.',
     );
+}
+
+export class AssignmentConflictError extends Error {
+  constructor(
+    public readonly bookingCode: string,
+    public readonly startTime: string,
+  ) {
+    super('ASSIGNMENT_CONFLICT');
+  }
+}
+
+/** Minutes since midnight for a `HH:MM(:SS)` value. */
+export function timeToMinutes(value: string): number {
+  const [hours = 0, minutes = 0] = value.split(':').map(Number);
+  return hours * 60 + minutes;
+}
+
+export function intervalsOverlap(
+  startA: number,
+  durationA: number,
+  startB: number,
+  durationB: number,
+): boolean {
+  return startA < startB + durationB && startB < startA + durationA;
+}
+
+// shortcut: only the work interval is compared; travel time is not modelled yet.
+export async function ensureLinkPath(row: { assignmentId: number; linkTokenEnc: string | null }): Promise<string | undefined> {
+  const existing = decryptLinkToken(row.linkTokenEnc);
+  if (existing) return `/tugas/${existing}`;
+  // Links issued before encrypted storage only keep a hash; rotate once to
+  // make the admin monitor usable again.
+  const rotated = await rotateLink(row.assignmentId);
+  row.linkTokenEnc = encryptLinkToken(rotated.token);
+  return `/tugas/${rotated.token}`;
+}
+
+export function linkPathFor(row: { linkTokenEnc: string | null }): string | undefined {
+  const token = decryptLinkToken(row.linkTokenEnc);
+  return token ? `/tugas/${token}` : undefined;
+}
+
+export async function assignCleaner(input: {
+  bookingId: number;
+  cleanerId: number;
+  adminId: number;
+  token: string;
+  expiresAt: Date;
+}): Promise<void> {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [bookingRows] = await connection.execute<RowDataPacket[]>(
+      `SELECT b.booking_code AS code,
+         DATE_FORMAT(b.scheduled_date, '%Y-%m-%d') AS date,
+         TIME_FORMAT(b.scheduled_start_time, '%H:%i') AS startTime,
+         COALESCE(b.service_duration_minutes, s.duration_minutes, 60) AS duration
+       FROM bookings b
+       INNER JOIN services s ON s.id = b.service_id
+       WHERE b.id = ? FOR UPDATE`,
+      [input.bookingId],
+    );
+    const booking = bookingRows[0];
+    if (!booking) {
+      await connection.rollback();
+      throw new AppError(404, 'Pesanan tidak ditemukan.');
+    }
+
+    // Serialize assignments per cleaner for the same day.
+    await connection.execute('SELECT id FROM cleaners WHERE id = ? FOR UPDATE', [
+      input.cleanerId,
+    ]);
+    const [busyRows] = await connection.execute<RowDataPacket[]>(
+      `SELECT b.booking_code AS code,
+         TIME_FORMAT(b.scheduled_start_time, '%H:%i') AS startTime,
+         COALESCE(b.service_duration_minutes, s.duration_minutes, 60) AS duration
+       FROM cleaner_assignments ca
+       INNER JOIN bookings b ON b.id = ca.booking_id
+       INNER JOIN services s ON s.id = b.service_id
+       WHERE ca.cleaner_id = ? AND b.scheduled_date = ? AND b.id <> ?
+         AND ca.link_status <> 'revoked'
+         AND b.status NOT IN ('cancelled', 'rescheduled', 'completed')`,
+      [input.cleanerId, booking.date, input.bookingId],
+    );
+    const start = timeToMinutes(String(booking.startTime));
+    const duration = Number(booking.duration);
+    const clash = busyRows.find((row) =>
+      intervalsOverlap(
+        start,
+        duration,
+        timeToMinutes(String(row.startTime)),
+        Number(row.duration),
+      ),
+    );
+    if (clash) {
+      await connection.rollback();
+      throw new AssignmentConflictError(String(clash.code), String(clash.startTime));
+    }
+
+    await connection.execute(
+      `INSERT INTO cleaner_assignments
+         (booking_id, cleaner_id, assigned_by, link_token_hash, link_token_enc, link_expires_at)
+       VALUES (?, ?, ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE
+         cleaner_id = VALUES(cleaner_id),
+         assigned_by = VALUES(assigned_by),
+         assigned_at = NOW(),
+         link_token_hash = VALUES(link_token_hash),
+         link_token_enc = VALUES(link_token_enc),
+         link_expires_at = VALUES(link_expires_at),
+         link_status = 'active'`,
+      [
+        input.bookingId,
+        input.cleanerId,
+        input.adminId,
+        hashToken(input.token),
+        encryptLinkToken(input.token),
+        input.expiresAt,
+      ],
+    );
+    await connection.commit();
+  } catch (error) {
+    try {
+      await connection.rollback();
+    } catch {
+      // rollback after an explicit rollback is a no-op
+    }
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
+/**
+ * Claims an idempotency key for one assignment. Returns false when the same
+ * key was already processed, so the caller can answer without repeating side
+ * effects.
+ */
+export async function claimEventKey(
+  assignmentId: number,
+  eventKey: string,
+  kind: string,
+): Promise<boolean> {
+  const [result] = await pool.execute<ResultSetHeader>(
+    `INSERT IGNORE INTO cleaner_event_keys (assignment_id, event_key, kind)
+     VALUES (?, ?, ?)`,
+    [assignmentId, eventKey, kind],
+  );
+  return result.affectedRows > 0;
 }

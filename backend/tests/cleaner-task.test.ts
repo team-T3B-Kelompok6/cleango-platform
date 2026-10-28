@@ -9,6 +9,17 @@ vi.mock('../src/model/user.model.js', async (original) => ({
 
 const taskModel = vi.hoisted(() => ({
   assertUsable: vi.fn(),
+  assignCleaner: vi.fn(),
+  claimEventKey: vi.fn(),
+  ensureLinkPath: vi.fn(),
+  AssignmentConflictError: class AssignmentConflictError extends Error {
+    constructor(
+      public bookingCode: string,
+      public startTime: string,
+    ) {
+      super('ASSIGNMENT_CONFLICT');
+    }
+  },
   createLinkToken: vi.fn(() => 'token-raw'),
   deletePhoto: vi.fn(),
   findAssignmentByTokenHash: vi.fn(),
@@ -80,6 +91,9 @@ beforeEach(() => {
   taskModel.stageOf.mockReturnValue('assigned');
   taskModel.findAssignmentByTokenHash.mockResolvedValue(row);
   taskModel.listPhotos.mockResolvedValue([]);
+  taskModel.claimEventKey.mockResolvedValue(true);
+  taskModel.ensureLinkPath.mockResolvedValue(undefined);
+  taskModel.assignCleaner.mockResolvedValue(undefined);
   taskModel.listActiveAssignments.mockResolvedValue([row]);
   db.pool.query.mockResolvedValue([[{ id: 3, name: 'Sari' }], []]);
   db.pool.execute.mockResolvedValue([{}, []]);
@@ -136,7 +150,21 @@ describe('cleaner task page token', () => {
       .send({ kind: 'depart' });
     expect(response.status).toBe(200);
     expect(taskModel.saveStage).toHaveBeenCalledWith(7, 'en_route');
-    expect(taskModel.syncBookingStatus).toHaveBeenCalledWith(9, 'en_route');
+    expect(taskModel.syncBookingStatus).toHaveBeenCalledWith(9, 'en_route', {
+      type: 'cleaner',
+      cleanerId: 3,
+    });
+  });
+
+  it('returns the current task without repeating a processed event', async () => {
+    taskModel.claimEventKey.mockResolvedValue(false);
+    const response = await request(app)
+      .post('/api/cleaner-task/events')
+      .set('Authorization', 'Bearer good-token')
+      .set('Idempotency-Key', 'same-key-123')
+      .send({ kind: 'depart' });
+    expect(response.status).toBe(200);
+    expect(taskModel.saveStage).not.toHaveBeenCalled();
   });
 
   it('rejects an unknown event kind', async () => {
@@ -246,9 +274,12 @@ describe('cleaner task admin', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ staffName: 'Sari' });
     expect(response.status, JSON.stringify(response.body)).toBe(200);
-    const params = db.pool.execute.mock.calls.at(-1)?.[1] as unknown[];
-    expect(params).toContain('hash:token-raw');
-    expect(params).not.toContain('token-raw');
+    const params = taskModel.assignCleaner.mock.calls.at(-1)?.[0] as Record<
+      string,
+      unknown
+    >;
+    expect(params.token).toBe('token-raw');
+    expect(params).not.toHaveProperty('tokenHash');
   });
 
   it('rejects dispatch without a staff name', async () => {

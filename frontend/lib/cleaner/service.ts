@@ -278,12 +278,16 @@ export async function cleanerEvent(
 }
 export async function cleanerUpload(token: string, file: File) {
   if (token.startsWith('demo.')) return demoUpload(token, file);
-  const form = new FormData();
-  form.set('file', file);
+  if (!['image/png', 'image/jpeg'].includes(file.type))
+    throw new TaskError('Gunakan JPG atau PNG.', 400);
+  if (file.size > 2 * 1024 * 1024)
+    throw new TaskError('Ukuran foto maksimal 2 MB.', 400);
+  // The backend accepts raw image bytes with the image MIME type, not multipart.
   return validateTask(
     await publicRequest<CleanerTask>(token, '/photos', {
       method: 'POST',
-      body: form,
+      headers: { 'Content-Type': file.type },
+      body: new Uint8Array(await file.arrayBuffer()),
     }),
   );
 }

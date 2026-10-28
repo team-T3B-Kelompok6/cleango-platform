@@ -150,9 +150,8 @@ export function OrderEditor({
     ...new Set([...available.map((person) => person.name), ...crew]),
   ];
   function toggleCrew(name: string, checked: boolean) {
-    const next = checked
-      ? [...crew, name]
-      : crew.filter((value) => value !== name);
+    // One cleaner per order: the assignment table allows a single row per booking.
+    const next = checked ? [name] : [];
     setCrew(next);
     if (next.length && values.status === 'Menunggu Assign')
       set('status', 'Menunggu Lokasi');
