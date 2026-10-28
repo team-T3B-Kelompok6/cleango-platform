@@ -12,9 +12,13 @@ import {
   isValidSlot,
   listAvailability,
   listCustomerBookings,
+  resolveBookableServiceId,
   validateBookingDate,
   type BookingSlot,
 } from '../../model/booking.model.js';
+import { findPromoByCode } from '../../model/promo.model.js';
+import { calculateDiscount, promoIssue } from './promo.controller.js';
+import { statusLabel } from '../../lib/order-status.js';
 
 function customerId(request: Request): number {
   if (!request.user) throw new AppError(401, 'Authentication diperlukan', 'AUTH_REQUIRED');
@@ -59,9 +63,8 @@ export async function getAvailability(
 
     let serviceId: number | null = null;
     if (request.query.service !== undefined && request.query.service !== '') {
-      serviceId = numericId(request.query.service, 'ID layanan');
-      const service = await findBookableService(serviceId);
-      if (!service) throw new AppError(404, 'Layanan tidak ditemukan.');
+      serviceId = await resolveBookableServiceId(String(request.query.service));
+      if (!serviceId) throw new AppError(404, 'Layanan tidak ditemukan.');
     }
 
     response.status(200).json({ data: await listAvailability(date, serviceId) });
@@ -79,7 +82,6 @@ export async function createCustomerBooking(
     const userId = customerId(request);
     const body = request.body as Record<string, unknown>;
 
-    const serviceId = numericId(body.serviceId, 'ID layanan');
     const date = typeof body.date === 'string' ? body.date.trim() : '';
     const time = body.time;
 
@@ -95,6 +97,11 @@ export async function createCustomerBooking(
         time: 'Pilih slot lain.',
       });
 
+    const serviceId = await resolveBookableServiceId(String(body.serviceId ?? ''));
+    if (!serviceId)
+      throw new AppError(404, 'Layanan tidak ditemukan.', 'VALIDATION_ERROR', {
+        serviceId: 'Layanan tidak tersedia.',
+      });
     const service = await findBookableService(serviceId);
     if (!service) throw new AppError(404, 'Layanan tidak ditemukan.');
     if (!service.active)
@@ -117,6 +124,27 @@ export async function createCustomerBooking(
 
     const notes = textValue(body, 'notes', 2000);
 
+    const promoCode =
+      typeof body.promoCode === 'string' ? body.promoCode.trim().toUpperCase() : '';
+    let promo: { id: number; discountAmount: number; perCustomerLimit: number } | null =
+      null;
+    if (promoCode) {
+      if (promoCode.length > 50)
+        throw new AppError(400, 'Periksa kembali data yang dikirim.', 'VALIDATION_ERROR', {
+          promoCode: 'Kode promo terlalu panjang.',
+        });
+      const found = await findPromoByCode(promoCode);
+      if (!found) throw new AppError(404, 'Kode promo tidak ditemukan.');
+      const promoError = promoIssue(found, service.price, serviceId);
+      if (promoError)
+        throw new AppError(400, promoError, 'PROMO_REJECTED', { promoCode: promoError });
+      promo = {
+        id: Number(found.id),
+        discountAmount: calculateDiscount(found, service.price),
+        perCustomerLimit: found.perCustomerLimit,
+      };
+    }
+
     try {
       const created = await createBooking({
         customerId: userId,
@@ -125,6 +153,7 @@ export async function createCustomerBooking(
         date,
         time: slot,
         notes,
+        promo,
       });
       const data = await findCustomerBooking(userId, created.id);
       response.status(201).json({ message: 'Pesanan berhasil dibuat.', data });
@@ -141,6 +170,13 @@ export async function createCustomerBooking(
           throw new AppError(409, 'Slot sudah penuh.', 'SLOT_FULL', {
             time: 'Pilih slot lain.',
           });
+        if (error.reason === 'PROMO_LIMIT')
+          throw new AppError(
+            400,
+            'Batas pemakaian promo untuk akun ini sudah tercapai.',
+            'PROMO_REJECTED',
+            { promoCode: 'Promo ini sudah Anda pakai sesuai batas.' },
+          );
         throw new AppError(
           409,
           'Anda sudah memesan layanan pada slot ini.',
@@ -179,12 +215,7 @@ export async function getCustomerBooking(
 
 // Mirrors the admin order status labels used across the apps.
 function apiStatus(status: string): string {
-  if (status === 'in_progress') return 'Sedang Dikerjakan';
-  if (status === 'completed') return 'Selesai';
-  if (status === 'cancelled') return 'Batal';
-  if (status === 'departed' || status === 'en_route') return 'Menuju Lokasi';
-  if (status === 'assigned') return 'Menunggu Lokasi';
-  return 'Menunggu Assign';
+  return statusLabel(status);
 }
 
 export async function listMyBookings(
@@ -210,6 +241,27 @@ export async function listMyBookings(
         discountAmount: Number(row.discountAmount),
         totalAmount: Number(row.totalAmount),
         status: apiStatus(row.databaseStatus),
+        paymentStatus: row.paymentStatus ?? null,
+        recipientName: row.recipientName ?? null,
+        recipientPhone: row.recipientPhone ?? null,
+        landmark: row.landmark ?? '',
+        cleanerName: row.cleanerName ?? null,
+        hasReview: Boolean(row.hasReview),
+        reviewEditable: Boolean(row.reviewEditable),
+        reviewRating: row.reviewRating === null ? null : Number(row.reviewRating),
+        reviewComment: row.reviewComment ?? null,
+        reviewPhotos: (() => {
+          const ids = row.reviewPhotoIds
+            ? String(row.reviewPhotoIds).split(',').filter(Boolean)
+            : [];
+          const urls = row.reviewPhotos
+            ? String(row.reviewPhotos).split(',').filter(Boolean)
+            : [];
+          return urls.map((url, index) => ({
+            id: ids[index] ?? '',
+            url,
+          }));
+        })(),
         notes: row.notes,
         addressLabel: row.addressLabel,
         address: row.address,

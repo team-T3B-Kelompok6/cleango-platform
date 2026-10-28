@@ -17,6 +17,7 @@ export interface AppEnv {
   GROQ_MODEL: string;
   GROQ_FALLBACK_MODELS: string[];
   CHATBOT_DATABASE_ENABLED: boolean;
+  PAYMENT_WEBHOOK_SECRET?: string | undefined;
 }
 
 let cachedEnv: AppEnv | undefined;
@@ -57,6 +58,7 @@ export function getEnv(): AppEnv {
       process.env.OSRM_BASE_URL ?? 'https://router.project-osrm.org',
     GROQ_API_KEY: process.env.GROQ_API_KEY?.trim() ?? '',
     CHATBOT_DATABASE_ENABLED: chatDatabase === 'true',
+    PAYMENT_WEBHOOK_SECRET: process.env.PAYMENT_WEBHOOK_SECRET?.trim() || undefined,
     GROQ_MODEL: process.env.GROQ_MODEL?.trim() || 'openai/gpt-oss-20b',
     GROQ_FALLBACK_MODELS: (
       process.env.GROQ_FALLBACK_MODELS ?? 'openai/gpt-oss-120b,qwen/qwen3.8-27b'

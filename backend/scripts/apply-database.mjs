@@ -37,6 +37,11 @@ try {
     `CREATE DATABASE IF NOT EXISTS cleango CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
   );
   await connection.query('USE cleango');
+  await ensureColumn(
+    'cleaner_assignments',
+    'link_token_enc',
+    '`link_token_enc` VARCHAR(512) NULL AFTER `link_token_hash`',
+  );
   if (schemaOnly) {
     const [target] = await connection.query('SELECT DATABASE() AS name');
     if (target[0]?.name !== 'cleango')
@@ -128,6 +133,11 @@ try {
   );
   await ensureColumn(
     'users',
+    'avatar_url',
+    '`avatar_url` VARCHAR(500) NULL AFTER `phone`',
+  );
+  await ensureColumn(
+    'users',
     'auth_provider',
     "`auth_provider` ENUM('local','google','facebook') NOT NULL DEFAULT 'local' AFTER `role`",
   );
@@ -165,6 +175,17 @@ try {
     'promos',
     'stackable',
     '`stackable` BOOLEAN NOT NULL DEFAULT FALSE AFTER `per_customer_limit`',
+  );
+  await ensureColumn(
+    'bookings',
+    'service_duration_minutes',
+    '`service_duration_minutes` SMALLINT UNSIGNED NOT NULL DEFAULT 0 AFTER `service_price`',
+  );
+  await connection.query(
+    `UPDATE cleango.bookings b
+     INNER JOIN cleango.services s ON s.id = b.service_id
+     SET b.service_duration_minutes = s.duration_minutes
+     WHERE b.service_duration_minutes = 0`,
   );
   if (schemaOnly) {
     console.log(

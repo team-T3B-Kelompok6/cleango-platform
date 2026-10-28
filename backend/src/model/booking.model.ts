@@ -200,10 +200,13 @@ export interface CreateBookingInput {
   date: string;
   time: BookingSlot;
   notes: string;
+  promo?: { id: number; discountAmount: number; perCustomerLimit: number } | null;
 }
 
 export class BookingConflictError extends Error {
-  constructor(public readonly reason: 'SLOT_FULL' | 'DUPLICATE' | 'BUSY') {
+  constructor(
+    public readonly reason: 'SLOT_FULL' | 'DUPLICATE' | 'BUSY' | 'PROMO_LIMIT',
+  ) {
     super(reason);
   }
 }
@@ -257,7 +260,7 @@ export async function createBooking(input: CreateBookingInput): Promise<{
     }
 
     const [serviceRows] = await connection.execute<RowDataPacket[]>(
-      'SELECT price FROM services WHERE id = ? AND is_active = TRUE LIMIT 1',
+      'SELECT price, duration_minutes FROM services WHERE id = ? AND is_active = TRUE LIMIT 1',
       [input.serviceId],
     );
     const serviceRow = serviceRows[0];
@@ -266,6 +269,22 @@ export async function createBooking(input: CreateBookingInput): Promise<{
       throw new Error('SERVICE_NOT_BOOKABLE');
     }
     const price = Number(serviceRow.price);
+    const durationMinutes = Number(serviceRow.duration_minutes);
+    const discount = Math.min(
+      Math.max(0, Math.round(input.promo?.discountAmount ?? 0)),
+      price,
+    );
+
+    if (input.promo) {
+      const [usageRows] = await connection.execute<RowDataPacket[]>(
+        'SELECT COUNT(*) AS total FROM promo_usages WHERE promo_id = ? AND user_id = ?',
+        [input.promo.id, input.customerId],
+      );
+      if (Number(usageRows[0]?.total ?? 0) >= input.promo.perCustomerLimit) {
+        await connection.rollback();
+        throw new BookingConflictError('PROMO_LIMIT');
+      }
+    }
 
     const [addressRows] = await connection.execute<RowDataPacket[]>(
       'SELECT id FROM addresses WHERE id = ? AND user_id = ? LIMIT 1',
@@ -279,23 +298,38 @@ export async function createBooking(input: CreateBookingInput): Promise<{
     const code = bookingCode();
     const [result] = await connection.execute<ResultSetHeader>(
       `INSERT INTO bookings
-         (booking_code, customer_id, service_id, address_id, scheduled_date,
-          scheduled_start_time, customer_notes, service_price, platform_fee,
-          discount_amount, total_amount, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, 'confirmed')`,
+         (booking_code, customer_id, service_id, address_id, promo_id, scheduled_date,
+          scheduled_start_time, customer_notes, service_price, service_duration_minutes,
+          platform_fee, discount_amount, total_amount, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'confirmed')`,
       [
         code,
         input.customerId,
         input.serviceId,
         input.addressId,
+        input.promo?.id ?? null,
         input.date,
         `${input.time}:00`,
         input.notes || null,
         price,
+        durationMinutes,
         PLATFORM_FEE,
-        price + PLATFORM_FEE,
+        discount,
+        price + PLATFORM_FEE - discount,
       ],
     );
+
+    if (input.promo) {
+      await connection.execute(
+        `INSERT INTO promo_usages (promo_id, booking_id, user_id, discount_amount)
+         VALUES (?, ?, ?, ?)`,
+        [input.promo.id, result.insertId, input.customerId, discount],
+      );
+      await connection.execute(
+        'UPDATE promos SET used_count = used_count + 1 WHERE id = ?',
+        [input.promo.id],
+      );
+    }
 
     await connection.execute(
       `INSERT INTO notifications (recipient_user_id, booking_id, type, title, message)
@@ -335,12 +369,31 @@ export async function findCustomerBooking(customerId: number, id: number) {
        DATE_FORMAT(b.scheduled_date, '%Y-%m-%d') AS date,
        TIME_FORMAT(b.scheduled_start_time, '%H:%i') AS time,
        s.name AS service, b.service_price AS servicePrice,
-       b.platform_fee AS platformFee, b.total_amount AS totalAmount,
+       COALESCE(b.service_duration_minutes, s.duration_minutes) AS serviceDurationMinutes,
+       b.platform_fee AS platformFee, b.discount_amount AS discountAmount,
+       b.total_amount AS totalAmount, p.code AS promoCode,
+       pay.status AS paymentStatus,
        b.status, COALESCE(b.customer_notes, '') AS notes,
-       a.label AS addressLabel, a.street_address AS address
+       r.id IS NOT NULL AS hasReview,
+       r.rating AS reviewRating, r.comment AS reviewComment,
+       (b.completed_at IS NOT NULL AND b.completed_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)) AS reviewEditable,
+       (SELECT GROUP_CONCAT(rp.id ORDER BY rp.sort_order SEPARATOR ',')
+        FROM review_photos rp WHERE rp.review_id = r.id) AS reviewPhotoIds,
+       (SELECT GROUP_CONCAT(rp.photo_url ORDER BY rp.sort_order SEPARATOR ',')
+        FROM review_photos rp WHERE rp.review_id = r.id) AS reviewPhotos,
+       a.label AS addressLabel, a.landmark,
+       COALESCE(NULLIF(a.recipient_name, ''), u.name) AS recipientName,
+       COALESCE(NULLIF(a.recipient_phone, ''), u.phone) AS recipientPhone,
+       cl.name AS cleanerName, a.street_address AS address
      FROM bookings b
      INNER JOIN services s ON s.id = b.service_id
      INNER JOIN addresses a ON a.id = b.address_id
+     INNER JOIN users u ON u.id = b.customer_id
+     LEFT JOIN cleaner_assignments ca ON ca.booking_id = b.id
+     LEFT JOIN cleaners cl ON cl.id = ca.cleaner_id
+     LEFT JOIN promos p ON p.id = b.promo_id
+     LEFT JOIN payments pay ON pay.booking_id = b.id
+     LEFT JOIN reviews r ON r.booking_id = b.id
      WHERE b.id = ? AND b.customer_id = ?
      LIMIT 1`,
     [id, customerId],
@@ -362,6 +415,8 @@ export interface CustomerBookingRow extends RowDataPacket {
   totalAmount: number;
   databaseStatus: string;
   notes: string;
+  reviewPhotoIds: string | null;
+  reviewPhotos: string | null;
   addressLabel: string;
   address: string;
   latitude: number | null;
@@ -376,22 +431,61 @@ export async function listCustomerBookings(
     `SELECT b.id, b.booking_code AS code,
        DATE_FORMAT(b.scheduled_date, '%Y-%m-%d') AS date,
        TIME_FORMAT(b.scheduled_start_time, '%H:%i') AS time,
-       s.name AS service, s.duration_minutes AS serviceDurationMinutes,
+       s.name AS service,
+       COALESCE(b.service_duration_minutes, s.duration_minutes) AS serviceDurationMinutes,
        UNIX_TIMESTAMP(bs.started_at) * 1000 AS startedAt, b.service_price AS servicePrice,
        b.platform_fee AS platformFee, b.discount_amount AS discountAmount,
        b.total_amount AS totalAmount, b.status AS databaseStatus,
+       pay.status AS paymentStatus,
        COALESCE(b.customer_notes, '') AS notes,
+       r.id IS NOT NULL AS hasReview,
+       r.rating AS reviewRating, r.comment AS reviewComment,
+       (b.completed_at IS NOT NULL AND b.completed_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)) AS reviewEditable,
+       (SELECT GROUP_CONCAT(rp.id ORDER BY rp.sort_order SEPARATOR ',')
+        FROM review_photos rp WHERE rp.review_id = r.id) AS reviewPhotoIds,
+       (SELECT GROUP_CONCAT(rp.photo_url ORDER BY rp.sort_order SEPARATOR ',')
+        FROM review_photos rp WHERE rp.review_id = r.id) AS reviewPhotos,
        a.label AS addressLabel,
+       a.landmark,
+       COALESCE(NULLIF(a.recipient_name, ''), u.name) AS recipientName,
+       COALESCE(NULLIF(a.recipient_phone, ''), u.phone) AS recipientPhone,
+       cl.name AS cleanerName,
        CONCAT_WS(', ', a.street_address, a.city, a.province) AS address,
        a.latitude, a.longitude
      FROM bookings b
      INNER JOIN services s ON s.id = b.service_id
      INNER JOIN addresses a ON a.id = b.address_id
+     INNER JOIN users u ON u.id = b.customer_id
      LEFT JOIN cleaner_assignments ca ON ca.booking_id = b.id
+     LEFT JOIN cleaners cl ON cl.id = ca.cleaner_id
      LEFT JOIN cleaner_task_stages bs ON bs.assignment_id = ca.id
+     LEFT JOIN payments pay ON pay.booking_id = b.id
+     LEFT JOIN reviews r ON r.booking_id = b.id
      WHERE b.customer_id = ?
      ORDER BY b.scheduled_date DESC, b.scheduled_start_time DESC, b.id DESC`,
     [customerId],
   );
   return rows;
+}
+
+/**
+ * The mobile app ships catalog slugs while the backend keys services by id.
+ * Accept either so booking works for both clients.
+ */
+export async function resolveBookableServiceId(
+  identifier: string,
+): Promise<number | null> {
+  const value = identifier.trim();
+  if (!value) return null;
+  const numeric = Number(value);
+  const [rows] = Number.isInteger(numeric) && numeric > 0
+    ? await pool.execute<RowDataPacket[]>(
+        'SELECT id FROM services WHERE id = ? AND is_active = TRUE LIMIT 1',
+        [numeric],
+      )
+    : await pool.execute<RowDataPacket[]>(
+        'SELECT id FROM services WHERE slug = ? AND is_active = TRUE LIMIT 1',
+        [value],
+      );
+  return rows[0] ? Number(rows[0].id) : null;
 }

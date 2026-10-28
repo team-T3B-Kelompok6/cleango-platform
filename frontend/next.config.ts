@@ -5,7 +5,10 @@ const config: NextConfig = {
   poweredByHeader: false,
   outputFileTracingExcludes: { '/*': ['./.local/**/*'] },
   devIndicators: false,
-  experimental: { serverActions: { bodySizeLimit: '8mb' } },
+  experimental: {
+    serverActions: { bodySizeLimit: '8mb' },
+    agentUpgrade: 'security',
+  },
   turbopack: { root: fileURLToPath(new URL('..', import.meta.url)) },
   async headers() {
     return [

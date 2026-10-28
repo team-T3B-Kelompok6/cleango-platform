@@ -1,6 +1,7 @@
 import type { RowDataPacket } from 'mysql2';
 import type { NextFunction, Request, Response } from 'express';
 import { AppError } from '../lib/AppError.js';
+import { OrderStatusTransitionError } from '../lib/order-status.js';
 import { pool } from '../lib/db.js';
 import {
   deleteBookingById,
@@ -49,6 +50,9 @@ function inputFrom(
   price?: number;
   status?: string;
   notes?: string;
+  phone?: string;
+  address?: string;
+  staff?: string[];
 } {
   const input: ReturnType<typeof inputFrom> = {};
   const customer = requiredText(body, 'customer', 'Nama pelanggan', 120, partial);
@@ -61,6 +65,50 @@ function inputFrom(
   if (time !== undefined) input.time = time;
   const notes = requiredText(body, 'notes', 'Catatan', 2000, partial);
   if (notes !== undefined) input.notes = notes;
+
+  if (body.address !== undefined) {
+    const address = typeof body.address === 'string' ? body.address.trim() : '';
+    if (address.length > 3000)
+      throw new AppError(
+        400,
+        'Periksa kembali data yang dikirim.',
+        'VALIDATION_ERROR',
+        { address: 'Maksimal 3000 karakter.' },
+      );
+    input.address = address;
+  }
+
+  if (body.phone !== undefined) {
+    const phone = typeof body.phone === 'string' ? body.phone.trim() : '';
+    if (phone && !/^[0-9+()\-\s]{6,30}$/.test(phone))
+      throw new AppError(
+        400,
+        'Periksa kembali data yang dikirim.',
+        'VALIDATION_ERROR',
+        { phone: 'Nomor telepon tidak valid.' },
+      );
+    input.phone = phone;
+  }
+
+  if (body.staff !== undefined) {
+    if (!Array.isArray(body.staff) || body.staff.length > 1)
+      throw new AppError(
+        400,
+        'Periksa kembali data yang dikirim.',
+        'VALIDATION_ERROR',
+        { staff: 'Pilih satu petugas per pesanan.' },
+      );
+    if (body.staff.some((name) => typeof name !== 'string'))
+      throw new AppError(
+        400,
+        'Periksa kembali data yang dikirim.',
+        'VALIDATION_ERROR',
+        { staff: 'Nama petugas tidak valid.' },
+      );
+    input.staff = [...new Set(body.staff.map((name) => name.trim()))].filter(
+      Boolean,
+    );
+  }
 
   if (!partial || body.price !== undefined) {
     const price = Number(body.price);
@@ -128,11 +176,44 @@ export async function updateOrder(
     const data = await updateBookingById(
       positiveId(request.params.id, 'ID pesanan'),
       inputFrom(body, true),
+      { type: 'admin', userId: request.user?.id ?? null },
     );
     if (!data) throw new AppError(404, 'Pesanan tidak ditemukan.');
     response.status(200).json({ message: 'Pesanan berhasil diperbarui.', data });
   } catch (error) {
-    next(error);
+    if (error instanceof Error && error.message === 'UNKNOWN_STATUS')
+      next(
+        new AppError(400, 'Status pesanan tidak dikenal.', 'VALIDATION_ERROR', {
+          status: 'Pilih status yang tersedia.',
+        }),
+      );
+    else if (error instanceof OrderStatusTransitionError)
+      next(
+        new AppError(
+          409,
+          'Status pesanan tidak boleh kembali ke tahap sebelumnya.',
+          'ORDER_STATUS_BACKWARDS',
+          { status: `Dari ${error.from} ke ${error.to} tidak diizinkan.` },
+        ),
+      );
+    else if (error instanceof Error && error.message === 'STAFF_NOT_FOUND')
+      next(
+        new AppError(400, 'Petugas tidak ditemukan.', 'VALIDATION_ERROR', {
+          staff: 'Perbarui pilihan petugas.',
+        }),
+      );
+    else if (error instanceof Error && error.message === 'STAFF_LIMIT')
+      next(
+        new AppError(400, 'Terlalu banyak petugas.', 'VALIDATION_ERROR', {
+          staff: 'Pilih satu petugas per pesanan.',
+        }),
+      );
+    else if (
+      error instanceof Error &&
+      error.message === 'STAFF_ACTOR_REQUIRED'
+    )
+      next(new AppError(401, 'Authentication diperlukan', 'AUTH_REQUIRED'));
+    else next(error);
   }
 }
 

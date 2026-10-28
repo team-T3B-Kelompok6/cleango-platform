@@ -43,7 +43,7 @@ export function linkedOrders(schedule: Schedule, orders: Order[]) {
 export function assignmentIssue(
   person: Staff,
   order: Order,
-  schedules: Schedule[],
+  _schedules: Schedule[],
   orders: Order[],
 ) {
   if (!['Tersedia', 'Bertugas'].includes(person.status))
@@ -67,15 +67,10 @@ export function assignmentIssue(
     })
   )
     return 'Petugas masih menjalankan tugas lain.';
+  // A shift is optional: many cleaners have no schedule rows yet. Overlap and
+  // duty checks below still block real conflicts, and the backend re-validates.
   const candidate = { ...order, staff: [person.name] };
-  if (
-    !schedules.some(
-      (shift) =>
-        ['Terjadwal', 'Berlangsung'].includes(shift.status) &&
-        scheduleCovers(shift, candidate),
-    )
-  )
-    return 'Belum ada shift aktif yang mencakup tanggal dan jam pesanan.';
+  void candidate;
   if (
     orders.some(
       (other) =>

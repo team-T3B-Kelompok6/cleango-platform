@@ -125,6 +125,17 @@ describe('customer authentication contract', () => {
     expect(response.body.message).toBe('Password minimal 8 karakter');
   });
 
+  it('rejects passwords longer than 32 characters on registration', async () => {
+    const response = await request(app).post('/api/customer/auth/register').send({
+      name: 'User Baru',
+      phone: '081234567890',
+      password: 'a'.repeat(33),
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.body.message).toBe('Password maksimal 32 karakter');
+  });
+
   it('returns reset token in development for registered customer', async () => {
     userModel.findUserByPhone.mockResolvedValue({
       id: 10,

@@ -1,6 +1,19 @@
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { pool } from '../lib/db.js';
 
+import {
+  canTransition,
+  OrderStatusTransitionError,
+  statusLabel,
+} from '../lib/order-status.js';
+import {
+  createLinkToken,
+  hashToken,
+  linkExpiresAt,
+} from './cleaner-task.model.js';
+
+const MAX_STAFF_PER_ORDER = 1;
+
 type DatabaseOrderStatus =
   | 'awaiting_payment'
   | 'confirmed'
@@ -25,6 +38,7 @@ interface OrderRow extends RowDataPacket {
   time: string;
   staffNames: string;
   databaseStatus: DatabaseOrderStatus;
+  paymentStatus: string | null;
   notes: string;
 }
 
@@ -48,6 +62,7 @@ export interface Order {
     | 'Selesai'
     | 'Batal';
   notes: string;
+  paymentStatus: string | null;
 }
 
 const orderSelect = `SELECT b.id, b.customer_id AS customerId,
@@ -64,19 +79,16 @@ const orderSelect = `SELECT b.id, b.customer_id AS customerId,
     WHERE ca.booking_id = b.id
   ), '') AS staffNames,
   b.status AS databaseStatus,
+  p.status AS paymentStatus,
   COALESCE(b.customer_notes, '') AS notes
   FROM bookings b
   INNER JOIN users u ON u.id = b.customer_id
   INNER JOIN addresses a ON a.id = b.address_id
-  INNER JOIN services s ON s.id = b.service_id`;
+  INNER JOIN services s ON s.id = b.service_id
+  LEFT JOIN payments p ON p.booking_id = b.id`;
 
 function apiStatus(status: DatabaseOrderStatus): Order['status'] {
-  if (status === 'in_progress') return 'Sedang Dikerjakan';
-  if (status === 'completed') return 'Selesai';
-  if (status === 'cancelled') return 'Batal';
-  if (status === 'en_route' || status === 'departed') return 'Menuju Lokasi';
-  if (status === 'assigned') return 'Menunggu Lokasi';
-  return 'Menunggu Assign';
+  return statusLabel(status) as Order['status'];
 }
 
 const API_STATUS_TO_DATABASE: Record<string, DatabaseOrderStatus> = {
@@ -105,6 +117,7 @@ function mapOrder(row: OrderRow): Order {
     staff: row.staffNames ? row.staffNames.split('|||') : [],
     status: apiStatus(row.databaseStatus),
     notes: row.notes,
+    paymentStatus: row.paymentStatus ?? null,
   };
 }
 
@@ -132,6 +145,9 @@ export interface OrderWriteInput {
   price?: number;
   status?: string;
   notes?: string;
+  phone?: string;
+  address?: string;
+  staff?: string[];
 }
 
 function toDatabaseStatus(status: string | undefined): DatabaseOrderStatus | undefined {
@@ -194,44 +210,174 @@ export async function insertBooking(input: {
   return order;
 }
 
+export interface OrderActor {
+  type: 'system' | 'customer' | 'admin' | 'cleaner';
+  userId?: number | null;
+  cleanerId?: number | null;
+  notes?: string | null;
+}
+
 export async function updateBookingById(
   id: number,
   input: OrderWriteInput,
+  actor: OrderActor = { type: 'system' },
 ): Promise<Order | null> {
-  const existing = await findOrder(id);
-  if (!existing) return null;
-  const fields: string[] = [];
-  const values: (string | number)[] = [];
-
-  if (input.date !== undefined) {
-    fields.push('scheduled_date = ?');
-    values.push(input.date);
-  }
-  if (input.time !== undefined) {
-    fields.push('scheduled_start_time = ?');
-    values.push(`${input.time}:00`);
-  }
-  if (input.notes !== undefined) {
-    fields.push('customer_notes = ?');
-    values.push(input.notes);
-  }
-  if (input.price !== undefined) {
-    fields.push('service_price = ?', 'total_amount = ?');
-    values.push(input.price, input.price);
-  }
-  if (input.serviceName !== undefined) {
-    fields.push('service_id = ?');
-    values.push(await resolveServiceId(input.serviceName));
-  }
   const status = toDatabaseStatus(input.status);
-  if (status !== undefined) {
-    fields.push('status = ?');
-    values.push(status);
-  }
-  if (!fields.length) return existing;
+  if (input.status !== undefined && status === undefined)
+    throw new Error('UNKNOWN_STATUS');
 
-  values.push(id);
-  await pool.execute(`UPDATE bookings SET ${fields.join(', ')} WHERE id = ?`, values);
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [rows] = await connection.execute<RowDataPacket[]>(
+      'SELECT status, customer_id AS customerId, address_id AS addressId FROM bookings WHERE id = ? FOR UPDATE',
+      [id],
+    );
+    if (!rows[0]) {
+      await connection.rollback();
+      return null;
+    }
+    const current = rows[0].status as DatabaseOrderStatus;
+
+    const fields: string[] = [];
+    const values: (string | number)[] = [];
+    if (input.date !== undefined) {
+      fields.push('scheduled_date = ?');
+      values.push(input.date);
+    }
+    if (input.time !== undefined) {
+      fields.push('scheduled_start_time = ?');
+      values.push(`${input.time}:00`);
+    }
+    if (input.notes !== undefined) {
+      fields.push('customer_notes = ?');
+      values.push(input.notes);
+    }
+    if (input.price !== undefined) {
+      fields.push(
+        'service_price = ?',
+        'total_amount = ? + platform_fee - discount_amount',
+      );
+      values.push(input.price, input.price);
+    }
+    if (input.serviceName !== undefined) {
+      fields.push('service_id = ?');
+      values.push(await resolveServiceId(input.serviceName));
+    }
+    const changed = status !== undefined && status !== current;
+    if (changed) {
+      if (!canTransition(current, status)) {
+        await connection.rollback();
+        throw new OrderStatusTransitionError(current, status);
+      }
+      fields.push('status = ?');
+      values.push(status);
+    }
+    const customerChanged =
+      input.customerName !== undefined ||
+      input.phone !== undefined ||
+      input.address !== undefined;
+    const staffChanged = input.staff !== undefined;
+    if (!fields.length && !staffChanged && !customerChanged) {
+      await connection.rollback();
+      return findOrder(id);
+    }
+
+    if (fields.length) {
+      values.push(id);
+      await connection.execute(
+        `UPDATE bookings SET ${fields.join(', ')} WHERE id = ?`,
+        values,
+      );
+    }
+    if (changed) {
+      await connection.execute(
+        `INSERT INTO booking_status_history
+           (booking_id, status, actor_type, actor_user_id, actor_cleaner_id, notes)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          id,
+          status,
+          actor.type,
+          actor.userId ?? null,
+          actor.cleanerId ?? null,
+          actor.notes ?? null,
+        ],
+      );
+    }
+    if (input.customerName !== undefined) {
+      await connection.execute('UPDATE users SET name = ? WHERE id = ?', [
+        input.customerName,
+        Number(rows[0].customerId),
+      ]);
+    }
+    if (input.phone !== undefined) {
+      await connection.execute(
+        'UPDATE addresses SET recipient_phone = ? WHERE id = ?',
+        [input.phone || null, Number(rows[0].addressId)],
+      );
+    }
+    if (input.address !== undefined) {
+      await connection.execute(
+        'UPDATE addresses SET street_address = ? WHERE id = ?',
+        [input.address, Number(rows[0].addressId)],
+      );
+    }
+    if (staffChanged) {
+      const names = [...new Set((input.staff ?? []).map((name) => name.trim()))]
+        .filter(Boolean);
+      if (names.length > MAX_STAFF_PER_ORDER) throw new Error('STAFF_LIMIT');
+      if (names.length && !actor.userId) throw new Error('STAFF_ACTOR_REQUIRED');
+
+      const [cleanerRows] = names.length
+        ? await connection.query<RowDataPacket[]>(
+            'SELECT id, name FROM cleaners WHERE is_active = TRUE AND name IN (?)',
+            [names],
+          )
+        : [[] as RowDataPacket[]];
+      if (cleanerRows.length !== names.length) throw new Error('STAFF_NOT_FOUND');
+
+      const [assignedRows] = await connection.query<RowDataPacket[]>(
+        'SELECT id, cleaner_id AS cleanerId FROM cleaner_assignments WHERE booking_id = ?',
+        [id],
+      );
+      const desired = new Set(cleanerRows.map((row) => Number(row.id)));
+      const removeIds = assignedRows
+        .filter((row) => !desired.has(Number(row.cleanerId)))
+        .map((row) => Number(row.id));
+      if (removeIds.length)
+        await connection.query(
+          'DELETE FROM cleaner_assignments WHERE id IN (?)',
+          [removeIds],
+        );
+      const existing = new Set(assignedRows.map((row) => Number(row.cleanerId)));
+      for (const cleanerId of desired) {
+        if (existing.has(cleanerId)) continue;
+        await connection.execute(
+          `INSERT INTO cleaner_assignments
+             (booking_id, cleaner_id, assigned_by, link_token_hash, link_expires_at)
+           VALUES (?, ?, ?, ?, ?)`,
+          [
+            id,
+            cleanerId,
+            Number(actor.userId),
+            hashToken(createLinkToken()),
+            linkExpiresAt(),
+          ],
+        );
+      }
+    }
+    await connection.commit();
+  } catch (error) {
+    try {
+      await connection.rollback();
+    } catch {
+      // rollback after an explicit rollback is a no-op
+    }
+    throw error;
+  } finally {
+    connection.release();
+  }
   return findOrder(id);
 }
 

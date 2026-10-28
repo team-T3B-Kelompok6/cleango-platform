@@ -6,6 +6,10 @@ vi.mock('../src/model/user.model.js', async (original) => ({
   ...(await original<typeof import('../src/model/user.model.js')>()),
   isTokenRevoked: vi.fn().mockResolvedValue(false),
 }));
+vi.mock('../src/model/booking.model.js', async (original) => ({
+  ...(await original<typeof import('../src/model/booking.model.js')>()),
+  resolveBookableServiceId: vi.fn().mockResolvedValue(null),
+}));
 import { createApp } from '../src/app.js';
 
 const app = createApp();
@@ -29,10 +33,10 @@ describe('CleanGo MySQL API', () => {
     expect(response.body.message).toBe('ID kategori tidak valid');
   });
 
-  it('validates customer service id before database access', async () => {
+  it('rejects an unknown customer service identifier', async () => {
     const response = await request(app).get('/api/customer/services/0');
-    expect(response.status).toBe(400);
-    expect(response.body.message).toBe('ID layanan tidak valid');
+    expect(response.status).toBe(404);
+    expect(response.body.message).toBe('Layanan tidak ditemukan');
   });
 
   it('rejects overly long search before database access', async () => {

@@ -12,6 +12,7 @@ export interface User extends RowDataPacket {
   email: string;
   passwordHash: string;
   phone: string | null;
+  avatarUrl: string | null;
   role: UserRole;
   authProvider: AuthProvider;
   isActive: boolean;
@@ -19,7 +20,8 @@ export interface User extends RowDataPacket {
   updatedAt: Date;
 }
 
-const USER_COLUMNS = `id, name, email, password_hash AS passwordHash, phone, role,
+const USER_COLUMNS = `id, name, email, password_hash AS passwordHash, phone,
+            avatar_url AS avatarUrl, role,
             auth_provider AS authProvider, is_active AS isActive,
             created_at AS createdAt, updated_at AS updatedAt`;
 
@@ -65,18 +67,20 @@ export async function insertCustomer(input: {
 
 export async function updateUserProfile(
   id: number,
-  input: { name?: string; email?: string; phone?: string },
+  input: { name?: string; email?: string; phone?: string; avatarUrl?: string },
 ): Promise<User> {
   const [result] = await pool.execute<ResultSetHeader>(
     `UPDATE users SET
        name = IF(?, ?, name),
        email = IF(?, ?, email),
-       phone = IF(?, ?, phone)
+       phone = IF(?, ?, phone),
+       avatar_url = IF(?, ?, avatar_url)
      WHERE id = ?`,
     [
       input.name !== undefined, input.name ?? '',
       input.email !== undefined, input.email ?? '',
       input.phone !== undefined, input.phone ?? '',
+      input.avatarUrl !== undefined, input.avatarUrl ?? '',
       id,
     ],
   );

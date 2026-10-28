@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
   name VARCHAR(120) NOT NULL,
   email VARCHAR(190) NOT NULL,
   phone VARCHAR(30) NULL,
+  avatar_url VARCHAR(500) NULL,
   password_hash VARCHAR(255) NOT NULL,
   role ENUM('customer', 'admin') NOT NULL DEFAULT 'customer',
   auth_provider ENUM('local', 'google', 'facebook') NOT NULL DEFAULT 'local',
@@ -153,6 +154,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   scheduled_end_time TIME NULL,
   customer_notes TEXT NULL,
   service_price DECIMAL(12,2) NOT NULL,
+  service_duration_minutes SMALLINT UNSIGNED NOT NULL,
   platform_fee DECIMAL(12,2) NOT NULL DEFAULT 0,
   discount_amount DECIMAL(12,2) NOT NULL DEFAULT 0,
   total_amount DECIMAL(12,2) NOT NULL,
@@ -197,6 +199,7 @@ CREATE TABLE IF NOT EXISTS cleaner_assignments (
   assigned_by BIGINT UNSIGNED NOT NULL,
   assigned_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   link_token_hash CHAR(64) NOT NULL,
+  link_token_enc VARCHAR(512) NULL,
   link_expires_at DATETIME NOT NULL,
   link_status ENUM('active', 'expired', 'revoked', 'completed') NOT NULL DEFAULT 'active',
   location_sharing_started_at DATETIME NULL,
@@ -607,3 +610,15 @@ ON DUPLICATE KEY UPDATE
   answer = VALUES(answer),
   sort_order = VALUES(sort_order),
   is_active = VALUES(is_active);
+
+CREATE TABLE IF NOT EXISTS cleaner_event_keys (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  assignment_id BIGINT UNSIGNED NOT NULL,
+  event_key VARCHAR(100) NOT NULL,
+  kind VARCHAR(40) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_event_keys_assignment
+    FOREIGN KEY (assignment_id) REFERENCES cleaner_assignments(id) ON DELETE CASCADE,
+  UNIQUE KEY uq_event_keys (assignment_id, event_key),
+  INDEX idx_event_keys_created (created_at)
+) ENGINE=InnoDB;

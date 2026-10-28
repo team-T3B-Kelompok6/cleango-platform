@@ -2,6 +2,11 @@ import bcrypt from 'bcrypt';
 import type { NextFunction, Request, Response } from 'express';
 import { AppError } from '../../lib/AppError.js';
 import {
+  removeStoredFile,
+  saveImage,
+  storedPathFromUrl,
+} from '../../lib/image-storage.js';
+import {
   findUserByEmail,
   findUserById,
   updateUserPassword,
@@ -13,8 +18,22 @@ function customerId(request: Request): number {
   return request.user.id;
 }
 
-function profileData(user: { id: number; name: string; email: string; phone: string | null; role: string }) {
-  return { id: user.id, name: user.name, email: user.email, phone: user.phone, role: user.role };
+function profileData(user: {
+  id: number;
+  name: string;
+  email: string;
+  phone: string | null;
+  avatarUrl: string | null;
+  role: string;
+}) {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    avatarUrl: user.avatarUrl,
+    role: user.role,
+  };
 }
 
 export async function getProfile(request: Request, response: Response, next: NextFunction): Promise<void> {
@@ -56,6 +75,38 @@ export async function updateProfile(request: Request, response: Response, next: 
   } catch (error) { next(error); }
 }
 
+export async function updateProfilePhoto(
+  request: Request,
+  response: Response,
+  next: NextFunction,
+): Promise<void> {
+  let saved: Awaited<ReturnType<typeof saveImage>> | null = null;
+  try {
+    const id = customerId(request);
+    const user = await findUserById(id);
+    if (!user || user.role !== 'customer')
+      throw new AppError(404, 'Customer tidak ditemukan');
+
+    saved = await saveImage(
+      request.body,
+      request.header('content-type') ?? '',
+      'avatars',
+    );
+    const updated = await updateUserProfile(id, { avatarUrl: saved.url });
+    if (user.avatarUrl) {
+      const oldPath = storedPathFromUrl(user.avatarUrl);
+      if (oldPath) await removeStoredFile(oldPath);
+    }
+    response.status(201).json({
+      message: 'Foto profil berhasil diperbarui.',
+      data: profileData(updated),
+    });
+  } catch (error) {
+    if (saved) await removeStoredFile(saved.storagePath);
+    next(error);
+  }
+}
+
 export async function changePassword(request: Request, response: Response, next: NextFunction): Promise<void> {
   try {
     const id = customerId(request);
@@ -67,7 +118,7 @@ export async function changePassword(request: Request, response: Response, next:
     const newPassword = typeof body.newPassword === 'string' ? body.newPassword : '';
     if (!currentPassword) throw new AppError(400, 'Password lama wajib diisi');
     if (newPassword.length < 8) throw new AppError(400, 'Password baru minimal 8 karakter');
-    if (newPassword.length > 72) throw new AppError(400, 'Password baru maksimal 72 karakter');
+    if (newPassword.length > 32) throw new AppError(400, 'Password baru maksimal 32 karakter');
 
     if (!await bcrypt.compare(currentPassword, user.passwordHash)) {
       throw new AppError(401, 'Password lama salah');

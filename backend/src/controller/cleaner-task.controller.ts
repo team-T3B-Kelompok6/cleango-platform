@@ -5,9 +5,13 @@ import type { RowDataPacket } from 'mysql2';
 import type { NextFunction, Request, Response } from 'express';
 import { AppError } from '../lib/AppError.js';
 import { estimateWorkCompletion } from '../lib/work-estimate.js';
+import { statusLabel } from '../lib/order-status.js';
 import { pool } from '../lib/db.js';
 import {
   assertUsable,
+  AssignmentConflictError,
+  assignCleaner,
+  claimEventKey,
   createLinkToken,
   deletePhoto,
   findAssignmentByTokenHash,
@@ -15,6 +19,7 @@ import {
   hashToken,
   insertPhoto,
   linkExpiresAt,
+  ensureLinkPath,
   listActiveAssignments,
   listPhotos,
   revokeAssignment,
@@ -101,7 +106,7 @@ export function publicTask(
         ? estimateWorkCompletion(row.startedAt, row.serviceDurationMinutes)
         : null,
     notes: row.notes ?? '',
-    orderStatus: row.orderStatus,
+    orderStatus: statusLabel(row.orderStatus),
     stage,
     demo: false,
     departedAt: isoOrUndefined(row.departedAt),
@@ -178,6 +183,26 @@ export async function postCleanerEvent(
       );
     const body = request.body as Record<string, unknown>;
     const kind = typeof body.kind === 'string' ? body.kind : '';
+    const mutatingKinds = [
+      'location',
+      'depart',
+      'arrive',
+      'complete',
+      'remove_photo',
+    ];
+    if (kind !== 'retry_report') {
+      if (!mutatingKinds.includes(kind))
+        throw new AppError(400, 'Tindakan tidak dikenal.', 'VALIDATION_ERROR');
+      const firstAttempt = await claimEventKey(row.assignmentId, key, kind);
+      if (!firstAttempt) {
+        const fresh = await findAssignmentByTokenHash(hashToken(token));
+        if (!fresh)
+          throw new AppError(404, 'Link tugas tidak tersedia.', 'TASK_NOT_FOUND');
+        const photos = await listPhotos(fresh.assignmentId);
+        response.status(200).json({ data: publicTask(fresh, photos) });
+        return;
+      }
+    }
     const current = stageOf(row);
 
     if (kind === 'location') {
@@ -222,7 +247,10 @@ export async function postCleanerEvent(
           summary,
           body.checked === true,
         );
-        await syncBookingStatus(row.bookingId, 'completed');
+        await syncBookingStatus(row.bookingId, 'completed', {
+          type: 'cleaner',
+          cleanerId: row.cleanerId,
+        });
       }
     } else if (kind === 'remove_photo') {
       const photoId = typeof body.photoId === 'string' ? body.photoId : '';
@@ -256,7 +284,10 @@ async function advance(
   const order: TaskStage[] = ['assigned', 'en_route', 'working', 'completed'];
   if (order.indexOf(to) <= order.indexOf(from)) return;
   await saveStage(row.assignmentId, to);
-  await syncBookingStatus(row.bookingId, to);
+  await syncBookingStatus(row.bookingId, to, {
+    type: 'cleaner',
+    cleanerId: row.cleanerId,
+  });
 }
 
 export async function postCleanerPhoto(
@@ -336,8 +367,9 @@ export async function getAdminTaskBoard(
         address: row.address ?? '',
         date: row.orderDate,
         time: row.orderTime,
-        orderStatus: row.orderStatus,
-        task: publicTask(row, []),
+    orderStatus: statusLabel(row.orderStatus),
+    publicPath: await ensureLinkPath(row),
+    task: publicTask(row, []),
         destinationLocation:
           row.destinationLatitude !== null && row.destinationLongitude !== null
             ? {
@@ -435,20 +467,17 @@ export async function dispatchAssignment(
     if (!adminId)
       throw new AppError(401, 'Authentication diperlukan', 'AUTH_REQUIRED');
     const expiresAt = linkExpiresAt();
-    await pool.execute(
-      `INSERT INTO cleaner_assignments
-         (booking_id, cleaner_id, assigned_by, link_token_hash, link_expires_at)
-       VALUES (?, ?, ?, ?, ?)
-       ON DUPLICATE KEY UPDATE
-         cleaner_id = VALUES(cleaner_id),
-         assigned_by = VALUES(assigned_by),
-         assigned_at = NOW(),
-         link_token_hash = VALUES(link_token_hash),
-         link_expires_at = VALUES(link_expires_at),
-         link_status = 'active'`,
-      [bookingId, Number(cleaners[0].id), adminId, hashToken(token), expiresAt],
-    );
-    await syncBookingStatus(bookingId, 'assigned');
+    await assignCleaner({
+      bookingId,
+      cleanerId: Number(cleaners[0].id),
+      adminId,
+      token,
+      expiresAt,
+    });
+    await syncBookingStatus(bookingId, 'assigned', {
+      type: 'admin',
+      userId: adminId,
+    });
     response.status(200).json({
       message: 'Petugas ditugaskan.',
       data: {
@@ -459,7 +488,16 @@ export async function dispatchAssignment(
       },
     });
   } catch (error) {
-    next(error);
+    if (error instanceof AssignmentConflictError)
+      next(
+        new AppError(
+          409,
+          'Petugas sudah memiliki tugas lain pada jam tersebut.',
+          'ASSIGNMENT_CONFLICT',
+          { bookingCode: error.bookingCode, time: error.startTime },
+        ),
+      );
+    else next(error);
   }
 }
 

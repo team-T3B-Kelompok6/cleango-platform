@@ -139,9 +139,25 @@ describe('admin order writes', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ status: 'Selesai' });
     expect(response.status).toBe(200);
-    expect(orderModel.updateBookingById).toHaveBeenCalledWith(5, {
-      status: 'Selesai',
-    });
+    expect(orderModel.updateBookingById).toHaveBeenCalledWith(
+      5,
+      { status: 'Selesai' },
+      { type: 'admin', userId: 1 },
+    );
+  });
+
+  it('passes the selected staff to the order update', async () => {
+    orderModel.updateBookingById.mockResolvedValue({ id: '5', status: 'Menunggu Lokasi' });
+    const response = await request(app)
+      .patch('/api/orders/5')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ staff: ['Budi Santoso'] });
+    expect(response.status).toBe(200);
+    expect(orderModel.updateBookingById).toHaveBeenCalledWith(
+      5,
+      { staff: ['Budi Santoso'] },
+      { type: 'admin', userId: 1 },
+    );
   });
 
   it('returns 404 when patching a missing order', async () => {

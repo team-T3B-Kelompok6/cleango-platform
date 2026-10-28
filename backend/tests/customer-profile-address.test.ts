@@ -12,8 +12,14 @@ const addressModel = vi.hoisted(() => ({
   findAddressesByUser: vi.fn(), findAddressById: vi.fn(), countAddressesByUser: vi.fn(),
   insertAddress: vi.fn(), updateAddressById: vi.fn(), deleteAddressById: vi.fn(),
 }));
+const imageStorage = vi.hoisted(() => ({
+  saveImage: vi.fn(),
+  removeStoredFile: vi.fn(),
+  storedPathFromUrl: vi.fn(),
+}));
 vi.mock('../src/model/user.model.js', () => userModel);
 vi.mock('../src/model/address.model.js', () => addressModel);
+vi.mock('../src/lib/image-storage.js', () => imageStorage);
 
 import { createApp } from '../src/app.js';
 import { createAccessToken } from '../src/lib/jwt.js';
@@ -34,7 +40,15 @@ beforeEach(() => {
   addressModel.updateAddressById.mockResolvedValue({ id: 1, label: 'Kantor' });
   addressModel.deleteAddressById.mockResolvedValue(true);
   userModel.findUserById.mockResolvedValue({ id: 10, name: 'C', email: 'c@e.com', phone: '0812', role: 'customer', passwordHash: 'x', isActive: true, createdAt: new Date(), updatedAt: new Date() });
-  userModel.updateUserProfile.mockImplementation(async (_id: number, patch: Record<string, string>) => ({ id: 10, name: patch.name ?? 'C', email: patch.email ?? 'c@e.com', phone: patch.phone ?? '0812', role: 'customer' }));
+  userModel.updateUserProfile.mockImplementation(async (_id: number, patch: Record<string, string>) => ({ id: 10, name: patch.name ?? 'C', email: patch.email ?? 'c@e.com', phone: patch.phone ?? '0812', avatarUrl: patch.avatarUrl ?? null, role: 'customer' }));
+  imageStorage.saveImage.mockReset();
+  imageStorage.removeStoredFile.mockReset();
+  imageStorage.storedPathFromUrl.mockReset();
+  imageStorage.saveImage.mockResolvedValue({
+    url: '/uploads/avatars/a.png',
+    storagePath: '/tmp/avatar.png',
+  });
+  imageStorage.storedPathFromUrl.mockReturnValue('/tmp/old.png');
 });
 
 describe('customer profile', () => {
@@ -43,6 +57,20 @@ describe('customer profile', () => {
   it('gets profile', async () => { expect((await request(app).get('/api/customer/profile').set('Authorization', `Bearer ${customerToken}`)).status).toBe(200); });
   it('patches profile', async () => { expect((await request(app).patch('/api/customer/profile').set('Authorization', `Bearer ${customerToken}`).send({ name: 'Baru' })).status).toBe(200); });
   it('rejects role change', async () => { expect((await request(app).patch('/api/customer/profile').set('Authorization', `Bearer ${customerToken}`).send({ role: 'admin' })).status).toBe(400); });
+  it('uploads a profile photo and removes the previous file', async () => {
+    userModel.findUserById.mockResolvedValue({ id: 10, name: 'C', email: 'c@e.com', phone: '0812', avatarUrl: '/uploads/avatars/old.png', role: 'customer', passwordHash: 'x', isActive: true });
+    const response = await request(app)
+      .post('/api/customer/profile/photo')
+      .set('Authorization', `Bearer ${customerToken}`)
+      .set('Content-Type', 'image/png')
+      .send(Buffer.from([1, 2, 3]));
+    expect(response.status).toBe(201);
+    expect(userModel.updateUserProfile).toHaveBeenCalledWith(10, {
+      avatarUrl: '/uploads/avatars/a.png',
+    });
+    expect(imageStorage.removeStoredFile).toHaveBeenCalledWith('/tmp/old.png');
+  });
+
   it('changes password with current password', async () => {
     userModel.findUserById.mockResolvedValue({ id: 10, name: 'C', email: 'c@e.com', phone: '0812', role: 'customer', passwordHash: '$2b$12$LQv3c1yqBWbYwQy3w5QvQOe7j6j7g3h6W8VQW8VQW8VQW8VQW8VQW', isActive: true });
     const response = await request(app).patch('/api/customer/profile/password').set('Authorization', `Bearer ${customerToken}`).send({ currentPassword: 'wrong', newPassword: 'new-password' });

@@ -19,6 +19,7 @@ const bookingModel = vi.hoisted(() => ({
   findOwnedAddress: vi.fn(),
   findPrimaryAddressId: vi.fn(),
   listAvailability: vi.fn(),
+  resolveBookableServiceId: vi.fn(),
 }));
 
 vi.mock('../src/model/booking.model.js', async () => {
@@ -59,6 +60,7 @@ beforeEach(() => {
   bookingModel.findOwnedAddress.mockReset();
   bookingModel.findPrimaryAddressId.mockReset();
   bookingModel.listAvailability.mockReset();
+  bookingModel.resolveBookableServiceId.mockReset().mockResolvedValue(1);
 
   bookingModel.createBooking.mockResolvedValue({ id: 77, code: 'CG-TEST' });
   bookingModel.findCustomerBooking.mockResolvedValue({ id: 77, code: 'CG-TEST', totalAmount: 105000 });
@@ -111,6 +113,14 @@ describe('POST booking validation', () => {
     expect(response.status).toBe(400);
     expect(response.body.errors.time).toBe('Pilih salah satu slot yang tersedia.');
     expect(bookingModel.createBooking).not.toHaveBeenCalled();
+    expect(bookingModel.resolveBookableServiceId).not.toHaveBeenCalled();
+  });
+
+  it('resolves a service slug before creating a booking with its numeric ID', async () => {
+    const response = await auth('post', '/api/customer/bookings').send({ ...valid(), serviceId: 'basic-home-cleaning' });
+    expect(response.status).toBe(201);
+    expect(bookingModel.resolveBookableServiceId).toHaveBeenCalledWith('basic-home-cleaning');
+    expect(bookingModel.createBooking).toHaveBeenCalledWith(expect.objectContaining({ serviceId: 1 }));
   });
 
   it('rejects an inactive service', async () => {
