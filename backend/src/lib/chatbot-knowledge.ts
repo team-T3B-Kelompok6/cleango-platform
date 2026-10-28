@@ -15,6 +15,8 @@ export const pendingOrderReply =
   'Pengecekan pesanan pribadi melalui Boo masih menunggu integrasi database dan akun pelanggan. Saya belum dapat membaca status, jadwal, pembayaran, atau lokasi cleaner Anda. Periksa halaman Pesanan/Status Pesanan di aplikasi atau Pusat Bantuan. Saya tetap bisa menjelaskan arti status dan alur layanannya.';
 export const noActionReply =
   'Saya bisa bantu menjelaskan caranya. Untuk membuat, mengubah, membatalkan, menjadwalkan ulang, atau membayar pesanan, menerapkan promo, dan menghubungi admin, gunakan fitur di aplikasi atau Pusat Bantuan, ya. Boo tidak dapat menjalankan tindakan itu melalui chat. Tidak ada pesanan atau pembayaran yang saya ubah.';
+export const offTopicReply =
+  'Maaf, saya belum bisa membantu pertanyaan di luar seputar CleanGo. Saya bisa membantu informasi layanan, cara booking, pembayaran, promo, tracking, atau keluhan layanan CleanGo. Mau dibantu yang mana, ya?';
 
 const policyTopics: Record<string, RegExp> = {
   pembatalan: /\b(?:batal|batalkan|membatalkan|pembatalan|cancel)\b/i,
@@ -75,6 +77,27 @@ const knowledge: (ChatSource & { matches: RegExp })[] = [
     matches:
       /booking|memesan|pemesanan|pesen|pesan layanan|pesan jasa|order baru|pesan.*(?:gimana|bagaimana|cara)|cara.*pesan/i,
     text: 'Untuk booking di aplikasi, ikuti langkah berikut, ya:\n• Pilih layanan dan baca detailnya.\n• Tentukan tanggal/jam dan pilih alamat pembersihan. Tambahkan catatan bila perlu.\n• Lanjut ke checkout, periksa ringkasan, lalu pilih metode pembayaran yang tersedia.\n• Ikuti instruksi aplikasi dan pantau hasilnya di Pesanan/Status Pesanan. Booking tetap dilakukan melalui aplikasi, bukan chat Boo.',
+  },
+  {
+    id: 'knowledge:checkout',
+    title: 'Memeriksa checkout dan konfirmasi pesanan',
+    matches:
+      /checkout|ringkasan (?:pesanan|booking|pembayaran)|konfirmasi pemesanan|sebelum (?:bayar|membayar)/i,
+    text: 'Sebelum melanjutkan checkout, periksa layanan, alamat yang dipilih, tanggal/jam, dan rincian harga di layar. Jika ada yang salah, kembali ke bagian terkait untuk memperbaikinya. Gunakan hanya metode dan promo yang tersedia pada aplikasi. Setelah mengirim pesanan atau pembayaran, periksa hasilnya di Pesanan sebelum mengulang saat koneksi terputus agar tidak memesan dua kali. Boo tidak mengonfirmasi pembayaran atau membuat booking melalui chat.',
+  },
+  {
+    id: 'knowledge:schedule',
+    title: 'Memilih jadwal dan ketersediaan',
+    matches:
+      /pilih (?:tanggal|jam|jadwal)|memilih (?:tanggal|jam|jadwal)|jadwal (?:tersedia|penuh)|slot|tanggal (?:penuh|tersedia)|pesan (?:hari ini|besok)|booking (?:hari ini|besok)/i,
+    text: 'Pilih tanggal dan jam pada halaman Booking sesuai pilihan yang tersedia. Jika slot tidak tersedia atau pesanan ditolak saat konfirmasi, pilih jadwal lain dan periksa kembali ringkasan sebelum melanjutkan. Ketersediaan dapat berubah; Boo belum membaca kapasitas slot atau menjamin cleaner tersedia lewat chat. Jadwal, harga, dan ketersediaan harus diperiksa ulang ketika memesan lagi.',
+  },
+  {
+    id: 'knowledge:chat-input',
+    title: 'Mengirim pesan kepada Boo',
+    matches:
+      /kirim (?:foto|gambar|suara|pesan)|upload (?:foto|gambar)|kamera|mikrofon|voice|pesan suara|chat (?:gambar|foto)/i,
+    text: 'Boo saat ini menerima pertanyaan teks. Foto, gambar, dan pesan suara belum dianalisis melalui chat. Jelaskan kendala dengan teks tanpa data pribadi. Untuk foto ulasan atau bukti layanan, gunakan fitur unggah yang tersedia pada halaman terkait, bukan chat Boo. Tidak perlu mengirim foto identitas, kartu, atau bukti pembayaran sensitif.',
   },
   {
     id: 'knowledge:address',

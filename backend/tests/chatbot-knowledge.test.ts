@@ -28,6 +28,41 @@ beforeEach(() => {
 });
 
 describe('Boo public guidance without database integration', () => {
+  it.each(['apa itu clean go', 'jelaskan tentang clean-go'])(
+    'recognizes the product even without a database: %s',
+    async (message) => {
+      const result = await replyToChat({ message, history: [] });
+      expect(result.answer).toContain('platform');
+      expect(mocks.db).not.toHaveBeenCalled();
+    },
+  );
+  it.each([
+    'python fibonacci',
+    'buatkan kode Python untuk CleanGo',
+    'resep nasi goreng',
+  ])(
+    'refuses unrelated questions even without a database: %s',
+    async (message) => {
+      const result = await replyToChat({ message, history: [] });
+      expect(result.answer).toMatch(/maaf/i);
+      expect(result.answer).toMatch(/di luar.*CleanGo/i);
+      expect(mocks.db).not.toHaveBeenCalled();
+      expect(mocks.groq).not.toHaveBeenCalled();
+    },
+  );
+  it.each([
+    ['Apa yang diperiksa di ringkasan checkout?', 'alamat'],
+    ['Bagaimana memilih tanggal dan jam?', 'Booking'],
+    ['Boleh kirim gambar ke Boo?', 'teks'],
+    ['Apakah hujan mempengaruhi ETA cleaner?', 'tidak mengetahui'],
+  ])(
+    'explains supported app usage without inventing live facts: %s',
+    async (message, expected) => {
+      const result = await replyToChat({ message, history: [] });
+      expect(result.answer).toContain(expected);
+      expect(mocks.db).not.toHaveBeenCalled();
+    },
+  );
   it('keeps an unknown policy deterministic even when the provider would invent a guarantee', async () => {
     mocks.groq.mockResolvedValue({
       answer: 'Refund selalu gratis dan pasti disetujui.',

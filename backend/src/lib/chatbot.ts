@@ -1,11 +1,12 @@
 import { listFaqs } from '../model/faq.model.js';
-import { findServices } from '../model/service.model.js';
+import { findServiceInclusions, findServices } from '../model/service.model.js';
 import { findChatOrder, listChatPromos } from '../model/chatbot.model.js';
 import { askGroq, minimizeChatText, type ChatSource } from './groq-chat.js';
 import { getEnv } from '../config/env.js';
 import {
   chatSearchText,
   chatTokens,
+  isOffTopicChat,
   normalizeChatText,
   smallTalkReply,
 } from './chatbot-text.js';
@@ -14,6 +15,7 @@ import {
   chatSafetyReply,
   knowledgeFor,
   pendingOrderReply,
+  offTopicReply,
   policyTopicsFor,
 } from './chatbot-knowledge.js';
 
@@ -97,6 +99,7 @@ export async function replyToChat(
   if (safetyReply) return reply(safetyReply);
   const socialReply = smallTalkReply(originalQuestion);
   if (socialReply) return reply(socialReply);
+  if (isOffTopicChat(question)) return reply(offTopicReply);
   const respondFromSources = async (
     sources: ChatSource[],
     fallback: ChatSource[],
@@ -243,6 +246,8 @@ export async function replyToChat(
     'knowledge:booking',
     'knowledge:payment',
     'knowledge:address',
+    'knowledge:checkout',
+    'knowledge:schedule',
   ];
   const generalGuidance =
     generalSources.some((source) => guidanceIds.includes(source.id)) &&
@@ -291,7 +296,10 @@ export async function replyToChat(
         ),
       );
     sources.push(...generalSources.slice(0, 2));
-    if (!sources.length) return reply(clarification);
+    if (!sources.length)
+      return reply(
+        tokens(question).length >= 3 ? offTopicReply : clarification,
+      );
     return respondFromSources(sources, sources, contextHistory);
   }
   if ((isPrivate || followupPrivate) && !generalStatusQuestion) {
@@ -329,7 +337,7 @@ export async function replyToChat(
       contextQuestion,
     )
   )
-    return reply(clarification);
+    return reply(tokens(question).length >= 3 ? offTopicReply : clarification);
 
   const [faqResult, serviceResult, promoResult] = await Promise.allSettled([
     listFaqs(),
@@ -475,13 +483,38 @@ export async function replyToChat(
       `Detail layanan ${[...missingNames.map((name) => `${name} cleaning`), ...missingSubjects].join(', ')} belum tersedia di katalog aktif. Saya tidak dapat menyamakannya dengan layanan lain atau memastikan harga dan cakupannya. Silakan konfirmasi kepada admin.`,
       'faq',
     );
+  const serviceDetails = new Map<number, string>();
+  const unavailableDetails = new Set<number>();
+  if (
+    needsServices &&
+    (areaQuestion ||
+      /cakupan|termasuk|include|rincian|tugas|dibersihkan|dikerjakan|membersihkan|beda|detail|jelaskan/i.test(
+        question,
+      ))
+  ) {
+    // Read at most three displayed services; simple price questions need no extra queries.
+    const displayedServices = matchedServices.slice(0, 3);
+    const results = await Promise.allSettled(
+      displayedServices.map((service) => findServiceInclusions(service.id)),
+    );
+    for (const [index, result] of results.entries()) {
+      const service = displayedServices[index]!;
+      if (result.status === 'fulfilled')
+        serviceDetails.set(
+          service.id,
+          result.value.map((item) => item.description).join('; '),
+        );
+      else unavailableDetails.add(service.id);
+    }
+  }
   if (
     areaQuestion &&
+    !unavailableDetails.size &&
     matchedServices.length &&
     matchedServices.every(
       (service) =>
         !/luas|ukuran|m²|\bm2\b|meter|\d+\s*[x×]\s*\d+/i.test(
-          service.description ?? '',
+          `${service.description ?? ''} ${serviceDetails.get(service.id) ?? ''}`,
         ),
     )
   )
@@ -503,9 +536,15 @@ export async function replyToChat(
         id: `service:${service.id}`,
         title: service.name,
         text: minimizeChatText(
-          `${service.name}. Kategori: ${service.categoryName}. Harga katalog ${money(service.price)}. Durasi layanan ${service.durationMinutes} menit. ${service.description ?? ''}`,
+          `${service.name}. Kategori: ${service.categoryName}. Harga katalog ${money(service.price)}. Durasi layanan ${service.durationMinutes} menit. ${service.description ?? ''}${serviceDetails.get(service.id) ? ` Rincian pekerjaan: ${serviceDetails.get(service.id)}.` : ''}${unavailableDetails.has(service.id) ? ' Rincian pekerjaan sedang tidak dapat dihubungi; cakupan lengkap belum dapat dipastikan.' : ''}`,
         ),
       });
+  if (unavailableDetails.size)
+    candidates.push({
+      id: 'availability:service-details',
+      title: 'Status rincian pekerjaan',
+      text: 'Rincian pekerjaan sedang tidak dapat dihubungi; konfirmasi cakupan lengkap melalui halaman layanan atau admin.',
+    });
   if (needsServices && serviceResult.status === 'rejected')
     candidates.push({
       id: 'availability:services',
@@ -595,13 +634,9 @@ export async function replyToChat(
   if (needsServices)
     fallback.push(
       ...(serviceResult.status === 'fulfilled'
-        ? matchedServices.slice(0, 3).map((service) => ({
-            id: `service:${service.id}`,
-            title: service.name,
-            text: minimizeChatText(
-              `${service.name}: harga katalog ${money(service.price)}. Durasi layanan ${service.durationMinutes} menit.`,
-            ),
-          }))
+        ? candidates
+            .filter((source) => source.id.startsWith('service:'))
+            .slice(0, 3)
         : candidates.filter((source) => source.id === 'availability:services')),
     );
   if (needsPromos)
