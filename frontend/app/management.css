@@ -1079,3 +1079,59 @@ h3 {
     font-size: var(--ui-text-small);
   }
 }
+.category-icon-row,
+.category-icon-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.category-icon-row {
+  gap: 14px;
+  margin-top: 10px;
+}
+.category-icon-preview {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--muted);
+}
+.category-icon-preview img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+.category-icon-preview svg {
+  width: 24px;
+  height: 24px;
+}
+.category-icon-row .field-hint {
+  display: block;
+  margin-top: 8px;
+}
+.category-tab-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+.category-selector {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.category-selector label {
+  display: block;
+  margin-bottom: 8px;
+}
+.category-editor-footer {
+  flex-wrap: wrap;
+}
+.category-delete-action {
+  margin-right: auto;
+  color: var(--color-056);
+}

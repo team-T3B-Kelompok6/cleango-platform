@@ -9,7 +9,7 @@
     "start": "next start --hostname 127.0.0.1",
     "typecheck": "tsc --noEmit",
     "check:demo": "node scripts/check-admin-demo.mjs",
-    "check:service-icons": "node scripts/check-service-icons.mjs",
+    "check:category-icons": "node scripts/check-category-icons.mjs",
     "check:staff-skills": "node scripts/check-staff-skills.mjs",
     "check:categories": "node scripts/check-categories.mjs",
     "check:audit": "node scripts/check-audit.mjs",

@@ -18,8 +18,6 @@ import { ServiceForm } from './ServiceForm';
 import { OrderEditor, ScheduleEditor } from './BookingEditors';
 import { isDemoId } from '@/lib/cleaner/demo-store';
 import { withOrderWorkTimes } from '@/lib/order-work-times';
-import { adminDemoEnabled } from '@/lib/demo/mode';
-import { validImageUrl } from '@/lib/service-image';
 import { serviceSkillOptions } from '@/lib/staff-skills';
 import { staffPhotoSource } from '@/lib/staff-photo';
 async function optionalLookup<T extends RecordData>(
@@ -142,23 +140,12 @@ export async function ResourceFormServer({
   }
   const fields = await fieldsFor(resource, record);
   if (resource === 'services') {
-    const categories = await listCategories('services');
     return (
       <ServiceForm
         focusPromo={focusPromo}
         initial={record}
         categories={
           fields.find((field) => field.name === 'category')?.options ?? []
-        }
-        availableIcons={categories.flatMap((category) =>
-          validImageUrl(category.icon)
-            ? [{ name: category.name, url: category.icon }]
-            : [],
-        )}
-        mediaOrigin={
-          !adminDemoEnabled() && process.env.API_URL
-            ? new URL(process.env.API_URL).origin
-            : ''
         }
         action={saveAction.bind(null, resource, record?.id ?? null)}
       />

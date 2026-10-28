@@ -1,5 +1,6 @@
 'use client';
 import { UiIcon } from './UiIcon';
+import { CategoryIcon } from './CategoryIcon';
 import {
   useState,
   useRef,
@@ -21,11 +22,13 @@ const validDate = (value: string | null) =>
     : '';
 export function Filters({
   tabs = [],
+  tabIcons = {},
   date = false,
   dateCounts = {},
   today = '',
 }: {
   tabs?: string[];
+  tabIcons?: Record<string, string>;
   date?: boolean;
   dateCounts?: Record<string, number>;
   today?: string;
@@ -228,6 +231,7 @@ export function Filters({
               }
               onClick={() => apply({ tab: index ? tab : '' })}
             >
+              {tabIcons[tab] && <CategoryIcon src={tabIcons[tab]} />}
               {pathname === '/petugas'
                 ? ((
                     {

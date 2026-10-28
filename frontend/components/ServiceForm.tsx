@@ -14,19 +14,14 @@ import { useDialogClose } from './DialogTrigger';
 import { SubmitButton } from './Form';
 import { UiIcon } from './UiIcon';
 import type { FormState, RecordData } from '@/types';
-import { serviceMediaUrl } from '@/lib/service-media';
 
 export function ServiceForm({
   initial = {},
   categories,
-  availableIcons = [],
-  mediaOrigin = '',
   action,
 }: {
   initial?: Partial<RecordData>;
   categories: string[];
-  availableIcons?: { name: string; url: string }[];
-  mediaOrigin?: string;
   action: (state: FormState, form: FormData) => Promise<FormState>;
   focusPromo?: boolean;
 }) {
@@ -34,7 +29,6 @@ export function ServiceForm({
   const close = useDialogClose();
   const id = useId();
   const fileInput = useRef<HTMLInputElement>(null);
-  const iconInput = useRef<HTMLInputElement>(null);
   const nextFeature = useRef(1000);
   const [name, setName] = useState(String(initial.name ?? ''));
   const [category, setCategory] = useState(
@@ -50,11 +44,6 @@ export function ServiceForm({
   const [imageError, setImageError] = useState('');
   const [imageFailed, setImageFailed] = useState(false);
   const [dragging, setDragging] = useState(false);
-  const [iconFile, setIconFile] = useState<File | null>(null);
-  const [iconUrl, setIconUrl] = useState(String(initial.iconUrl ?? ''));
-  const [iconPreview, setIconPreview] = useState('');
-  const [iconError, setIconError] = useState('');
-  const [iconFailed, setIconFailed] = useState(false);
   const [price, setPrice] = useState(String(initial.price ?? ''));
   const [active, setActive] = useState(initial.active !== false);
   const [features, setFeatures] = useState(() =>
@@ -72,35 +61,6 @@ export function ServiceForm({
     setPreview(url);
     return () => URL.revokeObjectURL(url);
   }, [file, removed, initial.imageUrl]);
-  useEffect(() => {
-    setIconFailed(false);
-    if (!iconFile) {
-      setIconPreview(serviceMediaUrl(iconUrl, mediaOrigin));
-      return;
-    }
-    const url = URL.createObjectURL(iconFile);
-    setIconPreview(url);
-    return () => URL.revokeObjectURL(url);
-  }, [iconFile, iconUrl, mediaOrigin]);
-  function chooseIcon(url: string) {
-    setIconFile(null);
-    setIconUrl(url);
-    setIconError('');
-    if (iconInput.current) iconInput.current.value = '';
-  }
-  function selectIcon(selected?: File) {
-    if (!selected) return;
-    if (
-      !['image/jpeg', 'image/png', 'image/webp'].includes(selected.type) ||
-      selected.size > 2 * 1024 * 1024
-    ) {
-      setIconError('Gunakan JPG, PNG, atau WebP, maksimal 2 MB.');
-      if (iconInput.current) iconInput.current.value = '';
-      return;
-    }
-    setIconError('');
-    setIconFile(selected);
-  }
   function selectFile(selected?: File) {
     if (!selected) return;
     if (
@@ -143,8 +103,6 @@ export function ServiceForm({
       className="next-form service-editor"
       action={(data) => {
         if (file) data.set('serviceImage', file);
-        if (iconFile) data.set('serviceIcon', iconFile);
-        data.set('iconUrl', iconUrl);
         data.set('removeImage', String(removed));
         data.set(
           'features',
@@ -249,110 +207,6 @@ export function ServiceForm({
               {(imageError || state.errors?.serviceImage) && (
                 <p className="field-error" role="alert">
                   {imageError || state.errors?.serviceImage}
-                </p>
-              )}
-            </div>
-            <div
-              className="service-icon-box"
-              aria-labelledby={id + 'icon-label'}
-            >
-              <div className="service-section-heading">
-                <strong id={id + 'icon-label'}>Ikon layanan</strong>
-                <small>JPG, PNG, WebP · maks. 2 MB</small>
-              </div>
-              <div className="service-icon-content">
-                <div className="service-icon-preview">
-                  {iconPreview && !iconFailed ? (
-                    <Image
-                      src={iconPreview}
-                      alt="Pratinjau ikon layanan"
-                      width={64}
-                      height={64}
-                      unoptimized
-                      onError={() => setIconFailed(true)}
-                    />
-                  ) : (
-                    <UiIcon name="image" />
-                  )}
-                </div>
-                <div className="service-icon-controls">
-                  <p className="field-hint">
-                    Ditampilkan pada pilihan layanan di aplikasi.
-                  </p>
-                  <div className="service-icon-actions">
-                    <button
-                      className="button"
-                      type="button"
-                      disabled={pending}
-                      onClick={() => iconInput.current?.click()}
-                    >
-                      {iconPreview ? 'Ganti' : 'Unggah ikon'}
-                    </button>
-                    {(iconPreview || iconError) && (
-                      <button
-                        className="button"
-                        type="button"
-                        aria-label="Hapus ikon layanan"
-                        disabled={pending}
-                        onClick={() => chooseIcon('')}
-                      >
-                        <UiIcon name="trash" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-              {!!availableIcons.length && (
-                <div
-                  className="service-icon-presets"
-                  role="group"
-                  aria-label="Ikon kategori yang tersedia"
-                >
-                  <span className="field-hint">Ikon tersedia</span>
-                  <div>
-                    {availableIcons.map((icon) => (
-                      <button
-                        type="button"
-                        className="service-icon-option"
-                        key={icon.name}
-                        disabled={pending}
-                        aria-pressed={!iconFile && iconUrl === icon.url}
-                        onClick={() => chooseIcon(icon.url)}
-                      >
-                        <Image
-                          src={serviceMediaUrl(icon.url, mediaOrigin)}
-                          alt=""
-                          width={28}
-                          height={28}
-                          unoptimized
-                        />
-                        {icon.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              <input
-                ref={iconInput}
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                className="service-file-input"
-                aria-label="Unggah ikon layanan"
-                disabled={pending}
-                onChange={(event) => selectIcon(event.target.files?.[0])}
-              />
-              <input type="hidden" name="iconUrl" value={iconUrl} />
-              {(iconError ||
-                iconFailed ||
-                state.errors?.serviceIcon ||
-                state.errors?.iconUrl) && (
-                <p className="field-error" role="alert">
-                  {iconError ||
-                    (iconFailed
-                      ? 'Ikon tidak dapat dimuat. Pilih ikon lain atau unggah ulang.'
-                      : '') ||
-                    state.errors?.serviceIcon ||
-                    state.errors?.iconUrl}
                 </p>
               )}
             </div>
@@ -544,8 +398,6 @@ export function ServiceForm({
                 'description',
                 'features',
                 'serviceImage',
-                'serviceIcon',
-                'iconUrl',
               ].includes(name),
           )
           .map(([name, message]) => (
@@ -573,7 +425,7 @@ export function ServiceForm({
             Batal
           </Link>
         )}
-        <SubmitButton disabled={!!imageError || !!iconError}>
+        <SubmitButton disabled={!!imageError}>
           {initial.id ? 'Simpan perubahan' : 'Simpan layanan'}
         </SubmitButton>
       </div>

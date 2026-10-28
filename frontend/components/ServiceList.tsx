@@ -3,8 +3,6 @@ import Image from 'next/image';
 
 import { UiIcon } from './UiIcon';
 import { RecordActions } from './RecordActions';
-import { ServiceIcon } from './ServiceIcon';
-import { serviceMediaUrl } from '@/lib/service-media';
 
 import type { Service } from '@/types';
 import type { RecordListProps } from './RecordListProps';
@@ -38,20 +36,7 @@ export function ServiceList({ shown, resource, edit }: RecordListProps) {
                       <span className="service-promo-badge">Promo</span>
                     )}
                   </span>
-                  <h3 className="service-name-with-icon">
-                    {service.iconUrl && (
-                      <ServiceIcon
-                        src={serviceMediaUrl(
-                          service.iconUrl,
-                          process.env.API_URL
-                            ? new URL(process.env.API_URL).origin
-                            : '',
-                        )}
-                        name={service.name}
-                      />
-                    )}
-                    {service.name}
-                  </h3>
+                  <h3>{service.name}</h3>
                   <p>Durasi: {service.duration}</p>
                   <p className="service-list-description">
                     {service.description}

@@ -531,6 +531,29 @@ export async function adminDemoRequest(
       return { data: structuredClone(created) };
     }
     if (index < 0) throw new TaskError('Data uji tidak ditemukan.', 404);
+    if (
+      method === 'PATCH' &&
+      resource === 'categories' &&
+      records[index].resource === 'services' &&
+      typeof body.name === 'string' &&
+      body.name !== records[index].name
+    ) {
+      const previousName = records[index].name;
+      for (const service of store.admin!.records.services.filter(
+        (service) => service.category === previousName,
+      )) {
+        const before = structuredClone(service);
+        service.category = body.name;
+        recordDemoAudit(
+          store.admin!,
+          'update',
+          'services',
+          service.id,
+          before,
+          service,
+        );
+      }
+    }
     if (method === 'DELETE') {
       if (resource === 'categories' && records[index].resource === 'services') {
         const linkedServices = store.admin!.records.services.filter(

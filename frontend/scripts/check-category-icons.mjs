@@ -36,19 +36,19 @@ vm.runInThisContext('(function(require,module,exports){' + code + '\n})')(
   module,
   module.exports,
 );
-
-const { uploadServiceIcon } = module.exports;
+const upload = (file) => module.exports.uploadImage(file, 'category-icon');
 const file = new File([new Uint8Array([1, 2, 3])], 'icon.png', {
   type: 'image/png',
 });
-assert.equal(await uploadServiceIcon(file), '/uploads/icon.png');
+assert.equal(await upload(file), '/uploads/icon.png');
 assert.equal(sent.path, '/uploads');
 assert.equal(sent.headers['Content-Type'], 'image/png');
 assert.deepEqual(new Uint8Array(sent.body), new Uint8Array([1, 2, 3]));
 demo = true;
-await uploadServiceIcon(file);
+await upload(file);
 assert.ok(sent.body instanceof FormData);
 assert.equal(sent.body.get('file').name, 'icon.png');
+assert.equal(sent.body.get('purpose'), 'category-icon');
 for (const invalid of [
   'javascript:alert(1)',
   '//other.example/icon.png',
@@ -56,8 +56,8 @@ for (const invalid of [
   '/bad\\path.png',
 ]) {
   responseUrl = invalid;
-  await assert.rejects(uploadServiceIcon(file), ApiError);
+  await assert.rejects(upload(file), ApiError);
 }
 console.log(
-  'PASS service icon upload: Express bytes, isolated demo upload, invalid response URLs',
+  'PASS category icon upload: Express bytes, demo upload, and invalid response URLs',
 );

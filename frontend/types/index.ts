@@ -27,7 +27,6 @@ export interface Order extends RecordData {
 }
 export interface Service extends RecordData {
   imageUrl?: string | null;
-  iconUrl?: string | null;
   discountPrice?: number | null;
   packageLabel?: string;
   isFavorite?: boolean;

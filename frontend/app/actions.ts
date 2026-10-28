@@ -5,12 +5,7 @@ import { redirect } from 'next/navigation';
 import { ApiError, request, list, detail } from '@/lib/api';
 import { resources, isResource } from '@/lib/resources';
 import { listCategories } from '@/lib/categories';
-import {
-  uploadServiceImage,
-  uploadServiceIcon,
-  validImageUrl,
-  uploadImage,
-} from '@/lib/service-image';
+import { uploadServiceImage, uploadImage } from '@/lib/service-image';
 import { unsavedFields } from '@/lib/saved-fields';
 import { needsAssignment } from '@/lib/order-flow';
 import { withOrderWorkTimes } from '@/lib/order-work-times';
@@ -176,8 +171,6 @@ export async function saveAction(
     errors.staff = 'Pilih petugas untuk status ini.';
   const imageFile = form.get('serviceImage');
   const hasImage = imageFile instanceof File && imageFile.size > 0;
-  const iconFile = form.get('serviceIcon');
-  const hasIcon = iconFile instanceof File && iconFile.size > 0;
   const staffPhoto = form.get('staffPhoto');
   const hasStaffPhoto = staffPhoto instanceof File && staffPhoto.size > 0;
   if (resource === 'staff') {
@@ -190,19 +183,6 @@ export async function saveAction(
     if (form.get('removeStaffPhoto') === 'true') data.photoUrl = null;
   }
   if (resource === 'services') {
-    // Omitted icon fields preserve icons when older clients edit a service.
-    if (form.has('iconUrl')) {
-      const iconUrl = String(form.get('iconUrl') ?? '').trim();
-      if (iconUrl && (!validImageUrl(iconUrl) || iconUrl.length > 500))
-        errors.iconUrl = 'Alamat ikon tidak valid.';
-      data.iconUrl = iconUrl || null;
-    }
-    if (
-      hasIcon &&
-      (!['image/jpeg', 'image/png', 'image/webp'].includes(iconFile.type) ||
-        iconFile.size > 2 * 1024 * 1024)
-    )
-      errors.serviceIcon = 'Gunakan JPG, PNG, atau WebP, maksimal 2 MB.';
     // Discounts are managed exclusively through promo codes.
     data.discountPrice = null;
     const features = data.features as string[];
@@ -355,8 +335,6 @@ export async function saveAction(
     }
     if (resource === 'services' && hasImage)
       data.imageUrl = await uploadServiceImage(imageFile);
-    if (resource === 'services' && hasIcon)
-      data.iconUrl = await uploadServiceIcon(iconFile);
     if (resource === 'staff' && hasStaffPhoto)
       data.photoUrl = await uploadImage(staffPhoto, 'staff-photo');
     const result = await request<{ data: RecordData }>(

@@ -25,13 +25,6 @@ export function unsavedFields(
   }
   if (resource === 'services') {
     if (
-      'iconUrl' in sent &&
-      (!Object.hasOwn(saved, 'iconUrl') ||
-        (saved.iconUrl ?? null) !== sent.iconUrl)
-    )
-      errors.serviceIcon =
-        'Perubahan ikon belum tersimpan pada layanan. Periksa dukungan ikon pada API.';
-    if (
       'discountPrice' in sent &&
       (saved.discountPrice == null ? null : Number(saved.discountPrice)) !==
         (sent.discountPrice ?? null)

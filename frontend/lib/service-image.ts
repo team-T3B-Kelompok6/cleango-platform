@@ -45,7 +45,3 @@ export async function uploadImage(
     throw new ApiError('Alamat gambar dari layanan upload tidak valid.', 502);
   return result.data.url;
 }
-
-export async function uploadServiceIcon(file: File): Promise<string> {
-  return uploadImage(file, 'service-icon');
-}

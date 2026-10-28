@@ -620,32 +620,74 @@ await check(
   },
 );
 await check(
-  'Service icons persist independently of photos, survive edits, and can be cleared',
+  'Category icons are stored on categories and do not change service photos',
   async () => {
-    const service = (await request('/services')).data[0];
-    const photo = service.imageUrl;
-    const withIcon = (
-      await request('/services/' + service.id, 'PATCH', {
-        iconUrl: '/demo/icon-test.png',
+    const services = (await request('/services')).data;
+    const category = (
+      await request('/categories', 'POST', {
+        name: 'Kategori dengan ikon',
+        resource: 'services',
+        icon: '/demo/category-icon.png',
       })
     ).data;
-    assert.equal(withIcon.iconUrl, '/demo/icon-test.png');
-    assert.equal(withIcon.imageUrl, photo);
-    await request('/services/' + service.id, 'PATCH', { name: service.name });
-    assert.equal(
-      (await request('/services/' + service.id)).data.iconUrl,
-      '/demo/icon-test.png',
+    assert.equal(category.icon, '/demo/category-icon.png');
+    const saved = (await request('/categories?resource=services')).data.find(
+      (item) => item.id === category.id,
     );
-    const cleared = (
-      await request('/services/' + service.id, 'PATCH', { iconUrl: null })
+    assert.equal(saved.icon, '/demo/category-icon.png');
+    assert.deepEqual((await request('/services')).data, services);
+  },
+);
+await check(
+  'Category edits retain linked services and support icon replacement/removal',
+  async () => {
+    const category = (
+      await request('/categories', 'POST', {
+        name: 'Kategori sebelum diubah',
+        resource: 'services',
+        icon: '/demo/old-icon.png',
+      })
     ).data;
-    assert.equal(cleared.iconUrl, null);
-    assert.equal(cleared.imageUrl, photo);
-    const { unsavedFields } = load(path.join(root, 'lib/saved-fields.ts'));
-    assert.ok(
-      unsavedFields('services', { iconUrl: '/new.png' }, service).serviceIcon,
+    const created = [];
+    for (const active of [true, false])
+      created.push(
+        (
+          await request('/services', 'POST', {
+            name: 'Layanan kategori ' + active,
+            category: category.name,
+            active,
+            imageUrl: '/demo/service-photo.png',
+          })
+        ).data,
+      );
+    const beforeCount = (await request('/services')).data.length;
+    const renamed = (
+      await request('/categories/' + category.id, 'PATCH', {
+        name: 'Kategori sesudah diubah',
+        resource: 'services',
+      })
+    ).data;
+    assert.equal(renamed.id, category.id);
+    assert.equal(renamed.icon, '/demo/old-icon.png');
+    const services = (await request('/services')).data;
+    assert.equal(services.length, beforeCount);
+    for (const original of created) {
+      const saved = services.find((item) => item.id === original.id);
+      assert.deepEqual(saved, { ...original, category: renamed.name });
+    }
+    const replaced = (
+      await request('/categories/' + category.id, 'PATCH', {
+        name: renamed.name,
+        icon: '/demo/new-icon.png',
+      })
+    ).data;
+    assert.equal(replaced.icon, '/demo/new-icon.png');
+    await request('/categories/' + category.id, 'PATCH', { icon: null });
+    const saved = (await request('/categories?resource=services')).data.find(
+      (item) => item.id === category.id,
     );
-    assert.deepEqual(unsavedFields('services', { iconUrl: null }, cleared), {});
+    assert.equal(saved.icon, null);
+    assert.deepEqual((await request('/services')).data, services);
   },
 );
 await check(

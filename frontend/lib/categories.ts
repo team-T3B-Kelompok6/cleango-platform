@@ -43,6 +43,7 @@ function categoryRecord(value: unknown, resource: CategoryResource): Category {
 export async function createCategoryRecord(
   resource: CategoryResource,
   name: string,
+  icon?: string | null,
 ) {
   const result = await request<{ data: unknown }>(categoryPath(resource), {
     method: 'POST',
@@ -52,9 +53,35 @@ export async function createCategoryRecord(
           ? 'Sofa dan Kasur'
           : name,
       resource,
+      ...(resource === 'services' && icon !== undefined ? { icon } : {}),
     }),
   });
   return categoryRecord(result.data, resource);
+}
+
+export async function updateCategoryRecord(
+  id: string,
+  name: string,
+  icon?: string | null,
+) {
+  const result = await request<{ data: unknown }>(
+    categoryPath('services') + '/' + encodeURIComponent(id),
+    {
+      method: 'PATCH',
+      body: JSON.stringify({
+        name:
+          categoryPath('services') === '/admin/categories' && name === 'Sofa'
+            ? 'Sofa dan Kasur'
+            : name,
+        resource: 'services',
+        ...(icon !== undefined ? { icon } : {}),
+      }),
+    },
+  );
+  const category = categoryRecord(result.data, 'services');
+  if (category.id !== id)
+    throw new ApiError('Respons perubahan kategori tidak sesuai.', 502);
+  return category;
 }
 
 export async function deleteCategoryRecord(

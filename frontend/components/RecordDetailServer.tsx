@@ -24,8 +24,6 @@ import {
   newestOrderFirst,
 } from '@/lib/order-flow';
 import { withOrderWorkTimes } from '@/lib/order-work-times';
-import { ServiceIcon } from './ServiceIcon';
-import { serviceMediaUrl } from '@/lib/service-media';
 
 function dateText(value: unknown) {
   return typeof value === 'string' && Number.isFinite(Date.parse(value))
@@ -309,20 +307,7 @@ function ServicePreview({ service }: { service: Service }) {
       <div className="service-preview-heading">
         <div>
           <span className="detail-category">{service.category}</span>
-          <h3 className="service-name-with-icon">
-            {service.iconUrl && (
-              <ServiceIcon
-                src={serviceMediaUrl(
-                  service.iconUrl,
-                  process.env.API_URL
-                    ? new URL(process.env.API_URL).origin
-                    : '',
-                )}
-                name={service.name}
-              />
-            )}
-            {service.name}
-          </h3>
+          <h3>{service.name}</h3>
         </div>
         <Badge status={service.active ? 'Aktif' : 'Nonaktif'} />
       </div>
