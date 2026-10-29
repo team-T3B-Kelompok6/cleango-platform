@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import { AppError } from '../lib/AppError.js';
+import { upsertPromoNotifications } from '../model/notification.model.js';
 import {
   deletePromoById,
   findPromo,
@@ -15,6 +16,15 @@ import { positiveId, validationError } from './resource-validation.js';
 
 const CODE_PATTERN = /^[A-Z0-9][A-Z0-9_-]{2,29}$/;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+async function notifyPromo(promo: Awaited<ReturnType<typeof insertPromo>>): Promise<void> {
+  if (!promo.active) return;
+  try {
+    await upsertPromoNotifications(promo);
+  } catch (error) {
+    console.error('Gagal membuat notifikasi promo:', error);
+  }
+}
 
 function text(body: Record<string, unknown>, field: string, label: string, max: number): string {
   const value = typeof body[field] === 'string' ? (body[field] as string).trim() : '';
@@ -167,6 +177,7 @@ export async function createPromo(
         code: 'Kode promo sudah dipakai.',
       });
     const data = await insertPromo(input);
+    await notifyPromo(data);
     response.status(201).json({ message: 'Promo berhasil dibuat.', data });
   } catch (error) {
     next(error);
@@ -180,6 +191,7 @@ export async function updatePromo(
 ): Promise<void> {
   try {
     const id = positiveId(request.params.id, 'ID promo');
+    const before = await findPromo(id);
     const input = inputFrom(request.body as Record<string, unknown>, true);
     if (input.code) {
       const existing = await findPromoByCode(input.code);
@@ -190,6 +202,7 @@ export async function updatePromo(
     }
     const data = await updatePromoById(id, input);
     if (!data) throw new AppError(404, 'Promo tidak ditemukan.');
+    if (!before?.active && data.active) await notifyPromo(data);
     response.status(200).json({ message: 'Promo berhasil diperbarui.', data });
   } catch (error) {
     next(error);

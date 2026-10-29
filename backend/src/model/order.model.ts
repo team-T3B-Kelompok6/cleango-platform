@@ -1,4 +1,6 @@
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
+import { AppError } from '../lib/AppError.js';
+import { addressSql } from '../lib/address-display.js';
 import { pool } from '../lib/db.js';
 
 import {
@@ -67,7 +69,7 @@ export interface Order {
 
 const orderSelect = `SELECT b.id, b.customer_id AS customerId,
   u.name AS customer,
-  CONCAT_WS(', ', a.street_address, a.city, a.province) AS address,
+  ${addressSql('a')} AS address,
   a.latitude, a.longitude,
   s.name AS service, b.total_amount AS price,
   DATE_FORMAT(b.scheduled_date, '%Y-%m-%d') AS date,
@@ -230,7 +232,9 @@ export async function updateBookingById(
   try {
     await connection.beginTransaction();
     const [rows] = await connection.execute<RowDataPacket[]>(
-      'SELECT status, customer_id AS customerId, address_id AS addressId FROM bookings WHERE id = ? FOR UPDATE',
+      `SELECT status, customer_id AS customerId, address_id AS addressId,
+         (hold_until > NOW()) AS onHold
+       FROM bookings WHERE id = ? FOR UPDATE`,
       [id],
     );
     if (!rows[0]) {
@@ -269,6 +273,20 @@ export async function updateBookingById(
       if (!canTransition(current, status)) {
         await connection.rollback();
         throw new OrderStatusTransitionError(current, status);
+      }
+      if (
+        status !== undefined &&
+        Number(rows[0].onHold) === 1 &&
+        ['assigned', 'departed', 'en_route', 'in_progress', 'completed'].includes(
+          status,
+        )
+      ) {
+        await connection.rollback();
+        throw new AppError(
+          409,
+          'Pesanan masih dalam masa tahan 15 detik.',
+          'BOOKING_ON_HOLD',
+        );
       }
       fields.push('status = ?');
       values.push(status);

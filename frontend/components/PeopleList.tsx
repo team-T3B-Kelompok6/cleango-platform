@@ -4,6 +4,8 @@ import { Badge } from './StatusBadge';
 import { UiIcon } from './UiIcon';
 import { TrackingButton } from './tracking/TrackingButton';
 import { RecordActions } from './RecordActions';
+import { StaffAvatar } from './StaffAvatar';
+import { staffPhotoSource } from '@/lib/staff-photo';
 
 import type { RecordListProps } from './RecordListProps';
 export function PeopleList({ shown, resource, edit }: RecordListProps) {
@@ -50,7 +52,17 @@ export function PeopleList({ shown, resource, edit }: RecordListProps) {
                   </>
                 )}
               </span>
-              <h3>
+              <h3
+                className={
+                  resource === 'staff' ? 'staff-name-with-photo' : undefined
+                }
+              >
+                {resource === 'staff' && (
+                  <StaffAvatar
+                    name={String(item.name)}
+                    src={staffPhotoSource(item.photoUrl)}
+                  />
+                )}
                 {valueText(item.name)}
                 {resource === 'staff' && typeof item.rating === 'number' && (
                   <span className="staff-rating">

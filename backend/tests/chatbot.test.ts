@@ -10,6 +10,7 @@ vi.mock('../src/model/user.model.js', async (original) => ({
 const models = vi.hoisted(() => ({
   faqs: vi.fn(),
   services: vi.fn(),
+  inclusions: vi.fn(),
   promos: vi.fn(),
   order: vi.fn(),
   groq: vi.fn(),
@@ -23,6 +24,7 @@ vi.mock('../src/config/env.js', async (original) => {
 vi.mock('../src/model/faq.model.js', () => ({ listFaqs: models.faqs }));
 vi.mock('../src/model/service.model.js', () => ({
   findServices: models.services,
+  findServiceInclusions: models.inclusions,
 }));
 vi.mock('../src/model/chatbot.model.js', () => ({
   listChatPromos: models.promos,
@@ -81,10 +83,98 @@ beforeEach(() => {
     },
   ]);
   models.order.mockResolvedValue(null);
+  models.inclusions.mockResolvedValue([]);
   models.groq.mockResolvedValue(null);
 });
 
 describe('chatbot grounding and access', () => {
+  it.each([
+    'apa itu clean go',
+    'clean go itu apa?',
+    'jelaskan tentang clean-go',
+  ])(
+    'recognizes the product name instead of searching for a service: %s',
+    async (message) => {
+      const result = await replyToChat(input(message));
+      expect(result.answer).toContain('platform');
+      expect(result.sources).toContainEqual(
+        expect.objectContaining({ id: 'knowledge:cleango' }),
+      );
+      expect(models.services).not.toHaveBeenCalled();
+      expect(models.order).not.toHaveBeenCalled();
+    },
+  );
+  it.each([
+    'buatkan kodingan python fibonacci',
+    'python fibonacci',
+    'Boo CleanGo, buat kode Python Fibonacci',
+    'Buatkan SQL database CleanGo',
+    'ajari pemrograman aplikasi CleanGo',
+    'buat puisi tentang rumah',
+    'resep nasi goreng di rumah',
+    'harga bitcoin berapa?',
+    'siapa pemenang sepak bola?',
+    'hitung 2+2',
+    'ibu kota Jepang apa?',
+  ])(
+    'politely refuses unrelated requests before retrieval: %s',
+    async (message) => {
+      const result = await replyToChat({
+        message,
+        history: [{ role: 'user', content: 'Harga Deep Cleaning?' }],
+      });
+      expect(result.answer).toMatch(/maaf/i);
+      expect(result.answer).toMatch(/di luar.*CleanGo/i);
+      expect(models.faqs).not.toHaveBeenCalled();
+      expect(models.services).not.toHaveBeenCalled();
+      expect(models.promos).not.toHaveBeenCalled();
+      expect(models.order).not.toHaveBeenCalled();
+      expect(models.groq).not.toHaveBeenCalled();
+    },
+  );
+  it('answers a new introduction independently of previous service questions', async () => {
+    const result = await replyToChat({
+      message: 'apa itu clean go',
+      history: [{ role: 'user', content: 'home base clean' }],
+    });
+    expect(result.answer).toContain('platform');
+    expect(result.answer).not.toContain('Rp');
+    expect(models.services).not.toHaveBeenCalled();
+  });
+  it('reads work inclusions from the service database and keeps them in provider fallback', async () => {
+    models.inclusions.mockResolvedValue([
+      { id: 1, description: 'Vakum lantai hingga 30 m²', sortOrder: 0 },
+    ]);
+    const result = await replyToChat(
+      input('Apa saja yang termasuk Deep Cleaning?'),
+    );
+    expect(models.inclusions).toHaveBeenCalledWith(1);
+    expect(result.answer).toContain('Vakum lantai hingga 30 m²');
+    expect(result.answer).toContain('Rp150.000');
+    expect(JSON.stringify(models.groq.mock.calls[0]?.[2])).toContain(
+      'Vakum lantai hingga 30 m²',
+    );
+  });
+  it('does not claim area is missing when it exists in service inclusions', async () => {
+    models.inclusions.mockResolvedValue([
+      { id: 1, description: 'Area maksimal 30 m²', sortOrder: 0 },
+    ]);
+    const result = await replyToChat(input('Berapa luas Deep Cleaning?'));
+    expect(result.answer).toContain('30 m²');
+    expect(result.answer).not.toContain('belum tercantum');
+  });
+  it('keeps a valid catalogue price when scope details cannot be read', async () => {
+    models.inclusions.mockRejectedValue(new Error('private database detail'));
+    const result = await replyToChat(input('Detail Deep Cleaning apa saja?'));
+    expect(result.answer).toContain('Rp150.000');
+    expect(result.answer).toContain('Rincian pekerjaan');
+    expect(result.answer).toContain('tidak dapat dihubungi');
+    expect(result.answer).not.toContain('private database detail');
+  });
+  it('does not fetch work inclusions for a simple price question', async () => {
+    await replyToChat(input('harga Deep Cleaning?'));
+    expect(models.inclusions).not.toHaveBeenCalled();
+  });
   it('introduces Boo transparently as Customer Service AI', async () => {
     expect((await replyToChat(input('kamu bisa apa?'))).answer).toContain(
       'Customer Service AI',

@@ -22,6 +22,8 @@ describe('bounded chat language normalization', () => {
     ['prmo voucer', 'promo voucher'],
     ['di kos', 'di kost'],
     ['otpku', 'otp saya'],
+    ['apa itu clean go', 'apa itu cleango'],
+    ['CLEAN-GO', 'cleango'],
   ])('normalizes only known variants: %s', (message, expected) => {
     expect(chatSearchText(message)).toBe(expected);
   });
@@ -31,6 +33,7 @@ describe('bounded chat language normalization', () => {
     'Rp150.000',
     'gsk_fake_test',
     'unknown-new-service',
+    'CL-clean-go-0001',
   ])(
     'does not spell-correct identifiers, numbers or unknown names: %s',
     (value) => {

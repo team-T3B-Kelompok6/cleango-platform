@@ -1,4 +1,5 @@
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
+import { addressSql } from '../lib/address-display.js';
 import { pool } from '../lib/db.js';
 
 // Hourly slots so customers have more choice; matches the mobile selector.
@@ -300,8 +301,9 @@ export async function createBooking(input: CreateBookingInput): Promise<{
       `INSERT INTO bookings
          (booking_code, customer_id, service_id, address_id, promo_id, scheduled_date,
           scheduled_start_time, customer_notes, service_price, service_duration_minutes,
-          platform_fee, discount_amount, total_amount, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'confirmed')`,
+          platform_fee, discount_amount, total_amount, status, hold_until)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'confirmed',
+         DATE_ADD(NOW(), INTERVAL 15 SECOND))`,
       [
         code,
         input.customerId,
@@ -363,6 +365,73 @@ export async function createBooking(input: CreateBookingInput): Promise<{
   }
 }
 
+export type CancelBookingFailure =
+  | 'NOT_FOUND'
+  | 'NOT_ALLOWED'
+  | 'WINDOW_CLOSED'
+  | 'ALREADY_ASSIGNED';
+
+export async function cancelCustomerBooking(
+  customerId: number,
+  bookingId: number,
+): Promise<{ ok: true } | { ok: false; reason: CancelBookingFailure }> {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [rows] = await connection.execute<RowDataPacket[]>(
+      `SELECT b.status, b.hold_until AS holdUntil,
+         (b.hold_until > NOW()) AS holdActive,
+         ca.id AS assignmentId
+       FROM bookings b
+       LEFT JOIN cleaner_assignments ca ON ca.booking_id = b.id
+       WHERE b.id = ? AND b.customer_id = ?
+       FOR UPDATE`,
+      [bookingId, customerId],
+    );
+    const row = rows[0];
+    if (!row) {
+      await connection.rollback();
+      return { ok: false, reason: 'NOT_FOUND' };
+    }
+    if (row.status !== 'confirmed') {
+      await connection.rollback();
+      return { ok: false, reason: 'NOT_ALLOWED' };
+    }
+    if (row.assignmentId !== null) {
+      await connection.rollback();
+      return { ok: false, reason: 'ALREADY_ASSIGNED' };
+    }
+    if (Number(row.holdActive) !== 1) {
+      await connection.rollback();
+      return { ok: false, reason: 'WINDOW_CLOSED' };
+    }
+    await connection.execute(
+      `UPDATE bookings
+       SET status = 'cancelled',
+           cancellation_reason = 'Dibatalkan customer dalam masa tahan 15 detik.'
+       WHERE id = ?`,
+      [bookingId],
+    );
+    await connection.execute(
+      `INSERT INTO booking_status_history
+         (booking_id, status, actor_type, actor_user_id, notes)
+       VALUES (?, 'cancelled', 'customer', ?, 'Dibatalkan dalam masa tahan 15 detik.')`,
+      [bookingId, customerId],
+    );
+    await connection.commit();
+    return { ok: true };
+  } catch (error) {
+    try {
+      await connection.rollback();
+    } catch {
+      // rollback after an explicit rollback is a no-op
+    }
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
 export async function findCustomerBooking(customerId: number, id: number) {
   const [rows] = await pool.execute<RowDataPacket[]>(
     `SELECT b.id, b.booking_code AS code,
@@ -373,7 +442,9 @@ export async function findCustomerBooking(customerId: number, id: number) {
        b.platform_fee AS platformFee, b.discount_amount AS discountAmount,
        b.total_amount AS totalAmount, p.code AS promoCode,
        pay.status AS paymentStatus,
-       b.status, COALESCE(b.customer_notes, '') AS notes,
+       b.status, b.hold_until AS holdUntil,
+       (b.status = 'confirmed' AND b.hold_until > NOW() AND ca.id IS NULL) AS canCancel,
+       COALESCE(b.customer_notes, '') AS notes,
        r.id IS NOT NULL AS hasReview,
        r.rating AS reviewRating, r.comment AS reviewComment,
        (b.completed_at IS NOT NULL AND b.completed_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)) AS reviewEditable,
@@ -384,7 +455,7 @@ export async function findCustomerBooking(customerId: number, id: number) {
        a.label AS addressLabel, a.landmark,
        COALESCE(NULLIF(a.recipient_name, ''), u.name) AS recipientName,
        COALESCE(NULLIF(a.recipient_phone, ''), u.phone) AS recipientPhone,
-       cl.name AS cleanerName, a.street_address AS address
+       cl.name AS cleanerName, ${addressSql('a')} AS address
      FROM bookings b
      INNER JOIN services s ON s.id = b.service_id
      INNER JOIN addresses a ON a.id = b.address_id
@@ -414,6 +485,8 @@ export interface CustomerBookingRow extends RowDataPacket {
   discountAmount: number;
   totalAmount: number;
   databaseStatus: string;
+  holdUntil: Date | null;
+  canCancel: number;
   notes: string;
   reviewPhotoIds: string | null;
   reviewPhotos: string | null;
@@ -437,6 +510,8 @@ export async function listCustomerBookings(
        b.platform_fee AS platformFee, b.discount_amount AS discountAmount,
        b.total_amount AS totalAmount, b.status AS databaseStatus,
        pay.status AS paymentStatus,
+       b.hold_until AS holdUntil,
+       (b.status = 'confirmed' AND b.hold_until > NOW() AND ca.id IS NULL) AS canCancel,
        COALESCE(b.customer_notes, '') AS notes,
        r.id IS NOT NULL AS hasReview,
        r.rating AS reviewRating, r.comment AS reviewComment,
@@ -450,7 +525,7 @@ export async function listCustomerBookings(
        COALESCE(NULLIF(a.recipient_name, ''), u.name) AS recipientName,
        COALESCE(NULLIF(a.recipient_phone, ''), u.phone) AS recipientPhone,
        cl.name AS cleanerName,
-       CONCAT_WS(', ', a.street_address, a.city, a.province) AS address,
+       ${addressSql('a')} AS address,
        a.latitude, a.longitude
      FROM bookings b
      INNER JOIN services s ON s.id = b.service_id

@@ -34,6 +34,16 @@ beforeEach(() => {
 });
 afterEach(() => vi.unstubAllGlobals());
 describe('Groq bounded fallback and validation', () => {
+  it('does not call the provider for programming requests even with valid CleanGo sources', async () => {
+    expect(
+      await askGroq(
+        'Boo CleanGo, buatkan python fibonacci',
+        ['Harga Deep Cleaning?'],
+        sources,
+      ),
+    ).toBeNull();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
   it.each([
     'Tiket keluhan Anda sudah dibuat.',
     'Saya sudah meneruskan laporan ke admin.',

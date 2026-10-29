@@ -105,6 +105,7 @@ CREATE TABLE IF NOT EXISTS cleaners (
   phone VARCHAR(30) NOT NULL,
   area VARCHAR(120) NOT NULL DEFAULT 'Malang',
   photo_url VARCHAR(500) NULL,
+  skills TEXT NULL,
   status ENUM('available', 'busy', 'offline') NOT NULL DEFAULT 'offline',
   average_rating DECIMAL(3,2) NOT NULL DEFAULT 0.00,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
@@ -169,6 +170,7 @@ CREATE TABLE IF NOT EXISTS bookings (
     'cancelled',
     'rescheduled'
   ) NOT NULL DEFAULT 'awaiting_payment',
+  hold_until DATETIME NULL,
   cancellation_reason VARCHAR(255) NULL,
   completed_at DATETIME NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -405,6 +407,7 @@ CREATE TABLE IF NOT EXISTS notifications (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   recipient_user_id BIGINT UNSIGNED NOT NULL,
   booking_id BIGINT UNSIGNED NULL,
+  promo_id BIGINT UNSIGNED NULL,
   type ENUM('order', 'payment', 'promo', 'risk_alert', 'system') NOT NULL,
   channel ENUM('in_app', 'push', 'whatsapp') NOT NULL DEFAULT 'in_app',
   title VARCHAR(150) NOT NULL,
@@ -418,9 +421,12 @@ CREATE TABLE IF NOT EXISTS notifications (
     FOREIGN KEY (recipient_user_id) REFERENCES users(id) ON DELETE CASCADE,
   CONSTRAINT fk_notifications_booking
     FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
+  UNIQUE KEY uq_notifications_promo (recipient_user_id, promo_id),
   INDEX idx_notifications_inbox (recipient_user_id, is_read, created_at),
   INDEX idx_notifications_delivery (delivery_status, created_at),
-  INDEX idx_notifications_booking (booking_id)
+  INDEX idx_notifications_booking (booking_id),
+  INDEX idx_notifications_promo (promo_id),
+  INDEX idx_notifications_created (created_at)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS booking_risk_alerts (

@@ -68,6 +68,19 @@ try {
       );
   }
 
+  async function ensureIndex(table, indexName, columns) {
+    const [existing] = await connection.query(
+      `SELECT 1 FROM information_schema.statistics
+       WHERE table_schema = 'cleango' AND table_name = ? AND index_name = ?
+       LIMIT 1`,
+      [table, indexName],
+    );
+    if (!existing[0])
+      await connection.query(
+        `ALTER TABLE cleango.\`${table}\` ADD INDEX \`${indexName}\` (${columns})`,
+      );
+  }
+
   async function ensureUniqueIndex(
     table,
     indexName,
@@ -142,6 +155,18 @@ try {
     "`auth_provider` ENUM('local','google','facebook') NOT NULL DEFAULT 'local' AFTER `role`",
   );
   await ensureColumn(
+    'notifications',
+    'promo_id',
+    '`promo_id` BIGINT UNSIGNED NULL AFTER `booking_id`',
+  );
+  await ensureUniqueIndex(
+    'notifications',
+    'uq_notifications_promo',
+    '`recipient_user_id`, `promo_id`',
+  );
+  await ensureIndex('notifications', 'idx_notifications_promo', '`promo_id`');
+  await ensureIndex('notifications', 'idx_notifications_created', '`created_at`');
+  await ensureColumn(
     'users',
     'password_changed_at',
     '`password_changed_at` DATETIME NULL AFTER `is_active`',
@@ -156,6 +181,8 @@ try {
     'area',
     "`area` VARCHAR(120) NOT NULL DEFAULT 'Malang' AFTER `phone`",
   );
+  await ensureColumn('cleaners', 'photo_url', '`photo_url` VARCHAR(500) NULL AFTER `area`');
+  await ensureColumn('cleaners', 'skills', '`skills` TEXT NULL AFTER `photo_url`');
   await ensureColumn(
     'promos',
     'scope',
@@ -175,6 +202,11 @@ try {
     'promos',
     'stackable',
     '`stackable` BOOLEAN NOT NULL DEFAULT FALSE AFTER `per_customer_limit`',
+  );
+  await ensureColumn(
+    'bookings',
+    'hold_until',
+    '`hold_until` DATETIME NULL AFTER `status`',
   );
   await ensureColumn(
     'bookings',

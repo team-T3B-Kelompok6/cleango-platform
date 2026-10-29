@@ -144,7 +144,7 @@ export async function insertPromo(input: PromoInput): Promise<Promo> {
       input.minPurchase,
       input.usageLimit,
       `${input.startsOn} 00:00:00`,
-      `${input.endsOn} 00:00:00`,
+      `${input.endsOn} 23:59:59`,
       input.active,
       input.scope,
       JSON.stringify(input.scope === 'all' ? [] : input.serviceIds),
@@ -179,7 +179,7 @@ export async function updatePromoById(
   if (input.minPurchase !== undefined) set('minimum_order', input.minPurchase);
   if (input.usageLimit !== undefined) set('quota', input.usageLimit);
   if (input.startsOn !== undefined) set('starts_at', `${input.startsOn} 00:00:00`);
-  if (input.endsOn !== undefined) set('ends_at', `${input.endsOn} 00:00:00`);
+  if (input.endsOn !== undefined) set('ends_at', `${input.endsOn} 23:59:59`);
   if (input.active !== undefined) set('is_active', input.active ? 1 : 0);
   if (input.scope !== undefined) set('scope', input.scope);
   if (input.serviceIds !== undefined)

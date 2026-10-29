@@ -1,5 +1,6 @@
 import { Router, raw } from 'express';
 import {
+  cancelMyBooking,
   createCustomerBooking,
   getAvailability,
   getCustomerBooking,
@@ -37,6 +38,7 @@ customerBookingRouter.delete(
   '/:id/review/photos/:photoId',
   deleteBookingReviewPhotoHandler,
 );
+customerBookingRouter.post('/:id/cancel', cancelMyBooking);
 customerBookingRouter.post('/:id/pay', payBooking);
 customerBookingRouter.get('/:id/tracking', getCustomerEta);
 customerBookingRouter.get('/:id', getCustomerBooking);

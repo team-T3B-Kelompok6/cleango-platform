@@ -10,6 +10,7 @@ import { SubmitButton } from './Form';
 import { useDialogClose } from './DialogContext';
 import { assignmentIssue } from '@/lib/staff-schedules';
 import { orderStatusLabel } from '@/lib/order-flow';
+import { StaffAvatar } from './StaffAvatar';
 
 type Action = (previous: FormState, form: FormData) => Promise<FormState>;
 function Field({
@@ -265,6 +266,12 @@ export function OrderEditor({
                         toggleCrew(name, event.target.checked)
                       }
                     />
+                    <StaffAvatar
+                      name={name}
+                      src={
+                        staff.find((person) => person.name === name)?.photoUrl
+                      }
+                    />
                     <span>
                       <strong>{name}</strong>
                       <small>
@@ -436,14 +443,7 @@ export function ScheduleEditor({
     >
       <div className="modal-body booking-editor-body">
         <div className="schedule-staff-summary">
-          <span className="detail-initials">
-            {values.staff
-              .trim()
-              .split(/\s+/)
-              .slice(0, 2)
-              .map((word) => word[0])
-              .join('')}
-          </span>
+          <StaffAvatar name={values.staff} src={person?.photoUrl} />
           <div>
             <strong>{values.staff || 'Petugas belum ditugaskan'}</strong>
             <p>{person?.skills?.join(' · ') || 'Kru kebersihan'}</p>

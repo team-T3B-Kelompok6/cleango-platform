@@ -329,3 +329,82 @@
     gap: 10px;
   }
 }
+.service-skills {
+  max-height: 240px;
+  overflow-y: auto;
+  margin-bottom: 0;
+}
+.service-skills label {
+  min-width: 0;
+}
+.service-skills input {
+  flex-shrink: 0;
+}
+.service-skills .staff-option-copy {
+  overflow-wrap: anywhere;
+}
+.staff-photo {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--ui-accent-soft);
+  color: var(--ui-accent);
+  font-weight: 600;
+  font-size: 13px;
+}
+.staff-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.staff-photo-large {
+  width: 72px;
+  height: 72px;
+  font-size: 22px;
+}
+.staff-photo-small {
+  width: 28px;
+  height: 28px;
+  font-size: 11px;
+}
+.staff-photo-field {
+  margin-bottom: 22px;
+}
+.staff-photo-field > strong {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--service-field-label);
+  font-size: var(--text-12);
+  font-weight: 600;
+}
+.staff-photo-controls,
+.staff-photo-actions,
+.staff-name-with-photo,
+.order-assigned-staff,
+.assigned-staff-person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.staff-photo-controls {
+  gap: 16px;
+}
+.staff-photo-controls .field-hint {
+  display: block;
+  margin-top: 8px;
+}
+.order-assigned-staff {
+  flex-wrap: wrap;
+}
+.assigned-staff-person {
+  gap: 7px;
+}
+.compact-staff .staff-option-copy {
+  flex: 1;
+}

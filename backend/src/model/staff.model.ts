@@ -8,12 +8,16 @@ export interface StaffInput {
   phone: string;
   area: string;
   status: StaffStatus;
+  photoUrl?: string | null;
+  skills?: string[];
 }
 interface StaffRow extends RowDataPacket {
   id: number;
   name: string;
   phone: string;
   area: string;
+  photoUrl: string | null;
+  skills: string | null;
   databaseStatus: 'available' | 'busy' | 'offline';
   active: number;
   rating: number;
@@ -23,6 +27,8 @@ export interface Staff {
   name: string;
   phone: string;
   area: string;
+  photoUrl: string | null;
+  skills: string[];
   status: StaffStatus;
   rating: number;
 }
@@ -48,11 +54,25 @@ function mapStaff(row: StaffRow): Staff {
     name: row.name,
     phone: row.phone,
     area: row.area,
+    photoUrl: row.photoUrl ?? null,
+    skills: parseSkills(row.skills),
     status: apiStatus(row),
     rating: row.rating,
   };
 }
-const select = `SELECT id, name, phone, area, status AS databaseStatus, is_active AS active, average_rating AS rating FROM cleaners`;
+function parseSkills(value: string | null): string[] {
+  if (!value) return [];
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return Array.isArray(parsed)
+      ? parsed.filter((item): item is string => typeof item === 'string')
+      : [];
+  } catch {
+    return [];
+  }
+}
+const select = `SELECT id, name, phone, area, photo_url AS photoUrl, skills,
+  status AS databaseStatus, is_active AS active, average_rating AS rating FROM cleaners`;
 export async function listStaff(): Promise<Staff[]> {
   const [rows] = await pool.query<StaffRow[]>(`${select} ORDER BY name`);
   return rows.map(mapStaff);
@@ -67,8 +87,17 @@ export async function findStaff(id: number): Promise<Staff | null> {
 export async function insertStaff(input: StaffInput): Promise<Staff> {
   const mapped = databaseStatus(input.status);
   const [result] = await pool.execute<ResultSetHeader>(
-    'INSERT INTO cleaners (name, phone, area, status, is_active) VALUES (?, ?, ?, ?, ?)',
-    [input.name, input.phone, input.area, mapped.status, mapped.active],
+    `INSERT INTO cleaners (name, phone, area, photo_url, skills, status, is_active)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [
+      input.name,
+      input.phone,
+      input.area,
+      input.photoUrl ?? null,
+      JSON.stringify(input.skills ?? []),
+      mapped.status,
+      mapped.active,
+    ],
   );
   const staff = await findStaff(result.insertId);
   if (!staff) throw new Error('Petugas gagal dibaca setelah dibuat');
@@ -82,6 +111,7 @@ export async function updateStaffById(
     input.status === undefined ? null : databaseStatus(input.status);
   const [result] = await pool.execute<ResultSetHeader>(
     `UPDATE cleaners SET name = IF(?, ?, name), phone = IF(?, ?, phone), area = IF(?, ?, area),
+     photo_url = IF(?, ?, photo_url), skills = IF(?, ?, skills),
      status = IF(?, ?, status), is_active = IF(?, ?, is_active) WHERE id = ?`,
     [
       input.name !== undefined,
@@ -90,6 +120,10 @@ export async function updateStaffById(
       input.phone ?? '',
       input.area !== undefined,
       input.area ?? '',
+      input.photoUrl !== undefined,
+      input.photoUrl ?? null,
+      input.skills !== undefined,
+      JSON.stringify(input.skills ?? []),
       mapped !== null,
       mapped?.status ?? 'offline',
       mapped !== null,

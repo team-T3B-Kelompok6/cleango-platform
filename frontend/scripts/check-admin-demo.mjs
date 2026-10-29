@@ -620,6 +620,77 @@ await check(
   },
 );
 await check(
+  'Category icons are stored on categories and do not change service photos',
+  async () => {
+    const services = (await request('/services')).data;
+    const category = (
+      await request('/categories', 'POST', {
+        name: 'Kategori dengan ikon',
+        resource: 'services',
+        icon: '/demo/category-icon.png',
+      })
+    ).data;
+    assert.equal(category.icon, '/demo/category-icon.png');
+    const saved = (await request('/categories?resource=services')).data.find(
+      (item) => item.id === category.id,
+    );
+    assert.equal(saved.icon, '/demo/category-icon.png');
+    assert.deepEqual((await request('/services')).data, services);
+  },
+);
+await check(
+  'Category edits retain linked services and support icon replacement/removal',
+  async () => {
+    const category = (
+      await request('/categories', 'POST', {
+        name: 'Kategori sebelum diubah',
+        resource: 'services',
+        icon: '/demo/old-icon.png',
+      })
+    ).data;
+    const created = [];
+    for (const active of [true, false])
+      created.push(
+        (
+          await request('/services', 'POST', {
+            name: 'Layanan kategori ' + active,
+            category: category.name,
+            active,
+            imageUrl: '/demo/service-photo.png',
+          })
+        ).data,
+      );
+    const beforeCount = (await request('/services')).data.length;
+    const renamed = (
+      await request('/categories/' + category.id, 'PATCH', {
+        name: 'Kategori sesudah diubah',
+        resource: 'services',
+      })
+    ).data;
+    assert.equal(renamed.id, category.id);
+    assert.equal(renamed.icon, '/demo/old-icon.png');
+    const services = (await request('/services')).data;
+    assert.equal(services.length, beforeCount);
+    for (const original of created) {
+      const saved = services.find((item) => item.id === original.id);
+      assert.deepEqual(saved, { ...original, category: renamed.name });
+    }
+    const replaced = (
+      await request('/categories/' + category.id, 'PATCH', {
+        name: renamed.name,
+        icon: '/demo/new-icon.png',
+      })
+    ).data;
+    assert.equal(replaced.icon, '/demo/new-icon.png');
+    await request('/categories/' + category.id, 'PATCH', { icon: null });
+    const saved = (await request('/categories?resource=services')).data.find(
+      (item) => item.id === category.id,
+    );
+    assert.equal(saved.icon, null);
+    assert.deepEqual((await request('/services')).data, services);
+  },
+);
+await check(
   'Disabled and production modes cannot serve demo authentication/data',
   async () => {
     process.env.ADMIN_DEMO_ENABLED = 'false';

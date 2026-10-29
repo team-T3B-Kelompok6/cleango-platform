@@ -3,6 +3,7 @@ import { estimateWorkCompletion } from '../../lib/work-estimate.js';
 import { AppError } from '../../lib/AppError.js';
 import {
   BookingConflictError,
+  cancelCustomerBooking,
   createBooking,
   findBookableService,
   findCustomerBooking,
@@ -213,6 +214,43 @@ export async function getCustomerBooking(
   }
 }
 
+export async function cancelMyBooking(
+  request: Request,
+  response: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const result = await cancelCustomerBooking(
+      customerId(request),
+      numericId(request.params.id, 'ID pesanan'),
+    );
+    if (!result.ok) {
+      if (result.reason === 'NOT_FOUND')
+        throw new AppError(404, 'Pesanan tidak ditemukan.');
+      if (result.reason === 'WINDOW_CLOSED')
+        throw new AppError(
+          409,
+          'Masa tahan pembatalan sudah lewat.',
+          'CANCEL_WINDOW_CLOSED',
+        );
+      if (result.reason === 'ALREADY_ASSIGNED')
+        throw new AppError(
+          409,
+          'Pesanan sudah ditugaskan ke petugas.',
+          'ALREADY_ASSIGNED',
+        );
+      throw new AppError(
+        409,
+        'Pesanan ini tidak dapat dibatalkan.',
+        'CANCEL_NOT_ALLOWED',
+      );
+    }
+    response.status(200).json({ message: 'Pesanan berhasil dibatalkan.' });
+  } catch (error) {
+    next(error);
+  }
+}
+
 // Mirrors the admin order status labels used across the apps.
 function apiStatus(status: string): string {
   return statusLabel(status);
@@ -241,6 +279,10 @@ export async function listMyBookings(
         discountAmount: Number(row.discountAmount),
         totalAmount: Number(row.totalAmount),
         status: apiStatus(row.databaseStatus),
+        holdUntil: row.holdUntil
+          ? new Date(row.holdUntil).toISOString()
+          : null,
+        canCancel: Boolean(row.canCancel),
         paymentStatus: row.paymentStatus ?? null,
         recipientName: row.recipientName ?? null,
         recipientPhone: row.recipientPhone ?? null,

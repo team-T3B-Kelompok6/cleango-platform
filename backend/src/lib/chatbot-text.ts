@@ -89,6 +89,7 @@ export function normalizeChatText(value: string): string {
 export function chatSearchText(value: string): string {
   return normalizeChatText(value)
     .toLowerCase()
+    .replace(/(?<![\p{L}\p{N}_/-])clean[ -]+go(?![\p{L}\p{N}_/-])/gu, 'cleango')
     .replace(/[\p{L}\p{N}_/-]+/gu, (word) => {
       if (!/^[\p{L}]+$/u.test(word)) return word;
       return (
@@ -98,6 +99,13 @@ export function chatSearchText(value: string): string {
         word
       );
     });
+}
+
+// shortcut: explicit unrelated tasks are bounded rules; unknown wording still needs clarification.
+export function isOffTopicChat(value: string): boolean {
+  return /\b(?:python|fibonacci|javascript|typescript|pemrograman|programming|kodingan|coding|sql|html|css|bitcoin|kripto|cryptocurrency|saham|sepak bola|pertandingan bola|ramalan zodiak|ibu kota)\b|\bhitung\s+\d+\s*[+*/=−-]|\b(?:buat(?:kan)?|tulis(?:kan)?|ajari|ajarkan)\b.{0,60}\b(?:kode program|puisi|pantun|cerpen|novel|es[ae]i)\b|\bresep\b.{0,40}\b(?:masak|makanan|minuman|nasi|kue|ayam)\b/i.test(
+    chatSearchText(value),
+  );
 }
 
 const stopWords = new Set(

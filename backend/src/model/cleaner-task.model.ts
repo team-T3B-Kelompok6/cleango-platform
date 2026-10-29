@@ -3,6 +3,7 @@ import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import type { PoolConnection } from 'mysql2/promise';
 import { canTransition, type BookingStatus } from '../lib/order-status.js';
 import { decryptLinkToken, encryptLinkToken } from '../lib/link-token.js';
+import { addressSql } from '../lib/address-display.js';
 import { pool } from '../lib/db.js';
 import { AppError } from '../lib/AppError.js';
 
@@ -54,8 +55,10 @@ const TASK_SELECT = `SELECT ca.id AS assignmentId, b.id AS bookingId, b.customer
   ca.cleaner_id AS cleanerId, ca.link_status AS linkStatus, ca.link_expires_at AS linkExpiresAt,
   ca.link_token_enc AS linkTokenEnc,
   ca.updated_at AS updatedAt,
-  b.status AS orderStatus, u.name AS customerName, u.phone AS customerPhone,
-  CONCAT_WS(', ', a.street_address, a.city, a.province) AS address,
+  b.status AS orderStatus,
+  COALESCE(NULLIF(TRIM(a.recipient_name), ''), u.name) AS customerName,
+  COALESCE(NULLIF(TRIM(a.recipient_phone), ''), u.phone) AS customerPhone,
+  ${addressSql('a')} AS address,
   s.name AS serviceName,
   COALESCE(b.service_duration_minutes, s.duration_minutes) AS serviceDurationMinutes,
   cl.name AS staffName, DATE_FORMAT(b.scheduled_date, '%Y-%m-%d') AS orderDate,
@@ -421,6 +424,7 @@ export async function assignCleaner(input: {
       `SELECT b.booking_code AS code,
          DATE_FORMAT(b.scheduled_date, '%Y-%m-%d') AS date,
          TIME_FORMAT(b.scheduled_start_time, '%H:%i') AS startTime,
+         (b.hold_until > NOW()) AS onHold,
          COALESCE(b.service_duration_minutes, s.duration_minutes, 60) AS duration
        FROM bookings b
        INNER JOIN services s ON s.id = b.service_id
@@ -431,6 +435,14 @@ export async function assignCleaner(input: {
     if (!booking) {
       await connection.rollback();
       throw new AppError(404, 'Pesanan tidak ditemukan.');
+    }
+    if (Number(booking.onHold) === 1) {
+      await connection.rollback();
+      throw new AppError(
+        409,
+        'Pesanan masih dalam masa tahan 15 detik.',
+        'BOOKING_ON_HOLD',
+      );
     }
 
     // Serialize assignments per cleaner for the same day.

@@ -13,6 +13,7 @@ const bookingModel = vi.hoisted(() => ({
       super(reason);
     }
   },
+  cancelCustomerBooking: vi.fn(),
   createBooking: vi.fn(),
   findBookableService: vi.fn(),
   findCustomerBooking: vi.fn(),
@@ -28,6 +29,7 @@ vi.mock('../src/model/booking.model.js', async () => {
   return {
     ...actual,
     ...bookingModel,
+    cancelCustomerBooking: bookingModel.cancelCustomerBooking,
     createBooking: bookingModel.createBooking,
     findBookableService: bookingModel.findBookableService,
     findCustomerBooking: bookingModel.findCustomerBooking,
@@ -53,6 +55,7 @@ function tomorrow(): string {
 }
 
 beforeEach(() => {
+  bookingModel.cancelCustomerBooking.mockReset();
   bookingModel.createBooking.mockReset();
   bookingModel.findBookableService.mockReset();
   bookingModel.findCustomerBooking.mockReset();
@@ -60,6 +63,7 @@ beforeEach(() => {
   bookingModel.findPrimaryAddressId.mockReset();
   bookingModel.listAvailability.mockReset();
 
+  bookingModel.cancelCustomerBooking.mockResolvedValue({ ok: true });
   bookingModel.createBooking.mockResolvedValue({ id: 77, code: 'CG-TEST' });
   bookingModel.findCustomerBooking.mockResolvedValue({ id: 77, code: 'CG-TEST', totalAmount: 105000 });
   bookingModel.findBookableService.mockResolvedValue({ id: 1, name: 'Basic', price: 100000, active: true });
@@ -177,5 +181,33 @@ describe('GET booking scoping', () => {
     const response = await auth('get', '/api/customer/bookings/999');
     expect(response.status).toBe(404);
     expect(bookingModel.findCustomerBooking).toHaveBeenCalledWith(10, 999);
+  });
+});
+
+describe('customer booking cancellation', () => {
+  it('cancels only the session customer booking', async () => {
+    const response = await auth('post', '/api/customer/bookings/77/cancel');
+    expect(response.status).toBe(200);
+    expect(bookingModel.cancelCustomerBooking).toHaveBeenCalledWith(10, 77);
+  });
+
+  it('maps a closed hold window to 409', async () => {
+    bookingModel.cancelCustomerBooking.mockResolvedValue({
+      ok: false,
+      reason: 'WINDOW_CLOSED',
+    });
+    const response = await auth('post', '/api/customer/bookings/77/cancel');
+    expect(response.status).toBe(409);
+    expect(response.body.code).toBe('CANCEL_WINDOW_CLOSED');
+  });
+
+  it('maps an assigned booking to 409', async () => {
+    bookingModel.cancelCustomerBooking.mockResolvedValue({
+      ok: false,
+      reason: 'ALREADY_ASSIGNED',
+    });
+    const response = await auth('post', '/api/customer/bookings/77/cancel');
+    expect(response.status).toBe(409);
+    expect(response.body.code).toBe('ALREADY_ASSIGNED');
   });
 });

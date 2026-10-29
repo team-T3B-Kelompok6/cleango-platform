@@ -38,10 +38,18 @@ export function unsavedFields(
     )
       errors.serviceImage = 'Perubahan foto belum tersimpan pada layanan.';
   }
+  if (
+    resource === 'staff' &&
+    'photoUrl' in sent &&
+    (!Object.hasOwn(saved, 'photoUrl') ||
+      (saved.photoUrl ?? null) !== sent.photoUrl)
+  )
+    errors.staffPhoto = 'Perubahan foto petugas belum tersimpan.';
   if (resource === 'staff' && Array.isArray(sent.skills)) {
     if (
       !Array.isArray(saved.skills) ||
-      JSON.stringify(saved.skills) !== JSON.stringify(sent.skills)
+      JSON.stringify([...saved.skills].sort()) !==
+        JSON.stringify([...sent.skills].sort())
     )
       errors.skills =
         'Keahlian petugas belum tersimpan. Data petugas lainnya mungkin sudah diperbarui.';
