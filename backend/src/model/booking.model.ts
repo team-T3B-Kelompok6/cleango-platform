@@ -368,7 +368,6 @@ export async function createBooking(input: CreateBookingInput): Promise<{
 export type CancelBookingFailure =
   | 'NOT_FOUND'
   | 'NOT_ALLOWED'
-  | 'WINDOW_CLOSED'
   | 'ALREADY_ASSIGNED';
 
 export async function cancelCustomerBooking(
@@ -379,9 +378,7 @@ export async function cancelCustomerBooking(
   try {
     await connection.beginTransaction();
     const [rows] = await connection.execute<RowDataPacket[]>(
-      `SELECT b.status, b.hold_until AS holdUntil,
-         (b.hold_until > NOW()) AS holdActive,
-         ca.id AS assignmentId
+      `SELECT b.status, ca.id AS assignmentId
        FROM bookings b
        LEFT JOIN cleaner_assignments ca ON ca.booking_id = b.id
        WHERE b.id = ? AND b.customer_id = ?
@@ -393,7 +390,7 @@ export async function cancelCustomerBooking(
       await connection.rollback();
       return { ok: false, reason: 'NOT_FOUND' };
     }
-    if (row.status !== 'confirmed') {
+    if (row.status !== 'confirmed' && row.status !== 'awaiting_payment') {
       await connection.rollback();
       return { ok: false, reason: 'NOT_ALLOWED' };
     }
@@ -401,21 +398,17 @@ export async function cancelCustomerBooking(
       await connection.rollback();
       return { ok: false, reason: 'ALREADY_ASSIGNED' };
     }
-    if (Number(row.holdActive) !== 1) {
-      await connection.rollback();
-      return { ok: false, reason: 'WINDOW_CLOSED' };
-    }
     await connection.execute(
       `UPDATE bookings
        SET status = 'cancelled',
-           cancellation_reason = 'Dibatalkan customer dalam masa tahan 15 detik.'
-       WHERE id = ?`,
+           cancellation_reason = 'Dibatalkan customer.'
+      WHERE id = ?`,
       [bookingId],
     );
-    await connection.execute(
+await connection.execute(
       `INSERT INTO booking_status_history
          (booking_id, status, actor_type, actor_user_id, notes)
-       VALUES (?, 'cancelled', 'customer', ?, 'Dibatalkan dalam masa tahan 15 detik.')`,
+       VALUES (?, 'cancelled', 'customer', ?, 'Dibatalkan customer.')`,
       [bookingId, customerId],
     );
     await connection.commit();
@@ -432,6 +425,109 @@ export async function cancelCustomerBooking(
   }
 }
 
+export type RescheduleBookingFailure =
+  | CancelBookingFailure
+  | 'SLOT_FULL'
+  | 'DUPLICATE'
+  | 'BUSY'
+  | 'SERVICE_INACTIVE'
+  | 'INVALID_DATE'
+  | 'PAST_DATE'
+  | 'TOO_FAR'
+  | 'INVALID_SLOT'
+  | 'SLOT_CLOSED';
+
+export async function rescheduleCustomerBooking(
+  customerId: number,
+  bookingId: number,
+  date: string,
+  time: string,
+): Promise<{ ok: true } | { ok: false; reason: RescheduleBookingFailure }> {
+  const issue = validateBookingDate(date);
+  if (issue) return { ok: false, reason: issue.code };
+  if (!isValidSlot(time)) return { ok: false, reason: 'INVALID_SLOT' };
+  const lockName = `cleango_slot_${date}_${time}`;
+  const connection = await pool.getConnection();
+  let locked = false;
+  try {
+    const [lockRows] = await connection.execute<RowDataPacket[]>(
+      'SELECT GET_LOCK(?, 5) AS ok', [lockName],
+    );
+    if (Number(lockRows[0]?.ok ?? 0) !== 1) return { ok: false, reason: 'BUSY' };
+    locked = true;
+    await connection.beginTransaction();
+    const [rows] = await connection.execute<RowDataPacket[]>(
+      `SELECT b.status, b.service_id AS serviceId,
+         DATE_FORMAT(b.scheduled_date, '%Y-%m-%d') AS date,
+         TIME_FORMAT(b.scheduled_start_time, '%H:%i') AS time,
+         ca.id AS assignmentId
+       FROM bookings b
+       LEFT JOIN cleaner_assignments ca ON ca.booking_id = b.id
+       WHERE b.id = ? AND b.customer_id = ? FOR UPDATE`,
+      [bookingId, customerId],
+    );
+    const row = rows[0];
+    let reason: RescheduleBookingFailure | undefined;
+    if (!row) reason = 'NOT_FOUND';
+    else if (row.status !== 'confirmed' && row.status !== 'awaiting_payment') reason = 'NOT_ALLOWED';
+    else if (row.assignmentId !== null) reason = 'ALREADY_ASSIGNED';
+    else if (validateBookingDate(date)) reason = validateBookingDate(date)!.code;
+    else if (isSlotLeadTimePassed(date, time)) reason = 'SLOT_CLOSED';
+    if (reason) {
+      await connection.rollback();
+      return { ok: false, reason };
+    }
+    const [services] = await connection.execute<RowDataPacket[]>(
+      'SELECT id FROM services WHERE id = ? AND is_active = TRUE LIMIT 1', [row!.serviceId],
+    );
+    if (!services[0]) {
+      await connection.rollback();
+      return { ok: false, reason: 'SERVICE_INACTIVE' };
+    }
+    if (row!.date === date && row!.time === time) {
+      await connection.commit();
+      return { ok: true };
+    }
+    const [existing] = await connection.execute<RowDataPacket[]>(
+      `SELECT id, customer_id AS customerId FROM bookings
+       WHERE scheduled_date = ? AND scheduled_start_time = ? AND id <> ?
+         AND status NOT IN ('cancelled', 'rescheduled')`,
+      [date, `${time}:00`, bookingId],
+    );
+    if (existing.some((booking) => Number(booking.customerId) === customerId)) reason = 'DUPLICATE';
+    else if (existing.length >= CAPACITY_PER_SLOT) reason = 'SLOT_FULL';
+    if (reason) {
+      await connection.rollback();
+      return { ok: false, reason };
+    }
+    await connection.execute(
+      `UPDATE bookings SET scheduled_date = ?, scheduled_start_time = ?,
+         scheduled_end_time = CASE WHEN scheduled_end_time IS NULL THEN NULL
+           ELSE ADDTIME(?, SEC_TO_TIME(service_duration_minutes * 60)) END
+       WHERE id = ?`,
+      [date, `${time}:00`, `${time}:00`, bookingId],
+    );
+    await connection.execute(
+      `INSERT INTO booking_status_history (booking_id, status, actor_type, actor_user_id, notes)
+       VALUES (?, ?, 'customer', ?, ?)`,
+      [bookingId, row!.status, customerId,
+        `Jadwal diubah dari ${row!.date} ${row!.time} ke ${date} ${time}.`],
+    );
+    await connection.commit();
+    return { ok: true };
+  } catch (error) {
+    await connection.rollback();
+    if (isLockConflict(error)) return { ok: false, reason: 'BUSY' };
+    throw error;
+  } finally {
+    try {
+      if (locked) await connection.execute('SELECT RELEASE_LOCK(?)', [lockName]);
+    } finally {
+      connection.release();
+    }
+  }
+}
+
 export async function findCustomerBooking(customerId: number, id: number) {
   const [rows] = await pool.execute<RowDataPacket[]>(
     `SELECT b.id, b.booking_code AS code,
@@ -443,7 +539,8 @@ export async function findCustomerBooking(customerId: number, id: number) {
        b.total_amount AS totalAmount, p.code AS promoCode,
        pay.status AS paymentStatus,
        b.status, b.hold_until AS holdUntil,
-       (b.status = 'confirmed' AND b.hold_until > NOW() AND ca.id IS NULL) AS canCancel,
+       (b.status IN ('confirmed', 'awaiting_payment') AND ca.id IS NULL) AS canCancel,
+       (b.status IN ('confirmed', 'awaiting_payment') AND ca.id IS NULL) AS canReschedule,
        COALESCE(b.customer_notes, '') AS notes,
        r.id IS NOT NULL AS hasReview,
        r.rating AS reviewRating, r.comment AS reviewComment,
@@ -469,7 +566,8 @@ export async function findCustomerBooking(customerId: number, id: number) {
      LIMIT 1`,
     [id, customerId],
   );
-  return rows[0] ?? null;
+  const row = rows[0];
+  return row ? { ...row, canCancel: Boolean(row.canCancel), canReschedule: Boolean(row.canReschedule) } : null;
 }
 
 export interface CustomerBookingRow extends RowDataPacket {
@@ -487,6 +585,7 @@ export interface CustomerBookingRow extends RowDataPacket {
   databaseStatus: string;
   holdUntil: Date | null;
   canCancel: number;
+  canReschedule: number;
   notes: string;
   reviewPhotoIds: string | null;
   reviewPhotos: string | null;
@@ -511,7 +610,8 @@ export async function listCustomerBookings(
        b.total_amount AS totalAmount, b.status AS databaseStatus,
        pay.status AS paymentStatus,
        b.hold_until AS holdUntil,
-       (b.status = 'confirmed' AND b.hold_until > NOW() AND ca.id IS NULL) AS canCancel,
+       (b.status IN ('confirmed', 'awaiting_payment') AND ca.id IS NULL) AS canCancel,
+       (b.status IN ('confirmed', 'awaiting_payment') AND ca.id IS NULL) AS canReschedule,
        COALESCE(b.customer_notes, '') AS notes,
        r.id IS NOT NULL AS hasReview,
        r.rating AS reviewRating, r.comment AS reviewComment,

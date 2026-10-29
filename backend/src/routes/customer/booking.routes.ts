@@ -5,6 +5,7 @@ import {
   getAvailability,
   getCustomerBooking,
   listMyBookings,
+  rescheduleMyBooking,
 } from '../../controller/customer/booking.controller.js';
 import {
   authenticate,
@@ -39,6 +40,7 @@ customerBookingRouter.delete(
   deleteBookingReviewPhotoHandler,
 );
 customerBookingRouter.post('/:id/cancel', cancelMyBooking);
+customerBookingRouter.post('/:id/reschedule', rescheduleMyBooking);
 customerBookingRouter.post('/:id/pay', payBooking);
 customerBookingRouter.get('/:id/tracking', getCustomerEta);
 customerBookingRouter.get('/:id', getCustomerBooking);

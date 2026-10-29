@@ -13,6 +13,7 @@ import {
   isValidSlot,
   listAvailability,
   listCustomerBookings,
+  rescheduleCustomerBooking,
   resolveBookableServiceId,
   validateBookingDate,
   type BookingSlot,
@@ -227,12 +228,6 @@ export async function cancelMyBooking(
     if (!result.ok) {
       if (result.reason === 'NOT_FOUND')
         throw new AppError(404, 'Pesanan tidak ditemukan.');
-      if (result.reason === 'WINDOW_CLOSED')
-        throw new AppError(
-          409,
-          'Masa tahan pembatalan sudah lewat.',
-          'CANCEL_WINDOW_CLOSED',
-        );
       if (result.reason === 'ALREADY_ASSIGNED')
         throw new AppError(
           409,
@@ -246,6 +241,68 @@ export async function cancelMyBooking(
       );
     }
     response.status(200).json({ message: 'Pesanan berhasil dibatalkan.' });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function rescheduleMyBooking(
+  request: Request,
+  response: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const userId = customerId(request);
+    const bookingId = numericId(request.params.id, 'ID pesanan');
+    const body = (request.body ?? {}) as Record<string, unknown>;
+
+    const date = typeof body.date === 'string' ? body.date.trim() : '';
+    const time = body.time;
+
+    const dateIssue = validateBookingDate(date);
+    if (dateIssue)
+      throw new AppError(400, dateIssue.message, dateIssue.code, { date: dateIssue.message });
+    if (!isValidSlot(time))
+      throw new AppError(400, 'Jam pengerjaan tidak valid.', 'VALIDATION_ERROR', {
+        time: 'Pilih salah satu slot yang tersedia.',
+      });
+
+    const result = await rescheduleCustomerBooking(userId, bookingId, date, time);
+    if (!result.ok) {
+      if (result.reason === 'NOT_FOUND')
+        throw new AppError(404, 'Pesanan tidak ditemukan.');
+      if (result.reason === 'ALREADY_ASSIGNED')
+        throw new AppError(
+          409,
+          'Pesanan sudah ditugaskan ke petugas.',
+          'ALREADY_ASSIGNED',
+        );
+      if (['INVALID_DATE', 'PAST_DATE', 'TOO_FAR'].includes(result.reason))
+        throw new AppError(400, 'Tanggal tidak valid.', result.reason, {
+          date: 'Tanggal tidak valid.',
+        });
+      if (['INVALID_SLOT', 'SLOT_CLOSED'].includes(result.reason))
+        throw new AppError(400, 'Waktu pemesanan sudah lewat.', 'SLOT_CLOSED', {
+          time: 'Pilih slot lain.',
+        });
+      if (result.reason === 'SLOT_FULL')
+        throw new AppError(409, 'Slot sudah penuh.', 'SLOT_FULL', {
+          time: 'Pilih slot lain.',
+        });
+      if (result.reason === 'DUPLICATE')
+        throw new AppError(409, 'Anda sudah memesan layanan pada slot ini.', 'DUPLICATE_BOOKING', {
+          time: 'Pilih slot lain atau periksa Pesanan Anda.',
+        });
+      if (result.reason === 'BUSY')
+        throw new AppError(409, 'Slot sedang dipesan pelanggan lain. Coba lagi.', 'BOOKING_BUSY', {
+          time: 'Coba lagi sebentar lagi.',
+        });
+      if (result.reason === 'SERVICE_INACTIVE')
+        throw new AppError(400, 'Layanan sedang tidak tersedia.', 'SERVICE_INACTIVE');
+      throw new AppError(409, 'Pesanan ini tidak dapat dijadwalkan ulang.', 'RESCHEDULE_NOT_ALLOWED');
+    }
+    const data = await findCustomerBooking(userId, bookingId);
+    response.status(200).json({ message: 'Pesanan berhasil dijadwalkan ulang.', data });
   } catch (error) {
     next(error);
   }

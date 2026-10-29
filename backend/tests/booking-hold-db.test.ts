@@ -127,12 +127,9 @@ suite('booking hold and cancellation against the database (RUN_DB_TESTS=1)', () 
     expect(history[0]).toMatchObject({ status: 'cancelled', actorType: 'customer' });
   });
 
-  it('rejects cancellation after the hold and when a cleaner is assigned', async () => {
+  it('allows cancellation after the hold but rejects an assigned booking', async () => {
     const { cancelCustomerBooking } = await import('../src/model/booking.model.js');
-    expect(await cancelCustomerBooking(customerId, holdPast)).toEqual({
-      ok: false,
-      reason: 'WINDOW_CLOSED',
-    });
+    expect(await cancelCustomerBooking(customerId, holdPast)).toEqual({ ok: true });
     expect(await cancelCustomerBooking(customerId, assignedHold)).toEqual({
       ok: false,
       reason: 'ALREADY_ASSIGNED',
