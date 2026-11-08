@@ -14,6 +14,8 @@ const bookingModel = vi.hoisted(() => ({
     }
   },
   cancelCustomerBooking: vi.fn(),
+  rescheduleCustomerBooking: vi.fn(),
+  listCustomerBookings: vi.fn(),
   createBooking: vi.fn(),
   findBookableService: vi.fn(),
   findCustomerBooking: vi.fn(),
@@ -56,6 +58,8 @@ function tomorrow(): string {
 
 beforeEach(() => {
   bookingModel.cancelCustomerBooking.mockReset();
+  bookingModel.rescheduleCustomerBooking.mockReset().mockResolvedValue({ ok: true });
+  bookingModel.listCustomerBookings.mockReset().mockResolvedValue([]);
   bookingModel.createBooking.mockReset();
   bookingModel.findBookableService.mockReset();
   bookingModel.findCustomerBooking.mockReset();
@@ -184,6 +188,63 @@ describe('GET booking scoping', () => {
   });
 });
 
+describe('customer reschedule API', () => {
+  const path = '/api/customer/bookings/77/reschedule';
+  const valid = () => ({ date: tomorrow(), time: '10:00' });
+
+  it('requires customer authentication', async () => {
+    expect((await request(app).post(path).send(valid())).status).toBe(401);
+    expect((await auth('post', path, adminToken).send(valid())).status).toBe(403);
+    expect(bookingModel.rescheduleCustomerBooking).not.toHaveBeenCalled();
+  });
+
+  it('returns standard data and passes only the session owner, id and schedule', async () => {
+    bookingModel.findCustomerBooking.mockResolvedValue({ id: 77, date: tomorrow(), time: '10:00', canCancel: true, canReschedule: true });
+    const response = await auth('post', path).send({ ...valid(), customerId: 99, totalAmount: 1, status: 'completed' });
+    expect(response.status).toBe(200);
+    expect(response.body.data).toMatchObject({ id: 77, canCancel: true, canReschedule: true });
+    expect(bookingModel.rescheduleCustomerBooking).toHaveBeenCalledWith(10, 77, tomorrow(), '10:00');
+    expect(bookingModel.findCustomerBooking).toHaveBeenCalledWith(10, 77);
+  });
+
+  it.each([
+    [{}, 'INVALID_DATE'],
+    [{ date: '2026-02-30', time: '10:00' }, 'INVALID_DATE'],
+    [{ date: '2000-01-01', time: '10:00' }, 'PAST_DATE'],
+    [{ date: '2999-01-01', time: '10:00' }, 'TOO_FAR'],
+    [{ time: '09:30' }, 'VALIDATION_ERROR'],
+    [{ time: 10 }, 'VALIDATION_ERROR'],
+  ])('rejects invalid schedule %j', async (body, code) => {
+    const response = await auth('post', path).send('date' in body || !Object.keys(body).length ? body : { date: tomorrow(), ...body });
+    expect(response.status).toBe(400);
+    expect(response.body.code).toBe(code);
+    expect(bookingModel.rescheduleCustomerBooking).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['NOT_FOUND', 404, 'APP_ERROR'],
+    ['NOT_ALLOWED', 409, 'RESCHEDULE_NOT_ALLOWED'],
+    ['ALREADY_ASSIGNED', 409, 'ALREADY_ASSIGNED'],
+    ['SLOT_FULL', 409, 'SLOT_FULL'],
+    ['DUPLICATE', 409, 'DUPLICATE_BOOKING'],
+    ['BUSY', 409, 'BOOKING_BUSY'],
+    ['SERVICE_INACTIVE', 400, 'SERVICE_INACTIVE'],
+    ['SLOT_CLOSED', 400, 'SLOT_CLOSED'],
+  ])('maps %s', async (reason, status, code) => {
+    bookingModel.rescheduleCustomerBooking.mockResolvedValue({ ok: false, reason });
+    const response = await auth('post', path).send(valid());
+    expect(response.status).toBe(status);
+    expect(response.body.code).toBe(code);
+  });
+
+  it('returns both capability booleans in the booking list', async () => {
+    bookingModel.listCustomerBookings.mockResolvedValue([{ id: 77, databaseStatus: 'awaiting_payment', canCancel: 1, canReschedule: 1 }]);
+    const response = await auth('get', '/api/customer/bookings');
+    expect(response.status).toBe(200);
+    expect(response.body.data[0]).toMatchObject({ status: 'Menunggu Assign', canCancel: true, canReschedule: true });
+  });
+});
+
 describe('customer booking cancellation', () => {
   it('cancels only the session customer booking', async () => {
     const response = await auth('post', '/api/customer/bookings/77/cancel');
@@ -191,14 +252,11 @@ describe('customer booking cancellation', () => {
     expect(bookingModel.cancelCustomerBooking).toHaveBeenCalledWith(10, 77);
   });
 
-  it('maps a closed hold window to 409', async () => {
-    bookingModel.cancelCustomerBooking.mockResolvedValue({
-      ok: false,
-      reason: 'WINDOW_CLOSED',
-    });
+  it('maps an ineligible status to 409', async () => {
+    bookingModel.cancelCustomerBooking.mockResolvedValue({ ok: false, reason: 'NOT_ALLOWED' });
     const response = await auth('post', '/api/customer/bookings/77/cancel');
     expect(response.status).toBe(409);
-    expect(response.body.code).toBe('CANCEL_WINDOW_CLOSED');
+    expect(response.body.code).toBe('CANCEL_NOT_ALLOWED');
   });
 
   it('maps an assigned booking to 409', async () => {

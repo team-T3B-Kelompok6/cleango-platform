@@ -37,6 +37,7 @@ export async function savePromo(
   form: FormData,
 ): Promise<PromoActionState> {
   const { data, errors, values } = parsePromo(form);
+  const bannerFile = form.get('bannerImage');
   if (Object.keys(errors).length) return { errors, values };
   try {
     const [promos, services] = await Promise.all([
@@ -72,7 +73,31 @@ export async function savePromo(
         },
         values,
       };
-    const payload = await request<{ data?: unknown } | null>(
+
+    let payload: { data?: unknown } | null = null;
+    console.log('bannerFile type:', typeof bannerFile, bannerFile?.constructor?.name, bannerFile?.size);
+    if (bannerFile && bannerFile.size > 0) {
+      if (!['image/png', 'image/jpeg', 'image/webp'].includes(bannerFile.type)) {
+        return { errors: { bannerImage: 'Gunakan JPG, PNG, atau WebP.' }, values };
+      }
+      if (bannerFile.size > 2 * 1024 * 1024) {
+        return { errors: { bannerImage: 'Ukuran banner maksimal 2 MB.' }, values };
+      }
+      const uploadRes = await request<{ data: { url: string } }>(
+        '/uploads',
+        {
+          method: 'POST',
+          body: bannerFile,
+          headers: { 'Content-Type': bannerFile.type },
+        },
+      );
+      const bannerUrl = uploadRes.data?.url;
+      if (!bannerUrl) {
+        return { errors: { bannerImage: 'Gagal mengunggah banner.' }, values };
+      }
+      data.bannerUrl = bannerUrl;
+    }
+    payload = await request<{ data?: unknown } | null>(
       '/promos' + (id ? '/' + encodeURIComponent(id) : ''),
       {
         method: id ? 'PATCH' : 'POST',

@@ -20,6 +20,7 @@ export interface Promo {
   perCustomerLimit: number;
   stackable: boolean;
   active: boolean;
+  bannerUrl?: string | null;
   usedCount?: number;
 }
 
@@ -38,6 +39,7 @@ export interface PromoInput {
   perCustomerLimit: number;
   stackable: boolean;
   active: boolean;
+  bannerUrl?: string | null;
 }
 
 interface PromoRow extends RowDataPacket {
@@ -57,6 +59,7 @@ interface PromoRow extends RowDataPacket {
   serviceIds: string | string[] | null;
   perCustomerLimit: number;
   stackable: number;
+  bannerUrl: string | null;
 }
 
 const SELECT = `SELECT id, name, code, discount_type AS discountType,
@@ -64,7 +67,7 @@ const SELECT = `SELECT id, name, code, discount_type AS discountType,
   minimum_order AS minimumOrder, quota, used_count AS usedCount,
   starts_at AS startsAt, ends_at AS endsAt, is_active AS isActive,
   scope, service_ids AS serviceIds, per_customer_limit AS perCustomerLimit,
-  stackable
+  stackable, banner_url AS bannerUrl
   FROM promos`;
 
 function parseServiceIds(value: PromoRow['serviceIds']): string[] {
@@ -96,6 +99,7 @@ function mapPromo(row: PromoRow): Promo {
     perCustomerLimit: Number(row.perCustomerLimit),
     stackable: Boolean(row.stackable),
     active: Boolean(row.isActive),
+    bannerUrl: row.bannerUrl ?? null,
     usedCount: Number(row.usedCount),
   };
 }
@@ -106,14 +110,42 @@ export async function listPromos(): Promise<Promo[]> {
 }
 
 // Promos the customer app may show: active, inside the period, quota left.
-export async function listActivePromos(): Promise<Promo[]> {
+export async function listPromoBanners(): Promise<{ id: string; imageUrl: string }[]> {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT id, banner_url AS imageUrl FROM promos
+     WHERE is_active = TRUE AND banner_url IS NOT NULL
+       AND starts_at <= NOW() AND ends_at > NOW()
+     ORDER BY created_at DESC`,
+  );
+  return rows.map((row) => ({
+    id: String(row.id),
+    imageUrl: String(row.imageUrl),
+  }));
+}
+
+export async function listActivePromos(customerId: number): Promise<Promo[]> {
   const [rows] = await pool.query<PromoRow[]>(
     `${SELECT}
      WHERE is_active = TRUE AND starts_at <= NOW() AND ends_at > NOW()
        AND (quota IS NULL OR used_count < quota)
+       AND (SELECT COUNT(*) FROM promo_usages
+            WHERE promo_id = promos.id AND user_id = ?
+              AND status IN ('reserved', 'redeemed')) < per_customer_limit
      ORDER BY ends_at ASC, id ASC`,
+    [customerId],
   );
   return rows.map(mapPromo);
+}
+
+export async function countPromoUsageByCustomer(
+  promoId: number,
+  customerId: number,
+): Promise<number> {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    'SELECT COUNT(*) AS total FROM promo_usages WHERE promo_id = ? AND user_id = ?',
+    [promoId, customerId],
+  );
+  return Number(rows[0]?.total ?? 0);
 }
 
 export async function findPromo(id: number): Promise<Promo | null> {
@@ -133,8 +165,8 @@ export async function insertPromo(input: PromoInput): Promise<Promo> {
     `INSERT INTO promos
        (code, name, discount_type, discount_value, maximum_discount, minimum_order,
         quota, starts_at, ends_at, is_active, scope, service_ids,
-        per_customer_limit, stackable)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        per_customer_limit, stackable, banner_url)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       input.code,
       input.name,
@@ -150,6 +182,7 @@ export async function insertPromo(input: PromoInput): Promise<Promo> {
       JSON.stringify(input.scope === 'all' ? [] : input.serviceIds),
       input.perCustomerLimit,
       input.stackable,
+      input.bannerUrl ?? null,
     ],
   );
   const promo = await findPromo(result.insertId);
@@ -186,6 +219,7 @@ export async function updatePromoById(
     set('service_ids', JSON.stringify(input.scope === 'all' ? [] : input.serviceIds));
   if (input.perCustomerLimit !== undefined) set('per_customer_limit', input.perCustomerLimit);
   if (input.stackable !== undefined) set('stackable', input.stackable ? 1 : 0);
+  if (input.bannerUrl !== undefined) set('banner_url', input.bannerUrl);
 
   if (!fields.length) return existing;
   values.push(id);

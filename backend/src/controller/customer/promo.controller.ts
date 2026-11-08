@@ -1,10 +1,16 @@
 import type { NextFunction, Request, Response } from 'express';
 import { AppError } from '../../lib/AppError.js';
 import {
+  countPromoUsageByCustomer,
   findPromoByCode,
   listActivePromos,
   type Promo,
 } from '../../model/promo.model.js';
+
+function customerId(request: Request): number {
+  if (!request.user) throw new AppError(401, 'Authentication diperlukan', 'AUTH_REQUIRED');
+  return Number(request.user.id);
+}
 
 function validationError(field: string, message: string): AppError {
   return new AppError(400, 'Periksa kembali data yang dikirim.', 'VALIDATION_ERROR', {
@@ -42,6 +48,7 @@ export function promoIssue(
   promo: Promo,
   price: number,
   serviceId: number | null,
+  customerUsageCount = 0,
 ): string | null {
   if (!promo.active) return 'Kode promo sudah tidak aktif.';
   const today = todayJakarta();
@@ -49,6 +56,8 @@ export function promoIssue(
   if (promo.endsOn < today) return 'Kode promo sudah kedaluwarsa.';
   if (promo.usageLimit !== null && (promo.usedCount ?? 0) >= promo.usageLimit)
     return 'Kuota promo sudah habis.';
+  if (customerUsageCount >= promo.perCustomerLimit)
+    return 'Batas pemakaian promo untuk akun ini sudah tercapai.';
   if (price < promo.minPurchase)
     return `Minimal transaksi Rp${promo.minPurchase.toLocaleString('id-ID')}.`;
   if (
@@ -61,12 +70,12 @@ export function promoIssue(
 }
 
 export async function getCustomerPromos(
-  _request: Request,
+  request: Request,
   response: Response,
   next: NextFunction,
 ): Promise<void> {
   try {
-    response.status(200).json({ data: await listActivePromos() });
+    response.status(200).json({ data: await listActivePromos(customerId(request)) });
   } catch (error) {
     next(error);
   }
@@ -98,7 +107,8 @@ export async function validateCustomerPromo(
     const promo = await findPromoByCode(code);
     if (!promo) throw new AppError(404, 'Kode promo tidak ditemukan.');
 
-    const issue = promoIssue(promo, price, serviceId);
+    const usageCount = await countPromoUsageByCustomer(Number(promo.id), customerId(request));
+    const issue = promoIssue(promo, price, serviceId, usageCount);
     if (issue) throw new AppError(400, issue, 'PROMO_REJECTED', { code: issue });
 
     response.status(200).json({

@@ -2,6 +2,7 @@ import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import type { PoolConnection } from 'mysql2/promise';
 import { canTransition, type BookingStatus } from '../lib/order-status.js';
+import { addDays } from './booking.model.js';
 import { decryptLinkToken, encryptLinkToken } from '../lib/link-token.js';
 import { addressSql } from '../lib/address-display.js';
 import { pool } from '../lib/db.js';
@@ -132,11 +133,11 @@ const STAGE_STATUS: Record<TaskStage, string> = {
   completed: 'completed',
 };
 
-const STAGE_COLUMNS: Record<TaskStage, string | null> = {
+const STAGE_COLUMNS: Record<TaskStage, string[] | null> = {
   assigned: null,
-  en_route: 'departed_at',
-  working: 'started_at',
-  completed: 'completed_at',
+  en_route: ['departed_at'],
+  working: ['arrived_at', 'started_at'],
+  completed: ['completed_at'],
 };
 
 export async function saveStage(
@@ -145,9 +146,12 @@ export async function saveStage(
   summary?: string,
   checked?: boolean,
 ): Promise<void> {
-  const column = STAGE_COLUMNS[stage];
-  if (!column) return;
-  const sets = [`${column} = COALESCE(${column}, NOW())`, 'updated_at = NOW()'];
+  const columns = STAGE_COLUMNS[stage];
+  if (!columns) return;
+  const sets = [
+    ...columns.map((column) => `${column} = COALESCE(${column}, NOW())`),
+    'updated_at = NOW()',
+  ];
   const values: (string | number | null)[] = [];
   if (summary !== undefined) {
     sets.push('summary = ?');
@@ -158,8 +162,8 @@ export async function saveStage(
     values.push(checked ? 1 : 0);
   }
   await pool.execute(
-    `INSERT INTO cleaner_task_stages (assignment_id, ${column})
-     VALUES (?, NOW())
+    `INSERT INTO cleaner_task_stages (assignment_id, ${columns.join(', ')})
+     VALUES (?, ${columns.map(() => 'NOW()').join(', ')})
      ON DUPLICATE KEY UPDATE ${sets.join(', ')}`,
     [assignmentId, ...values],
   );
@@ -421,7 +425,7 @@ export async function assignCleaner(input: {
   try {
     await connection.beginTransaction();
     const [bookingRows] = await connection.execute<RowDataPacket[]>(
-      `SELECT b.booking_code AS code,
+      `SELECT b.booking_code AS code, b.status,
          DATE_FORMAT(b.scheduled_date, '%Y-%m-%d') AS date,
          TIME_FORMAT(b.scheduled_start_time, '%H:%i') AS startTime,
          (b.hold_until > NOW()) AS onHold,
@@ -444,6 +448,9 @@ export async function assignCleaner(input: {
         'BOOKING_ON_HOLD',
       );
     }
+
+    if (['cancelled', 'completed', 'rescheduled'].includes(String(booking.status)))
+      throw new AppError(409, 'Pesanan ini tidak dapat ditugaskan.', 'ASSIGNMENT_NOT_ALLOWED');
 
     // Serialize assignments per cleaner for the same day.
     await connection.execute('SELECT id FROM cleaners WHERE id = ? FOR UPDATE', [
@@ -474,6 +481,47 @@ export async function assignCleaner(input: {
     if (clash) {
       await connection.rollback();
       throw new AssignmentConflictError(String(clash.code), String(clash.startTime));
+    }
+
+    // Jeda 2 jam: tugas baru tidak boleh mulai sebelum 2 jam setelah tugas
+    // sebelumnya pada tanggal yang sama selesai.
+    const [recentRows] = await connection.execute<RowDataPacket[]>(
+      `SELECT b.booking_code AS code,
+         DATE_FORMAT(b.scheduled_date, '%Y-%m-%d') AS date,
+         TIME_FORMAT(b.scheduled_start_time, '%H:%i') AS startTime,
+         COALESCE(b.service_duration_minutes, s.duration_minutes, 60) AS duration
+       FROM cleaner_assignments ca
+       INNER JOIN bookings b ON b.id = ca.booking_id
+       INNER JOIN services s ON s.id = b.service_id
+       INNER JOIN cleaner_task_stages cts ON cts.assignment_id = ca.id
+       WHERE ca.cleaner_id = ? AND b.id <> ?
+         AND cts.completed_at IS NOT NULL
+         AND ca.link_status <> 'revoked'`,
+      [input.cleanerId, input.bookingId],
+    );
+    const breakMinutes = 120;
+    const restRecent = recentRows.find((row) => {
+      const sameDay =
+        String(row.date) === String(booking.date) ||
+        // Tugas kemarin yang selesai melewati tengah malam juga dihitung.
+        addDays(String(row.date), 1) === String(booking.date) &&
+          timeToMinutes(String(row.startTime)) + Number(row.duration) > 24 * 60;
+      if (!sameDay) return false;
+      const endMinutes =
+        (timeToMinutes(String(row.startTime)) + Number(row.duration)) % (24 * 60);
+      const newStart = timeToMinutes(String(booking.startTime));
+      const startBase =
+        String(row.date) === String(booking.date) ? 0 : 24 * 60;
+      const restEnd = startBase + endMinutes + breakMinutes;
+      return newStart < restEnd;
+    });
+    if (restRecent) {
+      await connection.rollback();
+      throw new AppError(
+        409,
+        `Petugas baru saja menyelesaikan tugas ${restRecent.code}. Beri jeda minimal 2 jam sebelum penugasan berikutnya.`,
+        'CLEANER_REST_REQUIRED',
+      );
     }
 
     await connection.execute(

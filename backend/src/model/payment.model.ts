@@ -129,10 +129,23 @@ export async function applyPaymentEvent(event: {
       `UPDATE payments SET status = ?,
          gateway_reference = COALESCE(?, gateway_reference),
          paid_at = CASE WHEN ? = 'paid' THEN NOW() ELSE paid_at END
-       WHERE id = ?`,
+        WHERE id = ?`,
       [event.status, event.reference, event.status, Number(booking.paymentId)],
     );
     if (event.status === 'paid') {
+      const [rows] = await connection.execute<RowDataPacket[]>(
+        `SELECT pu.id AS promoUsageId
+         FROM promo_usages pu
+         WHERE pu.booking_id = ?
+           AND pu.status = 'reserved'`,
+        [event.bookingId],
+      );
+      for (const row of rows) {
+        await connection.execute(
+          `UPDATE promo_usages SET status = 'redeemed' WHERE id = ?`,
+          [row.promoUsageId],
+        );
+      }
       await connection.execute(
         `INSERT INTO notifications (recipient_user_id, booking_id, type, title, message)
          VALUES (?, ?, 'payment', 'Pembayaran diterima', ?)`,

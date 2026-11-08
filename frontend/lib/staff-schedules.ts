@@ -43,7 +43,7 @@ export function linkedOrders(schedule: Schedule, orders: Order[]) {
 export function assignmentIssue(
   person: Staff,
   order: Order,
-  _schedules: Schedule[],
+  schedules: Schedule[],
   orders: Order[],
 ) {
   if (!['Tersedia', 'Bertugas'].includes(person.status))
@@ -84,6 +84,14 @@ export function assignmentIssue(
     )
   )
     return 'Sudah ditugaskan pada pesanan lain di jam yang sama.';
+  // Cek shift: jika petugas punya shift pada tanggal pesanan, shift harus mencakup jam pesanan.
+  const personSchedules = schedules.filter(
+    (s) => s.staff === person.name && s.date === order.date,
+  );
+  if (personSchedules.length > 0) {
+    const covered = personSchedules.some((s) => scheduleCovers(s, order));
+    if (!covered) return 'Shift tidak mencakup jam pesanan.';
+  }
   return '';
 }
 export function scheduleIssue(

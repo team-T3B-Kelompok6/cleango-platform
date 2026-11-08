@@ -344,6 +344,10 @@ export async function updateBookingById(
     if (staffChanged) {
       const names = [...new Set((input.staff ?? []).map((name) => name.trim()))]
         .filter(Boolean);
+      if (names.length && ['cancelled', 'completed', 'rescheduled'].includes(status ?? current))
+        throw new AppError(409, 'Pesanan ini tidak dapat ditugaskan.', 'ASSIGNMENT_NOT_ALLOWED');
+      if (names.length && Number(rows[0].onHold) === 1)
+        throw new AppError(409, 'Pesanan masih dalam masa tahan 15 detik.', 'BOOKING_ON_HOLD');
       if (names.length > MAX_STAFF_PER_ORDER) throw new Error('STAFF_LIMIT');
       if (names.length && !actor.userId) throw new Error('STAFF_ACTOR_REQUIRED');
 

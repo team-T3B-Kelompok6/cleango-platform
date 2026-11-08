@@ -8,6 +8,7 @@ import { customerFaqRouter } from './faq.routes.js';
 import { customerChatbotRouter } from './chatbot.routes.js';
 import { customerBookingRouter } from './booking.routes.js';
 import { customerBannerRouter } from './banner.routes.js';
+// Removed - banners now live on promos (banner_url)
 import { customerPromoRouter } from './promo.routes.js';
 import { customerNotificationRouter } from './notification.routes.js';
 
@@ -21,5 +22,6 @@ customerRouter.use('/faqs', customerFaqRouter);
 customerRouter.use('/chat', customerChatbotRouter);
 customerRouter.use('/bookings', customerBookingRouter);
 customerRouter.use('/banners', customerBannerRouter);
+// Removed - banners now live on promos (banner_url)
 customerRouter.use('/promos', customerPromoRouter);
 customerRouter.use('/notifications', customerNotificationRouter);

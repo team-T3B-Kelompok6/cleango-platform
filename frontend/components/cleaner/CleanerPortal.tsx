@@ -238,7 +238,12 @@ export function CleanerPortal({
       value: task.departedAt,
       active: task.stage === 'en_route',
     },
-    { label: 'Tiba Lokasi', value: task.arrivedAt, active: false },
+    {
+      label: 'Tiba Lokasi',
+      value: task.arrivedAt,
+      active: false,
+      passed: task.stage === 'working' || task.stage === 'completed',
+    },
     {
       label: 'Dikerjakan',
       value: task.startedAt,
@@ -483,13 +488,13 @@ export function CleanerPortal({
                   <li
                     key={step.label}
                     className={
-                      (step.value || (completed && index === 3)
+                      (step.value || step.passed || (completed && index === 3)
                         ? 'is-done '
                         : '') + (step.active ? 'is-active' : '')
                     }
                   >
                     <span>
-                      {step.value || (completed && index === 3) ? (
+                      {step.value || step.passed || (completed && index === 3) ? (
                         <UiIcon name="tick" />
                       ) : (
                         index + 1
@@ -502,9 +507,11 @@ export function CleanerPortal({
                       <small>
                         {step.value
                           ? time(step.value)
-                          : completed
-                            ? 'Tidak tercatat'
-                            : 'Menunggu'}
+                          : step.passed
+                            ? 'Waktu kedatangan tidak tercatat'
+                            : completed
+                              ? 'Tidak tercatat'
+                              : 'Menunggu'}
                       </small>
                     </div>
                   </li>

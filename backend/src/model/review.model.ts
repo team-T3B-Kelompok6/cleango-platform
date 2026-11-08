@@ -149,6 +149,18 @@ export async function createBookingReview(
         input.comment,
       ],
     );
+    if (state.cleanerId !== null) {
+      await connection.execute(
+        `UPDATE cleaners
+         SET average_rating = (
+           SELECT COALESCE(AVG(rating), 0)
+           FROM reviews
+           WHERE cleaner_id = ?
+         )
+         WHERE id = ?`,
+        [Number(state.cleanerId), Number(state.cleanerId)],
+      );
+    }
     await connection.commit();
     return { ok: true, id: Number(result.insertId) };
   } catch (error) {
@@ -192,6 +204,18 @@ export async function updateBookingReview(
       'UPDATE reviews SET rating = ?, comment = ? WHERE id = ?',
       [input.rating, input.comment, Number(state.reviewId)],
     );
+    if (state.cleanerId !== null) {
+      await connection.execute(
+        `UPDATE cleaners
+         SET average_rating = (
+           SELECT COALESCE(AVG(rating), 0)
+           FROM reviews
+           WHERE cleaner_id = ?
+         )
+         WHERE id = ?`,
+        [Number(state.cleanerId), Number(state.cleanerId)],
+      );
+    }
     await connection.commit();
     return { ok: true };
   } catch (error) {

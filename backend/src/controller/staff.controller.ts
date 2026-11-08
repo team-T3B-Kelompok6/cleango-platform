@@ -65,9 +65,27 @@ async function skillsValue(value: unknown): Promise<string[]> {
     });
   return skills;
 }
+async function wouldCreateCycle(
+  selfId: number,
+  trainerId: number,
+): Promise<boolean> {
+  let current: number | null = trainerId;
+  const seen = new Set<number>();
+  while (current !== null) {
+    if (current === selfId) return true;
+    if (seen.has(current)) return true;
+    seen.add(current);
+    const trainer = await findStaff(current);
+    if (!trainer || trainer.trainerId === null) break;
+    current = Number(trainer.trainerId);
+  }
+  return false;
+}
 async function inputFrom(
   body: Record<string, unknown>,
   partial: boolean,
+  currentStatus?: StaffStatus,
+  selfId?: number,
 ): Promise<Partial<StaffInput>> {
   let status: StaffStatus | undefined;
   if (!partial || body.status !== undefined) {
@@ -93,6 +111,64 @@ async function inputFrom(
     input.photoUrl = photoUrlValue(body.photoUrl);
   if (!partial || body.skills !== undefined)
     input.skills = await skillsValue(body.skills);
+
+  const effectiveStatus = status ?? currentStatus;
+  if (effectiveStatus !== undefined) {
+    if (effectiveStatus !== 'Masa Training') {
+      if (
+        body.trainerId !== undefined &&
+        body.trainerId !== null &&
+        body.trainerId !== ''
+      ) {
+        validationError({
+          trainerId: 'Mentor hanya untuk petugas Masa Training.',
+        });
+      }
+      if (
+        partial &&
+        status !== undefined &&
+        currentStatus === 'Masa Training'
+      ) {
+        input.trainerId = null;
+      }
+    } else {
+      if (body.trainerId !== undefined) {
+        if (body.trainerId === null || body.trainerId === '') {
+          input.trainerId = null;
+        } else {
+          const trainerId = positiveId(body.trainerId, 'Mentor');
+          if (selfId !== undefined && trainerId === selfId) {
+            validationError({
+              trainerId: 'Petugas tidak bisa menjadi mentor dirinya sendiri.',
+            });
+          }
+          const trainer = await findStaff(trainerId);
+          if (!trainer)
+            validationError({ trainerId: 'Mentor tidak ditemukan.' });
+          if (!['Tersedia', 'Bertugas'].includes(trainer.status)) {
+            validationError({
+              trainerId:
+                'Mentor harus petugas aktif non-training (Tersedia atau Bertugas).',
+            });
+          }
+          if (
+            selfId !== undefined &&
+            (await wouldCreateCycle(selfId, trainerId))
+          ) {
+            validationError({
+              trainerId: 'Mentor membentuk siklus pelatihan.',
+            });
+          }
+          input.trainerId = trainerId;
+        }
+      }
+    }
+  } else if (body.trainerId !== undefined) {
+    validationError({
+      trainerId: 'Mentor hanya untuk petugas Masa Training.',
+    });
+  }
+
   if (partial) requireChanges(input);
   return input;
 }
@@ -143,9 +219,17 @@ export async function updateStaff(
   next: NextFunction,
 ): Promise<void> {
   try {
+    const id = positiveId(request.params.id, 'ID petugas');
+    const current = await findStaff(id);
+    if (!current) throw new AppError(404, 'Petugas tidak ditemukan.');
     const data = await updateStaffById(
-      positiveId(request.params.id, 'ID petugas'),
-      await inputFrom(request.body as Record<string, unknown>, true),
+      id,
+      await inputFrom(
+        request.body as Record<string, unknown>,
+        true,
+        current.status,
+        id,
+      ),
     );
     if (!data) throw new AppError(404, 'Petugas tidak ditemukan.');
     response

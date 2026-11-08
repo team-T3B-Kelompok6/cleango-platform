@@ -4,7 +4,7 @@ import { getEnv } from './config/env.js';
 import { requestLogger } from './lib/logger.js';
 import { globalErrorHandler, notFoundHandler } from './middleware/error.middleware.js';
 import { apiRouter } from './routes/index.js';
-import { UPLOAD_DIR } from './controller/banner.controller.js';
+import { UPLOAD_DIR } from './lib/image-storage.js';
 import { postPaymentWebhook } from './controller/payment.controller.js';
 
 export function createApp() {

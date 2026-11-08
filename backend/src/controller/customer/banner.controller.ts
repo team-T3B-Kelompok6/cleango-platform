@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
-import { listBanners } from '../../model/banner.model.js';
+import { listPromoBanners } from '../../model/promo.model.js';
 
 export async function getCustomerBanners(
   _request: Request,
@@ -7,7 +7,7 @@ export async function getCustomerBanners(
   next: NextFunction,
 ): Promise<void> {
   try {
-    response.status(200).json({ data: await listBanners() });
+    response.status(200).json({ data: await listPromoBanners() });
   } catch (error) {
     next(error);
   }

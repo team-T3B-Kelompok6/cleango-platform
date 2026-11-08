@@ -119,7 +119,7 @@ suite('booking hold and cancellation against the database (RUN_DB_TESTS=1)', () 
       [holdFuture],
     );
     expect(rows[0]?.status).toBe('cancelled');
-    expect(String(rows[0]?.reason)).toContain('15 detik');
+    expect(rows[0]?.reason).toBe('Dibatalkan customer.');
     const [history] = await db.query<RowDataPacket[]>(
       "SELECT status, actor_type AS actorType FROM booking_status_history WHERE booking_id = ? ORDER BY id DESC LIMIT 1",
       [holdFuture],
@@ -134,6 +134,25 @@ suite('booking hold and cancellation against the database (RUN_DB_TESTS=1)', () 
       ok: false,
       reason: 'ALREADY_ASSIGNED',
     });
+  });
+
+  it('returns the short hold as a UTC instant for the customer clock', async () => {
+    const { findCustomerBooking, listCustomerBookings } = await import('../src/model/booking.model.js');
+    const [rows] = await db.query<RowDataPacket[]>(
+      'SELECT TIMESTAMPDIFF(SECOND, NOW(), hold_until) AS remaining FROM bookings WHERE id = ?',
+      [assignGuard],
+    );
+    const single = await findCustomerBooking(customerId, assignGuard);
+    const listed = (await listCustomerBookings(customerId)).find((row) => row.id === assignGuard);
+    const expected = Number(rows[0]?.remaining);
+    expect(expected).toBeGreaterThan(0);
+    for (const holdUntil of [single?.holdUntil, listed?.holdUntil]) {
+      expect(holdUntil).toBeInstanceOf(Date);
+      const remaining = (holdUntil as Date).getTime() - Date.now();
+      expect(remaining).toBeGreaterThan(0);
+      expect(remaining).toBeLessThan(20_000);
+      expect(Math.abs(remaining / 1000 - expected)).toBeLessThan(5);
+    }
   });
 
   it('blocks admin assignment while the booking is held', async () => {

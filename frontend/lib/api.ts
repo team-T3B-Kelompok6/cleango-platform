@@ -21,7 +21,7 @@ export class ApiError extends Error {
     super(message);
   }
 }
-async function upstreamRequest<T>(
+export async function upstreamRequest<T>(
   path: string,
   options: RequestInit = {},
   anonymous = false,

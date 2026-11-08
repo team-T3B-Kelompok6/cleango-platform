@@ -17,7 +17,6 @@ import { useDialogClose } from './DialogContext';
 import { SubmitButton } from './Form';
 import { PromoForm } from './PromoForm';
 import { UiIcon } from './UiIcon';
-import { AddBannerButton } from './AddBannerButton';
 
 const dateLabel = (date: string) =>
   new Intl.DateTimeFormat('id-ID', {
@@ -141,7 +140,6 @@ function PromoList({
             {message ? 'Daftar promo' : `${promos.length} kode promo`}
           </span>
           <div className="promo-heading-actions">
-            <AddBannerButton />
             <button
               type="button"
               className="button primary"

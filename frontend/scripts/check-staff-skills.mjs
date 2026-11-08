@@ -66,6 +66,10 @@ function load(filename) {
   })(resolve, module, module.exports);
   return module.exports;
 }
+let staff = [
+  { id: '1', name: 'Petugas', status: 'Tersedia', skills: ['Sanitasi'] },
+  { id: '2', name: 'Mentor Aktif', status: 'Tersedia', skills: ['Cuci AC'] },
+];
 let services = [
   { id: '1', name: 'Deep Cleaning Rumah', active: true },
   { id: '2', name: 'Cuci AC', active: false },
@@ -84,6 +88,8 @@ globalThis.fetch = async (input, options = {}) => {
   assert.equal(options.headers.Authorization, 'Bearer skill-test-session');
   if (url.pathname === '/api/services')
     return Response.json({ data: services });
+  if (url.pathname === '/api/staff' && !options.method)
+    return Response.json({ data: staff });
   if (url.pathname === '/api/uploads') {
     uploads++;
     assert.equal(options.headers['Content-Type'], 'image/png');

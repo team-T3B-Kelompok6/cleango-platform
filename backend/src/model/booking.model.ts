@@ -278,7 +278,8 @@ export async function createBooking(input: CreateBookingInput): Promise<{
 
     if (input.promo) {
       const [usageRows] = await connection.execute<RowDataPacket[]>(
-        'SELECT COUNT(*) AS total FROM promo_usages WHERE promo_id = ? AND user_id = ?',
+        `SELECT COUNT(*) AS total FROM promo_usages
+         WHERE promo_id = ? AND user_id = ? AND status IN ('reserved', 'redeemed')`,
         [input.promo.id, input.customerId],
       );
       if (Number(usageRows[0]?.total ?? 0) >= input.promo.perCustomerLimit) {
@@ -378,7 +379,7 @@ export async function cancelCustomerBooking(
   try {
     await connection.beginTransaction();
     const [rows] = await connection.execute<RowDataPacket[]>(
-      `SELECT b.status, ca.id AS assignmentId
+      `SELECT b.status, b.promo_id AS promoId, ca.id AS assignmentId
        FROM bookings b
        LEFT JOIN cleaner_assignments ca ON ca.booking_id = b.id
        WHERE b.id = ? AND b.customer_id = ?
@@ -398,14 +399,24 @@ export async function cancelCustomerBooking(
       await connection.rollback();
       return { ok: false, reason: 'ALREADY_ASSIGNED' };
     }
+    if (row.promoId !== null) {
+      await connection.execute(
+        `UPDATE promos SET used_count = GREATEST(0, used_count - 1) WHERE id = ?`,
+        [row.promoId],
+      );
+      await connection.execute(
+        `UPDATE promo_usages SET status = 'released' WHERE promo_id = ? AND booking_id = ?`,
+        [row.promoId, bookingId],
+      );
+    }
     await connection.execute(
       `UPDATE bookings
        SET status = 'cancelled',
            cancellation_reason = 'Dibatalkan customer.'
-      WHERE id = ?`,
+       WHERE id = ?`,
       [bookingId],
     );
-await connection.execute(
+    await connection.execute(
       `INSERT INTO booking_status_history
          (booking_id, status, actor_type, actor_user_id, notes)
        VALUES (?, 'cancelled', 'customer', ?, 'Dibatalkan customer.')`,
@@ -537,8 +548,8 @@ export async function findCustomerBooking(customerId: number, id: number) {
        COALESCE(b.service_duration_minutes, s.duration_minutes) AS serviceDurationMinutes,
        b.platform_fee AS platformFee, b.discount_amount AS discountAmount,
        b.total_amount AS totalAmount, p.code AS promoCode,
-       pay.status AS paymentStatus,
-       b.status, b.hold_until AS holdUntil,
+       pay.status AS paymentStatus, pay.method AS paymentMethod,
+       b.status, b.hold_until - INTERVAL TIMESTAMPDIFF(SECOND, UTC_TIMESTAMP(), NOW()) SECOND AS holdUntil,
        (b.status IN ('confirmed', 'awaiting_payment') AND ca.id IS NULL) AS canCancel,
        (b.status IN ('confirmed', 'awaiting_payment') AND ca.id IS NULL) AS canReschedule,
        COALESCE(b.customer_notes, '') AS notes,
@@ -552,7 +563,7 @@ export async function findCustomerBooking(customerId: number, id: number) {
        a.label AS addressLabel, a.landmark,
        COALESCE(NULLIF(a.recipient_name, ''), u.name) AS recipientName,
        COALESCE(NULLIF(a.recipient_phone, ''), u.phone) AS recipientPhone,
-       cl.name AS cleanerName, ${addressSql('a')} AS address
+       cl.name AS cleanerName, cl.average_rating AS cleanerRating, ${addressSql('a')} AS address
      FROM bookings b
      INNER JOIN services s ON s.id = b.service_id
      INNER JOIN addresses a ON a.id = b.address_id
@@ -583,6 +594,8 @@ export interface CustomerBookingRow extends RowDataPacket {
   discountAmount: number;
   totalAmount: number;
   databaseStatus: string;
+  paymentStatus: string | null;
+  paymentMethod: string | null;
   holdUntil: Date | null;
   canCancel: number;
   canReschedule: number;
@@ -608,8 +621,8 @@ export async function listCustomerBookings(
        UNIX_TIMESTAMP(bs.started_at) * 1000 AS startedAt, b.service_price AS servicePrice,
        b.platform_fee AS platformFee, b.discount_amount AS discountAmount,
        b.total_amount AS totalAmount, b.status AS databaseStatus,
-       pay.status AS paymentStatus,
-       b.hold_until AS holdUntil,
+       pay.status AS paymentStatus, pay.method AS paymentMethod,
+       b.hold_until - INTERVAL TIMESTAMPDIFF(SECOND, UTC_TIMESTAMP(), NOW()) SECOND AS holdUntil,
        (b.status IN ('confirmed', 'awaiting_payment') AND ca.id IS NULL) AS canCancel,
        (b.status IN ('confirmed', 'awaiting_payment') AND ca.id IS NULL) AS canReschedule,
        COALESCE(b.customer_notes, '') AS notes,
@@ -625,6 +638,7 @@ export async function listCustomerBookings(
        COALESCE(NULLIF(a.recipient_name, ''), u.name) AS recipientName,
        COALESCE(NULLIF(a.recipient_phone, ''), u.phone) AS recipientPhone,
        cl.name AS cleanerName,
+       cl.average_rating AS cleanerRating,
        ${addressSql('a')} AS address,
        a.latitude, a.longitude
      FROM bookings b

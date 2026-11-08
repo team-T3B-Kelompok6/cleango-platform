@@ -231,7 +231,7 @@ export function Filters({
               }
               onClick={() => apply({ tab: index ? tab : '' })}
             >
-              {tabIcons[tab] && <CategoryIcon src={tabIcons[tab]} />}
+              <CategoryIcon src={tabIcons[tab] ?? ''} />
               {pathname === '/petugas'
                 ? ((
                     {

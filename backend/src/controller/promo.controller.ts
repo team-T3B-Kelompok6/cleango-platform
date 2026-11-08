@@ -12,6 +12,7 @@ import {
   type PromoInput,
   type PromoScope,
 } from '../model/promo.model.js';
+import { saveImage, removeStoredFile, storedPathFromUrl } from '../lib/image-storage.js';
 import { positiveId, validationError } from './resource-validation.js';
 
 const CODE_PATTERN = /^[A-Z0-9][A-Z0-9_-]{2,29}$/;
@@ -136,6 +137,12 @@ function inputFrom(
       validationError({ active: 'Pilih status aktif.' });
     input.active = body.active as boolean;
   }
+  if (!partial || body.bannerUrl !== undefined) {
+    input.bannerUrl =
+      typeof body.bannerUrl === 'string' && body.bannerUrl.trim()
+        ? body.bannerUrl.trim()
+        : null;
+  }
   return input;
 }
 
@@ -170,16 +177,27 @@ export async function createPromo(
   response: Response,
   next: NextFunction,
 ): Promise<void> {
+  let saved: Awaited<ReturnType<typeof saveImage>> | null = null;
   try {
     const input = inputFrom(request.body as Record<string, unknown>, false) as PromoInput;
     if (await findPromoByCode(input.code))
       throw new AppError(400, 'Kode promo sudah dipakai.', 'VALIDATION_ERROR', {
         code: 'Kode promo sudah dipakai.',
       });
+    const contentType = request.header('content-type') ?? '';
+    if (contentType.includes('multipart/form-data')) {
+      saved = await saveImage(
+        request.body,
+        contentType,
+        'promo-banners',
+      );
+      input.bannerUrl = saved.url;
+    }
     const data = await insertPromo(input);
     await notifyPromo(data);
     response.status(201).json({ message: 'Promo berhasil dibuat.', data });
   } catch (error) {
+    if (saved) await removeStoredFile(saved.storagePath);
     next(error);
   }
 }
@@ -189,6 +207,7 @@ export async function updatePromo(
   response: Response,
   next: NextFunction,
 ): Promise<void> {
+  let saved: Awaited<ReturnType<typeof saveImage>> | null = null;
   try {
     const id = positiveId(request.params.id, 'ID promo');
     const before = await findPromo(id);
@@ -200,11 +219,29 @@ export async function updatePromo(
           code: 'Kode promo sudah dipakai.',
         });
     }
+    const contentType = request.header('content-type') ?? '';
+    if (contentType.includes('multipart/form-data')) {
+      const oldUrl = before?.bannerUrl;
+      saved = await saveImage(
+        request.body,
+        contentType,
+        'promo-banners',
+      );
+      input.bannerUrl = saved.url;
+      if (oldUrl) {
+        const storagePath = storedPathFromUrl(oldUrl);
+        if (storagePath) await removeStoredFile(storagePath);
+      }
+    } else if (input.bannerUrl === null && before?.bannerUrl) {
+      const storagePath = storedPathFromUrl(before.bannerUrl);
+      if (storagePath) await removeStoredFile(storagePath);
+    }
     const data = await updatePromoById(id, input);
     if (!data) throw new AppError(404, 'Promo tidak ditemukan.');
     if (!before?.active && data.active) await notifyPromo(data);
     response.status(200).json({ message: 'Promo berhasil diperbarui.', data });
   } catch (error) {
+    if (saved) await removeStoredFile(saved.storagePath);
     next(error);
   }
 }
@@ -215,8 +252,13 @@ export async function deletePromo(
   next: NextFunction,
 ): Promise<void> {
   try {
-    if (!(await deletePromoById(positiveId(request.params.id, 'ID promo'))))
-      throw new AppError(404, 'Promo tidak ditemukan.');
+    const id = positiveId(request.params.id, 'ID promo');
+    const before = await findPromo(id);
+    if (!(await deletePromoById(id))) throw new AppError(404, 'Promo tidak ditemukan.');
+    if (before?.bannerUrl) {
+      const storagePath = storedPathFromUrl(before.bannerUrl);
+      if (storagePath) await removeStoredFile(storagePath);
+    }
     response.status(200).json({ message: 'Promo berhasil dihapus.' });
   } catch (error) {
     next(error);

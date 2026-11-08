@@ -13,6 +13,7 @@ const addressModel = vi.hoisted(() => ({
   insertAddress: vi.fn(), updateAddressById: vi.fn(), deleteAddressById: vi.fn(),
 }));
 const imageStorage = vi.hoisted(() => ({
+  UPLOAD_DIR: 'uploads',
   saveImage: vi.fn(),
   removeStoredFile: vi.fn(),
   storedPathFromUrl: vi.fn(),

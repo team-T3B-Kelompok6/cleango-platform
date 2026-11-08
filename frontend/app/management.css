@@ -1120,6 +1120,12 @@ h3 {
   vertical-align: middle;
   margin-right: 8px;
 }
+.category-tab-icon-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--design-muted);
+}
 .category-selector {
   padding: 20px 24px 16px;
   border-bottom: 1px solid var(--border);

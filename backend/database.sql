@@ -105,6 +105,7 @@ CREATE TABLE IF NOT EXISTS cleaners (
   phone VARCHAR(30) NOT NULL,
   area VARCHAR(120) NOT NULL DEFAULT 'Malang',
   photo_url VARCHAR(500) NULL,
+  trainer_id BIGINT UNSIGNED NULL,
   skills TEXT NULL,
   status ENUM('available', 'busy', 'offline') NOT NULL DEFAULT 'offline',
   average_rating DECIMAL(3,2) NOT NULL DEFAULT 0.00,
@@ -113,7 +114,9 @@ CREATE TABLE IF NOT EXISTS cleaners (
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT chk_cleaners_rating CHECK (average_rating BETWEEN 0 AND 5),
   UNIQUE KEY uq_cleaners_phone (phone),
-  INDEX idx_cleaners_status_active (status, is_active)
+  INDEX idx_cleaners_status_active (status, is_active),
+  CONSTRAINT fk_cleaners_trainer FOREIGN KEY (trainer_id) REFERENCES cleaners(id) ON DELETE SET NULL,
+  INDEX idx_cleaners_trainer (trainer_id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS promos (
@@ -134,6 +137,8 @@ CREATE TABLE IF NOT EXISTS promos (
   service_ids TEXT NULL,
   per_customer_limit INT UNSIGNED NOT NULL DEFAULT 1,
   stackable BOOLEAN NOT NULL DEFAULT FALSE,
+  banner_url VARCHAR(500) NULL,
+  deactivated_at DATETIME NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT chk_promos_value CHECK (discount_value > 0),
@@ -357,6 +362,7 @@ CREATE TABLE IF NOT EXISTS promo_usages (
   user_id BIGINT UNSIGNED NOT NULL,
   discount_amount DECIMAL(12,2) NOT NULL,
   used_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  status ENUM('reserved', 'redeemed', 'released') NOT NULL DEFAULT 'reserved',
   CONSTRAINT fk_promo_usages_promo
     FOREIGN KEY (promo_id) REFERENCES promos(id),
   CONSTRAINT fk_promo_usages_booking

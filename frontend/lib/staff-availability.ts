@@ -42,7 +42,7 @@ export function staffOperationalStatus(person: Staff, orders: Order[]) {
     )
   )
     return 'Siap Berangkat';
-  return person.status === 'Bertugas' ? 'Bertugas' : 'Siaga & Tersedia';
+  return 'Siaga & Tersedia';
 }
 
 export function recommendedSkills(person: Staff, order: Order): string[] {

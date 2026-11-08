@@ -245,21 +245,23 @@ export const valueText = (value: unknown) =>
         : 'Nonaktif'
       : String(value ?? '');
 export const tone = (status: string) =>
-  status === 'Batal' || status === 'Nonaktif'
-    ? 'neutral'
-    : status === 'Aktif' ||
-        status === 'Selesai' ||
-        status === 'Tersedia' ||
-        status === 'Siaga & Tersedia'
-      ? 'green'
-      : status === 'Menunggu Lokasi' ||
-          status === 'Menuju Lokasi' ||
-          status === 'Sedang Dikerjakan' ||
-          status === 'Berlangsung' ||
-          status === 'Bertugas' ||
-          status === 'Sedang Bekerja'
-        ? 'blue'
-        : 'amber';
+  status === 'Batal'
+    ? 'red'
+    : status === 'Nonaktif'
+      ? 'neutral'
+      : status === 'Aktif' ||
+          status === 'Selesai' ||
+          status === 'Tersedia' ||
+          status === 'Siaga & Tersedia'
+        ? 'green'
+        : status === 'Menunggu Lokasi' ||
+            status === 'Menuju Lokasi' ||
+            status === 'Sedang Dikerjakan' ||
+            status === 'Berlangsung' ||
+            status === 'Bertugas' ||
+            status === 'Sedang Bekerja'
+          ? 'blue'
+          : 'amber';
 export const scheduleShifts = [
   { name: 'Shift Pagi', time: '08.00–12.00 WIB' },
   { name: 'Shift Siang', time: '13.00–17.00 WIB' },

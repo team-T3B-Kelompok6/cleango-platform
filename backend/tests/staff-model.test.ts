@@ -16,6 +16,9 @@ interface StaffRow {
   phone: string;
   area: string;
   photoUrl: string | null;
+  trainerId: number | null;
+  trainerName: string | null;
+  trainerSkills: string | null;
   skills: string | null;
   databaseStatus: 'available' | 'busy' | 'offline';
   active: number;
@@ -29,6 +32,9 @@ function row(overrides: Partial<StaffRow> = {}): StaffRow {
     phone: '08123',
     area: 'Pasar Baru',
     photoUrl: null,
+    trainerId: null,
+    trainerName: null,
+    trainerSkills: null,
     skills: null,
     databaseStatus: 'available',
     active: 1,
@@ -107,6 +113,13 @@ describe('staff model: row mapping', () => {
     expect(found?.photoUrl).toBeNull();
   });
 
+  it('qualifies the id in findStaff to avoid an ambiguous join column', async () => {
+    await findStaff(1);
+    const [sql] = db.query.mock.calls[0]!;
+    expect(sql).toContain('WHERE cleaners.id = ?');
+    expect(sql).toContain('LEFT JOIN cleaners AS trainers');
+  });
+
   it('normalises rows into Staff[] on listStaff', async () => {
     db.query.mockResolvedValue([
       [row({ id: 2, name: 'Budi' }), row({ id: 3, name: 'Ani' })],
@@ -145,6 +158,7 @@ describe('staff model: insertStaff parameter binding', () => {
       '08123',
       'Pasar Baru',
       null,
+      null,
       '[]',
       'available',
       true,
@@ -152,7 +166,7 @@ describe('staff model: insertStaff parameter binding', () => {
     expect(sqlOf()).toContain('INSERT INTO cleaners');
     expect(sqlOf()).toContain('is_active');
     expect(db.query).toHaveBeenCalledWith(
-      expect.stringContaining('WHERE id = ? LIMIT 1'),
+      expect.stringContaining('WHERE cleaners.id = ? LIMIT 1'),
       [42],
     );
   });
@@ -169,6 +183,7 @@ describe('staff model: insertStaff parameter binding', () => {
       '08123',
       'Pasar Baru',
       'https://cdn.example/a.png',
+      null,
       JSON.stringify(['AC Repair', 'Carpentry']),
       'busy',
       true,
@@ -182,6 +197,7 @@ describe('staff model: insertStaff parameter binding', () => {
       '08123',
       'Pasar Baru',
       null,
+      null,
       '[]',
       'offline',
       false,
@@ -194,6 +210,7 @@ describe('staff model: insertStaff parameter binding', () => {
       'Sari',
       '08123',
       'Pasar Baru',
+      null,
       null,
       '[]',
       'offline',
@@ -228,6 +245,8 @@ describe('staff model: updateStaffById parameter binding', () => {
       false,
       null,
       false,
+      null,
+      false,
       '[]',
       false,
       'offline',
@@ -253,6 +272,8 @@ describe('staff model: updateStaffById parameter binding', () => {
       true,
       null,
       false,
+      null,
+      false,
       '[]',
       false,
       'offline',
@@ -272,6 +293,8 @@ describe('staff model: updateStaffById parameter binding', () => {
       '',
       false,
       '',
+      false,
+      null,
       false,
       null,
       true,
@@ -296,7 +319,7 @@ describe('staff model: updateStaffById parameter binding', () => {
     db.query.mockResolvedValue([[row({ id: 7 })]]);
     await updateStaffById(7, { name: 'Budi' });
     expect(db.query).toHaveBeenCalledWith(
-      expect.stringContaining('WHERE id = ? LIMIT 1'),
+      expect.stringContaining('WHERE cleaners.id = ? LIMIT 1'),
       [7],
     );
   });

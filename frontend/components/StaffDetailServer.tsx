@@ -140,6 +140,24 @@ export async function StaffDetailServer({
             )}
           </dd>
         </div>
+        {staff.trainerId && staff.trainerName && (
+          <div>
+            <dt>MATERI PENDAMPINGAN</dt>
+            <dd>
+              <strong>{staff.trainerName}</strong>
+              {Array.isArray(staff.mentorMaterials) &&
+              staff.mentorMaterials.length ? (
+                <ul className="mentor-skills">
+                  {staff.mentorMaterials.map((skill) => (
+                    <li key={skill}>{skill}</li>
+                  ))}
+                </ul>
+              ) : (
+                <span className="muted">Tidak ada materi pendampingan.</span>
+              )}
+            </dd>
+          </div>
+        )}
         <div>
           <dt>Tanggal bergabung</dt>
           <dd>{displayDate(staff.joined)}</dd>

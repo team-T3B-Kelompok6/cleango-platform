@@ -64,6 +64,7 @@ const baseBody = {
 beforeEach(() => {
   staffModel.listStaff.mockReset();
   staffModel.findStaff.mockReset();
+  staffModel.findStaff.mockResolvedValue({ id: '1', name: 'Sari', status: 'Tersedia' });
   staffModel.insertStaff.mockReset();
   staffModel.updateStaffById.mockReset();
   staffModel.deleteStaffById.mockReset();

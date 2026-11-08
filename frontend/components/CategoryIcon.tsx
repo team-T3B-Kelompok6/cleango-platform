@@ -3,10 +3,22 @@
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
+import { UiIcon } from './UiIcon';
+
 export function CategoryIcon({ src }: { src: string }) {
   const [failed, setFailed] = useState(false);
   useEffect(() => setFailed(false), [src]);
-  return failed ? null : (
+  if (!src || failed) {
+    return (
+      <span
+        className="category-tab-icon category-tab-icon-fallback"
+        aria-hidden
+      >
+        <UiIcon name="tag" />
+      </span>
+    );
+  }
+  return (
     <Image
       className="category-tab-icon"
       src={src}
