@@ -6,6 +6,14 @@ vi.mock('../src/model/user.model.js', async (original) => ({
   ...(await original<typeof import('../src/model/user.model.js')>()),
   isTokenRevoked: vi.fn().mockResolvedValue(false),
 }));
+
+vi.mock('../src/model/booking.model.js', async (original) => ({
+  ...(await original<typeof import('../src/model/booking.model.js')>()),
+  resolveBookableServiceId: vi.fn().mockImplementation((identifier: string) =>
+    identifier === '0' ? Promise.resolve(null) : Promise.resolve(1),
+  ),
+}));
+
 import { createApp } from '../src/app.js';
 
 const app = createApp();

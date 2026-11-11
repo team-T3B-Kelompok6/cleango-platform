@@ -75,8 +75,7 @@ export async function savePromo(
       };
 
     let payload: { data?: unknown } | null = null;
-    console.log('bannerFile type:', typeof bannerFile, bannerFile?.constructor?.name, bannerFile?.size);
-    if (bannerFile && bannerFile.size > 0) {
+    if (bannerFile instanceof File && bannerFile.size > 0) {
       if (!['image/png', 'image/jpeg', 'image/webp'].includes(bannerFile.type)) {
         return { errors: { bannerImage: 'Gunakan JPG, PNG, atau WebP.' }, values };
       }

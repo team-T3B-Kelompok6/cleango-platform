@@ -8,7 +8,7 @@ import vm from 'node:vm';
 const native = createRequire(import.meta.url);
 const ts = native('typescript');
 const root = path.resolve(import.meta.dirname, '..');
-process.env.NODE_ENV = 'development';
+process.env.NODE_ENV = 'test';
 process.env.ADMIN_DEMO_ENABLED = 'true';
 process.env.CLEANER_DEMO_DATA_DIR = mkdtempSync(
   path.join(tmpdir(), 'cleango-admin-demo-'),
@@ -310,7 +310,7 @@ await check(
   },
 );
 await check(
-  'Assignment requires matching shift; linked active shifts cannot be moved or deleted; overlapping jobs rejected',
+  'Assignment shift optional; linked active shifts cannot be moved or deleted; overlapping jobs rejected',
   async () => {
     const rules = load(path.join(root, 'lib/staff-schedules.ts'));
     const order = (await request('/orders/DEMO-CHECK-01')).data;
@@ -319,10 +319,7 @@ await check(
     );
     const shifts = (await request('/schedules')).data;
     const allOrders = (await request('/orders')).data;
-    assert.equal(
-      rules.assignmentIssue(person, order, [], allOrders),
-      'Belum ada shift aktif yang mencakup tanggal dan jam pesanan.',
-    );
+    assert.equal(rules.assignmentIssue(person, order, [], allOrders), '');
     const shift = shifts.find(
       (shift) =>
         shift.staff === person.name &&
@@ -361,7 +358,7 @@ await check(
         shifts,
         [],
       ),
-      'Belum ada shift aktif yang mencakup tanggal dan jam pesanan.',
+      'Shift tidak mencakup jam pesanan.',
     );
     assert.equal(rules.overlaps('08.00–12.00 WIB', '12.00–13.00 WIB'), false);
     assert.equal(rules.timeRange('25.00–26.00 WIB'), null);
@@ -406,7 +403,25 @@ await check(
         [order],
       ),
     );
-    assert.ok(rules.assignmentIssue(person, order, [], [order]));
+    assert.equal(rules.assignmentIssue(person, order, [], [order]), '');
+    const nonaktif = {
+      ...shift,
+      id: 'shift-nonaktif',
+      status: 'Nonaktif',
+    };
+    assert.equal(
+      rules.assignmentIssue(person, order, [nonaktif], [order]),
+      'Shift tidak mencakup jam pesanan.',
+    );
+    const wrongTime = {
+      ...shift,
+      id: 'shift-wrong',
+      time: '14.00–18.00 WIB',
+    };
+    assert.equal(
+      rules.assignmentIssue(person, order, [wrongTime, nonaktif], [order]),
+      'Shift tidak mencakup jam pesanan.',
+    );
     const busy = {
       ...order,
       id: 'busy',
@@ -688,6 +703,21 @@ await check(
     );
     assert.equal(saved.icon, null);
     assert.deepEqual((await request('/services')).data, services);
+  },
+);
+await check(
+  'Mode development tidak menerima demo meski flag lama aktif',
+  async () => {
+    const previousEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'development';
+    process.env.ADMIN_DEMO_ENABLED = 'true';
+    process.env.CLEANER_DEMO_ENABLED = 'true';
+    assert.equal(cleaner.demoEnabled(), false);
+    await assert.rejects(
+      cleaner.demoTransaction(() => {}),
+      { status: 404 },
+    );
+    process.env.NODE_ENV = previousEnv;
   },
 );
 await check(

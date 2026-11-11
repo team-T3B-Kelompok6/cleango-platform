@@ -22,6 +22,7 @@ const bookingModel = vi.hoisted(() => ({
   findOwnedAddress: vi.fn(),
   findPrimaryAddressId: vi.fn(),
   listAvailability: vi.fn(),
+  resolveBookableServiceId: vi.fn(),
 }));
 
 vi.mock('../src/model/booking.model.js', async () => {
@@ -38,6 +39,7 @@ vi.mock('../src/model/booking.model.js', async () => {
     findOwnedAddress: bookingModel.findOwnedAddress,
     findPrimaryAddressId: bookingModel.findPrimaryAddressId,
     listAvailability: bookingModel.listAvailability,
+    resolveBookableServiceId: bookingModel.resolveBookableServiceId,
   };
 });
 
@@ -66,6 +68,7 @@ beforeEach(() => {
   bookingModel.findOwnedAddress.mockReset();
   bookingModel.findPrimaryAddressId.mockReset();
   bookingModel.listAvailability.mockReset();
+  bookingModel.resolveBookableServiceId.mockReset();
 
   bookingModel.cancelCustomerBooking.mockResolvedValue({ ok: true });
   bookingModel.createBooking.mockResolvedValue({ id: 77, code: 'CG-TEST' });
@@ -74,6 +77,7 @@ beforeEach(() => {
   bookingModel.findOwnedAddress.mockResolvedValue({ id: 5, label: 'Rumah' });
   bookingModel.findPrimaryAddressId.mockResolvedValue(5);
   bookingModel.listAvailability.mockResolvedValue({ date: '2026-06-01', slots: [], serviceActive: true });
+  bookingModel.resolveBookableServiceId.mockResolvedValue(1);
 });
 
 describe('customer booking auth', () => {
@@ -155,6 +159,7 @@ describe('POST booking validation', () => {
       expect.objectContaining({ customerId: 10, serviceId: 1, addressId: 5, time: '10:00' }),
     );
     expect(bookingModel.findCustomerBooking).toHaveBeenCalledWith(10, 77);
+    expect(bookingModel.resolveBookableServiceId).toHaveBeenCalledWith('1');
   });
 
   it('maps a duplicate request to 409', async () => {

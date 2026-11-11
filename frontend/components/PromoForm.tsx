@@ -10,6 +10,7 @@ import {
 import { savePromo } from '@/app/promo-actions';
 import { quotePromo } from '@/lib/promo-rules';
 import { rupiah } from '@/lib/resources';
+import { serviceMediaUrl } from '@/lib/service-media';
 import type { Promo, PromoActionState } from '@/types/promos';
 import type { Service } from '@/types';
 import { SubmitButton } from './Form';
@@ -59,6 +60,40 @@ export function PromoForm({
   const [selected, setSelected] = useState(initial?.serviceIds ?? []);
   const [query, setQuery] = useState('');
   const [exampleId, setExampleId] = useState('');
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(
+    initial?.bannerUrl
+      ? serviceMediaUrl(
+          initial.bannerUrl,
+          (process.env.NEXT_PUBLIC_API_URL || process.env.API_URL)
+            ? new URL(
+                process.env.NEXT_PUBLIC_API_URL || process.env.API_URL!,
+              ).origin
+            : '',
+        )
+      : null,
+  );
+  const [bannerError, setBannerError] = useState('');
+  useEffect(() => {
+    if (!bannerFile) {
+      setBannerPreview(
+        initial?.bannerUrl
+          ? serviceMediaUrl(
+              initial.bannerUrl,
+              (process.env.NEXT_PUBLIC_API_URL || process.env.API_URL)
+                ? new URL(
+                    process.env.NEXT_PUBLIC_API_URL || process.env.API_URL!,
+                  ).origin
+                : '',
+            )
+          : null,
+      );
+      return;
+    }
+    const url = URL.createObjectURL(bannerFile);
+    setBannerPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [bannerFile, initial?.bannerUrl]);
   function change(name: string, value: string) {
     setValues((current) => ({
       ...current,
@@ -143,6 +178,7 @@ export function PromoForm({
     'perCustomerLimit',
     'stackable',
     'active',
+    'bannerImage',
   ];
   return (
     <form action={action} className="next-form promo-form">
@@ -273,6 +309,56 @@ export function PromoForm({
               </span>
             </label>
             {error('active')}
+            <div className="promo-field">
+              <label htmlFor={baseId + '-banner'}>Banner promo (opsional)</label>
+              <input
+                id={baseId + '-banner'}
+                type="file"
+                name="bannerImage"
+                accept="image/png,image/jpeg,image/webp"
+                aria-describedby={baseId + '-banner-hint'}
+                onChange={(event) => {
+                  const selected = event.target.files?.[0] ?? null;
+                  if (!selected) {
+                    setBannerFile(null);
+                    setBannerError('');
+                    return;
+                  }
+                  const invalid =
+                    !['image/png', 'image/jpeg', 'image/webp'].includes(
+                      selected.type,
+                    ) || selected.size > 2 * 1024 * 1024;
+                  if (invalid) {
+                    setBannerFile(null);
+                    setBannerError('Gunakan JPG, PNG, atau WebP, maksimal 2 MB.');
+                    event.target.value = '';
+                  } else {
+                    setBannerFile(selected);
+                    setBannerError('');
+                  }
+                }}
+              />
+              <small className="field-hint" id={baseId + '-banner-hint'}>
+                JPG, PNG, atau WebP · maks. 2 MB. Disarankan 1200 × 400 px.
+              </small>
+              {bannerPreview ? (
+                <div className="promo-upload-preview">
+                  <img
+                    src={bannerPreview}
+                    alt="Pratinjau banner promo"
+                    onError={() => setBannerPreview(null)}
+                  />
+                </div>
+              ) : (
+                <p className="field-hint">Pratinjau gambar banner</p>
+              )}
+              {bannerError && (
+                <p className="field-error" role="alert">
+                  {bannerError}
+                </p>
+              )}
+              {error('bannerImage')}
+            </div>
           </section>
           <section
             className="promo-form-column"

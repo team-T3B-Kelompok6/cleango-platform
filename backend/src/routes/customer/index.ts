@@ -11,6 +11,7 @@ import { customerBannerRouter } from './banner.routes.js';
 // Removed - banners now live on promos (banner_url)
 import { customerPromoRouter } from './promo.routes.js';
 import { customerNotificationRouter } from './notification.routes.js';
+import { customerPushDeviceRouter } from './push-device.routes.js';
 
 export const customerRouter = Router();
 customerRouter.use('/auth', customerAuthRouter);
@@ -24,4 +25,5 @@ customerRouter.use('/bookings', customerBookingRouter);
 customerRouter.use('/banners', customerBannerRouter);
 // Removed - banners now live on promos (banner_url)
 customerRouter.use('/promos', customerPromoRouter);
+customerRouter.use('/notifications/devices', customerPushDeviceRouter);
 customerRouter.use('/notifications', customerNotificationRouter);

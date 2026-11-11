@@ -21,6 +21,7 @@ import {
 import { findPromoByCode } from '../../model/promo.model.js';
 import { calculateDiscount, promoIssue } from './promo.controller.js';
 import { statusLabel } from '../../lib/order-status.js';
+import { notifyBookingCreated } from '../../lib/firebase-push.js';
 
 function customerId(request: Request): number {
   if (!request.user) throw new AppError(401, 'Authentication diperlukan', 'AUTH_REQUIRED');
@@ -159,6 +160,7 @@ export async function createCustomerBooking(
       });
       const data = await findCustomerBooking(userId, created.id);
       response.status(201).json({ message: 'Pesanan berhasil dibuat.', data });
+      void notifyBookingCreated(userId);
     } catch (error) {
       if (error instanceof BookingConflictError) {
         if (error.reason === 'BUSY')

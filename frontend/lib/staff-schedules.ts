@@ -70,7 +70,6 @@ export function assignmentIssue(
   // A shift is optional: many cleaners have no schedule rows yet. Overlap and
   // duty checks below still block real conflicts, and the backend re-validates.
   const candidate = { ...order, staff: [person.name] };
-  void candidate;
   if (
     orders.some(
       (other) =>
@@ -89,7 +88,9 @@ export function assignmentIssue(
     (s) => s.staff === person.name && s.date === order.date,
   );
   if (personSchedules.length > 0) {
-    const covered = personSchedules.some((s) => scheduleCovers(s, order));
+    const covered = personSchedules.some(
+      (s) => s.status !== 'Nonaktif' && scheduleCovers(s, candidate),
+    );
     if (!covered) return 'Shift tidak mencakup jam pesanan.';
   }
   return '';

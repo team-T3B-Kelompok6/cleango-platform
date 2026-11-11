@@ -4,6 +4,7 @@ import {
   findServiceById,
   findServiceInclusions,
   findServiceReviewStats,
+  findServiceSummary,
   findServices,
   listServiceReviews,
 } from '../../model/service.model.js';
@@ -25,7 +26,18 @@ export async function getServices(request: Request, response: Response, next: Ne
       ? null
       : numericId(String(request.query.category), 'Kategori');
     const services = await findServices({ search, categoryId, activeOnly: true });
-    response.status(200).json({ data: services });
+    const summaries = await findServiceSummary(services.map((service) => service.id));
+    const summaryById = new Map(summaries.map((summary) => [summary.serviceId, summary]));
+    const data = services.map((service) => {
+      const summary = summaryById.get(service.id);
+      return {
+        ...service,
+        rating: summary?.rating ?? null,
+        reviewCount: summary?.reviewCount ?? 0,
+        orderCount: summary?.orderCount ?? 0,
+      };
+    });
+    response.status(200).json({ data });
   } catch (error) {
     next(error);
   }
@@ -36,12 +48,13 @@ export async function getServiceDetail(request: Request, response: Response, nex
     const serviceId = await resolveBookableServiceId(String(request.params.id));
     const service = serviceId ? await findServiceById(serviceId, true) : null;
     if (!service) throw new AppError(404, 'Layanan tidak ditemukan');
-    const [inclusions, stats] = await Promise.all([
+    const [inclusions, stats, summary] = await Promise.all([
       findServiceInclusions(service.id),
       findServiceReviewStats(service.id),
+      findServiceSummary([service.id]),
     ]);
     response.status(200).json({
-      data: { ...service, inclusions, ...stats },
+      data: { ...service, inclusions, ...stats, orderCount: summary[0]?.orderCount ?? 0 },
     });
   } catch (error) {
     next(error);

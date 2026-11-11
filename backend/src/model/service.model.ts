@@ -141,6 +141,67 @@ export async function findServiceReviewStats(
   };
 }
 
+export interface ServiceSummary {
+  serviceId: number;
+  rating: number | null;
+  reviewCount: number;
+  orderCount: number;
+}
+
+export async function findServiceSummary(
+  serviceIds: number[],
+): Promise<ServiceSummary[]> {
+  if (serviceIds.length === 0) return [];
+  const placeholders = serviceIds.map(() => '?').join(',');
+  const [reviewRows] = await pool.execute<RowDataPacket[]>(
+    `SELECT r.service_id AS serviceId,
+            COUNT(*) AS reviewCount,
+            AVG(r.rating) AS rating
+     FROM reviews r
+     INNER JOIN bookings b ON b.id = r.booking_id
+     WHERE r.service_id IN (${placeholders}) AND b.status = 'completed'
+     GROUP BY r.service_id`,
+    serviceIds,
+  );
+  const [bookingRows] = await pool.execute<RowDataPacket[]>(
+    `SELECT b.service_id AS serviceId, COUNT(*) AS orderCount
+     FROM bookings b
+     WHERE b.service_id IN (${placeholders}) AND b.status = 'completed'
+     GROUP BY b.service_id`,
+    serviceIds,
+  );
+  const byId = new Map<number, ServiceSummary>();
+  for (const row of reviewRows) {
+    const id = Number(row.serviceId);
+    byId.set(id, {
+      serviceId: id,
+      rating: row.rating === null || row.rating === undefined ? null : Number(row.rating),
+      reviewCount: Number(row.reviewCount ?? 0),
+      orderCount: 0,
+    });
+  }
+  for (const row of bookingRows) {
+    const id = Number(row.serviceId);
+    const existing = byId.get(id);
+    if (existing) {
+      existing.orderCount = Number(row.orderCount ?? 0);
+    } else {
+      byId.set(id, {
+        serviceId: id,
+        rating: null,
+        reviewCount: 0,
+        orderCount: Number(row.orderCount ?? 0),
+      });
+    }
+  }
+  return serviceIds.map((id) => byId.get(id) ?? {
+    serviceId: id,
+    rating: null,
+    reviewCount: 0,
+    orderCount: 0,
+  });
+}
+
 export async function listServiceReviews(
   serviceId: number,
   page: number,

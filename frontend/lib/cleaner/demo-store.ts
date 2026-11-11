@@ -60,7 +60,8 @@ interface Store {
   };
 }
 export const demoEnabled = () =>
-  process.env.CLEANER_DEMO_ENABLED === 'true' || adminDemoEnabled();
+  process.env.NODE_ENV === 'test' &&
+  (process.env.CLEANER_DEMO_ENABLED === 'true' || adminDemoEnabled());
 export const isDemoId = (id: string) => id.startsWith('DEMO-');
 const directory = () =>
   path.resolve(

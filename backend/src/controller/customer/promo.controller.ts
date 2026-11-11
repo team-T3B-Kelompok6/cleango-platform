@@ -75,7 +75,19 @@ export async function getCustomerPromos(
   next: NextFunction,
 ): Promise<void> {
   try {
-    response.status(200).json({ data: await listActivePromos(customerId(request)) });
+    const promos = await listActivePromos(customerId(request));
+    const requested = request.query.serviceId;
+    const serviceId =
+      typeof requested === 'string' && requested.trim() ? requested.trim() : null;
+    const data = serviceId
+      ? promos.filter(
+          (promo) =>
+            promo.scope !== 'services' ||
+            promo.serviceIds.length === 0 ||
+            promo.serviceIds.includes(serviceId),
+        )
+      : promos;
+    response.status(200).json({ data });
   } catch (error) {
     next(error);
   }
