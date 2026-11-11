@@ -23,6 +23,7 @@ function Links({ close }: { close?: () => void }) {
       {links.map((link) => (
         <Link
           key={link.href}
+          aria-label={link.label}
           href={link.href}
           className={
             'nav-link ' +
@@ -56,7 +57,7 @@ function Links({ close }: { close?: () => void }) {
           onClick={close}
         >
           <Icon name={link.icon} />
-          {link.label}
+          <span className="nav-link-label">{link.label}</span>
         </Link>
       ))}
     </>

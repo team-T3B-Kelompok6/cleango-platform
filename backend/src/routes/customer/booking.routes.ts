@@ -1,9 +1,11 @@
 import { Router, raw } from 'express';
 import {
+  cancelMyBooking,
   createCustomerBooking,
   getAvailability,
   getCustomerBooking,
   listMyBookings,
+  rescheduleMyBooking,
 } from '../../controller/customer/booking.controller.js';
 import {
   authenticate,
@@ -37,6 +39,8 @@ customerBookingRouter.delete(
   '/:id/review/photos/:photoId',
   deleteBookingReviewPhotoHandler,
 );
+customerBookingRouter.post('/:id/cancel', cancelMyBooking);
+customerBookingRouter.post('/:id/reschedule', rescheduleMyBooking);
 customerBookingRouter.post('/:id/pay', payBooking);
 customerBookingRouter.get('/:id/tracking', getCustomerEta);
 customerBookingRouter.get('/:id', getCustomerBooking);

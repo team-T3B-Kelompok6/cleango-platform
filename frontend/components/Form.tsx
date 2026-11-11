@@ -1,9 +1,11 @@
 'use client';
-import { useActionState, useId, type ReactNode } from 'react';
+import { useActionState, useId, useState, type ReactNode } from 'react';
 import { useFormStatus } from 'react-dom';
 import Link from 'next/link';
 import { useDialogClose } from './DialogTrigger';
 import type { Field, FormState, RecordData } from '@/types';
+import { StaffAvatar } from './StaffAvatar';
+import { StaffPhotoField } from './StaffPhotoField';
 
 type FormAction = (state: FormState, form: FormData) => Promise<FormState>;
 
@@ -33,6 +35,7 @@ export function ResourceForm({
   cancelHref,
   submitLabel = 'Simpan perubahan',
   intro,
+  staffPhoto,
 }: {
   fields: Field[];
   initial?: Partial<RecordData>;
@@ -40,14 +43,46 @@ export function ResourceForm({
   cancelHref: string;
   submitLabel?: string;
   intro?: ReactNode;
+  staffPhoto?: string | null;
 }) {
   const formId = useId();
-  const [state, formAction] = useActionState(action, {});
+  const [state, formAction, pending] = useActionState(action, {});
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoRemoved, setPhotoRemoved] = useState(false);
+  const [photoInvalid, setPhotoInvalid] = useState(false);
   const close = useDialogClose();
   return (
-    <form action={formAction} className="next-form">
+    <form
+      action={(form) => {
+        if (staffPhoto !== undefined) {
+          if (photoFile) form.set('staffPhoto', photoFile);
+          form.set('removeStaffPhoto', String(photoRemoved));
+        }
+        formAction(form);
+      }}
+      className="next-form"
+    >
       <div className="modal-body manage-form">
         {intro}
+        {staffPhoto !== undefined && (
+          <StaffPhotoField
+            name={String(initial.name ?? 'Petugas')}
+            url={staffPhoto}
+            file={photoFile}
+            removed={photoRemoved}
+            pending={pending}
+            error={state.errors?.staffPhoto || state.errors?.photoUrl}
+            onSelect={(file) => {
+              setPhotoFile(file);
+              setPhotoRemoved(false);
+            }}
+            onRemove={() => {
+              setPhotoFile(null);
+              setPhotoRemoved(true);
+            }}
+            onInvalid={setPhotoInvalid}
+          />
+        )}
         <div className="form-grid">
           {fields.map((field) => {
             const value =
@@ -86,11 +121,19 @@ export function ResourceForm({
               >
                 {field.kind === 'multiselect' ? (
                   <fieldset
+                    key={JSON.stringify(value)}
                     className="staff-fieldset"
-                    aria-describedby={error ? errorId : undefined}
+                    aria-invalid={!!error}
+                    aria-required={field.required}
+                    aria-describedby={props['aria-describedby']}
                   >
                     <legend>{field.label}</legend>
-                    <div className="compact-staff">
+                    <div
+                      className={
+                        'compact-staff' +
+                        (field.name === 'skills' ? ' service-skills' : '')
+                      }
+                    >
                       {field.options?.map((option) => (
                         <label key={option}>
                           <input
@@ -102,6 +145,12 @@ export function ResourceForm({
                               Array.isArray(value) && value.includes(option)
                             }
                           />
+                          {field.optionPhotos && (
+                            <StaffAvatar
+                              name={option}
+                              src={field.optionPhotos[option]}
+                            />
+                          )}
                           <span className="staff-option-copy">
                             <span>
                               {option}
@@ -118,7 +167,9 @@ export function ResourceForm({
                         </label>
                       ))}
                       {!field.options?.length && (
-                        <span className="muted">Belum ada petugas aktif.</span>
+                        <span className="muted">
+                          {field.emptyMessage ?? 'Belum ada petugas aktif.'}
+                        </span>
                       )}
                     </div>
                   </fieldset>
@@ -181,7 +232,14 @@ export function ResourceForm({
           </p>
         )}
         {Object.entries(state.errors ?? {})
-          .filter(([name]) => !fields.some((field) => field.name === name))
+          .filter(
+            ([name]) =>
+              !fields.some((field) => field.name === name) &&
+              !(
+                staffPhoto !== undefined &&
+                ['staffPhoto', 'photoUrl'].includes(name)
+              ),
+          )
           .map(([name, message]) => (
             <p key={name} className="field-error" role="alert">
               {message}
@@ -198,7 +256,7 @@ export function ResourceForm({
             Batal
           </Link>
         )}
-        <SubmitButton>{submitLabel}</SubmitButton>
+        <SubmitButton disabled={photoInvalid}>{submitLabel}</SubmitButton>
       </div>
     </form>
   );

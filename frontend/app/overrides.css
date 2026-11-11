@@ -185,6 +185,81 @@
   }
 }
 
+/* Sidebar desktop: toggle, perlebar/sempitkan, dan ukuran yang bertahan setelah reload. */
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-10);
+  padding: 0 var(--space-6) var(--space-21);
+}
+.sidebar-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  border-radius: 9px;
+  color: var(--color-009);
+  flex-shrink: 0;
+  min-width: 36px;
+}
+.sidebar-toggle:hover:not(:disabled) {
+  background: var(--color-010);
+}
+.sidebar .brand {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+.sidebar .brand-copy {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (min-width: 701px) {
+  .sidebar.sidebar--collapsed {
+    width: 72px;
+    transition: width 0.2s ease;
+  }
+  .sidebar--collapsed .sidebar-brand {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-9);
+    padding-inline: 0;
+  }
+  .sidebar--collapsed .brand {
+    flex: 0 0 auto;
+    padding: 0;
+    gap: 0;
+  }
+  .sidebar.sidebar--collapsed .brand-copy {
+    display: none;
+  }
+  .sidebar--collapsed .nav-link {
+    justify-content: center;
+    padding: var(--space-11) var(--space-8);
+    gap: var(--space-7);
+  }
+  .sidebar--collapsed .nav-link > .nav-link-label {
+    display: none;
+  }
+  .sidebar--collapsed + .workspace {
+    margin-left: 72px;
+    transition: margin-left 0.2s ease;
+  }
+  .app-shell[data-sidebar-collapsed] .skip-link {
+    left: 72px;
+  }
+}
+@media (min-width: 701px) and (prefers-reduced-motion: reduce) {
+  .sidebar.sidebar--collapsed,
+  .sidebar--collapsed + .workspace,
+  .sidebar--collapsed .brand span {
+    transition: none;
+  }
+}
 .staff-fieldset {
   border: 0;
   padding: 0;

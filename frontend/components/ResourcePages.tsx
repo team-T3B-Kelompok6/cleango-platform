@@ -31,6 +31,8 @@ import type {
   Staff,
 } from '@/types';
 import { staffOperationalStatus } from '@/lib/staff-availability';
+import { validImageUrl } from '@/lib/service-image';
+import { serviceMediaUrl } from '@/lib/service-media';
 function query(search: Search, key: string) {
   const value = search[key];
   return typeof value === 'string' ? value : '';
@@ -264,6 +266,27 @@ export async function ResourceListPage({
         }
       >
         <Filters
+          tabIcons={
+            resource === 'services'
+              ? Object.fromEntries(
+                  categories.flatMap((category) =>
+                    validImageUrl(category.icon)
+                      ? [
+                          [
+                            category.name,
+                            serviceMediaUrl(
+                              category.icon,
+                              process.env.API_URL
+                                ? new URL(process.env.API_URL).origin
+                                : '',
+                            ),
+                          ],
+                        ]
+                      : [],
+                  ),
+                )
+              : undefined
+          }
           tabs={
             resource === 'services' || resource === 'faqs'
               ? [
@@ -287,6 +310,14 @@ export async function ResourceListPage({
           resource={resource}
           categories={categories.map((category) => ({
             ...category,
+            iconSrc: validImageUrl(category.icon)
+              ? serviceMediaUrl(
+                  category.icon,
+                  process.env.API_URL
+                    ? new URL(process.env.API_URL).origin
+                    : '',
+                )
+              : null,
             serviceCount: records.filter(
               (record) => record.category === category.name,
             ).length,

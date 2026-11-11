@@ -242,6 +242,10 @@
   color: var(--design-muted);
   background: var(--color-070);
 }
+.status-badge.red {
+  --tone: var(--danger);
+  --tone-bg: var(--color-055);
+}
 .modal-heading {
   display: flex;
   align-items: center;

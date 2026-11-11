@@ -48,7 +48,7 @@ function load(filename) {
   return module.exports;
 }
 
-process.env.NODE_ENV = 'development';
+process.env.NODE_ENV = 'test';
 process.env.ADMIN_DEMO_ENABLED = 'true';
 process.env.CLEANER_DEMO_DATA_DIR = mkdtempSync(
   path.join(tmpdir(), 'cleango-audit-'),
@@ -345,6 +345,18 @@ await check(
       globalThis.fetch = async () => Response.json(bad);
       await assert.rejects(api.listAuditLogs(filters), { status: 502 });
     }
+  },
+);
+await check(
+  'Mode development tidak menerima demo meski flag lama aktif',
+  async () => {
+    const mode = load(path.join(root, 'lib/demo/mode.ts'));
+    const previousEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'development';
+    process.env.ADMIN_DEMO_ENABLED = 'true';
+    process.env.CLEANER_DEMO_ENABLED = 'true';
+    assert.equal(mode.adminDemoEnabled(), false);
+    process.env.NODE_ENV = previousEnv;
   },
 );
 console.log(checks.length + ' audit groups passed.');

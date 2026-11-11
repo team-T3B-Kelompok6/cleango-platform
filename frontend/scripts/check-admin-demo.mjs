@@ -8,7 +8,7 @@ import vm from 'node:vm';
 const native = createRequire(import.meta.url);
 const ts = native('typescript');
 const root = path.resolve(import.meta.dirname, '..');
-process.env.NODE_ENV = 'development';
+process.env.NODE_ENV = 'test';
 process.env.ADMIN_DEMO_ENABLED = 'true';
 process.env.CLEANER_DEMO_DATA_DIR = mkdtempSync(
   path.join(tmpdir(), 'cleango-admin-demo-'),
@@ -310,7 +310,7 @@ await check(
   },
 );
 await check(
-  'Assignment requires matching shift; linked active shifts cannot be moved or deleted; overlapping jobs rejected',
+  'Assignment shift optional; linked active shifts cannot be moved or deleted; overlapping jobs rejected',
   async () => {
     const rules = load(path.join(root, 'lib/staff-schedules.ts'));
     const order = (await request('/orders/DEMO-CHECK-01')).data;
@@ -319,10 +319,7 @@ await check(
     );
     const shifts = (await request('/schedules')).data;
     const allOrders = (await request('/orders')).data;
-    assert.equal(
-      rules.assignmentIssue(person, order, [], allOrders),
-      'Belum ada shift aktif yang mencakup tanggal dan jam pesanan.',
-    );
+    assert.equal(rules.assignmentIssue(person, order, [], allOrders), '');
     const shift = shifts.find(
       (shift) =>
         shift.staff === person.name &&
@@ -361,7 +358,7 @@ await check(
         shifts,
         [],
       ),
-      'Belum ada shift aktif yang mencakup tanggal dan jam pesanan.',
+      'Shift tidak mencakup jam pesanan.',
     );
     assert.equal(rules.overlaps('08.00–12.00 WIB', '12.00–13.00 WIB'), false);
     assert.equal(rules.timeRange('25.00–26.00 WIB'), null);
@@ -406,7 +403,25 @@ await check(
         [order],
       ),
     );
-    assert.ok(rules.assignmentIssue(person, order, [], [order]));
+    assert.equal(rules.assignmentIssue(person, order, [], [order]), '');
+    const nonaktif = {
+      ...shift,
+      id: 'shift-nonaktif',
+      status: 'Nonaktif',
+    };
+    assert.equal(
+      rules.assignmentIssue(person, order, [nonaktif], [order]),
+      'Shift tidak mencakup jam pesanan.',
+    );
+    const wrongTime = {
+      ...shift,
+      id: 'shift-wrong',
+      time: '14.00–18.00 WIB',
+    };
+    assert.equal(
+      rules.assignmentIssue(person, order, [wrongTime, nonaktif], [order]),
+      'Shift tidak mencakup jam pesanan.',
+    );
     const busy = {
       ...order,
       id: 'busy',
@@ -617,6 +632,92 @@ await check(
         (item) => item.id === category.id,
       ),
     );
+  },
+);
+await check(
+  'Category icons are stored on categories and do not change service photos',
+  async () => {
+    const services = (await request('/services')).data;
+    const category = (
+      await request('/categories', 'POST', {
+        name: 'Kategori dengan ikon',
+        resource: 'services',
+        icon: '/demo/category-icon.png',
+      })
+    ).data;
+    assert.equal(category.icon, '/demo/category-icon.png');
+    const saved = (await request('/categories?resource=services')).data.find(
+      (item) => item.id === category.id,
+    );
+    assert.equal(saved.icon, '/demo/category-icon.png');
+    assert.deepEqual((await request('/services')).data, services);
+  },
+);
+await check(
+  'Category edits retain linked services and support icon replacement/removal',
+  async () => {
+    const category = (
+      await request('/categories', 'POST', {
+        name: 'Kategori sebelum diubah',
+        resource: 'services',
+        icon: '/demo/old-icon.png',
+      })
+    ).data;
+    const created = [];
+    for (const active of [true, false])
+      created.push(
+        (
+          await request('/services', 'POST', {
+            name: 'Layanan kategori ' + active,
+            category: category.name,
+            active,
+            imageUrl: '/demo/service-photo.png',
+          })
+        ).data,
+      );
+    const beforeCount = (await request('/services')).data.length;
+    const renamed = (
+      await request('/categories/' + category.id, 'PATCH', {
+        name: 'Kategori sesudah diubah',
+        resource: 'services',
+      })
+    ).data;
+    assert.equal(renamed.id, category.id);
+    assert.equal(renamed.icon, '/demo/old-icon.png');
+    const services = (await request('/services')).data;
+    assert.equal(services.length, beforeCount);
+    for (const original of created) {
+      const saved = services.find((item) => item.id === original.id);
+      assert.deepEqual(saved, { ...original, category: renamed.name });
+    }
+    const replaced = (
+      await request('/categories/' + category.id, 'PATCH', {
+        name: renamed.name,
+        icon: '/demo/new-icon.png',
+      })
+    ).data;
+    assert.equal(replaced.icon, '/demo/new-icon.png');
+    await request('/categories/' + category.id, 'PATCH', { icon: null });
+    const saved = (await request('/categories?resource=services')).data.find(
+      (item) => item.id === category.id,
+    );
+    assert.equal(saved.icon, null);
+    assert.deepEqual((await request('/services')).data, services);
+  },
+);
+await check(
+  'Mode development tidak menerima demo meski flag lama aktif',
+  async () => {
+    const previousEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'development';
+    process.env.ADMIN_DEMO_ENABLED = 'true';
+    process.env.CLEANER_DEMO_ENABLED = 'true';
+    assert.equal(cleaner.demoEnabled(), false);
+    await assert.rejects(
+      cleaner.demoTransaction(() => {}),
+      { status: 404 },
+    );
+    process.env.NODE_ENV = previousEnv;
   },
 );
 await check(

@@ -41,7 +41,11 @@ export interface Service extends RecordData {
   features?: string[];
 }
 export interface Staff extends RecordData {
+  photoUrl?: string | null;
   joined?: string;
+  trainerId?: string | null;
+  trainerName?: string | null;
+  mentorMaterials?: string[];
   skills: string[];
   rating?: number;
   name: string;
@@ -101,7 +105,10 @@ export interface Field {
     | 'multiselect';
   required?: boolean;
   options?: string[];
+  optionLabels?: Record<string, string>;
+  emptyMessage?: string;
   optionHints?: Record<string, string>;
+  optionPhotos?: Record<string, string | null>;
   recommendedOptions?: string[];
   placeholder?: string;
   hint?: string;
@@ -111,6 +118,7 @@ export interface Field {
 export interface Category extends RecordData {
   name: string;
   resource: 'services' | 'faqs';
+  icon?: string | null;
 }
 
 export interface Banner extends RecordData {

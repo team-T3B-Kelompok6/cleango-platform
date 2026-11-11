@@ -105,6 +105,8 @@ CREATE TABLE IF NOT EXISTS cleaners (
   phone VARCHAR(30) NOT NULL,
   area VARCHAR(120) NOT NULL DEFAULT 'Malang',
   photo_url VARCHAR(500) NULL,
+  trainer_id BIGINT UNSIGNED NULL,
+  skills TEXT NULL,
   status ENUM('available', 'busy', 'offline') NOT NULL DEFAULT 'offline',
   average_rating DECIMAL(3,2) NOT NULL DEFAULT 0.00,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
@@ -112,7 +114,9 @@ CREATE TABLE IF NOT EXISTS cleaners (
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT chk_cleaners_rating CHECK (average_rating BETWEEN 0 AND 5),
   UNIQUE KEY uq_cleaners_phone (phone),
-  INDEX idx_cleaners_status_active (status, is_active)
+  INDEX idx_cleaners_status_active (status, is_active),
+  CONSTRAINT fk_cleaners_trainer FOREIGN KEY (trainer_id) REFERENCES cleaners(id) ON DELETE SET NULL,
+  INDEX idx_cleaners_trainer (trainer_id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS promos (
@@ -133,6 +137,8 @@ CREATE TABLE IF NOT EXISTS promos (
   service_ids TEXT NULL,
   per_customer_limit INT UNSIGNED NOT NULL DEFAULT 1,
   stackable BOOLEAN NOT NULL DEFAULT FALSE,
+  banner_url VARCHAR(500) NULL,
+  deactivated_at DATETIME NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT chk_promos_value CHECK (discount_value > 0),
@@ -169,6 +175,7 @@ CREATE TABLE IF NOT EXISTS bookings (
     'cancelled',
     'rescheduled'
   ) NOT NULL DEFAULT 'awaiting_payment',
+  hold_until DATETIME NULL,
   cancellation_reason VARCHAR(255) NULL,
   completed_at DATETIME NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -355,6 +362,7 @@ CREATE TABLE IF NOT EXISTS promo_usages (
   user_id BIGINT UNSIGNED NOT NULL,
   discount_amount DECIMAL(12,2) NOT NULL,
   used_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  status ENUM('reserved', 'redeemed', 'released') NOT NULL DEFAULT 'reserved',
   CONSTRAINT fk_promo_usages_promo
     FOREIGN KEY (promo_id) REFERENCES promos(id),
   CONSTRAINT fk_promo_usages_booking
@@ -405,6 +413,7 @@ CREATE TABLE IF NOT EXISTS notifications (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   recipient_user_id BIGINT UNSIGNED NOT NULL,
   booking_id BIGINT UNSIGNED NULL,
+  promo_id BIGINT UNSIGNED NULL,
   type ENUM('order', 'payment', 'promo', 'risk_alert', 'system') NOT NULL,
   channel ENUM('in_app', 'push', 'whatsapp') NOT NULL DEFAULT 'in_app',
   title VARCHAR(150) NOT NULL,
@@ -418,9 +427,12 @@ CREATE TABLE IF NOT EXISTS notifications (
     FOREIGN KEY (recipient_user_id) REFERENCES users(id) ON DELETE CASCADE,
   CONSTRAINT fk_notifications_booking
     FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
+  UNIQUE KEY uq_notifications_promo (recipient_user_id, promo_id),
   INDEX idx_notifications_inbox (recipient_user_id, is_read, created_at),
   INDEX idx_notifications_delivery (delivery_status, created_at),
-  INDEX idx_notifications_booking (booking_id)
+  INDEX idx_notifications_booking (booking_id),
+  INDEX idx_notifications_promo (promo_id),
+  INDEX idx_notifications_created (created_at)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS booking_risk_alerts (

@@ -44,7 +44,7 @@ Konfigurasi lokal yang sudah ada tidak ditimpa oleh merge.
 
 1. Jalankan MySQL/MariaDB, misalnya melalui Laragon.
 2. Sesuaikan kredensial pada `backend/.env`.
-3. Database baru/demo: jalankan `npm run db:setup` (termasuk seeder). Untuk database lokal `cleango` yang sudah berisi data, gunakan `npm run db:setup --workspace backend -- --schema-only` agar hanya struktur Putra yang diperbarui, tanpa menimpa data lama.
+3. `npm run db:setup` hanya memastikan skema tambahan secara idempoten dan tidak menjalankan seeder. Untuk database baru/demo, jalankan seeder secara eksplisit dengan `npm run db:setup --workspace backend -- --seed`; seeder dapat memperbarui nilai contoh melalui `ON DUPLICATE KEY UPDATE`, jadi jangan gunakan pada database berisi data yang harus dipertahankan.
 
 Akun admin dummy lokal: `admin@cleango.id` / `321321`. Password tersimpan
 sebagai hash bcrypt di database, bukan teks biasa.

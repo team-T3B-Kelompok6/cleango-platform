@@ -2,7 +2,13 @@
 import { useActionState, useId, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import type { FormState, Order, Schedule, Service, Staff } from '@/types';
-import { resources, scheduleShifts, shiftOf } from '@/lib/resources';
+import {
+  bookingStartSlots,
+  resources,
+  scheduleShifts,
+  shiftEndOf,
+  startSlotOf,
+} from '@/lib/resources';
 import { Badge } from './StatusBadge';
 import { UiIcon } from './UiIcon';
 import { DialogNote } from './DialogNote';
@@ -10,6 +16,7 @@ import { SubmitButton } from './Form';
 import { useDialogClose } from './DialogContext';
 import { assignmentIssue } from '@/lib/staff-schedules';
 import { orderStatusLabel } from '@/lib/order-flow';
+import { StaffAvatar } from './StaffAvatar';
 
 type Action = (previous: FormState, form: FormData) => Promise<FormState>;
 function Field({
@@ -265,6 +272,12 @@ export function OrderEditor({
                         toggleCrew(name, event.target.checked)
                       }
                     />
+                    <StaffAvatar
+                      name={name}
+                      src={
+                        staff.find((person) => person.name === name)?.photoUrl
+                      }
+                    />
                     <span>
                       <strong>{name}</strong>
                       <small>
@@ -372,22 +385,37 @@ export function ScheduleEditor({
 }) {
   const [state, formAction, pending] = useActionState(action, {});
   const uid = useId();
-  const [values, setValues] = useState<Record<string, string>>(() => ({
-    date:
-      schedule?.date ??
-      new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(
-        new Date(),
-      ),
-    time: schedule?.time ?? scheduleShifts[0].time,
-    staff:
-      schedule?.staff ??
-      staff.find((person) => ['Tersedia', 'Bertugas'].includes(person.status))
-        ?.name ??
-      '',
-    status: schedule?.status ?? 'Terjadwal',
-  }));
+  const [values, setValues] = useState<Record<string, string>>(() => {
+    const time = schedule?.time ?? scheduleShifts[0].time;
+    return {
+      date:
+        schedule?.date ??
+        new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(
+          new Date(),
+        ),
+      time,
+      start: startSlotOf(time),
+      end: shiftEndOf(time) ?? '12:00',
+      staff:
+        schedule?.staff ??
+        staff.find((person) => ['Tersedia', 'Bertugas'].includes(person.status))
+          ?.name ??
+        '',
+      status: schedule?.status ?? 'Terjadwal',
+    };
+  });
   function set(name: string, value: string) {
     setValues((previous) => ({ ...previous, [name]: value }));
+  }
+  function composeTime(start: string, end: string) {
+    return start.replace(':', '.') + '–' + end.replace(':', '.') + ' WIB';
+  }
+  function setStart(start: string) {
+    setValues((previous) => ({
+      ...previous,
+      start,
+      time: composeTime(start, previous.end),
+    }));
   }
   function props(name: string) {
     return {
@@ -436,14 +464,7 @@ export function ScheduleEditor({
     >
       <div className="modal-body booking-editor-body">
         <div className="schedule-staff-summary">
-          <span className="detail-initials">
-            {values.staff
-              .trim()
-              .split(/\s+/)
-              .slice(0, 2)
-              .map((word) => word[0])
-              .join('')}
-          </span>
+          <StaffAvatar name={values.staff} src={person?.photoUrl} />
           <div>
             <strong>{values.staff || 'Petugas belum ditugaskan'}</strong>
             <p>{person?.skills?.join(' · ') || 'Kru kebersihan'}</p>
@@ -464,28 +485,41 @@ export function ScheduleEditor({
           <div className="booking-field full-width">
             <fieldset className="schedule-shift-options">
               <legend>Pilihan shift kerja</legend>
-              <div>
-                {scheduleShifts.map((shift) => (
-                  <label
-                    key={shift.name}
-                    className={
-                      shiftOf(values.time) === shift.name ? 'selected' : ''
-                    }
+              <div className="schedule-shift-grid">
+                <label>
+                  Jam mulai
+                  <select
+                    id={uid + 'shift-start'}
+                    value={values.start}
+                    onChange={(event) => setStart(event.target.value)}
                   >
-                    <input
-                      type="radio"
-                      name="shiftChoice"
-                      value={shift.name}
-                      checked={shiftOf(values.time) === shift.name}
-                      onChange={() => set('time', shift.time)}
-                    />
-                    <span>
-                      <strong>{shift.name}</strong>
-                      <small>{shift.time}</small>
-                    </span>
-                    <UiIcon name="tick" />
-                  </label>
-                ))}
+                    {bookingStartSlots.map((slot) => (
+                      <option key={slot} value={slot}>
+                        {slot.replace(':', '.')} WIB
+                      </option>
+                    ))}
+                    {!bookingStartSlots.some((slot) => slot === values.start) && (
+                      <option key="shift-start-existing" value={values.start}>
+                        {values.start.replace(':', '.')} WIB
+                      </option>
+                    )}
+                  </select>
+                </label>
+                <label>
+                  Jam selesai
+                  <input
+                    id={uid + 'shift-end'}
+                    type="time"
+                    value={values.end}
+                    onChange={(event) =>
+                      setValues((previous) => ({
+                        ...previous,
+                        end: event.target.value,
+                        time: composeTime(previous.start, event.target.value),
+                      }))
+                    }
+                  />
+                </label>
               </div>
             </fieldset>
           </div>

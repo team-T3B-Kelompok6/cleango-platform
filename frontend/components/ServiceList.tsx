@@ -1,4 +1,5 @@
 import { rupiah } from '@/lib/resources';
+import { serviceMediaUrl } from '@/lib/service-media';
 import Image from 'next/image';
 
 import { UiIcon } from './UiIcon';
@@ -19,7 +20,7 @@ export function ServiceList({ shown, resource, edit }: RecordListProps) {
                 {service.imageUrl && (
                   <Image
                     className="service-list-image"
-                    src={service.imageUrl}
+                    src={serviceMediaUrl(service.imageUrl, process.env.API_URL ? new URL(process.env.API_URL).origin : '')}
                     alt={service.name}
                     width={160}
                     height={120}

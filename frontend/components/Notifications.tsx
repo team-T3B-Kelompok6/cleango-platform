@@ -2,22 +2,74 @@
 import { displayId } from '@/lib/display';
 import { UiIcon } from './UiIcon';
 import Link from 'next/link';
-import { useState, useRef } from 'react';
+import { useState, useRef, useTransition, useEffect } from 'react';
 import { Icon } from './Icon';
 import { useOutsideDismiss } from './useOutsideDismiss';
 import type { Order } from '@/types';
 import { orderStatusLabel } from '@/lib/order-flow';
-export function Notifications({ orders }: { orders: Order[] }) {
+import {
+  markAdminNotificationsRead,
+  getAdminNotificationsRead,
+} from '@/app/admin-notification-actions';
+export function Notifications({
+  orders,
+  initialRead = [],
+}: {
+  orders: Order[];
+  initialRead?: string[];
+}) {
   const [open, setOpen] = useState(false),
-    [read, setRead] = useState<string[]>([]),
-    [unreadOnly, setUnreadOnly] = useState(false);
+    [read, setRead] = useState<string[]>(initialRead),
+    [unreadOnly, setUnreadOnly] = useState(false),
+    [error, setError] = useState<string | null>(null),
+    [readStatusLoaded, setReadStatusLoaded] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const ref = useRef<HTMLDivElement>(null);
   useOutsideDismiss(ref, open, () => setOpen(false));
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const ids = await getAdminNotificationsRead();
+        if (!cancelled) {
+          setRead(ids);
+          setReadStatusLoaded(true);
+        }
+      } catch {
+        if (!cancelled) {
+          setError('Gagal memuat status dibaca.');
+          setReadStatusLoaded(true);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const recent = orders.slice(0, 8),
-    unread = recent.filter((order) => !read.includes(order.id)).length;
+    unread = readStatusLoaded
+      ? recent.filter((order) => !read.includes(order.id)).length
+      : 0;
   const shown = recent.filter(
     (order) => !unreadOnly || !read.includes(order.id),
   );
+  const markRead = async (ids: string[]) => {
+    setError(null);
+    startTransition(async () => {
+      try {
+        await markAdminNotificationsRead(ids);
+        setRead((previous) => {
+          const merged = [...new Set([...previous, ...ids])];
+          return merged;
+        });
+      } catch {
+        setError('Gagal menyimpan status dibaca. Silakan coba lagi.');
+      }
+    });
+  };
+  const handleMarkAllRead = async () => {
+    markRead(recent.map((order) => order.id));
+  };
   return (
     <div className="notification-anchor" ref={ref}>
       <button
@@ -71,11 +123,16 @@ export function Notifications({ orders }: { orders: Order[] }) {
           </div>
           <button
             className="quiet-action"
-            disabled={!unread}
-            onClick={() => setRead(recent.map((order) => order.id))}
+            disabled={!unread || isPending}
+            onClick={handleMarkAllRead}
           >
             Tandai semua dibaca
           </button>
+          {error && (
+            <span className="error-message" role="alert" aria-live="polite">
+              {error}
+            </span>
+          )}
         </div>
         <div className="notification-list">
           {shown.map((order) => (
@@ -83,14 +140,15 @@ export function Notifications({ orders }: { orders: Order[] }) {
               href={'/pesanan/' + encodeURIComponent(order.id)}
               key={order.id}
               className={
-                'notification-row ' + (!read.includes(order.id) ? 'unread' : '')
+                'notification-row ' +
+                (readStatusLoaded && !read.includes(order.id) ? 'unread' : '')
               }
               onClick={() => {
-                setRead((previous) => [...previous, order.id]);
+                markRead([order.id]);
                 setOpen(false);
               }}
             >
-              {!read.includes(order.id) && (
+              {readStatusLoaded && !read.includes(order.id) && (
                 <i className="notification-unread" />
               )}
               <span

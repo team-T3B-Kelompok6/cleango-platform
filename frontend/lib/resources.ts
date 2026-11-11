@@ -140,11 +140,11 @@ export const resources: Record<
       {
         name: 'skills',
         label: 'Keahlian petugas',
-        kind: 'textarea',
-        required: true,
-        lines: true,
-        placeholder: 'Deep cleaning\nCuci AC\nCuci sofa',
-        hint: 'Tulis satu keahlian per baris.',
+        kind: 'multiselect',
+        required: false,
+        options: [],
+        hint: 'Opsional, termasuk saat Masa Training. Pilih satu atau lebih layanan yang dikuasai, atau biarkan kosong.',
+        emptyMessage: 'Belum ada layanan. Tambahkan layanan di Kelola Layanan.',
       },
       {
         name: 'status',
@@ -245,31 +245,56 @@ export const valueText = (value: unknown) =>
         : 'Nonaktif'
       : String(value ?? '');
 export const tone = (status: string) =>
-  status === 'Batal' || status === 'Nonaktif'
-    ? 'neutral'
-    : status === 'Aktif' ||
-        status === 'Selesai' ||
-        status === 'Tersedia' ||
-        status === 'Siaga & Tersedia'
-      ? 'green'
-      : status === 'Menunggu Lokasi' ||
-          status === 'Menuju Lokasi' ||
-          status === 'Sedang Dikerjakan' ||
-          status === 'Berlangsung' ||
-          status === 'Bertugas' ||
-          status === 'Sedang Bekerja'
-        ? 'blue'
-        : 'amber';
+  status === 'Batal'
+    ? 'red'
+    : status === 'Nonaktif'
+      ? 'neutral'
+      : status === 'Aktif' ||
+          status === 'Selesai' ||
+          status === 'Tersedia' ||
+          status === 'Siaga & Tersedia'
+        ? 'green'
+        : status === 'Menunggu Lokasi' ||
+            status === 'Menuju Lokasi' ||
+            status === 'Sedang Dikerjakan' ||
+            status === 'Berlangsung' ||
+            status === 'Bertugas' ||
+            status === 'Sedang Bekerja'
+          ? 'blue'
+          : 'amber';
+// Jam mulai shift mengikuti slot booking mobile/backend (BOOKING_SLOTS).
+export const bookingStartSlots = [
+  '08:00',
+  '09:00',
+  '10:00',
+  '11:00',
+  '12:00',
+  '13:00',
+  '14:00',
+  '15:00',
+  '16:00',
+] as const;
 export const scheduleShifts = [
-  { name: 'Shift Pagi', time: '08.00–12.00 WIB' },
-  { name: 'Shift Siang', time: '13.00–17.00 WIB' },
-  { name: 'Shift Sore', time: '18.00–21.00 WIB' },
+  { name: 'Shift Pagi', time: '08.00–12.00 WIB', from: 8 },
+  { name: 'Shift Siang', time: '13.00–17.00 WIB', from: 13 },
+  { name: 'Shift Sore', time: '18.00–21.00 WIB', from: 18 },
 ];
 export const shiftOf = (time: string) => {
-  const hour = Number(time.match(/^\d{1,2}/)?.[0] ?? 8);
+  const hour = Number(time.match(/^(\d{1,2})[:.]/)?.[1] ?? 8);
   return (
-    scheduleShifts.findLast(
-      (shift) => hour >= Number(shift.time.slice(0, 2)),
-    ) ?? scheduleShifts[0]
+    scheduleShifts.findLast((shift) => hour >= shift.from) ??
+    scheduleShifts[0]
   ).name;
+};
+export const shiftEndOf = (time: string) => {
+  const range = /^(\d{1,2})[:.](\d{2})\s*[–—-]\s*(\d{1,2})[:.](\d{2})/.exec(
+    time.trim(),
+  );
+  if (!range) return null;
+  return range[3]!.padStart(2, '0') + ':' + range[4]!;
+};
+export const startSlotOf = (time: string): string => {
+  const match = time.match(/^(\d{1,2})[:.](\d{2})/);
+  if (!match) return '08:00';
+  return match[1].padStart(2, '0') + ':' + match[2];
 };

@@ -14,6 +14,7 @@ const reviewModel = vi.hoisted(() => ({
   deleteBookingReviewPhoto: vi.fn(),
 }));
 const imageStorage = vi.hoisted(() => ({
+  UPLOAD_DIR: 'uploads',
   saveImage: vi.fn(),
   removeStoredFile: vi.fn(),
   storedPathFromUrl: vi.fn(),

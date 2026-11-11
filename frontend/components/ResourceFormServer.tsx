@@ -11,6 +11,7 @@ import type {
   Schedule,
   Service,
   Customer,
+  Field,
 } from '@/types';
 import { Badge } from './StatusBadge';
 import { listCategories } from '@/lib/categories';
@@ -18,6 +19,9 @@ import { ServiceForm } from './ServiceForm';
 import { OrderEditor, ScheduleEditor } from './BookingEditors';
 import { isDemoId } from '@/lib/cleaner/demo-store';
 import { withOrderWorkTimes } from '@/lib/order-work-times';
+import { serviceMediaUrl } from '@/lib/service-media';
+import { serviceSkillOptions } from '@/lib/staff-skills';
+import { staffPhotoSource } from '@/lib/staff-photo';
 async function optionalLookup<T extends RecordData>(
   resource: Resource,
 ): Promise<T[]> {
@@ -30,6 +34,65 @@ async function optionalLookup<T extends RecordData>(
 }
 async function fieldsFor(resource: Resource, record?: RecordData) {
   const fields = resources[resource].fields;
+  if (resource === 'staff') {
+    const [staff, services] = await Promise.all([
+      list<Staff>('staff'),
+      list<Service>('services'),
+    ]);
+    const options = serviceSkillOptions(services);
+    const previous = Array.isArray(record?.skills)
+      ? record.skills.filter(
+          (skill): skill is string =>
+            typeof skill === 'string' && !options.includes(skill),
+        )
+      : [];
+    const trainee = record?.status === 'Masa Training';
+    const mentors = staff.filter(
+      (person) =>
+        person.id !== record?.id &&
+        ['Tersedia', 'Bertugas'].includes(person.status),
+    );
+    return fields.flatMap((field): Field[] => {
+      if (field.name === 'skills')
+        return trainee
+          ? []
+          : [
+              {
+                ...field,
+                options,
+                hint: previous.length
+                  ? 'Pilih layanan yang dikuasai. Keahlian sebelumnya: ' +
+                    previous.join(', ') +
+                    '.'
+                  : field.hint,
+              },
+            ];
+      if (field.name === 'status')
+        return [
+          {
+            ...field,
+            hint: trainee
+              ? 'Saat keluar dari training, pilih keahlian aktual trainee sebelum menyimpan.'
+              : field.hint,
+          },
+          {
+            name: 'trainerId',
+            label: 'Mentor senior',
+            kind: 'select' as const,
+            required: false,
+            options: ['', ...mentors.map((person) => person.id)],
+            optionLabels: {
+              '': 'Tanpa mentor',
+              ...Object.fromEntries(
+                mentors.map((person) => [person.id, person.name]),
+              ),
+            },
+            hint: 'Opsional. Hanya petugas aktif non-training. Keahliannya tampil sebagai materi pendampingan, bukan keahlian trainee.',
+          },
+        ];
+      return [field];
+    });
+  }
   if (resource === 'services' || resource === 'faqs') {
     const categories = await listCategories(resource);
     const existing = categories.length ? [] : await list(resource);
@@ -87,9 +150,12 @@ export async function ResourceFormServer({
     return (
       <OrderEditor
         order={record as Order}
-        staff={staff.filter(
-          (person) => isDemoId(person.id) === isDemoId(record.id),
-        )}
+        staff={staff
+          .filter((person) => isDemoId(person.id) === isDemoId(record.id))
+          .map((person) => ({
+            ...person,
+            photoUrl: staffPhotoSource(person.photoUrl),
+          }))}
         services={services}
         schedules={schedules}
         orders={await withOrderWorkTimes(orders)}
@@ -103,17 +169,31 @@ export async function ResourceFormServer({
     return (
       <ScheduleEditor
         schedule={record as Schedule | undefined}
-        staff={staff}
+        staff={staff.map((person) => ({
+          ...person,
+          photoUrl: staffPhotoSource(person.photoUrl),
+        }))}
         action={saveAction.bind(null, resource, record?.id ?? null)}
       />
     );
   }
   const fields = await fieldsFor(resource, record);
   if (resource === 'services') {
+    const origin = process.env.API_URL
+      ? new URL(process.env.API_URL).origin
+      : '';
+    const initialRecord = record
+      ? {
+          ...record,
+          imageUrl: record.imageUrl
+            ? serviceMediaUrl(String(record.imageUrl), origin)
+            : record.imageUrl,
+        }
+      : undefined;
     return (
       <ServiceForm
         focusPromo={focusPromo}
-        initial={record}
+        initial={initialRecord}
         categories={
           fields.find((field) => field.name === 'category')?.options ?? []
         }
@@ -124,6 +204,9 @@ export async function ResourceFormServer({
   return (
     <ResourceForm
       fields={fields}
+      staffPhoto={
+        resource === 'staff' ? staffPhotoSource(record?.photoUrl) : undefined
+      }
       initial={record}
       action={saveAction.bind(null, resource, record?.id ?? null)}
       cancelHref={resources[resource].path}

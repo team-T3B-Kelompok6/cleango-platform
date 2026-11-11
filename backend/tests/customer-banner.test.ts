@@ -6,10 +6,10 @@ vi.mock('../src/model/user.model.js', async (original) => ({
   isTokenRevoked: vi.fn().mockResolvedValue(false),
 }));
 
-const bannerModel = vi.hoisted(() => ({
-  listBanners: vi.fn(),
+const promoModel = vi.hoisted(() => ({
+  listPromoBanners: vi.fn(),
 }));
-vi.mock('../src/model/banner.model.js', () => bannerModel);
+vi.mock('../src/model/promo.model.js', () => promoModel);
 
 import { createApp } from '../src/app.js';
 import { createAccessToken } from '../src/lib/jwt.js';
@@ -19,8 +19,8 @@ const customerToken = createAccessToken({ id: 10, email: 'c@e.com', role: 'custo
 const adminToken = createAccessToken({ id: 1, email: 'a@e.com', role: 'admin' } as never);
 
 beforeEach(() => {
-  bannerModel.listBanners.mockReset();
-  bannerModel.listBanners.mockResolvedValue([{ id: '52', imageUrl: '/uploads/banner.png' }]);
+  promoModel.listPromoBanners.mockReset();
+  promoModel.listPromoBanners.mockResolvedValue([{ id: '52', imageUrl: '/uploads/banner.png' }]);
 });
 
 describe('customer banners', () => {

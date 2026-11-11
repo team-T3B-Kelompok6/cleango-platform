@@ -88,6 +88,28 @@ function load(filename) {
   })(require, module, module.exports);
   return module.exports;
 }
+const { tone } = load(path.join(root, 'lib/resources.ts'));
+for (const [expected, statuses] of Object.entries({
+  red: ['Batal'],
+  neutral: ['Nonaktif'],
+  green: ['Aktif', 'Selesai', 'Tersedia', 'Siaga & Tersedia'],
+  blue: [
+    'Menunggu Lokasi',
+    'Menuju Lokasi',
+    'Sedang Dikerjakan',
+    'Berlangsung',
+    'Bertugas',
+    'Sedang Bekerja',
+  ],
+  amber: ['Menunggu Assign', 'Siap Berangkat', 'Masa Training', 'Terjadwal', ''],
+})) {
+  for (const status of statuses) assert.equal(tone(status), expected, status);
+}
+assert.match(
+  readFileSync(path.join(root, 'app/design.css'), 'utf8'),
+  /\.status-badge\.red\s*\{\s*--tone: var\(--danger\);\s*--tone-bg: var\(--color-055\);\s*\}/,
+);
+console.log('PASS: Batal red, Nonaktif neutral, other status tones unchanged.');
 const service = load(path.join(root, 'lib/cleaner/service.ts'));
 const work = load(path.join(root, 'lib/order-work-times.ts'));
 for (const data of [

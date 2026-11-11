@@ -15,6 +15,12 @@ export interface PromoInput {
   perCustomerLimit: number;
   stackable: boolean;
   active: boolean;
+  bannerUrl?: string | null;
+}
+
+export interface Promo extends PromoInput {
+  id: string;
+  usedCount?: number;
 }
 export interface Promo extends PromoInput {
   id: string;

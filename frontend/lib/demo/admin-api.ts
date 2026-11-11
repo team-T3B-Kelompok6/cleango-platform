@@ -412,11 +412,18 @@ export async function adminDemoRequest(
   if (url.pathname === '/cleaner-tasks' && method === 'GET')
     return { data: [] };
   if (url.pathname === '/uploads' && method === 'POST') {
-    if (!(options.body instanceof FormData))
-      throw new TaskError('Pilih gambar.', 400);
-    const file = options.body.get('file');
+    let file: File | null = null;
+    if (options.body instanceof FormData) {
+      const entry =
+        options.body.get('file') ?? options.body.get('bannerImage');
+      if (entry instanceof File) file = entry;
+    } else if (options.body instanceof File) {
+      file = options.body;
+    } else if (options.body instanceof Blob) {
+      file = new File([options.body], 'upload', { type: options.body.type });
+    }
     if (
-      !(file instanceof File) ||
+      !file ||
       !file.size ||
       file.size > 5 * 1024 * 1024 ||
       !['image/png', 'image/jpeg', 'image/webp'].includes(file.type)
@@ -531,6 +538,29 @@ export async function adminDemoRequest(
       return { data: structuredClone(created) };
     }
     if (index < 0) throw new TaskError('Data uji tidak ditemukan.', 404);
+    if (
+      method === 'PATCH' &&
+      resource === 'categories' &&
+      records[index].resource === 'services' &&
+      typeof body.name === 'string' &&
+      body.name !== records[index].name
+    ) {
+      const previousName = records[index].name;
+      for (const service of store.admin!.records.services.filter(
+        (service) => service.category === previousName,
+      )) {
+        const before = structuredClone(service);
+        service.category = body.name;
+        recordDemoAudit(
+          store.admin!,
+          'update',
+          'services',
+          service.id,
+          before,
+          service,
+        );
+      }
+    }
     if (method === 'DELETE') {
       if (resource === 'categories' && records[index].resource === 'services') {
         const linkedServices = store.admin!.records.services.filter(

@@ -23,6 +23,8 @@ beforeEach(() => {
   db.connect.mockResolvedValue({ query: db.query, end: db.end });
   db.query.mockImplementation(async (sql: string, values?: string[]) => {
     if (sql === 'SELECT DATABASE() AS name') return [[{ name: 'cleango' }]];
+    if (sql.includes('SELECT email, role, is_active AS isActive'))
+      return [[{ email: 'admin@cleango.id', role: 'admin', isActive: 1 }]];
     if (sql.includes('information_schema.tables')) return [[{ exists: 1 }]];
     if (
       sql.includes('information_schema.statistics') &&
@@ -49,6 +51,10 @@ describe('Putra schema-only migration', () => {
       ),
     ).toBe(true);
     expect(
+      queries.some((sql) => sql.includes('ADD CONSTRAINT `fk_cleaners_trainer` FOREIGN KEY (`trainer_id`)')),
+    ).toBe(true);
+    expect(queries.filter((sql) => sql.includes('ADD CONSTRAINT `fk_cleaners_trainer`'))).toHaveLength(1);
+    expect(
       queries.some((sql) => sql.includes('ADD COLUMN `auth_provider`')),
     ).toBe(true);
     expect(
@@ -58,10 +64,15 @@ describe('Putra schema-only migration', () => {
           sql.includes('DROP INDEX `uq_service_categories_name`'),
       ),
     ).toBe(true);
-    expect(queries.filter((sql) => /^INSERT/i.test(sql))).toHaveLength(1);
-    expect(queries.find((sql) => /^INSERT/i.test(sql))).toContain(
-      'SELECT DISTINCT f.category',
+    expect(queries).toContain(
+      'ALTER TABLE cleango.`cleaners` ADD COLUMN `trainer_id` BIGINT UNSIGNED NULL AFTER `skills`',
     );
+    expect(queries).toContain(
+      'ALTER TABLE cleango.`cleaners` ADD INDEX `idx_cleaners_trainer` (`trainer_id`)',
+    );
+    const categoryPromotion = queries.filter((sql) => sql.includes('SELECT DISTINCT f.category'));
+    expect(categoryPromotion).toHaveLength(0);
+    expect(queries.some((sql) => /INSERT INTO (?:cleango\.)?(?:users|services|cleaners|faqs)\b|ON DUPLICATE KEY UPDATE|DROP TABLE|DELETE FROM/i.test(sql))).toBe(false);
     expect(
       queries.some((sql) =>
         /INSERT INTO users|ON DUPLICATE KEY UPDATE|DROP TABLE|DELETE FROM/i.test(
@@ -69,6 +80,37 @@ describe('Putra schema-only migration', () => {
         ),
       ),
     ).toBe(false);
+    expect(db.end).toHaveBeenCalledOnce();
+  });
+
+  it('does not recreate existing trainer columns or indexes on repeated migration', async () => {
+    const initialQuery = db.query.getMockImplementation()!;
+    db.query.mockImplementation(async (sql: string, values?: string[]) => {
+      if (
+        (sql.includes('information_schema.columns') && values?.includes('trainer_id')) ||
+        (sql.includes('information_schema.statistics') && values?.includes('idx_cleaners_trainer')) ||
+        (sql.includes('information_schema.table_constraints') && values?.includes('fk_cleaners_trainer'))
+      ) return [[{ exists: 1 }]];
+      return initialQuery(sql, values);
+    });
+    const migration = '../scripts/apply-database.mjs';
+    await import(migration);
+    const queries = db.query.mock.calls.map(([sql]) => String(sql));
+    expect(queries.some((sql) => /ALTER TABLE[^;]*(?:trainer_id|idx_cleaners_trainer)/i.test(sql))).toBe(false);
+    expect(queries.some((sql) => /INSERT INTO users|ON DUPLICATE KEY UPDATE|DROP TABLE|DELETE FROM/i.test(sql))).toBe(false);
+    expect(db.end).toHaveBeenCalledOnce();
+  });
+
+  it('requires explicit seed flag before executing reference seed data', async () => {
+    vi.stubGlobal('process', {
+      ...process,
+      argv: ['node', 'apply-database.mjs', '--seed'],
+    });
+    // @ts-expect-error Existing migration is a JavaScript CLI, not a typed module.
+    await import('../scripts/apply-database.mjs');
+    const queries = db.query.mock.calls.map(([sql]) => String(sql));
+    expect(queries.some((sql) => sql.includes('INSERT INTO users'))).toBe(true);
+    expect(queries.some((sql) => sql.includes('INSERT INTO services'))).toBe(true);
     expect(db.end).toHaveBeenCalledOnce();
   });
 

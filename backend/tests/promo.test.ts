@@ -16,7 +16,11 @@ const promoModel = vi.hoisted(() => ({
   updatePromoById: vi.fn(),
 }));
 
+const notificationModel = vi.hoisted(() => ({
+  upsertPromoNotifications: vi.fn(),
+}));
 vi.mock('../src/model/promo.model.js', () => promoModel);
+vi.mock('../src/model/notification.model.js', () => notificationModel);
 
 import { createApp } from '../src/app.js';
 
@@ -53,6 +57,8 @@ beforeEach(() => {
   promoModel.findPromoByCode.mockResolvedValue(null);
   promoModel.deletePromoById.mockResolvedValue(true);
   promoModel.insertPromo.mockResolvedValue({ id: '1', ...valid });
+  notificationModel.upsertPromoNotifications.mockReset();
+  notificationModel.upsertPromoNotifications.mockResolvedValue(2);
 });
 
 describe('admin promo', () => {
@@ -113,7 +119,7 @@ describe('admin promo', () => {
     );
   });
 
-  it('creates a valid percentage promo', async () => {
+  it('creates a valid percentage promo and broadcasts a notification', async () => {
     const response = await request(app)
       .post('/api/promos')
       .set('Authorization', `Bearer ${adminToken}`)
@@ -122,6 +128,47 @@ describe('admin promo', () => {
     expect(promoModel.insertPromo).toHaveBeenCalledWith(
       expect.objectContaining({ code: 'AWAL20', scope: 'all', serviceIds: [] }),
     );
+    expect(notificationModel.upsertPromoNotifications).toHaveBeenCalledWith(
+      expect.objectContaining({ id: '1', active: true }),
+    );
+  });
+
+  it('does not broadcast a notification for an inactive promo', async () => {
+    promoModel.insertPromo.mockResolvedValueOnce({
+      id: '2',
+      ...valid,
+      active: false,
+    });
+    const response = await request(app)
+      .post('/api/promos')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ ...valid, active: false });
+    expect(response.status).toBe(201);
+    expect(notificationModel.upsertPromoNotifications).not.toHaveBeenCalled();
+  });
+
+  it('broadcasts when an existing promo is activated', async () => {
+    promoModel.findPromo.mockResolvedValue({ id: '1', ...valid, active: false });
+    promoModel.updatePromoById.mockResolvedValue({ id: '1', ...valid, active: true });
+    const response = await request(app)
+      .patch('/api/promos/1')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ active: true });
+    expect(response.status).toBe(200);
+    expect(notificationModel.upsertPromoNotifications).toHaveBeenCalledWith(
+      expect.objectContaining({ id: '1', active: true }),
+    );
+  });
+
+  it('does not broadcast again when an active promo is edited', async () => {
+    promoModel.findPromo.mockResolvedValue({ id: '1', ...valid, active: true });
+    promoModel.updatePromoById.mockResolvedValue({ id: '1', ...valid, active: true });
+    const response = await request(app)
+      .patch('/api/promos/1')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ name: 'Nama Baru' });
+    expect(response.status).toBe(200);
+    expect(notificationModel.upsertPromoNotifications).not.toHaveBeenCalled();
   });
 
   it('allows keeping the same code when patching itself', async () => {

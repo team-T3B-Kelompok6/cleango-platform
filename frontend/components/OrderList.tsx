@@ -9,10 +9,27 @@ import { AssignmentFormServer } from './AssignmentFormServer';
 import { Badge } from './StatusBadge';
 import { TrackingButton } from './tracking/TrackingButton';
 import { RecordActions } from './RecordActions';
-import type { Order } from '@/types';
+import type { Order, Staff } from '@/types';
+import { ApiError, list } from '@/lib/api';
+import { staffPhotoSource } from '@/lib/staff-photo';
+import { StaffAvatar } from './StaffAvatar';
+import { isDemoId } from '@/lib/cleaner/demo-store';
 import type { RecordListProps } from './RecordListProps';
 import { needsAssignment, orderTimeText } from '@/lib/order-flow';
-export function OrderList({ shown, resource, config, edit }: RecordListProps) {
+export async function OrderList({
+  shown,
+  resource,
+  config,
+  edit,
+}: RecordListProps) {
+  let staff: Staff[] = [];
+  if (resource === 'orders') {
+    try {
+      staff = await list<Staff>('staff');
+    } catch (error) {
+      if (!(error instanceof ApiError)) throw error;
+    }
+  }
   return (
     <>
       {resource === 'orders' &&
@@ -49,9 +66,28 @@ export function OrderList({ shown, resource, config, edit }: RecordListProps) {
                 <strong>{rupiah(order.price)}</strong>
               </div>
               <div className="order-card-bottom">
-                <p>
+                <p className="order-assigned-staff">
                   Petugas:{' '}
-                  <span>{order.staff.join(' & ') || 'Belum Ditugaskan'}</span>
+                  {order.staff.length ? (
+                    order.staff.map((name) => (
+                      <span key={name} className="assigned-staff-person">
+                        <StaffAvatar
+                          name={name}
+                          src={staffPhotoSource(
+                            staff.find(
+                              (person) =>
+                                person.name === name &&
+                                isDemoId(person.id) === isDemoId(order.id),
+                            )?.photoUrl,
+                          )}
+                          className="staff-photo-small"
+                        />
+                        <span>{name}</span>
+                      </span>
+                    ))
+                  ) : (
+                    <span>Belum Ditugaskan</span>
+                  )}
                 </p>
                 <RecordActions resource={resource} record={order} edit={edit}>
                   {order.staff.length > 0 && order.status !== 'Batal' && (

@@ -75,15 +75,18 @@ export async function replyToChat(
   customerId?: number,
 ): Promise<ChatReply> {
   const started = Date.now();
+  const refundGuidance = policyTopicsFor(input.message, false).includes('refund')
+    ? 'Untuk pengajuan refund manual, hubungi CS 082140636747 melalui Pusat Bantuan. Pembatalan tidak memicu refund otomatis. Boo tidak memproses refund; persetujuan, jumlah, dan waktunya harus dikonfirmasi kepada CS.\n\n'
+    : '';
   const reply = (
     answer: string,
     source: ChatReply['source'] = 'support',
     sources: ChatSource[] = [],
   ): ChatReply => ({
     answer:
-      answer.length <= 2500
-        ? answer
-        : answer.slice(0, 2350).trimEnd() +
+      (refundGuidance + answer).length <= 2500
+        ? refundGuidance + answer
+        : (refundGuidance + answer).slice(0, 2350).trimEnd() +
           '\n\nInformasi lebih lengkap dapat diperiksa pada halaman layanan atau Pusat Bantuan.',
     source,
     sources: sources.map(({ id, title }) => ({ id, title })),

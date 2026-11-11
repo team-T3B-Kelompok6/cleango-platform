@@ -46,13 +46,16 @@ export async function createSchedule(
     const time = requiredText(body, 'time', 'Jam shift', 40, false);
     const staff = requiredText(body, 'staff', 'Petugas', 120, false);
     const status = requiredText(body, 'status', 'Status', 40, false);
-    const data = await insertSchedule({ date: date!, time: time!, staff: staff!, status: status! });
+    const actor = actorId(request);
+    const data = await insertSchedule({ date: date!, time: time!, staff: staff!, status: status! }, actor);
     response.status(201).json({ message: 'Jadwal berhasil dibuat.', data });
   } catch (error) {
     if (error instanceof Error && error.message === 'INVALID_TIME')
       next(new AppError(400, 'Jam shift tidak valid.', 'VALIDATION_ERROR'));
     else if (error instanceof Error && error.message === 'STAFF_NOT_FOUND')
       next(new AppError(400, 'Petugas tidak ditemukan.', 'VALIDATION_ERROR'));
+    else if (error instanceof Error && error.message === 'SHIFT_CONFLICT')
+      next(new AppError(409, 'Petugas sudah memiliki jadwal pada waktu tersebut.', 'SHIFT_CONFLICT'));
     else next(error);
   }
 }
@@ -73,7 +76,8 @@ export async function updateSchedule(
     if (staff !== undefined) input.staff = staff;
     const status = requiredText(body, 'status', 'Status', 40, true);
     if (status !== undefined) input.status = status;
-    const data = await updateScheduleById(positiveId(request.params.id, 'ID jadwal'), input);
+    const actor = actorId(request);
+    const data = await updateScheduleById(positiveId(request.params.id, 'ID jadwal'), input, actor);
     if (!data) throw new AppError(404, 'Jadwal tidak ditemukan.');
     response.status(200).json({ message: 'Jadwal berhasil diperbarui.', data });
   } catch (error) {
@@ -81,6 +85,8 @@ export async function updateSchedule(
       next(new AppError(400, 'Jam shift tidak valid.', 'VALIDATION_ERROR'));
     else if (error instanceof Error && error.message === 'STAFF_NOT_FOUND')
       next(new AppError(400, 'Petugas tidak ditemukan.', 'VALIDATION_ERROR'));
+    else if (error instanceof Error && error.message === 'SHIFT_CONFLICT')
+      next(new AppError(409, 'Petugas sudah memiliki jadwal pada waktu tersebut.', 'SHIFT_CONFLICT'));
     else next(error);
   }
 }
@@ -91,10 +97,16 @@ export async function deleteSchedule(
   next: NextFunction,
 ): Promise<void> {
   try {
-    if (!(await deleteScheduleById(positiveId(request.params.id, 'ID jadwal'))))
+    const actor = actorId(request);
+    if (!(await deleteScheduleById(positiveId(request.params.id, 'ID jadwal'), actor)))
       throw new AppError(404, 'Jadwal tidak ditemukan.');
     response.status(200).json({ message: 'Jadwal berhasil dihapus.' });
   } catch (error) {
     next(error);
   }
+}
+
+function actorId(request: Request): number | null {
+  const raw = (request as { user?: { id?: unknown } }).user?.id;
+  return raw == null || Number.isNaN(Number(raw)) ? null : Number(raw);
 }

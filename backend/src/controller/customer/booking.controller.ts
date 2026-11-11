@@ -3,6 +3,7 @@ import { estimateWorkCompletion } from '../../lib/work-estimate.js';
 import { AppError } from '../../lib/AppError.js';
 import {
   BookingConflictError,
+  cancelCustomerBooking,
   createBooking,
   findBookableService,
   findCustomerBooking,
@@ -12,6 +13,7 @@ import {
   isValidSlot,
   listAvailability,
   listCustomerBookings,
+  rescheduleCustomerBooking,
   resolveBookableServiceId,
   validateBookingDate,
   type BookingSlot,
@@ -19,6 +21,7 @@ import {
 import { findPromoByCode } from '../../model/promo.model.js';
 import { calculateDiscount, promoIssue } from './promo.controller.js';
 import { statusLabel } from '../../lib/order-status.js';
+import { notifyBookingCreated } from '../../lib/firebase-push.js';
 
 function customerId(request: Request): number {
   if (!request.user) throw new AppError(401, 'Authentication diperlukan', 'AUTH_REQUIRED');
@@ -157,6 +160,7 @@ export async function createCustomerBooking(
       });
       const data = await findCustomerBooking(userId, created.id);
       response.status(201).json({ message: 'Pesanan berhasil dibuat.', data });
+      void notifyBookingCreated(userId);
     } catch (error) {
       if (error instanceof BookingConflictError) {
         if (error.reason === 'BUSY')
@@ -213,6 +217,99 @@ export async function getCustomerBooking(
   }
 }
 
+export async function cancelMyBooking(
+  request: Request,
+  response: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const result = await cancelCustomerBooking(
+      customerId(request),
+      numericId(request.params.id, 'ID pesanan'),
+    );
+    if (!result.ok) {
+      if (result.reason === 'NOT_FOUND')
+        throw new AppError(404, 'Pesanan tidak ditemukan.');
+      if (result.reason === 'ALREADY_ASSIGNED')
+        throw new AppError(
+          409,
+          'Pesanan sudah ditugaskan ke petugas.',
+          'ALREADY_ASSIGNED',
+        );
+      throw new AppError(
+        409,
+        'Pesanan ini tidak dapat dibatalkan.',
+        'CANCEL_NOT_ALLOWED',
+      );
+    }
+    response.status(200).json({ message: 'Pesanan berhasil dibatalkan.' });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function rescheduleMyBooking(
+  request: Request,
+  response: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const userId = customerId(request);
+    const bookingId = numericId(request.params.id, 'ID pesanan');
+    const body = (request.body ?? {}) as Record<string, unknown>;
+
+    const date = typeof body.date === 'string' ? body.date.trim() : '';
+    const time = body.time;
+
+    const dateIssue = validateBookingDate(date);
+    if (dateIssue)
+      throw new AppError(400, dateIssue.message, dateIssue.code, { date: dateIssue.message });
+    if (!isValidSlot(time))
+      throw new AppError(400, 'Jam pengerjaan tidak valid.', 'VALIDATION_ERROR', {
+        time: 'Pilih salah satu slot yang tersedia.',
+      });
+
+    const result = await rescheduleCustomerBooking(userId, bookingId, date, time);
+    if (!result.ok) {
+      if (result.reason === 'NOT_FOUND')
+        throw new AppError(404, 'Pesanan tidak ditemukan.');
+      if (result.reason === 'ALREADY_ASSIGNED')
+        throw new AppError(
+          409,
+          'Pesanan sudah ditugaskan ke petugas.',
+          'ALREADY_ASSIGNED',
+        );
+      if (['INVALID_DATE', 'PAST_DATE', 'TOO_FAR'].includes(result.reason))
+        throw new AppError(400, 'Tanggal tidak valid.', result.reason, {
+          date: 'Tanggal tidak valid.',
+        });
+      if (['INVALID_SLOT', 'SLOT_CLOSED'].includes(result.reason))
+        throw new AppError(400, 'Waktu pemesanan sudah lewat.', 'SLOT_CLOSED', {
+          time: 'Pilih slot lain.',
+        });
+      if (result.reason === 'SLOT_FULL')
+        throw new AppError(409, 'Slot sudah penuh.', 'SLOT_FULL', {
+          time: 'Pilih slot lain.',
+        });
+      if (result.reason === 'DUPLICATE')
+        throw new AppError(409, 'Anda sudah memesan layanan pada slot ini.', 'DUPLICATE_BOOKING', {
+          time: 'Pilih slot lain atau periksa Pesanan Anda.',
+        });
+      if (result.reason === 'BUSY')
+        throw new AppError(409, 'Slot sedang dipesan pelanggan lain. Coba lagi.', 'BOOKING_BUSY', {
+          time: 'Coba lagi sebentar lagi.',
+        });
+      if (result.reason === 'SERVICE_INACTIVE')
+        throw new AppError(400, 'Layanan sedang tidak tersedia.', 'SERVICE_INACTIVE');
+      throw new AppError(409, 'Pesanan ini tidak dapat dijadwalkan ulang.', 'RESCHEDULE_NOT_ALLOWED');
+    }
+    const data = await findCustomerBooking(userId, bookingId);
+    response.status(200).json({ message: 'Pesanan berhasil dijadwalkan ulang.', data });
+  } catch (error) {
+    next(error);
+  }
+}
+
 // Mirrors the admin order status labels used across the apps.
 function apiStatus(status: string): string {
   return statusLabel(status);
@@ -241,11 +338,18 @@ export async function listMyBookings(
         discountAmount: Number(row.discountAmount),
         totalAmount: Number(row.totalAmount),
         status: apiStatus(row.databaseStatus),
+        holdUntil: row.holdUntil
+          ? new Date(row.holdUntil).toISOString()
+          : null,
+        canCancel: Boolean(row.canCancel),
+        canReschedule: Boolean(row.canReschedule),
         paymentStatus: row.paymentStatus ?? null,
+        paymentMethod: row.paymentMethod ?? null,
         recipientName: row.recipientName ?? null,
         recipientPhone: row.recipientPhone ?? null,
         landmark: row.landmark ?? '',
         cleanerName: row.cleanerName ?? null,
+        cleanerRating: row.cleanerRating === null ? null : Number(row.cleanerRating),
         hasReview: Boolean(row.hasReview),
         reviewEditable: Boolean(row.reviewEditable),
         reviewRating: row.reviewRating === null ? null : Number(row.reviewRating),

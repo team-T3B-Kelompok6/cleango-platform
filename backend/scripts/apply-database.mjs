@@ -3,7 +3,8 @@ import { readFile } from 'node:fs/promises';
 import mysql from 'mysql2/promise';
 
 const sql = await readFile(new URL('../database.sql', import.meta.url), 'utf8');
-const schemaOnly = process.argv.includes('--schema-only');
+const seed = process.argv.includes('--seed');
+const schemaOnly = !seed;
 if (
   schemaOnly &&
   ((process.env.DB_NAME ?? 'cleango') !== 'cleango' ||
@@ -68,6 +69,32 @@ try {
       );
   }
 
+  async function ensureIndex(table, indexName, columns) {
+    const [existing] = await connection.query(
+      `SELECT 1 FROM information_schema.statistics
+       WHERE table_schema = 'cleango' AND table_name = ? AND index_name = ?
+       LIMIT 1`,
+      [table, indexName],
+    );
+    if (!existing[0])
+      await connection.query(
+        `ALTER TABLE cleango.\`${table}\` ADD INDEX \`${indexName}\` (${columns})`,
+      );
+  }
+
+  async function ensureForeignKey(table, constraintName, column, refTable, refColumn, onDelete) {
+    const [existing] = await connection.query(
+      `SELECT 1 FROM information_schema.table_constraints
+       WHERE constraint_schema = 'cleango' AND table_name = ?
+         AND constraint_name = ? AND constraint_type = 'FOREIGN KEY' LIMIT 1`,
+      [table, constraintName],
+    );
+    if (!existing[0])
+      await connection.query(
+        `ALTER TABLE cleango.\`${table}\` ADD CONSTRAINT \`${constraintName}\` FOREIGN KEY (\`${column}\`) REFERENCES \`${refTable}\` (\`${refColumn}\`) ON DELETE ${onDelete}`,
+      );
+  }
+
   async function ensureUniqueIndex(
     table,
     indexName,
@@ -115,16 +142,18 @@ try {
   );
   // Existing FAQ categories live as free text on the faqs rows; promote them so
   // the FAQ category panel is not empty and old FAQs keep matching.
-  await connection.query(
-    `INSERT INTO cleango.service_categories (name, resource, is_active)
-     SELECT DISTINCT f.category, 'faqs', 1
-     FROM cleango.faqs f
-     WHERE f.category IS NOT NULL AND TRIM(f.category) <> ''
-       AND NOT EXISTS (
-         SELECT 1 FROM cleango.service_categories c
-         WHERE c.resource = 'faqs' AND c.name = f.category
-       )`,
-  );
+  if (seed) {
+    await connection.query(
+      `INSERT INTO cleango.service_categories (name, resource, is_active)
+       SELECT DISTINCT f.category, 'faqs', 1
+       FROM cleango.faqs f
+       WHERE f.category IS NOT NULL AND TRIM(f.category) <> ''
+         AND NOT EXISTS (
+           SELECT 1 FROM cleango.service_categories c
+           WHERE c.resource = 'faqs' AND c.name = f.category
+         )`,
+    );
+  }
 
   await ensureColumn(
     'faqs',
@@ -142,6 +171,18 @@ try {
     "`auth_provider` ENUM('local','google','facebook') NOT NULL DEFAULT 'local' AFTER `role`",
   );
   await ensureColumn(
+    'notifications',
+    'promo_id',
+    '`promo_id` BIGINT UNSIGNED NULL AFTER `booking_id`',
+  );
+  await ensureUniqueIndex(
+    'notifications',
+    'uq_notifications_promo',
+    '`recipient_user_id`, `promo_id`',
+  );
+  await ensureIndex('notifications', 'idx_notifications_promo', '`promo_id`');
+  await ensureIndex('notifications', 'idx_notifications_created', '`created_at`');
+  await ensureColumn(
     'users',
     'password_changed_at',
     '`password_changed_at` DATETIME NULL AFTER `is_active`',
@@ -156,6 +197,11 @@ try {
     'area',
     "`area` VARCHAR(120) NOT NULL DEFAULT 'Malang' AFTER `phone`",
   );
+  await ensureColumn('cleaners', 'photo_url', '`photo_url` VARCHAR(500) NULL AFTER `area`');
+  await ensureColumn('cleaners', 'skills', '`skills` TEXT NULL AFTER `photo_url`');
+  await ensureColumn('cleaners', 'trainer_id', '`trainer_id` BIGINT UNSIGNED NULL AFTER `skills`');
+  await ensureIndex('cleaners', 'idx_cleaners_trainer', '`trainer_id`');
+  await ensureForeignKey('cleaners', 'fk_cleaners_trainer', 'trainer_id', 'cleaners', 'id', 'SET NULL');
   await ensureColumn(
     'promos',
     'scope',
@@ -177,6 +223,26 @@ try {
     '`stackable` BOOLEAN NOT NULL DEFAULT FALSE AFTER `per_customer_limit`',
   );
   await ensureColumn(
+    'promos',
+    'deactivated_at',
+    '`deactivated_at` DATETIME NULL AFTER `stackable`',
+  );
+  await ensureColumn(
+    'promos',
+    'banner_url',
+    '`banner_url` VARCHAR(500) NULL AFTER `stackable`',
+  );
+  await ensureColumn(
+    'promo_usages',
+    'status',
+    "`status` ENUM('reserved','redeemed','released') NOT NULL DEFAULT 'reserved' AFTER `used_at`",
+  );
+  await ensureColumn(
+    'bookings',
+    'hold_until',
+    '`hold_until` DATETIME NULL AFTER `status`',
+  );
+  await ensureColumn(
     'bookings',
     'service_duration_minutes',
     '`service_duration_minutes` SMALLINT UNSIGNED NOT NULL DEFAULT 0 AFTER `service_price`',
@@ -187,11 +253,7 @@ try {
      SET b.service_duration_minutes = s.duration_minutes
      WHERE b.service_duration_minutes = 0`,
   );
-  if (schemaOnly) {
-    console.log(
-      'Schema Putra diterapkan ke cleango lokal tanpa seeder; data lama dipertahankan.',
-    );
-  } else {
+  if (seed) {
     await connection.query(sql);
     const [rows] = await connection.query(
       `SELECT email, role, is_active AS isActive

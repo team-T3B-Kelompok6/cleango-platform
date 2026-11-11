@@ -1,4 +1,5 @@
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
+import { addressSql } from '../lib/address-display.js';
 import { pool } from '../lib/db.js';
 
 // Hourly slots so customers have more choice; matches the mobile selector.
@@ -277,7 +278,8 @@ export async function createBooking(input: CreateBookingInput): Promise<{
 
     if (input.promo) {
       const [usageRows] = await connection.execute<RowDataPacket[]>(
-        'SELECT COUNT(*) AS total FROM promo_usages WHERE promo_id = ? AND user_id = ?',
+        `SELECT COUNT(*) AS total FROM promo_usages
+         WHERE promo_id = ? AND user_id = ? AND status IN ('reserved', 'redeemed')`,
         [input.promo.id, input.customerId],
       );
       if (Number(usageRows[0]?.total ?? 0) >= input.promo.perCustomerLimit) {
@@ -300,8 +302,9 @@ export async function createBooking(input: CreateBookingInput): Promise<{
       `INSERT INTO bookings
          (booking_code, customer_id, service_id, address_id, promo_id, scheduled_date,
           scheduled_start_time, customer_notes, service_price, service_duration_minutes,
-          platform_fee, discount_amount, total_amount, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'confirmed')`,
+          platform_fee, discount_amount, total_amount, status, hold_until)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'confirmed',
+         DATE_ADD(NOW(), INTERVAL 15 SECOND))`,
       [
         code,
         input.customerId,
@@ -363,6 +366,179 @@ export async function createBooking(input: CreateBookingInput): Promise<{
   }
 }
 
+export type CancelBookingFailure =
+  | 'NOT_FOUND'
+  | 'NOT_ALLOWED'
+  | 'ALREADY_ASSIGNED';
+
+export async function cancelCustomerBooking(
+  customerId: number,
+  bookingId: number,
+): Promise<{ ok: true } | { ok: false; reason: CancelBookingFailure }> {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [rows] = await connection.execute<RowDataPacket[]>(
+      `SELECT b.status, b.promo_id AS promoId, ca.id AS assignmentId
+       FROM bookings b
+       LEFT JOIN cleaner_assignments ca ON ca.booking_id = b.id
+       WHERE b.id = ? AND b.customer_id = ?
+       FOR UPDATE`,
+      [bookingId, customerId],
+    );
+    const row = rows[0];
+    if (!row) {
+      await connection.rollback();
+      return { ok: false, reason: 'NOT_FOUND' };
+    }
+    if (row.status !== 'confirmed' && row.status !== 'awaiting_payment') {
+      await connection.rollback();
+      return { ok: false, reason: 'NOT_ALLOWED' };
+    }
+    if (row.assignmentId !== null) {
+      await connection.rollback();
+      return { ok: false, reason: 'ALREADY_ASSIGNED' };
+    }
+    if (row.promoId !== null) {
+      await connection.execute(
+        `UPDATE promos SET used_count = GREATEST(0, used_count - 1) WHERE id = ?`,
+        [row.promoId],
+      );
+      await connection.execute(
+        `UPDATE promo_usages SET status = 'released' WHERE promo_id = ? AND booking_id = ?`,
+        [row.promoId, bookingId],
+      );
+    }
+    await connection.execute(
+      `UPDATE bookings
+       SET status = 'cancelled',
+           cancellation_reason = 'Dibatalkan customer.'
+       WHERE id = ?`,
+      [bookingId],
+    );
+    await connection.execute(
+      `INSERT INTO booking_status_history
+         (booking_id, status, actor_type, actor_user_id, notes)
+       VALUES (?, 'cancelled', 'customer', ?, 'Dibatalkan customer.')`,
+      [bookingId, customerId],
+    );
+    await connection.commit();
+    return { ok: true };
+  } catch (error) {
+    try {
+      await connection.rollback();
+    } catch {
+      // rollback after an explicit rollback is a no-op
+    }
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
+export type RescheduleBookingFailure =
+  | CancelBookingFailure
+  | 'SLOT_FULL'
+  | 'DUPLICATE'
+  | 'BUSY'
+  | 'SERVICE_INACTIVE'
+  | 'INVALID_DATE'
+  | 'PAST_DATE'
+  | 'TOO_FAR'
+  | 'INVALID_SLOT'
+  | 'SLOT_CLOSED';
+
+export async function rescheduleCustomerBooking(
+  customerId: number,
+  bookingId: number,
+  date: string,
+  time: string,
+): Promise<{ ok: true } | { ok: false; reason: RescheduleBookingFailure }> {
+  const issue = validateBookingDate(date);
+  if (issue) return { ok: false, reason: issue.code };
+  if (!isValidSlot(time)) return { ok: false, reason: 'INVALID_SLOT' };
+  const lockName = `cleango_slot_${date}_${time}`;
+  const connection = await pool.getConnection();
+  let locked = false;
+  try {
+    const [lockRows] = await connection.execute<RowDataPacket[]>(
+      'SELECT GET_LOCK(?, 5) AS ok', [lockName],
+    );
+    if (Number(lockRows[0]?.ok ?? 0) !== 1) return { ok: false, reason: 'BUSY' };
+    locked = true;
+    await connection.beginTransaction();
+    const [rows] = await connection.execute<RowDataPacket[]>(
+      `SELECT b.status, b.service_id AS serviceId,
+         DATE_FORMAT(b.scheduled_date, '%Y-%m-%d') AS date,
+         TIME_FORMAT(b.scheduled_start_time, '%H:%i') AS time,
+         ca.id AS assignmentId
+       FROM bookings b
+       LEFT JOIN cleaner_assignments ca ON ca.booking_id = b.id
+       WHERE b.id = ? AND b.customer_id = ? FOR UPDATE`,
+      [bookingId, customerId],
+    );
+    const row = rows[0];
+    let reason: RescheduleBookingFailure | undefined;
+    if (!row) reason = 'NOT_FOUND';
+    else if (row.status !== 'confirmed' && row.status !== 'awaiting_payment') reason = 'NOT_ALLOWED';
+    else if (row.assignmentId !== null) reason = 'ALREADY_ASSIGNED';
+    else if (validateBookingDate(date)) reason = validateBookingDate(date)!.code;
+    else if (isSlotLeadTimePassed(date, time)) reason = 'SLOT_CLOSED';
+    if (reason) {
+      await connection.rollback();
+      return { ok: false, reason };
+    }
+    const [services] = await connection.execute<RowDataPacket[]>(
+      'SELECT id FROM services WHERE id = ? AND is_active = TRUE LIMIT 1', [row!.serviceId],
+    );
+    if (!services[0]) {
+      await connection.rollback();
+      return { ok: false, reason: 'SERVICE_INACTIVE' };
+    }
+    if (row!.date === date && row!.time === time) {
+      await connection.commit();
+      return { ok: true };
+    }
+    const [existing] = await connection.execute<RowDataPacket[]>(
+      `SELECT id, customer_id AS customerId FROM bookings
+       WHERE scheduled_date = ? AND scheduled_start_time = ? AND id <> ?
+         AND status NOT IN ('cancelled', 'rescheduled')`,
+      [date, `${time}:00`, bookingId],
+    );
+    if (existing.some((booking) => Number(booking.customerId) === customerId)) reason = 'DUPLICATE';
+    else if (existing.length >= CAPACITY_PER_SLOT) reason = 'SLOT_FULL';
+    if (reason) {
+      await connection.rollback();
+      return { ok: false, reason };
+    }
+    await connection.execute(
+      `UPDATE bookings SET scheduled_date = ?, scheduled_start_time = ?,
+         scheduled_end_time = CASE WHEN scheduled_end_time IS NULL THEN NULL
+           ELSE ADDTIME(?, SEC_TO_TIME(service_duration_minutes * 60)) END
+       WHERE id = ?`,
+      [date, `${time}:00`, `${time}:00`, bookingId],
+    );
+    await connection.execute(
+      `INSERT INTO booking_status_history (booking_id, status, actor_type, actor_user_id, notes)
+       VALUES (?, ?, 'customer', ?, ?)`,
+      [bookingId, row!.status, customerId,
+        `Jadwal diubah dari ${row!.date} ${row!.time} ke ${date} ${time}.`],
+    );
+    await connection.commit();
+    return { ok: true };
+  } catch (error) {
+    await connection.rollback();
+    if (isLockConflict(error)) return { ok: false, reason: 'BUSY' };
+    throw error;
+  } finally {
+    try {
+      if (locked) await connection.execute('SELECT RELEASE_LOCK(?)', [lockName]);
+    } finally {
+      connection.release();
+    }
+  }
+}
+
 export async function findCustomerBooking(customerId: number, id: number) {
   const [rows] = await pool.execute<RowDataPacket[]>(
     `SELECT b.id, b.booking_code AS code,
@@ -372,8 +548,11 @@ export async function findCustomerBooking(customerId: number, id: number) {
        COALESCE(b.service_duration_minutes, s.duration_minutes) AS serviceDurationMinutes,
        b.platform_fee AS platformFee, b.discount_amount AS discountAmount,
        b.total_amount AS totalAmount, p.code AS promoCode,
-       pay.status AS paymentStatus,
-       b.status, COALESCE(b.customer_notes, '') AS notes,
+       pay.status AS paymentStatus, pay.method AS paymentMethod,
+       b.status, b.hold_until - INTERVAL TIMESTAMPDIFF(SECOND, UTC_TIMESTAMP(), NOW()) SECOND AS holdUntil,
+       (b.status IN ('confirmed', 'awaiting_payment') AND ca.id IS NULL) AS canCancel,
+       (b.status IN ('confirmed', 'awaiting_payment') AND ca.id IS NULL) AS canReschedule,
+       COALESCE(b.customer_notes, '') AS notes,
        r.id IS NOT NULL AS hasReview,
        r.rating AS reviewRating, r.comment AS reviewComment,
        (b.completed_at IS NOT NULL AND b.completed_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)) AS reviewEditable,
@@ -384,7 +563,7 @@ export async function findCustomerBooking(customerId: number, id: number) {
        a.label AS addressLabel, a.landmark,
        COALESCE(NULLIF(a.recipient_name, ''), u.name) AS recipientName,
        COALESCE(NULLIF(a.recipient_phone, ''), u.phone) AS recipientPhone,
-       cl.name AS cleanerName, a.street_address AS address
+       cl.name AS cleanerName, cl.average_rating AS cleanerRating, ${addressSql('a')} AS address
      FROM bookings b
      INNER JOIN services s ON s.id = b.service_id
      INNER JOIN addresses a ON a.id = b.address_id
@@ -398,7 +577,8 @@ export async function findCustomerBooking(customerId: number, id: number) {
      LIMIT 1`,
     [id, customerId],
   );
-  return rows[0] ?? null;
+  const row = rows[0];
+  return row ? { ...row, canCancel: Boolean(row.canCancel), canReschedule: Boolean(row.canReschedule) } : null;
 }
 
 export interface CustomerBookingRow extends RowDataPacket {
@@ -414,6 +594,11 @@ export interface CustomerBookingRow extends RowDataPacket {
   discountAmount: number;
   totalAmount: number;
   databaseStatus: string;
+  paymentStatus: string | null;
+  paymentMethod: string | null;
+  holdUntil: Date | null;
+  canCancel: number;
+  canReschedule: number;
   notes: string;
   reviewPhotoIds: string | null;
   reviewPhotos: string | null;
@@ -436,7 +621,10 @@ export async function listCustomerBookings(
        UNIX_TIMESTAMP(bs.started_at) * 1000 AS startedAt, b.service_price AS servicePrice,
        b.platform_fee AS platformFee, b.discount_amount AS discountAmount,
        b.total_amount AS totalAmount, b.status AS databaseStatus,
-       pay.status AS paymentStatus,
+       pay.status AS paymentStatus, pay.method AS paymentMethod,
+       b.hold_until - INTERVAL TIMESTAMPDIFF(SECOND, UTC_TIMESTAMP(), NOW()) SECOND AS holdUntil,
+       (b.status IN ('confirmed', 'awaiting_payment') AND ca.id IS NULL) AS canCancel,
+       (b.status IN ('confirmed', 'awaiting_payment') AND ca.id IS NULL) AS canReschedule,
        COALESCE(b.customer_notes, '') AS notes,
        r.id IS NOT NULL AS hasReview,
        r.rating AS reviewRating, r.comment AS reviewComment,
@@ -450,7 +638,8 @@ export async function listCustomerBookings(
        COALESCE(NULLIF(a.recipient_name, ''), u.name) AS recipientName,
        COALESCE(NULLIF(a.recipient_phone, ''), u.phone) AS recipientPhone,
        cl.name AS cleanerName,
-       CONCAT_WS(', ', a.street_address, a.city, a.province) AS address,
+       cl.average_rating AS cleanerRating,
+       ${addressSql('a')} AS address,
        a.latitude, a.longitude
      FROM bookings b
      INNER JOIN services s ON s.id = b.service_id
