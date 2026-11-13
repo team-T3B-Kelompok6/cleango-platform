@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { canTransition } from '../src/lib/order-status.js';
+import { canTransition, statusLabel } from '../src/lib/order-status.js';
 
 describe('booking status transitions', () => {
+  it('labels checkout reservations as awaiting payment', () => {
+    expect(statusLabel('awaiting_payment')).toBe('Menunggu Pembayaran');
+  });
   it('allows the forward service flow', () => {
     expect(canTransition('confirmed', 'assigned')).toBe(true);
     expect(canTransition('assigned', 'en_route')).toBe(true);

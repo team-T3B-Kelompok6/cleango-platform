@@ -1,6 +1,45 @@
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { pool } from '../lib/db.js';
 import type { Promo } from './promo.model.js';
+import { statusLabel, type BookingStatus } from '../lib/order-status.js';
+
+export interface CustomerNotificationEvent {
+  notificationId: string;
+  userId: number;
+  bookingId: number;
+  type: 'order' | 'payment';
+  title: string;
+  message: string;
+}
+
+/** Call only while holding the booking lock, after a real state transition. */
+export async function insertCustomerNotification(
+  connection: { execute: typeof pool.execute },
+  event: Omit<CustomerNotificationEvent, 'notificationId'>,
+): Promise<CustomerNotificationEvent> {
+  const [result] = await connection.execute<ResultSetHeader>(
+    `INSERT INTO notifications (recipient_user_id, booking_id, type, title, message)
+     VALUES (?, ?, ?, ?, ?)`,
+    [event.userId, event.bookingId, event.type, event.title, event.message],
+  );
+  return { ...event, notificationId: String(result.insertId) };
+}
+
+export function insertPaymentAcceptedNotification(
+  connection: { execute: typeof pool.execute }, userId: number, bookingId: number, code: string,
+): Promise<CustomerNotificationEvent> {
+  return insertCustomerNotification(connection, { userId, bookingId, type: 'payment',
+    title: 'Pembayaran diterima', message: `Pembayaran untuk pesanan ${code} sudah diterima.` });
+}
+
+export function insertOrderStatusNotification(
+  connection: { execute: typeof pool.execute }, userId: number, bookingId: number,
+  code: string, status: BookingStatus,
+): Promise<CustomerNotificationEvent> {
+  const label = statusLabel(status);
+  return insertCustomerNotification(connection, { userId, bookingId, type: 'order',
+    title: `Status pesanan: ${label}`, message: `Pesanan ${code}: ${label}.` });
+}
 
 export type NotificationType = 'order' | 'payment' | 'promo' | 'risk_alert' | 'system';
 

@@ -47,7 +47,7 @@ export interface Staff extends RecordData {
   trainerName?: string | null;
   mentorMaterials?: string[];
   skills: string[];
-  rating?: number;
+  completedBookings?: number;
   name: string;
   area?: string;
   phone: string;

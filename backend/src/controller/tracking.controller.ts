@@ -151,25 +151,49 @@ export async function getCustomerEta(
         ? NaN
         : new Date(row.locationUpdatedAt).getTime();
     const age = (Date.now() - gpsTime) / 1000;
-    if (!Number.isFinite(age) || age < 0 || age >= 300)
-      throw new AppError(
-        409,
-        'Lokasi cleaner belum tersedia atau sudah usang. Menunggu pembaruan GPS.',
-        'TRACKING_NOT_READY',
-      );
-    const { cleaner, destination, route, requestedAt } =
-      await calculateTracking({
-        cleanerLatitude: row.latitude,
-        cleanerLongitude: row.longitude,
-        destinationLatitude: row.destinationLatitude,
-        destinationLongitude: row.destinationLongitude,
-      });
+    if (row.latitude == null || row.longitude == null)
+      throw new AppError(409, 'Lokasi cleaner belum tersedia. Menunggu pembaruan GPS.', 'TRACKING_NOT_READY');
+    const cleaner = coordinate({ cleanerLatitude: row.latitude, cleanerLongitude: row.longitude }, 'cleaner');
+    const destination = row.destinationLatitude == null || row.destinationLongitude == null
+      ? null
+      : coordinate({ destinationLatitude: row.destinationLatitude, destinationLongitude: row.destinationLongitude }, 'destination');
+    const requestedAt = new Date().toISOString();
+    const locationFresh = Number.isFinite(age) && age >= 0 && age < 300;
+    const snapshot = {
+      orderId: String(row.bookingId), cleaner, destination,
+      locationUpdatedAt: Number.isFinite(gpsTime) ? new Date(gpsTime).toISOString() : null,
+      locationFresh, updatedAt: requestedAt,
+    };
+    const withoutRoute = (routeStatus: string, routeMessage: string) => {
+      response.status(200).json({ data: {
+        ...snapshot, routeStatus, routeMessage, path: [], source: null,
+        distanceMeters: null, baselineEtaSeconds: null, etaSeconds: null,
+        etaMinutes: null, estimatedArrivalAt: null, modelVersion: null,
+        calculationVersion: 'route-v1',
+      } });
+    };
+    if (!locationFresh) {
+      withoutRoute('stale', 'Lokasi terakhir ditampilkan. Menunggu pembaruan GPS.');
+      return;
+    }
+    if (!destination) {
+      withoutRoute('destination_missing', 'Titik tujuan belum tersedia.');
+      return;
+    }
+    let route;
+    try {
+      route = await getRoute(cleaner, destination);
+    } catch (error) {
+      if (!(error instanceof AppError) || error.statusCode !== 502) throw error;
+      withoutRoute('unavailable', 'Rute dan ETA belum tersedia. Lokasi cleaner tetap ditampilkan.');
+      return;
+    }
     const seconds = Math.ceil(route.durationSeconds);
     response.status(200).json({
       data: {
-        orderId: String(row.bookingId),
-        cleaner,
-        destination,
+        ...snapshot,
+        routeStatus: 'available',
+        routeMessage: null,
         distanceMeters: Math.round(route.distanceMeters),
         baselineEtaSeconds: seconds,
         etaSeconds: seconds,

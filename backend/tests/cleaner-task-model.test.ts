@@ -4,11 +4,17 @@ vi.mock('../src/lib/db.js', () => ({ pool: db }));
 import {
   findCustomerTask,
   saveStage,
+  assertUsable,
 } from '../src/model/cleaner-task.model.js';
 beforeEach(() => {
   db.query.mockReset().mockResolvedValue([[]]);
   db.execute.mockReset().mockResolvedValue([{}]);
 });
+it('rejects usable check and events on awaiting_payment booking', () => {
+  expect(() => assertUsable({ orderStatus: 'awaiting_payment', linkStatus: 'active', linkExpiresAt: new Date(Date.now() + 10000) } as any))
+    .toThrowError(expect.objectContaining({ code: 'PAYMENT_REQUIRED', statusCode: 409 }));
+});
+
 it('enforces booking ownership inside parameterized SQL', async () => {
   expect(await findCustomerTask(10, 9)).toBeNull();
   expect(db.query).toHaveBeenCalledWith(

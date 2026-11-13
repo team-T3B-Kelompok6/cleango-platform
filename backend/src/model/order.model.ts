@@ -1,7 +1,18 @@
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
+import type { PoolConnection } from 'mysql2/promise';
+import {
+  acquireCapacityLock,
+  capacityBoard,
+  isSlotLeadTimePassed,
+  isValidSlot,
+  releaseCapacityConnection,
+  validateBookingDate,
+} from './booking.model.js';
 import { AppError } from '../lib/AppError.js';
 import { addressSql } from '../lib/address-display.js';
 import { pool } from '../lib/db.js';
+import { insertOrderStatusNotification, type CustomerNotificationEvent } from './notification.model.js';
+import { notifyCustomerNotification } from '../lib/firebase-push.js';
 
 import {
   canTransition,
@@ -125,7 +136,10 @@ function mapOrder(row: OrderRow): Order {
 
 export async function listOrders(): Promise<Order[]> {
   const [rows] = await pool.query<OrderRow[]>(
-    `${orderSelect} ORDER BY b.created_at DESC, b.id DESC`,
+    `${orderSelect}
+     WHERE (p.id IS NULL OR p.method = 'cash' OR p.status = 'paid')
+       AND b.status <> 'awaiting_payment'
+     ORDER BY b.created_at DESC, b.id DESC`,
   );
   return rows.map(mapOrder);
 }
@@ -157,13 +171,38 @@ function toDatabaseStatus(status: string | undefined): DatabaseOrderStatus | und
   return API_STATUS_TO_DATABASE[status];
 }
 
-async function resolveServiceId(name: string): Promise<number> {
-  const [rows] = await pool.query<RowDataPacket[]>(
-    'SELECT id FROM services WHERE name = ? AND is_active = TRUE LIMIT 1',
-    [name],
+async function resolveService(connection: PoolConnection, name: string, currentServiceId = 0) {
+  const [rows] = await connection.execute<RowDataPacket[]>(
+    'SELECT id, duration_minutes FROM services WHERE name = ? AND (is_active = TRUE OR id = ?) LIMIT 1',
+    [name, currentServiceId],
   );
   if (!rows[0]) throw new Error('SERVICE_NOT_FOUND');
-  return Number(rows[0].id);
+  return { id: Number(rows[0].id), duration: Number(rows[0].duration_minutes) };
+}
+
+function validateSchedule(date: string, time: string) {
+  const issue = validateBookingDate(date);
+  if (issue) throw new AppError(400, issue.message, issue.code);
+  if (!isValidSlot(time)) throw new AppError(400, 'Jam pengerjaan tidak valid.', 'INVALID_SLOT');
+  if (isSlotLeadTimePassed(date, time))
+    throw new AppError(409, 'Waktu pemesanan sudah lewat.', 'SLOT_CLOSED');
+}
+
+function positiveDuration(duration: number): number {
+  if (!Number.isInteger(duration) || duration <= 0)
+    throw new AppError(409, 'Durasi layanan tidak valid.', 'INVALID_DURATION');
+  return duration;
+}
+
+async function checkCapacity(connection: PoolConnection, date: string, time: string, duration: number, excludeId = 0) {
+  const { usage, capacity } = await capacityBoard(connection, date, duration, excludeId);
+  if (usage[time as keyof typeof usage] >= capacity)
+    throw new AppError(409, 'Slot sudah penuh.', 'SLOT_FULL');
+}
+
+async function lockCapacity(connection: PoolConnection) {
+  if (!(await acquireCapacityLock(connection)))
+    throw new AppError(409, 'Silakan coba kembali.', 'BUSY');
 }
 
 async function resolveAddressId(customerId: number): Promise<number> {
@@ -185,29 +224,41 @@ export async function insertBooking(input: {
   status: string;
   notes: string;
 }): Promise<Order> {
-  const serviceId = await resolveServiceId(input.serviceName);
+  validateSchedule(input.date, input.time);
   const addressId = await resolveAddressId(input.customerId);
   const code = `CG-${Date.now().toString(36).toUpperCase()}`;
-  const [result] = await pool.execute<ResultSetHeader>(
-    `INSERT INTO bookings
-       (booking_code, customer_id, service_id, address_id, scheduled_date,
-        scheduled_start_time, customer_notes, service_price, platform_fee,
-        discount_amount, total_amount, status)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?)`,
-    [
-      code,
-      input.customerId,
-      serviceId,
-      addressId,
-      input.date,
-      `${input.time}:00`,
-      input.notes || null,
-      input.price,
-      input.price,
-      toDatabaseStatus(input.status) ?? 'confirmed',
-    ],
-  );
-  const order = await findOrder(result.insertId);
+  const status = toDatabaseStatus(input.status);
+  if (!status) throw new Error('UNKNOWN_STATUS');
+  const connection = await pool.getConnection();
+  let locked = false;
+  let id: number;
+  try {
+    await lockCapacity(connection);
+    locked = true;
+    await connection.beginTransaction();
+    const service = await resolveService(connection, input.serviceName);
+    positiveDuration(service.duration);
+    if (status !== 'cancelled' && status !== 'rescheduled')
+      await checkCapacity(connection, input.date, input.time, service.duration);
+    const [result] = await connection.execute<ResultSetHeader>(
+      `INSERT INTO bookings
+         (booking_code, customer_id, service_id, address_id, scheduled_date,
+          scheduled_start_time, customer_notes, service_price, service_duration_minutes,
+          platform_fee, discount_amount, total_amount, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?)`,
+      [code, input.customerId, service.id, addressId, input.date,
+        `${input.time}:00`, input.notes || null, input.price, service.duration,
+        input.price, status],
+    );
+    id = result.insertId;
+    await connection.commit();
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    await releaseCapacityConnection(connection, locked);
+  }
+  const order = await findOrder(id);
   if (!order) throw new Error('Pesanan gagal dibaca setelah dibuat');
   return order;
 }
@@ -229,10 +280,21 @@ export async function updateBookingById(
     throw new Error('UNKNOWN_STATUS');
 
   const connection = await pool.getConnection();
+  let locked = false;
+  let notification: CustomerNotificationEvent | undefined;
+  let committed = false;
   try {
+    // Acquire before the booking row, matching customer reschedule lock order.
+    if (input.date !== undefined || input.time !== undefined || input.serviceName !== undefined || status === 'confirmed') {
+      await lockCapacity(connection);
+      locked = true;
+    }
     await connection.beginTransaction();
     const [rows] = await connection.execute<RowDataPacket[]>(
-      `SELECT status, customer_id AS customerId, address_id AS addressId,
+      `SELECT status, booking_code AS code, customer_id AS customerId, address_id AS addressId,
+         service_id AS serviceId, service_duration_minutes AS duration,
+         DATE_FORMAT(scheduled_date, '%Y-%m-%d') AS date,
+         TIME_FORMAT(scheduled_start_time, '%H:%i') AS time,
          (hold_until > NOW()) AS onHold
        FROM bookings WHERE id = ? FOR UPDATE`,
       [id],
@@ -242,6 +304,20 @@ export async function updateBookingById(
       return null;
     }
     const current = rows[0].status as DatabaseOrderStatus;
+
+    const startsWork = status !== undefined &&
+      ['confirmed', 'assigned', 'departed', 'en_route', 'in_progress', 'completed'].includes(status);
+    if (current === 'awaiting_payment' && (startsWork || input.staff?.some((name) => name.trim())))
+      throw new AppError(409, 'Pembayaran pesanan belum terverifikasi.', 'PAYMENT_REQUIRED');
+    if (startsWork || input.staff?.some((name) => name.trim())) {
+      const [payments] = await connection.execute<RowDataPacket[]>(
+        'SELECT method, status FROM payments WHERE booking_id = ? LIMIT 1 FOR UPDATE',
+        [id],
+      );
+      const payment = payments[0];
+      if (payment && payment.method !== 'cash' && payment.status !== 'paid')
+        throw new AppError(409, 'Pembayaran pesanan belum terverifikasi.', 'PAYMENT_REQUIRED');
+    }
 
     const fields: string[] = [];
     const values: (string | number)[] = [];
@@ -264,11 +340,27 @@ export async function updateBookingById(
       );
       values.push(input.price, input.price);
     }
-    if (input.serviceName !== undefined) {
-      fields.push('service_id = ?');
-      values.push(await resolveServiceId(input.serviceName));
+    const service = input.serviceName === undefined
+      ? null
+      : await resolveService(connection, input.serviceName, Number(rows[0].serviceId));
+    const serviceChanged = service !== null && service.id !== Number(rows[0].serviceId);
+    if (serviceChanged) {
+      fields.push('service_id = ?', 'service_duration_minutes = ?');
+      values.push(service.id, positiveDuration(service.duration));
     }
     const changed = status !== undefined && status !== current;
+    const reopensCapacity = current === 'rescheduled' && status === 'confirmed';
+    const scheduleChanged = serviceChanged ||
+      (input.date !== undefined && input.date !== rows[0].date) ||
+      (input.time !== undefined && input.time !== rows[0].time);
+    if (scheduleChanged || reopensCapacity) {
+      const date = input.date ?? String(rows[0].date);
+      const time = input.time ?? String(rows[0].time);
+      validateSchedule(date, time);
+      const duration = positiveDuration(serviceChanged ? service.duration : Number(rows[0].duration));
+      if (!['cancelled', 'rescheduled'].includes(status ?? current))
+        await checkCapacity(connection, date, time, duration, id);
+    }
     if (changed) {
       if (!canTransition(current, status)) {
         await connection.rollback();
@@ -300,8 +392,12 @@ export async function updateBookingById(
       await connection.rollback();
       return findOrder(id);
     }
-
     if (fields.length) {
+      if (input.time !== undefined || serviceChanged) {
+        fields.push(`scheduled_end_time = CASE WHEN scheduled_end_time IS NULL THEN NULL
+          ELSE ADDTIME(?, SEC_TO_TIME(service_duration_minutes * 60)) END`);
+        values.push(`${input.time ?? rows[0].time}:00`);
+      }
       values.push(id);
       await connection.execute(
         `UPDATE bookings SET ${fields.join(', ')} WHERE id = ?`,
@@ -309,6 +405,9 @@ export async function updateBookingById(
       );
     }
     if (changed) {
+      notification = await insertOrderStatusNotification(
+        connection, Number(rows[0].customerId), id, String(rows[0].code), status,
+      );
       await connection.execute(
         `INSERT INTO booking_status_history
            (booking_id, status, actor_type, actor_user_id, actor_cleaner_id, notes)
@@ -390,6 +489,7 @@ export async function updateBookingById(
       }
     }
     await connection.commit();
+    committed = true;
   } catch (error) {
     try {
       await connection.rollback();
@@ -398,7 +498,8 @@ export async function updateBookingById(
     }
     throw error;
   } finally {
-    connection.release();
+    await releaseCapacityConnection(connection, locked);
+    if (committed && notification) void notifyCustomerNotification(notification);
   }
   return findOrder(id);
 }

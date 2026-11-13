@@ -39,7 +39,12 @@ export async function getReportSummary(
          WHERE b.status = 'completed' AND DATE(b.completed_at) BETWEEN ? AND ?) AS completedOrders,
        (SELECT COUNT(*) FROM bookings b
          WHERE b.status IN ('confirmed','assigned','departed','en_route','in_progress')
-           AND b.scheduled_date BETWEEN ? AND ?) AS activeOrders,
+           AND b.scheduled_date BETWEEN ? AND ?
+            AND NOT EXISTS (
+              SELECT 1 FROM payments unpaid
+              WHERE unpaid.booking_id = b.id
+                AND unpaid.method <> 'cash' AND unpaid.status <> 'paid'
+            )) AS activeOrders,
        (SELECT COUNT(*) FROM bookings b
          WHERE b.status = 'cancelled' AND b.scheduled_date BETWEEN ? AND ?) AS cancelledOrders,
        (SELECT AVG(r.rating) FROM reviews r

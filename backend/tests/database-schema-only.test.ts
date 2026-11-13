@@ -50,6 +50,11 @@ describe('Putra schema-only migration', () => {
         sql.startsWith('CREATE TABLE IF NOT EXISTS cleaner_task_stages'),
       ),
     ).toBe(true);
+    for (const table of ['admin_notification_receipts', 'customer_push_devices']) {
+      expect(
+        queries.some((sql) => sql.startsWith(`CREATE TABLE IF NOT EXISTS ${table} (`)),
+      ).toBe(true);
+    }
     expect(
       queries.some((sql) => sql.includes('ADD CONSTRAINT `fk_cleaners_trainer` FOREIGN KEY (`trainer_id`)')),
     ).toBe(true);

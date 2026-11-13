@@ -23,7 +23,7 @@ function validateBody(body: unknown, allowPlatform: boolean) {
   const obj = body as Record<string, unknown>;
   for (const key of Object.keys(obj)) {
     if (!allowed.has(key)) {
-      throw new AppError(400, `Field '${key}' tidak dikenali.`, 'INVALID_FIELD');
+      throw new AppError(400, 'Field tidak dikenali.', 'INVALID_FIELD');
     }
   }
   if (!isValidToken(obj.token)) {
@@ -42,13 +42,14 @@ customerPushDeviceRouter.post('/', async (req, res, next) => {
   try {
     validateBody(req.body, true);
     const userId = (req as { user?: { id?: unknown } }).user?.id;
-    if (!userId || typeof userId !== 'number') {
+    if (typeof userId !== 'number' || !Number.isSafeInteger(userId) || userId <= 0) {
       throw new AppError(401, 'Identitas tidak ada.', 'IDENTITY_MISSING');
     }
     await registerPushDevice(userId, (req.body as { token: string }).token);
     res.json({ success: true });
   } catch (err) {
-    next(err);
+    // Database errors can contain SQL parameters, including device tokens.
+    next(err instanceof AppError ? err : new AppError(503, 'Registrasi perangkat tidak tersedia.', 'PUSH_DEVICE_UNAVAILABLE'));
   }
 });
 
@@ -56,12 +57,13 @@ customerPushDeviceRouter.delete('/', async (req, res, next) => {
   try {
     validateBody(req.body, false);
     const userId = (req as { user?: { id?: unknown } }).user?.id;
-    if (!userId || typeof userId !== 'number') {
+    if (typeof userId !== 'number' || !Number.isSafeInteger(userId) || userId <= 0) {
       throw new AppError(401, 'Identitas tidak ada.', 'IDENTITY_MISSING');
     }
     await unregisterPushDevice(userId, (req.body as { token: string }).token);
     res.json({ success: true });
   } catch (err) {
-    next(err);
+    // Database errors can contain SQL parameters, including device tokens.
+    next(err instanceof AppError ? err : new AppError(503, 'Registrasi perangkat tidak tersedia.', 'PUSH_DEVICE_UNAVAILABLE'));
   }
 });

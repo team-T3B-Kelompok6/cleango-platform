@@ -152,7 +152,7 @@ export function adminSeed(today: string) {
       status: 'Masa Training',
       joined: date(-14),
       area: 'Jakarta Selatan',
-      rating: 4.7,
+      completedBookings: 0,
       isDemo: true,
     },
     {
@@ -163,7 +163,7 @@ export function adminSeed(today: string) {
       status: 'Nonaktif',
       joined: date(-180),
       area: 'Bekasi',
-      rating: 4.8,
+      completedBookings: 0,
       isDemo: true,
     },
   ];

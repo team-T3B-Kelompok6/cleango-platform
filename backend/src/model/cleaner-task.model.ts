@@ -7,6 +7,12 @@ import { decryptLinkToken, encryptLinkToken } from '../lib/link-token.js';
 import { addressSql } from '../lib/address-display.js';
 import { pool } from '../lib/db.js';
 import { AppError } from '../lib/AppError.js';
+import {
+  insertOrderStatusNotification,
+  insertPaymentAcceptedNotification,
+  type CustomerNotificationEvent,
+} from './notification.model.js';
+import { notifyCustomerNotification } from '../lib/firebase-push.js';
 
 export type TaskStage = 'assigned' | 'en_route' | 'working' | 'completed';
 export type LinkStatus = 'active' | 'expired' | 'revoked' | 'completed';
@@ -173,7 +179,7 @@ async function settleCashOnCompletion(
   connection: PoolConnection,
   bookingId: number,
   total: number,
-): Promise<void> {
+): Promise<boolean> {
   const [rows] = await connection.execute<RowDataPacket[]>(
     'SELECT id, method, status FROM payments WHERE booking_id = ? FOR UPDATE',
     [bookingId],
@@ -185,14 +191,16 @@ async function settleCashOnCompletion(
        VALUES (?, 'cash', ?, 'paid', NOW())`,
       [bookingId, total],
     );
-    return;
+    return true;
   }
   if (String(payment.method) === 'cash' && String(payment.status) !== 'paid') {
     await connection.execute(
       "UPDATE payments SET status = 'paid', paid_at = NOW() WHERE id = ?",
       [Number(payment.id)],
     );
+    return true;
   }
+  return false;
 }
 
 export async function syncBookingStatus(
@@ -206,10 +214,12 @@ export async function syncBookingStatus(
 ): Promise<void> {
   const next = STAGE_STATUS[stage] as BookingStatus;
   const connection = await pool.getConnection();
+  const notifications: CustomerNotificationEvent[] = [];
+  let committed = false;
   try {
     await connection.beginTransaction();
     const [rows] = await connection.execute<RowDataPacket[]>(
-      'SELECT status, total_amount AS total FROM bookings WHERE id = ? FOR UPDATE',
+      'SELECT status, customer_id AS customerId, booking_code AS code, total_amount AS total FROM bookings WHERE id = ? FOR UPDATE',
       [bookingId],
     );
     if (!rows[0]) {
@@ -217,11 +227,37 @@ export async function syncBookingStatus(
       return;
     }
     const current = rows[0].status as BookingStatus;
+    if (current === 'awaiting_payment') {
+      throw new AppError(
+        409,
+        'Pesanan belum dikonfirmasi pembayarannya.',
+        'PAYMENT_REQUIRED',
+      );
+    }
     // Repeated or late cleaner events keep the current stage instead of
     // reopening an earlier one.
     if (current === next || !canTransition(current, next)) {
       await connection.rollback();
       return;
+    }
+    // Block cleaner work stages on unpaid non-cash bookings.
+    if (stage === 'en_route' || stage === 'working' || stage === 'completed') {
+      const [payRows] = await connection.execute<RowDataPacket[]>(
+        'SELECT method, status FROM payments WHERE booking_id = ? FOR UPDATE',
+        [bookingId],
+      );
+      const pay = payRows[0];
+      if (
+        pay &&
+        String(pay.method) !== 'cash' &&
+        String(pay.status) !== 'paid'
+      ) {
+        throw new AppError(
+          409,
+          'Pesanan non-tunai belum dibayar.',
+          'PAYMENT_REQUIRED',
+        );
+      }
     }
     await connection.execute(
       `UPDATE bookings SET status = ?,
@@ -229,16 +265,48 @@ export async function syncBookingStatus(
        WHERE id = ?`,
       [next, next, bookingId],
     );
+    const userId = Number(rows[0].customerId);
+    const code = String(rows[0].code);
+    notifications.push(
+      await insertOrderStatusNotification(
+        connection,
+        userId,
+        bookingId,
+        code,
+        next,
+      ),
+    );
     if (next === 'completed') {
-      await settleCashOnCompletion(connection, bookingId, Number(rows[0].total));
+      const settled = await settleCashOnCompletion(
+        connection,
+        bookingId,
+        Number(rows[0].total),
+      );
+      if (settled) {
+        notifications.push(
+          await insertPaymentAcceptedNotification(
+            connection,
+            userId,
+            bookingId,
+            code,
+          ),
+        );
+      }
     }
     await connection.execute(
       `INSERT INTO booking_status_history
          (booking_id, status, actor_type, actor_user_id, actor_cleaner_id)
        VALUES (?, ?, ?, ?, ?)`,
-      [bookingId, next, actor.type, actor.userId ?? null, actor.cleanerId ?? null],
+      [
+        bookingId,
+        next,
+        actor.type,
+        actor.userId ?? null,
+        actor.cleanerId ?? null,
+      ],
     );
     await connection.commit();
+    committed = true;
   } catch (error) {
     try {
       await connection.rollback();
@@ -248,6 +316,11 @@ export async function syncBookingStatus(
     throw error;
   } finally {
     connection.release();
+    if (committed) {
+      for (const item of notifications) {
+        void notifyCustomerNotification(item);
+      }
+    }
   }
 }
 
@@ -280,16 +353,17 @@ export async function saveLocation(
   assignmentId: number,
   latitude: number,
   longitude: number,
+  capturedAt: Date,
 ): Promise<void> {
   await pool.execute(
     `INSERT INTO cleaner_task_stages
        (assignment_id, latitude, longitude, location_updated_at)
-     VALUES (?, ?, ?, NOW())
+     VALUES (?, ?, ?, ?)
      ON DUPLICATE KEY UPDATE
        latitude = VALUES(latitude),
        longitude = VALUES(longitude),
-       location_updated_at = NOW()`,
-    [assignmentId, latitude, longitude],
+       location_updated_at = VALUES(location_updated_at)`,
+    [assignmentId, latitude, longitude, capturedAt],
   );
 }
 
@@ -359,6 +433,13 @@ export async function revokeAssignment(assignmentId: number): Promise<boolean> {
 }
 
 export function assertUsable(row: TaskRow): void {
+  if (row.orderStatus === 'awaiting_payment') {
+    throw new AppError(
+      409,
+      'Pesanan belum dikonfirmasi pembayarannya.',
+      'PAYMENT_REQUIRED',
+    );
+  }
   if (row.linkStatus === 'revoked')
     throw new AppError(
       410,
@@ -399,7 +480,10 @@ export function intervalsOverlap(
 }
 
 // shortcut: only the work interval is compared; travel time is not modelled yet.
-export async function ensureLinkPath(row: { assignmentId: number; linkTokenEnc: string | null }): Promise<string | undefined> {
+export async function ensureLinkPath(row: {
+  assignmentId: number;
+  linkTokenEnc: string | null;
+}): Promise<string | undefined> {
   const existing = decryptLinkToken(row.linkTokenEnc);
   if (existing) return `/tugas/${existing}`;
   // Links issued before encrypted storage only keep a hash; rotate once to
@@ -409,7 +493,9 @@ export async function ensureLinkPath(row: { assignmentId: number; linkTokenEnc: 
   return `/tugas/${rotated.token}`;
 }
 
-export function linkPathFor(row: { linkTokenEnc: string | null }): string | undefined {
+export function linkPathFor(row: {
+  linkTokenEnc: string | null;
+}): string | undefined {
   const token = decryptLinkToken(row.linkTokenEnc);
   return token ? `/tugas/${token}` : undefined;
 }
@@ -440,6 +526,28 @@ export async function assignCleaner(input: {
       await connection.rollback();
       throw new AppError(404, 'Pesanan tidak ditemukan.');
     }
+    if (booking.status === 'awaiting_payment') {
+      throw new AppError(
+        409,
+        'Pesanan belum dikonfirmasi pembayarannya.',
+        'PAYMENT_REQUIRED',
+      );
+    }
+    const [paymentRows] = await connection.execute<RowDataPacket[]>(
+      'SELECT method, status FROM payments WHERE booking_id = ? FOR UPDATE',
+      [input.bookingId],
+    );
+    if (
+      paymentRows[0] &&
+      paymentRows[0].method !== 'cash' &&
+      paymentRows[0].status !== 'paid'
+    ) {
+      throw new AppError(
+        409,
+        'Pesanan non-tunai belum dibayar.',
+        'PAYMENT_REQUIRED',
+      );
+    }
     if (Number(booking.onHold) === 1) {
       await connection.rollback();
       throw new AppError(
@@ -449,13 +557,20 @@ export async function assignCleaner(input: {
       );
     }
 
-    if (['cancelled', 'completed', 'rescheduled'].includes(String(booking.status)))
-      throw new AppError(409, 'Pesanan ini tidak dapat ditugaskan.', 'ASSIGNMENT_NOT_ALLOWED');
+    if (
+      ['cancelled', 'completed', 'rescheduled'].includes(String(booking.status))
+    )
+      throw new AppError(
+        409,
+        'Pesanan ini tidak dapat ditugaskan.',
+        'ASSIGNMENT_NOT_ALLOWED',
+      );
 
     // Serialize assignments per cleaner for the same day.
-    await connection.execute('SELECT id FROM cleaners WHERE id = ? FOR UPDATE', [
-      input.cleanerId,
-    ]);
+    await connection.execute(
+      'SELECT id FROM cleaners WHERE id = ? FOR UPDATE',
+      [input.cleanerId],
+    );
     const [busyRows] = await connection.execute<RowDataPacket[]>(
       `SELECT b.booking_code AS code,
          TIME_FORMAT(b.scheduled_start_time, '%H:%i') AS startTime,
@@ -480,7 +595,10 @@ export async function assignCleaner(input: {
     );
     if (clash) {
       await connection.rollback();
-      throw new AssignmentConflictError(String(clash.code), String(clash.startTime));
+      throw new AssignmentConflictError(
+        String(clash.code),
+        String(clash.startTime),
+      );
     }
 
     // Jeda 2 jam: tugas baru tidak boleh mulai sebelum 2 jam setelah tugas
@@ -504,14 +622,15 @@ export async function assignCleaner(input: {
       const sameDay =
         String(row.date) === String(booking.date) ||
         // Tugas kemarin yang selesai melewati tengah malam juga dihitung.
-        addDays(String(row.date), 1) === String(booking.date) &&
-          timeToMinutes(String(row.startTime)) + Number(row.duration) > 24 * 60;
+        (addDays(String(row.date), 1) === String(booking.date) &&
+          timeToMinutes(String(row.startTime)) + Number(row.duration) >
+            24 * 60);
       if (!sameDay) return false;
       const endMinutes =
-        (timeToMinutes(String(row.startTime)) + Number(row.duration)) % (24 * 60);
+        (timeToMinutes(String(row.startTime)) + Number(row.duration)) %
+        (24 * 60);
       const newStart = timeToMinutes(String(booking.startTime));
-      const startBase =
-        String(row.date) === String(booking.date) ? 0 : 24 * 60;
+      const startBase = String(row.date) === String(booking.date) ? 0 : 24 * 60;
       const restEnd = startBase + endMinutes + breakMinutes;
       return newStart < restEnd;
     });

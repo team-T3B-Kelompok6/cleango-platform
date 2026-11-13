@@ -1,8 +1,16 @@
 import { Router } from 'express';
 import { authenticate } from '../../middleware/auth.middleware.js';
-import { chat } from '../../controller/chatbot.controller.js';
+import { chat, suggestions } from '../../controller/chatbot.controller.js';
 
 export const customerChatbotRouter = Router();
+customerChatbotRouter.get(
+  '/suggestions',
+  (request, response, next) => {
+    if (request.header('authorization')) authenticate(request, response, next);
+    else next();
+  },
+  suggestions,
+);
 const limits = new Map<string, { count: number; until: number }>();
 customerChatbotRouter.post(
   '/',
@@ -19,11 +27,9 @@ customerChatbotRouter.post(
           'Retry-After',
           Math.ceil((entry.until - now) / 1000),
         );
-        response
-          .status(429)
-          .json({
-            message: 'Terlalu banyak pesan. Tunggu sebentar lalu coba lagi.',
-          });
+        response.status(429).json({
+          message: 'Terlalu banyak pesan. Tunggu sebentar lalu coba lagi.',
+        });
         return;
       }
       entry.count++;

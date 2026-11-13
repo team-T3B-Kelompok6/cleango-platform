@@ -54,9 +54,6 @@ export async function StaffDetailServer({
     related<Schedule>('schedules'),
   ]);
   const orders = rawOrders ? await withOrderWorkTimes(rawOrders) : null;
-  const ownOrders = orders?.filter(
-    (order) => Array.isArray(order.staff) && order.staff.includes(staff.name),
-  );
   const ownSchedules = schedules?.filter(
     (schedule) =>
       typeof schedule.staff === 'string' &&
@@ -67,9 +64,7 @@ export async function StaffDetailServer({
   );
   const activeOrder = orders ? activeOrderForStaff(staff, orders) : undefined;
   const task = activeOrder;
-  const completed = ownOrders?.filter(
-    (order) => order.status === 'Selesai',
-  ).length;
+  const completed = staff.completedBookings ?? 0;
   const skills = Array.isArray(staff.skills)
     ? staff.skills.filter((skill) => typeof skill === 'string' && skill.trim())
     : [];
@@ -97,23 +92,9 @@ export async function StaffDetailServer({
             <span className="staff-profile-id">#{displayId(staff.id)}</span>
           </div>
           <StaffPhone phone={phone} href={href} />
-          {((typeof staff.rating === 'number' &&
-            Number.isFinite(staff.rating) &&
-            staff.rating >= 0 &&
-            staff.rating <= 5) ||
-            completed !== undefined) && (
+          {completed !== undefined && (
             <p className="staff-profile-history">
-              {typeof staff.rating === 'number' &&
-                Number.isFinite(staff.rating) &&
-                staff.rating >= 0 &&
-                staff.rating <= 5 && (
-                  <span>
-                    <UiIcon name="star" /> {staff.rating.toFixed(1)}
-                  </span>
-                )}
-              {completed !== undefined && (
-                <span>{completed} pesanan selesai tercatat</span>
-              )}
+              <span>{completed} pesanan selesai tercatat</span>
             </p>
           )}
         </div>

@@ -64,12 +64,6 @@ export function PeopleList({ shown, resource, edit }: RecordListProps) {
                   />
                 )}
                 {valueText(item.name)}
-                {resource === 'staff' && typeof item.rating === 'number' && (
-                  <span className="staff-rating">
-                    <UiIcon name="star" />
-                    {item.rating.toFixed(1)}
-                  </span>
-                )}
               </h3>
               <p>
                 WhatsApp: {valueText(item.phone)}

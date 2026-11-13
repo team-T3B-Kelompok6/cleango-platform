@@ -197,7 +197,11 @@ export async function postCleanerEvent(
       if (!firstAttempt) {
         const fresh = await findAssignmentByTokenHash(hashToken(token));
         if (!fresh)
-          throw new AppError(404, 'Link tugas tidak tersedia.', 'TASK_NOT_FOUND');
+          throw new AppError(
+            404,
+            'Link tugas tidak tersedia.',
+            'TASK_NOT_FOUND',
+          );
         const photos = await listPhotos(fresh.assignmentId);
         response.status(200).json({ data: publicTask(fresh, photos) });
         return;
@@ -208,6 +212,28 @@ export async function postCleanerEvent(
     if (kind === 'location') {
       const latitude = body.latitude;
       const longitude = body.longitude;
+      const capturedAt = body.capturedAt;
+      if (
+        typeof capturedAt !== 'number' ||
+        !Number.isFinite(capturedAt) ||
+        capturedAt > Date.now() ||
+        Date.now() - capturedAt > 30000
+      )
+        throw new AppError(
+          400,
+          'Waktu pengambilan GPS tidak valid atau sudah usang.',
+          'VALIDATION_ERROR',
+        );
+      if (
+        current !== 'en_route' ||
+        row.linkStatus !== 'active' ||
+        !['en_route', 'departed'].includes(row.orderStatus)
+      )
+        throw new AppError(
+          409,
+          'GPS hanya tersedia saat cleaner sedang menuju lokasi.',
+          'INVALID_TASK_STAGE',
+        );
       if (
         typeof latitude !== 'number' ||
         !Number.isFinite(latitude) ||
@@ -218,7 +244,12 @@ export async function postCleanerEvent(
       )
         throw new AppError(400, 'Lokasi tidak valid.', 'VALIDATION_ERROR');
       await touchLocationSharing(row.assignmentId);
-      await saveLocation(row.assignmentId, latitude, longitude);
+      await saveLocation(
+        row.assignmentId,
+        latitude,
+        longitude,
+        new Date(capturedAt),
+      );
     } else if (kind === 'depart') {
       await advance(row, current, 'en_route');
     } else if (kind === 'arrive') {
@@ -241,16 +272,16 @@ export async function postCleanerEvent(
           'INVALID_TASK_STAGE',
         );
       if (current !== 'completed') {
+        await syncBookingStatus(row.bookingId, 'completed', {
+          type: 'cleaner',
+          cleanerId: row.cleanerId,
+        });
         await saveStage(
           row.assignmentId,
           'completed',
           summary,
           body.checked === true,
         );
-        await syncBookingStatus(row.bookingId, 'completed', {
-          type: 'cleaner',
-          cleanerId: row.cleanerId,
-        });
       }
     } else if (kind === 'remove_photo') {
       const photoId = typeof body.photoId === 'string' ? body.photoId : '';
@@ -283,11 +314,11 @@ async function advance(
 ): Promise<void> {
   const order: TaskStage[] = ['assigned', 'en_route', 'working', 'completed'];
   if (order.indexOf(to) <= order.indexOf(from)) return;
-  await saveStage(row.assignmentId, to);
   await syncBookingStatus(row.bookingId, to, {
     type: 'cleaner',
     cleanerId: row.cleanerId,
   });
+  await saveStage(row.assignmentId, to);
 }
 
 export async function postCleanerPhoto(
@@ -367,9 +398,9 @@ export async function getAdminTaskBoard(
         address: row.address ?? '',
         date: row.orderDate,
         time: row.orderTime,
-    orderStatus: statusLabel(row.orderStatus),
-    publicPath: await ensureLinkPath(row),
-    task: publicTask(row, []),
+        orderStatus: statusLabel(row.orderStatus),
+        publicPath: await ensureLinkPath(row),
+        task: publicTask(row, []),
         destinationLocation:
           row.destinationLatitude !== null && row.destinationLongitude !== null
             ? {
@@ -407,6 +438,13 @@ export async function resendAdminLink(
         'Penugasan tidak ditemukan.',
         'ASSIGNMENT_NOT_FOUND',
       );
+    if (row.orderStatus === 'awaiting_payment') {
+      throw new AppError(
+        409,
+        'Pesanan belum dikonfirmasi pembayarannya.',
+        'PAYMENT_REQUIRED',
+      );
+    }
     const { token, expiresAt } = await rotateLink(row.assignmentId);
     response.status(200).json({
       data: {

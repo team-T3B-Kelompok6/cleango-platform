@@ -223,6 +223,15 @@ const knowledge: (ChatSource & { matches: RegExp })[] = [
   },
 ];
 
+export function knowledgeSuggestions(): string[] {
+  return [
+    'Apa itu CleanGo?',
+    'Bagaimana cara booking layanan?',
+    'Bagaimana cara pembayaran?',
+    'Bagaimana jika cleaner terlambat?',
+  ];
+}
+
 export function knowledgeFor(question: string): ChatSource[] {
   const text = chatSearchText(question);
   return knowledge

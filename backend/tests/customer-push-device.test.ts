@@ -8,14 +8,14 @@ const authUser = vi.hoisted(() => ({ id: 1 as number | undefined, role: 'custome
 
 vi.mock('../src/middleware/auth.middleware.js', () => ({
   authenticate: (req: any, _res: any, next: any) => {
-    if (authUser.value.id === undefined) {
+    if (authUser.id === undefined) {
       const err: any = new Error('Identitas tidak ada.');
       err.statusCode = 401;
       err.code = 'IDENTITY_MISSING';
       next(err);
       return;
     }
-    req.user = { id: authUser.value.id, role: authUser.value.role };
+    req.user = { id: authUser.id, role: authUser.role };
     next();
   },
   requireCustomer: (req: any, _res: any, next: any) => {
@@ -49,7 +49,7 @@ app.use((err: any, _req: any, res: any, _next: any) => {
 
 beforeEach(() => {
   vi.resetAllMocks();
-  authUser.value = { id: 1, role: 'customer' };
+  Object.assign(authUser, { id: 1, role: 'customer' });
 });
 
 const validToken = 'a'.repeat(32);
@@ -64,7 +64,7 @@ describe('POST /notifications/devices', () => {
   });
 
   it('menggunakan userId dari JWT sebagai pemilik', async () => {
-    authUser.value = { id: 42, role: 'customer' };
+    Object.assign(authUser, { id: 42, role: 'customer' });
     registerMock.mockResolvedValue(undefined);
     const token = 'b'.repeat(40);
     await request(app).post('/notifications/devices').send({ token });
@@ -72,7 +72,7 @@ describe('POST /notifications/devices', () => {
   });
 
   it('mengembalikan 401 saat identitas tidak ada', async () => {
-    authUser.value = { id: undefined, role: 'customer' };
+    Object.assign(authUser, { id: undefined, role: 'customer' });
     registerMock.mockResolvedValue(undefined);
     const res = await request(app).post('/notifications/devices').send({ token: validToken });
     expect(res.status).toBe(401);
@@ -80,7 +80,7 @@ describe('POST /notifications/devices', () => {
   });
 
   it('menolak role admin dengan 403', async () => {
-    authUser.value = { id: 7, role: 'admin' };
+    Object.assign(authUser, { id: 7, role: 'admin' });
     registerMock.mockResolvedValue(undefined);
     const res = await request(app).post('/notifications/devices').send({ token: validToken });
     expect(res.status).toBe(403);
@@ -103,6 +103,13 @@ describe('POST /notifications/devices', () => {
   });
 });
 
+it('redacts DB errors containing tokens before global logging', async () => {
+  registerMock.mockRejectedValue(new Error(`SQL failed: ${validToken}`));
+  const res = await request(app).post('/notifications/devices').send({ token: validToken });
+  expect(res.status).toBe(503);
+  expect(JSON.stringify(res.body)).not.toContain(validToken);
+});
+
 describe('DELETE /notifications/devices', () => {
   it('mengembalikan {success:true} dan memanggil model', async () => {
     unregisterMock.mockResolvedValue(undefined);
@@ -113,7 +120,7 @@ describe('DELETE /notifications/devices', () => {
   });
 
   it('menggunakan userId dari JWT untuk unregister', async () => {
-    authUser.value = { id: 99, role: 'customer' };
+    Object.assign(authUser, { id: 99, role: 'customer' });
     unregisterMock.mockResolvedValue(undefined);
     const token = 'c'.repeat(36);
     await request(app).delete('/notifications/devices').send({ token });
@@ -121,7 +128,7 @@ describe('DELETE /notifications/devices', () => {
   });
 
   it('mengembalikan 401 saat identitas tidak ada', async () => {
-    authUser.value = { id: undefined, role: 'customer' };
+    Object.assign(authUser, { id: undefined, role: 'customer' });
     unregisterMock.mockResolvedValue(undefined);
     const res = await request(app).delete('/notifications/devices').send({ token: validToken });
     expect(res.status).toBe(401);
@@ -129,7 +136,7 @@ describe('DELETE /notifications/devices', () => {
   });
 
   it('menolak role admin dengan 403', async () => {
-    authUser.value = { id: 7, role: 'admin' };
+    Object.assign(authUser, { id: 7, role: 'admin' });
     unregisterMock.mockResolvedValue(undefined);
     const res = await request(app).delete('/notifications/devices').send({ token: validToken });
     expect(res.status).toBe(403);

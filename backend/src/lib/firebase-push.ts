@@ -1,4 +1,5 @@
 import { GoogleAuth } from 'google-auth-library';
+import type { CustomerNotificationEvent } from '../model/notification.model.js';
 import { listPushDevices, unregisterPushDevice } from '../model/customer-push-device.model.js';
 
 const FCM_SCOPE = 'https://www.googleapis.com/auth/firebase.messaging';
@@ -40,17 +41,23 @@ async function sendPush(
   token: string,
   projectId: string,
   accessToken: string,
+  event: CustomerNotificationEvent,
 ): Promise<'sent' | 'unregistered' | 'failed'> {
+  const data: Record<string, string> = { type: event.type };
+  if (event.notificationId && event.notificationId !== '0') {
+    data.notificationId = event.notificationId;
+  }
+  if (event.bookingId && event.bookingId > 0) {
+    data.bookingId = String(event.bookingId);
+  }
   const body = JSON.stringify({
     message: {
       token,
-      notification: {
-        title: 'CleanGo',
-        body: 'Pesanan berhasil dibuat.',
+      notification: { title: event.title, body: event.message },
+      android: {
+        notification: { channel_id: 'cleango_orders', icon: 'ic_notification' },
       },
-      data: {
-        type: 'order',
-      },
+      data,
     },
   });
   try {
@@ -77,24 +84,37 @@ async function sendPush(
   }
 }
 
-export async function notifyBookingCreated(userId: number): Promise<void> {
+export async function notifyCustomerNotification(
+  event: CustomerNotificationEvent,
+): Promise<void> {
   try {
     const projectId = process.env.CLEANGO_FCM_PROJECT_ID;
     if (!projectId || !process.env.GOOGLE_APPLICATION_CREDENTIALS) return;
     if (!isValidProjectId(projectId)) return;
-    const tokens = await listPushDevices(userId);
+    const tokens = await listPushDevices(event.userId);
     if (!tokens.length) return;
     const auth = getAuthClient();
     if (!auth) return;
     const accessToken = await auth.getAccessToken();
     if (!accessToken) return;
     for (const token of tokens) {
-      const result = await sendPush(token, projectId, accessToken);
+      const result = await sendPush(token, projectId, accessToken, event);
       if (result === 'unregistered') {
-        await unregisterPushDevice(userId, token).catch(() => {});
+        await unregisterPushDevice(event.userId, token).catch(() => {});
       }
     }
   } catch {
-    // FCM gagal tidak boleh mengganggu alur aplikasi utama.
+    // FCM failure must not break main transaction or business flow.
   }
+}
+
+export function notifyBookingCreated(userId: number, bookingId: number = 0): Promise<void> {
+  return notifyCustomerNotification({
+    notificationId: '0',
+    userId,
+    bookingId,
+    type: 'order',
+    title: 'CleanGo',
+    message: 'Pesanan berhasil dibuat.',
+  });
 }

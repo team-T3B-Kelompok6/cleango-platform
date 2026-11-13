@@ -21,7 +21,14 @@ vi.mock('../src/config/env.js', async (original) => {
     getEnv: () => ({ ...actual.getEnv(), CHATBOT_DATABASE_ENABLED: true }),
   };
 });
-vi.mock('../src/model/faq.model.js', () => ({ listFaqs: models.faqs }));
+vi.mock('../src/model/faq.model.js', () => ({
+  listFaqs: models.faqs,
+  listPublishedFaqs: vi.fn(async () =>
+    (await models.faqs()).filter(
+      (item: { published: boolean }) => item.published,
+    ),
+  ),
+}));
 vi.mock('../src/model/service.model.js', () => ({
   findServices: models.services,
   findServiceInclusions: models.inclusions,
@@ -88,6 +95,38 @@ beforeEach(() => {
 });
 
 describe('chatbot grounding and access', () => {
+  it('returns dynamic suggestions from published FAQ and active database services', async () => {
+    const response = await request(app).get('/api/customer/chat/suggestions');
+    expect(response.status).toBe(200);
+    expect(response.body.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          question: 'Bagaimana pembayaran?',
+          source: 'faq',
+        }),
+        expect.objectContaining({
+          question: expect.stringContaining('Deep Cleaning'),
+          source: 'database',
+        }),
+      ]),
+    );
+    expect(
+      response.body.data.some((item: { question: string }) =>
+        item.question.includes('Rahasia internal'),
+      ),
+    ).toBe(false);
+  });
+
+  it('adds order suggestion only for authenticated customer with database enabled', async () => {
+    const response = await request(app)
+      .get('/api/customer/chat/suggestions')
+      .set('Authorization', `Bearer ${token(44)}`);
+    expect(response.status).toBe(200);
+    expect(response.body.data).toEqual(
+      expect.arrayContaining([expect.objectContaining({ source: 'order' })]),
+    );
+  });
+
   it.each([
     'apa itu clean go',
     'clean go itu apa?',

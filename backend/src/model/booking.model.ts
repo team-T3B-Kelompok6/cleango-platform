@@ -1,4 +1,5 @@
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
+import type { Pool, PoolConnection } from 'mysql2/promise';
 import { addressSql } from '../lib/address-display.js';
 import { pool } from '../lib/db.js';
 
@@ -20,7 +21,16 @@ export const BOOKING_MAX_DAYS_AHEAD = 30;
 export const BOOKING_MIN_LEAD_MINUTES = 60;
 export const PLATFORM_FEE = 5000;
 
-const CAPACITY_PER_SLOT = 3;
+// One lock serializes capacity writes across start slots and midnight boundaries.
+// ponytail: single MySQL server; all capacity-increasing writers must use this lock.
+const CAPACITY_LOCK = 'cleango_booking_capacity';
+
+export async function acquireCapacityLock(connection: PoolConnection): Promise<boolean> {
+  const [rows] = await connection.execute<RowDataPacket[]>(
+    'SELECT GET_LOCK(?, 5) AS ok', [CAPACITY_LOCK],
+  );
+  return Number(rows[0]?.ok ?? 0) === 1;
+}
 
 export interface SlotAvailability {
   time: BookingSlot;
@@ -113,24 +123,86 @@ export async function slotUsage(
   return usage;
 }
 
+// All non-cancelled reservations consume capacity, including pending payments.
+// Do not infer cancellation from hold_until or a provider's local expiry.
+export async function capacityBoard(
+  db: Pool | PoolConnection,
+  date: string,
+  duration: number,
+  excludeId = 0,
+) {
+  const [staff] = await db.execute<RowDataPacket[]>(
+    'SELECT COUNT(*) AS total FROM cleaners WHERE is_active = TRUE',
+  );
+  const [bookings] = await db.execute<RowDataPacket[]>(
+    `SELECT TIMESTAMPDIFF(MINUTE, TIMESTAMP(?),
+        TIMESTAMP(scheduled_date, scheduled_start_time)) AS start,
+        service_duration_minutes AS duration
+     FROM bookings
+     WHERE status NOT IN ('cancelled', 'rescheduled') AND id <> ?
+       AND TIMESTAMP(scheduled_date, scheduled_start_time) < TIMESTAMPADD(MINUTE, ?, TIMESTAMP(?))
+       AND TIMESTAMPADD(MINUTE, service_duration_minutes,
+         TIMESTAMP(scheduled_date, scheduled_start_time)) > TIMESTAMP(?)`,
+    [date, excludeId, slotStartMinutes('16:00') + duration, date, date],
+  );
+  const usage = Object.fromEntries(BOOKING_SLOTS.map((time) => {
+    const start = slotStartMinutes(time);
+    const end = start + duration;
+    const events: [number, number][] = [];
+    for (const booking of bookings) {
+      const busyStart = Number(booking.start);
+      const busyEnd = busyStart + Number(booking.duration);
+      if (busyStart < end && busyEnd > start)
+        events.push([Math.max(start, busyStart), 1], [Math.min(end, busyEnd), -1]);
+    }
+    // Half-open intervals: finishing exactly at another start is not an overlap.
+    events.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    let current = 0;
+    let peak = 0;
+    for (const [, delta] of events) peak = Math.max(peak, current += delta);
+    return [time, peak];
+  })) as Record<BookingSlot, number>;
+  return { usage, capacity: Number(staff[0]?.total ?? 0) };
+}
+
 export async function listAvailability(
   isoDate: string,
   serviceId?: number | null,
+  customerId?: number,
 ): Promise<{
   date: string;
   slots: SlotAvailability[];
   serviceActive: boolean | null;
 }> {
-  const usage = await slotUsage(isoDate);
   let serviceActive: boolean | null = null;
-  if (serviceId) serviceActive = await isServiceActive(serviceId);
+  let duration = 60;
+  if (serviceId) {
+    const [services] = await pool.execute<RowDataPacket[]>(
+      'SELECT is_active, duration_minutes FROM services WHERE id = ? LIMIT 1', [serviceId],
+    );
+    serviceActive = Boolean(services[0]?.is_active);
+    duration = Number(services[0]?.duration_minutes ?? 60);
+  }
+  const { usage, capacity } = await capacityBoard(pool, isoDate, duration);
+  const duplicates = new Set<string>();
+  if (customerId && serviceId) {
+    const [bookings] = await pool.execute<RowDataPacket[]>(
+      `SELECT TIME_FORMAT(scheduled_start_time, '%H:%i') AS slot FROM bookings
+       WHERE customer_id = ? AND service_id = ? AND scheduled_date = ?
+         AND status NOT IN ('cancelled', 'rescheduled')`,
+      [customerId, serviceId, isoDate],
+    );
+    for (const booking of bookings) duplicates.add(String(booking.slot));
+  }
 
   const slots = BOOKING_SLOTS.map((time) => {
     if (serviceId && serviceActive === false)
       return { time, available: false, reason: 'Layanan sedang tidak tersedia.' };
     if (isSlotLeadTimePassed(isoDate, time))
       return { time, available: false, reason: 'Waktu pemesanan sudah lewat.' };
-    if (usage[time] >= CAPACITY_PER_SLOT)
+    if (duplicates.has(time))
+      return { time, available: false, reason: 'Anda sudah memesan layanan pada slot ini.' };
+    if (usage[time] >= capacity)
       return { time, available: false, reason: 'Slot sudah penuh.' };
     return { time, available: true };
   });
@@ -219,45 +291,43 @@ function isLockConflict(error: unknown): boolean {
   return errno === 1213 || errno === 1205;
 }
 
+export async function releaseCapacityConnection(connection: PoolConnection, locked: boolean) {
+  if (locked) {
+    try {
+      await connection.execute('SELECT RELEASE_LOCK(?)', [CAPACITY_LOCK]);
+    } catch {
+      // Returning a still-locked session to the pool would leak the advisory lock.
+      connection.destroy();
+      return;
+    }
+  }
+  connection.release();
+}
+
 // Slot capacity and duplicate requests are checked inside one transaction so two
 // concurrent submissions cannot both pass the availability check.
 export async function createBooking(input: CreateBookingInput): Promise<{
   id: number;
   code: string;
 }> {
-  const lockName = `cleango_slot_${input.date}_${input.time}`;
+  // One lock also covers durations that cross midnight and different start slots.
   const connection = await pool.getConnection();
   let locked = false;
   try {
-    const [lockRows] = await connection.execute<RowDataPacket[]>(
-      'SELECT GET_LOCK(?, 5) AS ok',
-      [lockName],
-    );
-    if (Number(lockRows[0]?.ok ?? 0) !== 1) throw new BookingConflictError('BUSY');
+    if (!(await acquireCapacityLock(connection))) throw new BookingConflictError('BUSY');
     locked = true;
 
     await connection.beginTransaction();
 
     const [existing] = await connection.execute<RowDataPacket[]>(
       `SELECT id FROM bookings
-       WHERE customer_id = ? AND scheduled_date = ? AND scheduled_start_time = ?
+       WHERE customer_id = ? AND service_id = ? AND scheduled_date = ? AND scheduled_start_time = ?
          AND status NOT IN ('cancelled', 'rescheduled')`,
-      [input.customerId, input.date, `${input.time}:00`],
+      [input.customerId, input.serviceId, input.date, `${input.time}:00`],
     );
     if (existing.length > 0) {
       await connection.rollback();
       throw new BookingConflictError('DUPLICATE');
-    }
-
-    const [countRows] = await connection.execute<RowDataPacket[]>(
-      `SELECT COUNT(*) AS total FROM bookings
-       WHERE scheduled_date = ? AND scheduled_start_time = ?
-         AND status NOT IN ('cancelled', 'rescheduled')`,
-      [input.date, `${input.time}:00`],
-    );
-    if (Number(countRows[0]?.total ?? 0) >= CAPACITY_PER_SLOT) {
-      await connection.rollback();
-      throw new BookingConflictError('SLOT_FULL');
     }
 
     const [serviceRows] = await connection.execute<RowDataPacket[]>(
@@ -271,6 +341,8 @@ export async function createBooking(input: CreateBookingInput): Promise<{
     }
     const price = Number(serviceRow.price);
     const durationMinutes = Number(serviceRow.duration_minutes);
+    const { usage, capacity } = await capacityBoard(connection, input.date, durationMinutes);
+    if (usage[input.time] >= capacity) throw new BookingConflictError('SLOT_FULL');
     const discount = Math.min(
       Math.max(0, Math.round(input.promo?.discountAmount ?? 0)),
       price,
@@ -303,7 +375,7 @@ export async function createBooking(input: CreateBookingInput): Promise<{
          (booking_code, customer_id, service_id, address_id, promo_id, scheduled_date,
           scheduled_start_time, customer_notes, service_price, service_duration_minutes,
           platform_fee, discount_amount, total_amount, status, hold_until)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'confirmed',
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'awaiting_payment',
          DATE_ADD(NOW(), INTERVAL 15 SECOND))`,
       [
         code,
@@ -336,11 +408,11 @@ export async function createBooking(input: CreateBookingInput): Promise<{
 
     await connection.execute(
       `INSERT INTO notifications (recipient_user_id, booking_id, type, title, message)
-       VALUES (?, ?, 'order', 'Pesanan Dikonfirmasi', ?)`,
+       VALUES (?, ?, 'order', 'Pesanan Dibuat', ?)`,
       [
         input.customerId,
         result.insertId,
-        `Pesanan ${code} untuk ${input.date} pukul ${input.time} telah dibuat dan menunggu penugasan cleaner.`,
+        `Pesanan ${code} untuk ${input.date} pukul ${input.time} telah dibuat. Pilih pembayaran tunai atau selesaikan pembayaran digital sebelum penugasan cleaner.`,
       ],
     );
 
@@ -355,14 +427,7 @@ export async function createBooking(input: CreateBookingInput): Promise<{
     if (isLockConflict(error)) throw new BookingConflictError('BUSY');
     throw error;
   } finally {
-    if (locked) {
-      try {
-        await connection.execute('SELECT RELEASE_LOCK(?)', [lockName]);
-      } catch {
-        // the lock is released with the connection anyway
-      }
-    }
-    connection.release();
+    await releaseCapacityConnection(connection, locked);
   }
 }
 
@@ -457,18 +522,14 @@ export async function rescheduleCustomerBooking(
   const issue = validateBookingDate(date);
   if (issue) return { ok: false, reason: issue.code };
   if (!isValidSlot(time)) return { ok: false, reason: 'INVALID_SLOT' };
-  const lockName = `cleango_slot_${date}_${time}`;
   const connection = await pool.getConnection();
   let locked = false;
   try {
-    const [lockRows] = await connection.execute<RowDataPacket[]>(
-      'SELECT GET_LOCK(?, 5) AS ok', [lockName],
-    );
-    if (Number(lockRows[0]?.ok ?? 0) !== 1) return { ok: false, reason: 'BUSY' };
+    if (!(await acquireCapacityLock(connection))) return { ok: false, reason: 'BUSY' };
     locked = true;
     await connection.beginTransaction();
     const [rows] = await connection.execute<RowDataPacket[]>(
-      `SELECT b.status, b.service_id AS serviceId,
+      `SELECT b.status, b.service_id AS serviceId, b.service_duration_minutes AS duration,
          DATE_FORMAT(b.scheduled_date, '%Y-%m-%d') AS date,
          TIME_FORMAT(b.scheduled_start_time, '%H:%i') AS time,
          ca.id AS assignmentId
@@ -500,13 +561,16 @@ export async function rescheduleCustomerBooking(
       return { ok: true };
     }
     const [existing] = await connection.execute<RowDataPacket[]>(
-      `SELECT id, customer_id AS customerId FROM bookings
-       WHERE scheduled_date = ? AND scheduled_start_time = ? AND id <> ?
-         AND status NOT IN ('cancelled', 'rescheduled')`,
-      [date, `${time}:00`, bookingId],
+      `SELECT id FROM bookings
+       WHERE customer_id = ? AND service_id = ? AND scheduled_date = ? AND scheduled_start_time = ?
+         AND status NOT IN ('cancelled', 'rescheduled') AND id <> ?`,
+      [customerId, row!.serviceId, date, `${time}:00`, bookingId],
     );
-    if (existing.some((booking) => Number(booking.customerId) === customerId)) reason = 'DUPLICATE';
-    else if (existing.length >= CAPACITY_PER_SLOT) reason = 'SLOT_FULL';
+    if (existing.length > 0) reason = 'DUPLICATE';
+    if (!reason) {
+      const { usage, capacity } = await capacityBoard(connection, date, Number(row!.duration), bookingId);
+      if (usage[time] >= capacity) reason = 'SLOT_FULL';
+    }
     if (reason) {
       await connection.rollback();
       return { ok: false, reason };
@@ -531,16 +595,15 @@ export async function rescheduleCustomerBooking(
     if (isLockConflict(error)) return { ok: false, reason: 'BUSY' };
     throw error;
   } finally {
-    try {
-      if (locked) await connection.execute('SELECT RELEASE_LOCK(?)', [lockName]);
-    } finally {
-      connection.release();
-    }
+    await releaseCapacityConnection(connection, locked);
   }
 }
 
 export async function findCustomerBooking(customerId: number, id: number) {
-  const [rows] = await pool.execute<RowDataPacket[]>(
+  const [rows] = await pool.execute<(RowDataPacket & {
+    paymentStatus: string | null;
+    paymentMethod: string | null;
+  })[]>(
     `SELECT b.id, b.booking_code AS code,
        DATE_FORMAT(b.scheduled_date, '%Y-%m-%d') AS date,
        TIME_FORMAT(b.scheduled_start_time, '%H:%i') AS time,
@@ -563,7 +626,11 @@ export async function findCustomerBooking(customerId: number, id: number) {
        a.label AS addressLabel, a.landmark,
        COALESCE(NULLIF(a.recipient_name, ''), u.name) AS recipientName,
        COALESCE(NULLIF(a.recipient_phone, ''), u.phone) AS recipientPhone,
-       cl.name AS cleanerName, cl.average_rating AS cleanerRating, ${addressSql('a')} AS address
+       cl.name AS cleanerName, CASE WHEN cl.id IS NULL THEN NULL ELSE
+          (SELECT COUNT(DISTINCT completed.id) FROM bookings completed
+           INNER JOIN cleaner_assignments assigned ON assigned.booking_id = completed.id
+           WHERE assigned.cleaner_id = cl.id AND completed.status = 'completed')
+        END AS cleanerCompletedBookings, ${addressSql('a')} AS address
      FROM bookings b
      INNER JOIN services s ON s.id = b.service_id
      INNER JOIN addresses a ON a.id = b.address_id
@@ -606,6 +673,8 @@ export interface CustomerBookingRow extends RowDataPacket {
   address: string;
   latitude: number | null;
   longitude: number | null;
+  cleanerName: string | null;
+  cleanerCompletedBookings: number | string | null;
 }
 
 // Only the signed-in customer's own bookings are returned.
@@ -638,7 +707,11 @@ export async function listCustomerBookings(
        COALESCE(NULLIF(a.recipient_name, ''), u.name) AS recipientName,
        COALESCE(NULLIF(a.recipient_phone, ''), u.phone) AS recipientPhone,
        cl.name AS cleanerName,
-       cl.average_rating AS cleanerRating,
+       CASE WHEN cl.id IS NULL THEN NULL ELSE
+          (SELECT COUNT(DISTINCT completed.id) FROM bookings completed
+           INNER JOIN cleaner_assignments assigned ON assigned.booking_id = completed.id
+           WHERE assigned.cleaner_id = cl.id AND completed.status = 'completed')
+        END AS cleanerCompletedBookings,
        ${addressSql('a')} AS address,
        a.latitude, a.longitude
      FROM bookings b

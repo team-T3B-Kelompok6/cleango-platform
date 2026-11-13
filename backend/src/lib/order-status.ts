@@ -9,8 +9,8 @@ export type BookingStatus =
   | 'cancelled'
   | 'rescheduled';
 
-// Forward order of the service flow. Payment has its own status and never
-// decides whether a booking may move forward.
+// Forward order of the service flow. Callers separately enforce payment
+// eligibility before assignment or work; cash need not be settled in advance.
 const RANK: Record<BookingStatus, number> = {
   awaiting_payment: 0,
   confirmed: 1,
@@ -48,6 +48,7 @@ export class OrderStatusTransitionError extends Error {
 
 /** One label set for customer, admin and cleaner screens. */
 export function statusLabel(status: string): string {
+  if (status === 'awaiting_payment') return 'Menunggu Pembayaran';
   if (status === 'in_progress') return 'Sedang Dikerjakan';
   if (status === 'completed') return 'Selesai';
   if (status === 'cancelled') return 'Batal';

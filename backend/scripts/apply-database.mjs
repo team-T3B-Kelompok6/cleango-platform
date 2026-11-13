@@ -2,7 +2,18 @@ import 'dotenv/config';
 import { readFile } from 'node:fs/promises';
 import mysql from 'mysql2/promise';
 
-const sql = await readFile(new URL('../database.sql', import.meta.url), 'utf8');
+const schemaFiles = [
+  'database.sql',
+  'admin-notification-receipts.sql',
+  'customer-push-devices.sql',
+  'payment-sessions.sql',
+];
+const schemaSources = await Promise.all(
+  schemaFiles.map((file) =>
+    readFile(new URL(`../${file}`, import.meta.url), 'utf8'),
+  ),
+);
+const [sql] = schemaSources;
 const seed = process.argv.includes('--seed');
 const schemaOnly = !seed;
 if (
@@ -18,13 +29,17 @@ if (
   );
 }
 // Extract only table definitions; never execute the seed in schema-only mode.
-const tableDefinitions = [
-  ...sql.matchAll(
-    /^CREATE TABLE IF NOT EXISTS \w+ \([\s\S]*?^\) ENGINE=InnoDB;/gm,
-  ),
-].map((match) => match[0]);
-if (!tableDefinitions.length)
-  throw new Error('Definisi tabel tidak ditemukan.');
+const tableDefinitions = schemaSources.flatMap((source, index) => {
+  const definitions = Array.from(
+    source.matchAll(
+      /^CREATE TABLE IF NOT EXISTS \w+ \([\s\S]*?^\) ENGINE=InnoDB;/gm,
+    ),
+    ([definition]) => definition,
+  );
+  if (!definitions.length)
+    throw new Error(`Definisi tabel tidak ditemukan di ${schemaFiles[index]}.`);
+  return definitions;
+});
 const connection = await mysql.createConnection({
   host: process.env.DB_HOST ?? '127.0.0.1',
   port: Number(process.env.DB_PORT ?? 3306),
@@ -268,6 +283,8 @@ try {
     }
 
     console.log('Database CleanGo siap; akun admin dummy aktif.');
+  } else {
+    console.log('Skema database CleanGo siap.');
   }
 } finally {
   await connection.end();

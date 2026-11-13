@@ -2,6 +2,60 @@ import type { Request, Response, NextFunction } from 'express';
 import { AppError } from '../lib/AppError.js';
 import { replyToChat, type ChatInput } from '../lib/chatbot.js';
 import { normalizeChatText } from '../lib/chatbot-text.js';
+import { getEnv } from '../config/env.js';
+import { listPublishedFaqs } from '../model/faq.model.js';
+import { findServices } from '../model/service.model.js';
+import { listChatPromos } from '../model/chatbot.model.js';
+import { knowledgeSuggestions } from '../lib/chatbot-knowledge.js';
+
+export async function suggestions(
+  request: Request,
+  response: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const data = knowledgeSuggestions().map((question) => ({
+      question,
+      source: 'knowledge',
+    }));
+    const env = getEnv();
+    if (env.CHATBOT_DATABASE_ENABLED) {
+      const [faqs, services, promos] = await Promise.allSettled([
+        listPublishedFaqs(),
+        findServices({ search: null, categoryId: null, activeOnly: true }),
+        listChatPromos(),
+      ]);
+      if (faqs.status === 'fulfilled')
+        data.push(
+          ...faqs.value
+            .slice(0, 3)
+            .map(({ question }) => ({ question, source: 'faq' })),
+        );
+      if (services.status === 'fulfilled')
+        data.push(
+          ...services.value
+            .slice(0, 3)
+            .map(({ name }) => ({
+              question: `Apa saja yang termasuk ${name}?`,
+              source: 'database',
+            })),
+        );
+      if (promos.status === 'fulfilled' && promos.value.length)
+        data.push({
+          question: 'Promo apa yang sedang berlaku?',
+          source: 'database',
+        });
+    }
+    if (request.user?.role === 'customer' && env.CHATBOT_DATABASE_ENABLED)
+      data.push({
+        question: 'Bagaimana status pesanan saya?',
+        source: 'order',
+      });
+    response.status(200).json({ data: data.slice(0, 8) });
+  } catch (error) {
+    next(error);
+  }
+}
 
 export async function chat(
   request: Request,

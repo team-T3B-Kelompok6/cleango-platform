@@ -24,7 +24,7 @@ interface StaffRow extends RowDataPacket {
   skills: string | null;
   databaseStatus: 'available' | 'busy' | 'offline';
   active: number;
-  rating: number;
+  completedBookings: number;
 }
 export interface Staff {
   id: string;
@@ -37,7 +37,7 @@ export interface Staff {
   mentorMaterials: string[];
   skills: string[];
   status: StaffStatus;
-  rating: number;
+  completedBookings: number;
 }
 
 function apiStatus(row: StaffRow): StaffStatus {
@@ -67,7 +67,7 @@ function mapStaff(row: StaffRow): Staff {
     mentorMaterials: parseSkills(row.trainerSkills),
     skills: parseSkills(row.skills),
     status: apiStatus(row),
-    rating: row.rating,
+    completedBookings: Number(row.completedBookings ?? 0),
   };
 }
 function parseSkills(value: string | null): string[] {
@@ -85,7 +85,10 @@ const select = `SELECT cleaners.id, cleaners.name, cleaners.phone, cleaners.area
   cleaners.photo_url AS photoUrl, cleaners.trainer_id AS trainerId,
   trainers.name AS trainerName, trainers.skills AS trainerSkills,
   cleaners.skills, cleaners.status AS databaseStatus,
-  cleaners.is_active AS active, cleaners.average_rating AS rating
+  cleaners.is_active AS active,
+  (SELECT COUNT(DISTINCT b.id) FROM bookings b
+   INNER JOIN cleaner_assignments ca ON ca.booking_id = b.id
+   WHERE ca.cleaner_id = cleaners.id AND b.status = 'completed') AS completedBookings
   FROM cleaners
   LEFT JOIN cleaners AS trainers ON trainers.id = cleaners.trainer_id`;
 export async function listStaff(): Promise<Staff[]> {

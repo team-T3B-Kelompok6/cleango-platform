@@ -51,6 +51,16 @@ beforeEach(() => {
 });
 
 describe('staff model: row mapping', () => {
+  it('returns completed booking count, never legacy cleaner rating', async () => {
+    db.query.mockResolvedValue([[{ ...row(), completedBookings: '2' }]]);
+    const found = await findStaff(1);
+    expect(found).toHaveProperty('completedBookings', 2);
+    expect(found).not.toHaveProperty('rating');
+    const sql = String(db.query.mock.calls[0]![0]);
+    expect(sql).toContain('COUNT(DISTINCT b.id)');
+    expect(sql).toContain("b.status = 'completed'");
+    expect(sql).not.toContain('average_rating');
+  });
   it('maps a null skills column to an empty array (legacy rows)', async () => {
     db.query.mockResolvedValue([[row({ skills: null })]]);
     const found = await findStaff(1);

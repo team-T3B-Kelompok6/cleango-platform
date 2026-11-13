@@ -101,12 +101,24 @@ describe('owned booking ETA', () => {
     { orderStatus: 'cancelled' },
     { linkStatus: 'revoked' },
     { linkExpiresAt: new Date(now) },
-    { locationUpdatedAt: null },
-    { locationUpdatedAt: now - 300000 },
-    { locationUpdatedAt: now + 1000 },
+
   ])('does not invent a route for unavailable travel %j', async (changes) => {
     find.mockResolvedValue({ ...row, ...changes });
     expect((await get()).status).toBe(409);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+  it.each([
+    { locationUpdatedAt: null },
+    { locationUpdatedAt: now - 300000 },
+    { locationUpdatedAt: now + 1000 },
+  ])('returns no route but retains valid GPS when fix is stale/missing %j', async (changes) => {
+    find.mockResolvedValue({ ...row, ...changes });
+    const response = await get();
+    expect(response.status).toBe(200);
+    expect(response.body.data).toMatchObject({
+      cleaner: { latitude: -7.97, longitude: 112.61 },
+      routeStatus: 'stale', path: [], etaSeconds: null,
+    });
     expect(fetch).not.toHaveBeenCalled();
   });
   it('allows GPS younger than the stale boundary', async () => {
@@ -115,13 +127,17 @@ describe('owned booking ETA', () => {
   });
   it('does not send invalid stored coordinates to the routing provider', async () => {
     find.mockResolvedValue({ ...row, latitude: null });
-    expect((await get()).status).toBe(400);
+    expect((await get()).status).toBe(409);
     expect(fetch).not.toHaveBeenCalled();
   });
   it('returns a routing failure without a fabricated estimate', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
     const response = await get();
-    expect(response.status).toBe(502);
-    expect(response.body.data).toBeUndefined();
+    expect(response.status).toBe(200);
+    expect(response.body.data).toMatchObject({
+      cleaner: { latitude: -7.97, longitude: 112.61 },
+      locationUpdatedAt: '2026-10-25T01:59:50.000Z',
+      routeStatus: 'unavailable', etaSeconds: null, path: [],
+    });
   });
 });

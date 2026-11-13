@@ -12,6 +12,7 @@
     "check:category-icons": "node scripts/check-category-icons.mjs",
     "check:service-image": "node scripts/check-service-image.mjs",
     "check:staff-skills": "node scripts/check-staff-skills.mjs",
+    "check:staff-metrics": "node scripts/check-staff-metrics.mjs",
     "check:categories": "node scripts/check-categories.mjs",
     "check:audit": "node scripts/check-audit.mjs",
     "check:promo": "node scripts/check-promo-pricing.mjs",

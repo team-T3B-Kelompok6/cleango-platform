@@ -267,7 +267,9 @@ async function initialize() {
     store.entities.customers.push(...seed.extraCustomers);
     store.entities.staff.forEach((person, index) => {
       person.joined ??= seed.date(-90 - index * 30);
-      person.rating ??= [4.9, 4.8, 4.7][index % 3];
+      person.completedBookings ??= store.entities.orders.filter(
+        (order) => order.status === 'Selesai' && order.staff?.includes(person.name),
+      ).length;
     });
     store.entities.customers.forEach((person, index) => {
       person.crewRating ??= [4.9, 4.8, 5][index % 3];
@@ -288,7 +290,7 @@ async function initialize() {
         phone: sampleContact('staff', index + 6, name).phone,
         skills: ['Deep Cleaning', 'Sanitasi'],
         joined: seed.date(-120),
-        rating: 4.9,
+        completedBookings: 0,
         area: ['Depok', 'Jakarta Selatan'][index],
         status: 'Bertugas',
         isDemo: true,

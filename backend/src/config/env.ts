@@ -18,9 +18,34 @@ export interface AppEnv {
   GROQ_FALLBACK_MODELS: string[];
   CHATBOT_DATABASE_ENABLED: boolean;
   PAYMENT_WEBHOOK_SECRET?: string | undefined;
+  MIDTRANS_SERVER_KEY: string;
+  MIDTRANS_CLIENT_KEY: string;
+  MIDTRANS_IS_PRODUCTION: boolean;
+  MIDTRANS_NOTIFICATION_URL?: string | undefined;
+  XENDIT_SECRET_KEY: string;
+  XENDIT_WEBHOOK_TOKEN: string;
+  XENDIT_SUCCESS_RETURN_URL?: string | undefined;
+  XENDIT_CANCEL_RETURN_URL?: string | undefined;
 }
 
 let cachedEnv: AppEnv | undefined;
+
+function httpsReturnUrl(name: string): string | undefined {
+  const value = process.env[name]?.trim();
+  if (!value) return undefined;
+  // Ignore unfilled placeholders such as https://<HOST_BACKEND_PUBLIK>/...
+  if (value.includes('<') || value.includes('>')) return undefined;
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new Error(`${name} harus berupa URL HTTPS yang valid`);
+  }
+  if (url.protocol !== 'https:' || url.username || url.password) {
+    throw new Error(`${name} harus memakai HTTPS`);
+  }
+  return url.toString();
+}
 
 export function getEnv(): AppEnv {
   if (cachedEnv) return cachedEnv;
@@ -42,6 +67,11 @@ export function getEnv(): AppEnv {
   if (!['true', 'false'].includes(chatDatabase))
     throw new Error('CHATBOT_DATABASE_ENABLED harus true atau false');
 
+  const midtransProduction = process.env.MIDTRANS_IS_PRODUCTION ?? 'false';
+  if (!['true', 'false'].includes(midtransProduction)) {
+    throw new Error('MIDTRANS_IS_PRODUCTION harus true atau false');
+  }
+
   cachedEnv = {
     NODE_ENV: nodeEnv as AppEnv['NODE_ENV'],
     PORT: port,
@@ -59,6 +89,14 @@ export function getEnv(): AppEnv {
     GROQ_API_KEY: process.env.GROQ_API_KEY?.trim() ?? '',
     CHATBOT_DATABASE_ENABLED: chatDatabase === 'true',
     PAYMENT_WEBHOOK_SECRET: process.env.PAYMENT_WEBHOOK_SECRET?.trim() || undefined,
+    MIDTRANS_SERVER_KEY: process.env.MIDTRANS_SERVER_KEY?.trim() ?? '',
+    MIDTRANS_CLIENT_KEY: process.env.MIDTRANS_CLIENT_KEY?.trim() ?? '',
+    MIDTRANS_IS_PRODUCTION: midtransProduction === 'true',
+    MIDTRANS_NOTIFICATION_URL: httpsReturnUrl('MIDTRANS_NOTIFICATION_URL'),
+    XENDIT_SECRET_KEY: process.env.XENDIT_SECRET_KEY?.trim() ?? '',
+    XENDIT_WEBHOOK_TOKEN: process.env.XENDIT_WEBHOOK_TOKEN?.trim() ?? '',
+    XENDIT_SUCCESS_RETURN_URL: httpsReturnUrl('XENDIT_SUCCESS_RETURN_URL'),
+    XENDIT_CANCEL_RETURN_URL: httpsReturnUrl('XENDIT_CANCEL_RETURN_URL'),
     GROQ_MODEL: process.env.GROQ_MODEL?.trim() || 'openai/gpt-oss-20b',
     GROQ_FALLBACK_MODELS: (
       process.env.GROQ_FALLBACK_MODELS ?? 'openai/gpt-oss-120b,qwen/qwen3.8-27b'

@@ -9,6 +9,7 @@ import { CleanGoLogo } from '../CleanGoLogo';
 import { DeliveryBadge } from './DeliveryBadge';
 import { whatsappLink } from '@/lib/whatsapp';
 import { orderTimeText } from '@/lib/order-flow';
+import { watchLocation } from './location-watch';
 
 function time(value?: string) {
   return value
@@ -33,6 +34,12 @@ function duration(seconds: number) {
     .map((value) => String(value).padStart(2, '0'))
     .join(':');
 }
+function requestKey() {
+  return (
+    globalThis.crypto?.randomUUID?.() ??
+    Date.now().toString(36) + '_' + Math.random().toString(36).slice(2)
+  );
+}
 const demoCleanerLocations: Record<string, [number, number]> = {
   'DEMO-ORD-01': [-7.94974, 112.63092],
   'DEMO-ORD-02': [-7.98018, 112.63063],
@@ -56,6 +63,11 @@ export function CleanerPortal({
   const [now, setNow] = useState(0);
   const keys = useRef<Record<string, string>>({});
   const requestRef = useRef(false);
+  const stopWatch = useRef<() => void>(() => {});
+  const locationRequest = useRef<Promise<void> | null>(null);
+  const [sharing, setSharing] = useState(false);
+  const [gpsError, setGpsError] = useState('');
+  const [gpsNotice, setGpsNotice] = useState('');
   const fileInput = useRef<HTMLInputElement>(null);
   const errorMessage = useRef<HTMLParagraphElement>(null);
   const endpoint = '/api/tugas/' + encodeURIComponent(token);
@@ -67,8 +79,76 @@ export function CleanerPortal({
       );
   }
   useEffect(() => {
-    if (error) errorMessage.current?.scrollIntoView({ block: 'center' });
-  }, [error]);
+    if (error || gpsError)
+      errorMessage.current?.scrollIntoView({ block: 'center' });
+  }, [error, gpsError]);
+  const canShare =
+    (task.stage === 'assigned' || task.stage === 'en_route') &&
+    !task.arrivedAt &&
+    !['Batal', 'Selesai'].includes(task.orderStatus) &&
+    Date.parse(task.expiresAt) > (now || Date.now());
+  useEffect(() => {
+    if (!sharing || !canShare) {
+      if (sharing)
+        setGpsNotice(
+          'Berbagi lokasi dihentikan karena tugas tidak lagi dalam perjalanan.',
+        );
+      setSharing(false);
+      return;
+    }
+    let active = true;
+    const stop = watchLocation({
+      geolocation: navigator.geolocation,
+      canSend: () => !requestRef.current && !locationRequest.current,
+      send: (coordinates) => {
+        // Each sample is a new event, even after a failed request.
+        const pending = (async () => {
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            signal: AbortSignal.timeout(15000),
+            body: JSON.stringify({
+              kind: 'location',
+              key: requestKey(),
+              ...coordinates,
+            }),
+          });
+          const result = await response.json();
+          if (!response.ok) {
+            if (active && [401, 403, 404, 410].includes(response.status)) {
+              stopWatch.current();
+              setSharing(false);
+            }
+            throw new Error(
+              result.message || 'Lokasi belum terkirim. Periksa koneksi.',
+            );
+          }
+          if (active) {
+            setTask(result.data);
+            parentUpdated();
+          }
+        })();
+        locationRequest.current = pending;
+        return pending.finally(() => {
+          if (locationRequest.current === pending)
+            locationRequest.current = null;
+        });
+      },
+      onSent: () => {
+        setGpsError('');
+        setGpsNotice('Lokasi terkini tersimpan. Berbagi lokasi aktif.');
+      },
+      onError: (message, stopped) => {
+        setGpsError(message);
+        if (stopped) setSharing(false);
+      },
+    });
+    stopWatch.current = () => {
+      active = false;
+      stop();
+    };
+    return () => stopWatch.current();
+  }, [sharing, canShare, endpoint]);
   useEffect(() => {
     setNow(Date.now());
     const timer = setInterval(() => setNow(Date.now()), 1000);
@@ -77,15 +157,24 @@ export function CleanerPortal({
   useEffect(() => {
     const controller = new AbortController();
     const timer = setInterval(async () => {
-      if (document.hidden || requestRef.current) return;
+      if (document.hidden || requestRef.current || locationRequest.current)
+        return;
       try {
         const response = await fetch(endpoint, {
           cache: 'no-store',
           signal: controller.signal,
         });
         const data = await response.json();
-        if (response.ok) setTask(data.data);
-        else setError(data.message || 'Tugas belum dapat dimuat.');
+        if (response.ok) {
+          if (!requestRef.current && !locationRequest.current)
+            setTask(data.data);
+        } else {
+          if ([401, 403, 404, 410].includes(response.status)) {
+            stopWatch.current();
+            setSharing(false);
+          }
+          setError(data.message || 'Tugas belum dapat dimuat.');
+        }
       } catch {
         /* Retain the last confirmed task while offline. */
       }
@@ -101,10 +190,16 @@ export function CleanerPortal({
     setBusy(kind);
     setError('');
     setNotice('');
-    keys.current[kind] ??=
-      crypto.randomUUID?.() ??
-      Date.now().toString(36) + '_' + Math.random().toString(36).slice(2);
+    if (kind === 'location') keys.current[kind] = requestKey();
+    else keys.current[kind] ??= requestKey();
+    if (kind === 'arrive' || kind === 'complete') {
+      stopWatch.current();
+      setSharing(false);
+      setGpsNotice('Berbagi lokasi dihentikan.');
+    }
     try {
+      // Reserve the action first, then drain GPS; never drop depart/arrive.
+      await locationRequest.current?.catch(() => {});
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -155,6 +250,7 @@ export function CleanerPortal({
     setBusy('photo');
     setError('');
     try {
+      await locationRequest.current?.catch(() => {});
       const form = new FormData();
       form.set('file', file);
       const response = await fetch(endpoint, { method: 'POST', body: form });
@@ -185,28 +281,32 @@ export function CleanerPortal({
       void perform('location', { latitude, longitude });
       return;
     }
-    if (!navigator.geolocation) {
-      setError('GPS tidak tersedia pada browser ini.');
+    if (sharing) {
+      stopWatch.current();
+      setSharing(false);
+      setGpsNotice('Berbagi lokasi dihentikan.');
+      setGpsError('');
       return;
     }
-    setBusy('gps');
-    setError('');
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setBusy('');
-        void perform('location', {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        });
-      },
-      () => {
-        setBusy('');
-        setError(
-          'Lokasi belum dibagikan. Izinkan GPS atau coba lagi dari browser HP.',
-        );
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
-    );
+    if (!window.isSecureContext) {
+      setGpsError(
+        'GPS perlu koneksi aman HTTPS. Gunakan HTTPS atau localhost; HTTP di alamat LAN tidak didukung.',
+      );
+      return;
+    }
+    if (!navigator.geolocation) {
+      setGpsError('GPS tidak tersedia pada browser ini.');
+      return;
+    }
+    if (!canShare) {
+      setGpsError(
+        'Berbagi GPS tersedia sebelum tiba, selama tugas masih aktif.',
+      );
+      return;
+    }
+    setGpsError('');
+    setGpsNotice('Mencari lokasi GPS…');
+    setSharing(true);
   }
   const assigned = task.stage === 'assigned',
     completed = task.stage === 'completed';
@@ -293,13 +393,19 @@ export function CleanerPortal({
                     {task.demo ? 'Bagikan lokasi' : 'Nyalakan GPS HP Anda'}
                   </h2>
                   <span>
-                    {task.location ? 'Lokasi Tersimpan' : 'Belum Aktif'}
+                    {sharing
+                      ? 'GPS Berbagi Aktif'
+                      : task.location
+                        ? 'Lokasi Tersimpan'
+                        : 'Belum Aktif'}
                   </span>
                 </div>
                 <p>
                   {task.demo
                     ? 'Pratinjau lokasi. GPS langsung belum terhubung.'
-                    : 'Bagikan lokasi saat siap berangkat. Konfirmasikan kedatangan melalui tombol di halaman tugas.'}
+                    : sharing
+                      ? 'GPS HP sedang berbagi lokasi secara berkala ke admin dan pelanggan. Browser harus tetap terbuka (tidak ada jaminan berjalan di latar belakang).'
+                      : 'Bagikan lokasi saat siap berangkat. Konfirmasikan kedatangan melalui tombol di halaman tugas.'}
                 </p>
                 <button
                   className="button cleaner-gps-button"
@@ -307,11 +413,13 @@ export function CleanerPortal({
                   onClick={shareLocation}
                 >
                   <UiIcon name="pin" />
-                  {busy === 'gps' || busy === 'location'
+                  {busy === 'location'
                     ? 'Memperbarui lokasi…'
                     : task.demo
                       ? 'Perbarui lokasi contoh'
-                      : 'Aktifkan GPS Sekarang'}
+                      : sharing
+                        ? 'Hentikan Berbagi Lokasi'
+                        : 'Mulai Berbagi Lokasi GPS'}
                 </button>
               </div>
             </section>
@@ -494,7 +602,9 @@ export function CleanerPortal({
                     }
                   >
                     <span>
-                      {step.value || step.passed || (completed && index === 3) ? (
+                      {step.value ||
+                      step.passed ||
+                      (completed && index === 3) ? (
                         <UiIcon name="tick" />
                       ) : (
                         index + 1
@@ -528,7 +638,7 @@ export function CleanerPortal({
                     : 'Saya Sudah Tiba & Mulai Pengerjaan'}
                 </button>
               )}
-              {!completed && (
+              {!completed && (task.demo || canShare || sharing) && (
                 <button
                   className="text-action cleaner-location-action"
                   disabled={!!busy}
@@ -537,7 +647,9 @@ export function CleanerPortal({
                   <UiIcon name="pin" />
                   {task.demo
                     ? 'Perbarui lokasi contoh'
-                    : 'Bagikan Lokasi Terkini'}
+                    : sharing
+                      ? 'Hentikan Berbagi Lokasi'
+                      : 'Mulai Berbagi Lokasi GPS'}
                 </button>
               )}
             </section>
@@ -690,9 +802,21 @@ export function CleanerPortal({
             </section>
           </>
         )}
-        {error && (
+        {!task.demo && (canShare || sharing) && (
+          <p>
+            Lokasi dikirim sekitar tiap 10 detik saat ada sinyal baru. Tetap
+            buka halaman; pengiriman di latar belakang atau saat layar terkunci
+            tidak dijamin. Berbagi berhenti saat tiba atau tugas berakhir.
+          </p>
+        )}
+        {(error || gpsError) && (
           <p ref={errorMessage} className="cleaner-error" role="alert">
-            {error}
+            {error || gpsError}
+          </p>
+        )}
+        {gpsNotice && !gpsError && (
+          <p className="cleaner-success" role="status">
+            {gpsNotice}
           </p>
         )}
         {notice && (

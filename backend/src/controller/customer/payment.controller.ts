@@ -21,10 +21,10 @@ export async function payBooking(
 ): Promise<void> {
   try {
     const bookingId = Number(request.params.id);
-    if (!Number.isInteger(bookingId) || bookingId <= 0)
+    if (!Number.isSafeInteger(bookingId) || bookingId <= 0)
       throw new AppError(400, 'ID pesanan tidak valid', 'VALIDATION_ERROR');
     const body = (request.body ?? {}) as Record<string, unknown>;
-    const method = typeof body.method === 'string' ? body.method.trim() : '';
+    const method = typeof body.method === 'string' ? body.method.trim().toLowerCase() : '';
     if (!PAYMENT_METHODS.includes(method as PaymentMethod))
       throw new AppError(400, 'Periksa kembali data yang dikirim.', 'VALIDATION_ERROR', {
         method: 'Pilih metode pembayaran yang tersedia.',
@@ -46,13 +46,13 @@ export async function payBooking(
         );
       throw new AppError(
         409,
-        'Metode ini belum tersedia. Pilih pembayaran tunai.',
+        'Pembayaran digital belum dikonfigurasi. Pilih pembayaran tunai atau hubungi admin.',
         'PAYMENT_GATEWAY_UNAVAILABLE',
       );
     }
     const receipt = await findCustomerBooking(customerId(request), bookingId);
     if (!receipt) throw new AppError(404, 'Pesanan tidak ditemukan.');
-    response.status(200).json({
+    response.status(result.checkoutUrl ? 201 : 200).json({
       message:
         result.status === 'paid'
           ? 'Pembayaran sudah diterima.'
@@ -60,6 +60,11 @@ export async function payBooking(
             ? 'Pesanan dikonfirmasi. Bayar tunai saat petugas tiba.'
             : 'Pembayaran menunggu konfirmasi gateway.',
       data: receipt,
+      payment: {
+        status: result.status,
+        checkoutUrl: result.checkoutUrl ?? null,
+        expiresAt: result.expiresAt ?? null,
+      },
     });
   } catch (error) {
     next(error);

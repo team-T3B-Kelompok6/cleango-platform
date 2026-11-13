@@ -35,7 +35,13 @@ describe('hourly booking slot capacity after merging Putra', () => {
   });
 
   it('closes a full new slot while keeping the other hourly slots open', async () => {
-    db.execute.mockResolvedValue([[{ slot: '09:00', total: 3 }]]);
+    db.execute
+      .mockResolvedValueOnce([[{ total: 3 }]])
+      .mockResolvedValueOnce([[
+        { start: 540, duration: 60 },
+        { start: 540, duration: 60 },
+        { start: 540, duration: 60 },
+      ]]);
 
     const board = await listAvailability('2099-01-01');
 

@@ -7,4 +7,4 @@ CREATE TABLE IF NOT EXISTS admin_notification_receipts (
     FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE CASCADE,
   CONSTRAINT fk_admin_notification_receipts_booking
     FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE
-);
+) ENGINE=InnoDB;

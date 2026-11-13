@@ -51,7 +51,6 @@ interface BookingState extends RowDataPacket {
   serviceId: number;
   status: string;
   completedAt: Date | null;
-  cleanerId: number | null;
   reviewId: number | null;
   rating: number | null;
   comment: string | null;
@@ -91,11 +90,9 @@ async function loadBookingState(
   const [rows] = await connection.execute<BookingState[]>(
     `SELECT b.id, b.customer_id AS customerId, b.service_id AS serviceId,
        b.status, b.completed_at AS completedAt,
-       ca.cleaner_id AS cleanerId,
        r.id AS reviewId, r.rating, r.comment,
        r.created_at AS createdAt, r.updated_at AS updatedAt
      FROM bookings b
-     LEFT JOIN cleaner_assignments ca ON ca.booking_id = b.id
      LEFT JOIN reviews r ON r.booking_id = b.id
      WHERE b.id = ? AND b.customer_id = ?
      FOR UPDATE`,
@@ -138,29 +135,10 @@ export async function createBookingReview(
     }
     const [result] = await connection.execute<ResultSetHeader>(
       `INSERT INTO reviews
-         (booking_id, customer_id, service_id, cleaner_id, rating, comment)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [
-        bookingId,
-        customerId,
-        Number(state.serviceId),
-        state.cleanerId === null ? null : Number(state.cleanerId),
-        input.rating,
-        input.comment,
-      ],
+         (booking_id, customer_id, service_id, rating, comment)
+       VALUES (?, ?, ?, ?, ?)`,
+      [bookingId, customerId, Number(state.serviceId), input.rating, input.comment],
     );
-    if (state.cleanerId !== null) {
-      await connection.execute(
-        `UPDATE cleaners
-         SET average_rating = (
-           SELECT COALESCE(AVG(rating), 0)
-           FROM reviews
-           WHERE cleaner_id = ?
-         )
-         WHERE id = ?`,
-        [Number(state.cleanerId), Number(state.cleanerId)],
-      );
-    }
     await connection.commit();
     return { ok: true, id: Number(result.insertId) };
   } catch (error) {
@@ -204,18 +182,6 @@ export async function updateBookingReview(
       'UPDATE reviews SET rating = ?, comment = ? WHERE id = ?',
       [input.rating, input.comment, Number(state.reviewId)],
     );
-    if (state.cleanerId !== null) {
-      await connection.execute(
-        `UPDATE cleaners
-         SET average_rating = (
-           SELECT COALESCE(AVG(rating), 0)
-           FROM reviews
-           WHERE cleaner_id = ?
-         )
-         WHERE id = ?`,
-        [Number(state.cleanerId), Number(state.cleanerId)],
-      );
-    }
     await connection.commit();
     return { ok: true };
   } catch (error) {

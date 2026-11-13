@@ -17,7 +17,7 @@ vi.mock('google-auth-library', async () => ({
   },
 }));
 
-import { notifyBookingCreated } from '../src/lib/firebase-push.js';
+import { notifyBookingCreated, notifyCustomerNotification } from '../src/lib/firebase-push.js';
 
 const origEnv = { ...process.env };
 let fetchMock: ReturnType<typeof vi.fn>;
@@ -72,6 +72,9 @@ describe('notifyBookingCreated', () => {
     expect(payload.message.notification.title).toBe('CleanGo');
     expect(payload.message.notification.body).toBe('Pesanan berhasil dibuat.');
     expect(payload.message.data).toEqual({ type: 'order' });
+    expect(payload.message.data.bookingId).toBeUndefined();
+    expect(payload.message.data.notificationId).toBeUndefined();
+    expect(payload.message.android.notification).toEqual({ channel_id: 'cleango_orders', icon: 'ic_notification' });
     const contentType = (init.headers as Record<string, string>)['Content-Type'];
     expect(String(contentType)).toBe('application/json; charset=utf-8');
   });
@@ -118,6 +121,16 @@ describe('notifyBookingCreated', () => {
     fetchMock.mockRejectedValue(new Error('jaringan putus'));
     await expect(notifyBookingCreated(10)).resolves.toBeUndefined();
     expect(pushModel.unregisterPushDevice).not.toHaveBeenCalled();
+  });
+
+  it('sends durable payment event data for booking navigation', async () => {
+    pushModel.listPushDevices.mockResolvedValue(['token-1']);
+    respondWith(200);
+    await notifyCustomerNotification({ notificationId: '88', userId: 10, bookingId: 19,
+      type: 'payment', title: 'Pembayaran diterima', message: 'Pembayaran BK-1 diterima.' });
+    const payload = JSON.parse(String(fetchMock.mock.calls[0]?.[1].body));
+    expect(payload.message.notification).toEqual({ title: 'Pembayaran diterima', body: 'Pembayaran BK-1 diterima.' });
+    expect(payload.message.data).toEqual({ type: 'payment', notificationId: '88', bookingId: '19' });
   });
 
   it('tidak mengirim saat project ID tidak valid', async () => {
