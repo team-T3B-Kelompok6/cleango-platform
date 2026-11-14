@@ -35,10 +35,45 @@ beforeEach(() => {
 });
 
 describe('customer booking payment method query and API regression', () => {
+  it('reads only the current active Midtrans checkout for an owned pending booking', async () => {
+    db.execute.mockResolvedValue([[{ id: 77, checkoutUrl: 'https://app.sandbox.midtrans.com/snap/token' }]]);
+    const response = await request(app).get('/api/customer/bookings/77').set('Authorization', `Bearer ${token}`);
+    expect(response.status).toBe(200);
+    const [sql, parameters] = db.execute.mock.calls[0]!;
+    expect(sql).toContain('AS checkoutUrl');
+    expect(sql).toContain('ps.reference_id = pay.gateway_reference');
+    expect(sql).toContain("ps.reference_id LIKE 'mid-%'");
+    expect(sql).toContain("ps.status = 'active'");
+    expect(sql).toContain("pay.status = 'pending'");
+    expect(sql).toContain("pay.method <> 'cash'");
+    expect(sql).toContain('ps.amount = b.total_amount');
+    expect(parameters).toEqual([77, 10]);
+    expect(sql).not.toMatch(/\b(?:INSERT|UPDATE|DELETE)\b/i);
+    expect(db.execute).toHaveBeenCalledTimes(1);
+  });
+  it('returns checkoutUrl from the owned booking list query', async () => {
+    db.execute.mockResolvedValueOnce([[]]); // No expired bookings to cancel.
+    db.execute.mockResolvedValue([[{
+      id: 77, code: 'CG-TEST', databaseStatus: 'awaiting_payment',
+      paymentStatus: 'pending', paymentMethod: 'qris',
+      checkoutUrl: 'https://app.sandbox.midtrans.com/snap/token',
+    }]]);
+    const response = await request(app).get('/api/customer/bookings').set('Authorization', `Bearer ${token}`);
+    expect(response.status).toBe(200);
+    expect(response.body.data[0].checkoutUrl).toBe('https://app.sandbox.midtrans.com/snap/token');
+    const [sql, parameters] = db.execute.mock.calls[1]!;
+    expect(sql).toContain('AS checkoutUrl');
+    expect(sql).toContain('ps.reference_id = pay.gateway_reference');
+    expect(sql).toContain("ps.reference_id LIKE 'mid-%'");
+    expect(parameters).toEqual([10]);
+  });
   for (const path of ['/api/customer/bookings', '/api/customer/bookings/77']) {
     it.each(['cash', 'qris', 'dana', 'gopay', null])(
       `${path} returns paymentMethod %s from the owned booking query`,
       async (paymentMethod) => {
+        if (path === '/api/customer/bookings') {
+          db.execute.mockResolvedValueOnce([[]]); // No expired bookings to cancel.
+        }
         db.execute.mockResolvedValue([[{
           id: 77,
           code: 'CG-TEST',
@@ -54,13 +89,17 @@ describe('customer booking payment method query and API regression', () => {
         const booking = Array.isArray(response.body.data) ? response.body.data[0] : response.body.data;
         expect(booking.paymentMethod).toBe(paymentMethod);
         expect(booking.paymentStatus).toBe(paymentMethod === null ? null : 'paid');
-        const [sql, parameters] = db.execute.mock.calls[0]!;
+        const isList = path === '/api/customer/bookings';
+        const [sql, parameters] = db.execute.mock.calls[isList ? 1 : 0]!;
         expect(sql).toContain('pay.method AS paymentMethod');
         expect(sql).toContain('LEFT JOIN payments pay ON pay.booking_id = b.id');
         expect(sql).toContain('b.customer_id = ?');
         expect(parameters).toEqual(path.endsWith('/77') ? [77, 10] : [10]);
         expect(sql).not.toMatch(/\b(?:INSERT|UPDATE|DELETE)\b/i);
-        expect(db.execute).toHaveBeenCalledTimes(1);
+        expect(db.execute).toHaveBeenCalledTimes(isList ? 2 : 1);
+        if (isList) {
+          expect(db.execute.mock.calls[0]![0]).toContain("hold_until <= NOW()");
+        }
         expect(db.query).not.toHaveBeenCalled();
       },
     );

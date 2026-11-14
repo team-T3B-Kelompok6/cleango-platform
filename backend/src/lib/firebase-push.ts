@@ -115,6 +115,6 @@ export function notifyBookingCreated(userId: number, bookingId: number = 0): Pro
     bookingId,
     type: 'order',
     title: 'CleanGo',
-    message: 'Pesanan berhasil dibuat.',
+    message: 'Pesanan sedang menunggu pembayaran.',
   });
 }

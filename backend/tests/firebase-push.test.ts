@@ -70,7 +70,7 @@ describe('notifyBookingCreated', () => {
     const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     const payload = JSON.parse(String(init.body));
     expect(payload.message.notification.title).toBe('CleanGo');
-    expect(payload.message.notification.body).toBe('Pesanan berhasil dibuat.');
+    expect(payload.message.notification.body).toBe('Pesanan sedang menunggu pembayaran.');
     expect(payload.message.data).toEqual({ type: 'order' });
     expect(payload.message.data.bookingId).toBeUndefined();
     expect(payload.message.data.notificationId).toBeUndefined();

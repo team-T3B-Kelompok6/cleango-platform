@@ -123,8 +123,42 @@ export async function slotUsage(
   return usage;
 }
 
-// All non-cancelled reservations consume capacity, including pending payments.
-// Do not infer cancellation from hold_until or a provider's local expiry.
+export async function expireExpiredAwaitingBookings(
+  db: Pool | PoolConnection = pool,
+): Promise<number> {
+  const [expired] = await db.execute<RowDataPacket[]>(
+    `SELECT id, promo_id FROM bookings
+     WHERE status = 'awaiting_payment' AND hold_until IS NOT NULL AND hold_until <= NOW()`,
+  );
+  if (!expired || expired.length === 0) return 0;
+
+  const ids = expired.map((b) => Number(b.id));
+  await db.query(
+    "UPDATE bookings SET status = 'cancelled', cancellation_reason = 'Batas waktu pembayaran habis.' WHERE id IN (?) AND status = 'awaiting_payment'",
+    [ids],
+  );
+  await db.query(
+    "UPDATE payments SET status = 'expired' WHERE booking_id IN (?) AND status = 'pending'",
+    [ids],
+  );
+  await db.query(
+    "UPDATE promo_usages SET status = 'released' WHERE booking_id IN (?) AND status = 'reserved'",
+    [ids],
+  );
+
+  for (const row of expired) {
+    if (row.promo_id) {
+      await db.execute(
+        `UPDATE promos SET used_count = GREATEST(0, used_count - 1) WHERE id = ?`,
+        [row.promo_id],
+      );
+    }
+  }
+
+  return ids.length;
+}
+
+// Expired holds no longer consume capacity or block duplicate bookings.
 export async function capacityBoard(
   db: Pool | PoolConnection,
   date: string,
@@ -309,6 +343,7 @@ export async function releaseCapacityConnection(connection: PoolConnection, lock
 export async function createBooking(input: CreateBookingInput): Promise<{
   id: number;
   code: string;
+  reused?: boolean;
 }> {
   // One lock also covers durations that cross midnight and different start slots.
   const connection = await pool.getConnection();
@@ -319,13 +354,28 @@ export async function createBooking(input: CreateBookingInput): Promise<{
 
     await connection.beginTransaction();
 
+    await expireExpiredAwaitingBookings(connection);
+
     const [existing] = await connection.execute<RowDataPacket[]>(
-      `SELECT id FROM bookings
+      `SELECT id, booking_code AS code, status, address_id AS addressId,
+          COALESCE(customer_notes, '') AS notes, promo_id AS promoId FROM bookings
        WHERE customer_id = ? AND service_id = ? AND scheduled_date = ? AND scheduled_start_time = ?
          AND status NOT IN ('cancelled', 'rescheduled')`,
       [input.customerId, input.serviceId, input.date, `${input.time}:00`],
     );
     if (existing.length > 0) {
+      const match = existing[0];
+      const sameBooking =
+        match &&
+        match.status === 'awaiting_payment' &&
+        Number(match.addressId) === input.addressId &&
+        String(match.notes ?? '').trim() === (input.notes || '').trim() &&
+        (match.promoId === null ? null : Number(match.promoId)) ===
+          (input.promo?.id ?? null);
+      if (sameBooking) {
+        await connection.commit();
+        return { id: Number(match.id), code: String(match.code), reused: true };
+      }
       await connection.rollback();
       throw new BookingConflictError('DUPLICATE');
     }
@@ -376,7 +426,7 @@ export async function createBooking(input: CreateBookingInput): Promise<{
           scheduled_start_time, customer_notes, service_price, service_duration_minutes,
           platform_fee, discount_amount, total_amount, status, hold_until)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'awaiting_payment',
-         DATE_ADD(NOW(), INTERVAL 15 SECOND))`,
+         DATE_ADD(NOW(), INTERVAL 15 MINUTE))`,
       [
         code,
         input.customerId,
@@ -408,11 +458,11 @@ export async function createBooking(input: CreateBookingInput): Promise<{
 
     await connection.execute(
       `INSERT INTO notifications (recipient_user_id, booking_id, type, title, message)
-       VALUES (?, ?, 'order', 'Pesanan Dibuat', ?)`,
+       VALUES (?, ?, 'order', 'Menunggu Pembayaran', ?)`,
       [
         input.customerId,
         result.insertId,
-        `Pesanan ${code} untuk ${input.date} pukul ${input.time} telah dibuat. Pilih pembayaran tunai atau selesaikan pembayaran digital sebelum penugasan cleaner.`,
+        `Pesanan ${code} untuk ${input.date} pukul ${input.time} sedang menunggu pembayaran. Selesaikan pembayaran sebelum batas waktu agar pesanan dapat dikonfirmasi.`,
       ],
     );
 
@@ -612,6 +662,16 @@ export async function findCustomerBooking(customerId: number, id: number) {
        b.platform_fee AS platformFee, b.discount_amount AS discountAmount,
        b.total_amount AS totalAmount, p.code AS promoCode,
        pay.status AS paymentStatus, pay.method AS paymentMethod,
+       (SELECT ps.checkout_url FROM payment_sessions ps
+        WHERE ps.booking_id = b.id AND ps.reference_id = pay.gateway_reference
+          AND ps.reference_id LIKE 'mid-%' AND ps.status = 'active'
+          AND ps.session_id IS NOT NULL AND ps.amount = b.total_amount
+          AND pay.status = 'pending' AND pay.method <> 'cash'
+          AND b.status NOT IN ('cancelled', 'completed')
+          AND NOT EXISTS (SELECT 1 FROM payment_sessions legacy
+            WHERE legacy.booking_id = b.id AND legacy.reference_id NOT LIKE 'mid-%'
+              AND legacy.status IN ('active', 'creating', 'unknown', 'completed'))
+        ORDER BY ps.id DESC LIMIT 1) AS checkoutUrl,
        b.status, b.hold_until - INTERVAL TIMESTAMPDIFF(SECOND, UTC_TIMESTAMP(), NOW()) SECOND AS holdUntil,
        (b.status IN ('confirmed', 'awaiting_payment') AND ca.id IS NULL) AS canCancel,
        (b.status IN ('confirmed', 'awaiting_payment') AND ca.id IS NULL) AS canReschedule,
@@ -663,6 +723,7 @@ export interface CustomerBookingRow extends RowDataPacket {
   databaseStatus: string;
   paymentStatus: string | null;
   paymentMethod: string | null;
+  checkoutUrl: string | null;
   holdUntil: Date | null;
   canCancel: number;
   canReschedule: number;
@@ -691,6 +752,16 @@ export async function listCustomerBookings(
        b.platform_fee AS platformFee, b.discount_amount AS discountAmount,
        b.total_amount AS totalAmount, b.status AS databaseStatus,
        pay.status AS paymentStatus, pay.method AS paymentMethod,
+       (SELECT ps.checkout_url FROM payment_sessions ps
+        WHERE ps.booking_id = b.id AND ps.reference_id = pay.gateway_reference
+          AND ps.reference_id LIKE 'mid-%' AND ps.status = 'active'
+          AND ps.session_id IS NOT NULL AND ps.amount = b.total_amount
+          AND pay.status = 'pending' AND pay.method <> 'cash'
+          AND b.status NOT IN ('cancelled', 'completed')
+          AND NOT EXISTS (SELECT 1 FROM payment_sessions legacy
+            WHERE legacy.booking_id = b.id AND legacy.reference_id NOT LIKE 'mid-%'
+              AND legacy.status IN ('active', 'creating', 'unknown', 'completed'))
+        ORDER BY ps.id DESC LIMIT 1) AS checkoutUrl,
        b.hold_until - INTERVAL TIMESTAMPDIFF(SECOND, UTC_TIMESTAMP(), NOW()) SECOND AS holdUntil,
        (b.status IN ('confirmed', 'awaiting_payment') AND ca.id IS NULL) AS canCancel,
        (b.status IN ('confirmed', 'awaiting_payment') AND ca.id IS NULL) AS canReschedule,
@@ -724,6 +795,7 @@ export async function listCustomerBookings(
      LEFT JOIN payments pay ON pay.booking_id = b.id
      LEFT JOIN reviews r ON r.booking_id = b.id
      WHERE b.customer_id = ?
+       AND (b.status != 'awaiting_payment' OR b.hold_until IS NULL OR b.hold_until > NOW())
      ORDER BY b.scheduled_date DESC, b.scheduled_start_time DESC, b.id DESC`,
     [customerId],
   );

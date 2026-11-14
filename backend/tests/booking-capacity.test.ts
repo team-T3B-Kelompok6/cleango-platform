@@ -98,7 +98,7 @@ function connection() {
               },
             ],
           ];
-        if (sql.includes('SELECT id FROM bookings')) {
+        if (sql.includes('FROM bookings') && sql.includes('customer_id = ?')) {
           expect(sql).toContain('service_id = ?');
           const [customerId, serviceId, requestedDate, time, excluded] = args;
           const start = Number(String(time).slice(0, 2)) * 60;

@@ -5,6 +5,7 @@ import {
   BookingConflictError,
   cancelCustomerBooking,
   createBooking,
+  expireExpiredAwaitingBookings,
   findBookableService,
   findCustomerBooking,
   findOwnedAddress,
@@ -223,8 +224,8 @@ export async function createCustomerBooking(
         promo,
       });
       const data = await findCustomerBooking(userId, created.id);
-      response.status(201).json({ message: 'Pesanan berhasil dibuat.', data });
-      void notifyBookingCreated(userId);
+      response.status(created.reused ? 200 : 201).json({ message: 'Pesanan sedang menunggu pembayaran.', data });
+      if (!created.reused) void notifyBookingCreated(userId, created.id);
     } catch (error) {
       if (error instanceof BookingConflictError) {
         if (error.reason === 'BUSY')
@@ -429,6 +430,7 @@ export async function listMyBookings(
   next: NextFunction,
 ): Promise<void> {
   try {
+    await expireExpiredAwaitingBookings();
     const rows = await listCustomerBookings(customerId(request));
     response.status(200).json({
       data: rows.map((row) => ({
@@ -456,6 +458,7 @@ export async function listMyBookings(
         canReschedule: Boolean(row.canReschedule),
         paymentStatus: row.paymentStatus ?? null,
         paymentMethod: row.paymentMethod ?? null,
+        checkoutUrl: row.checkoutUrl ?? null,
         recipientName: row.recipientName ?? null,
         recipientPhone: row.recipientPhone ?? null,
         landmark: row.landmark ?? '',

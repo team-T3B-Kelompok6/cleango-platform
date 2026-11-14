@@ -33,8 +33,13 @@ const SELECT = `SELECT u.id, u.name, u.email, u.phone, u.is_active AS isActive, 
   FROM users u
   LEFT JOIN addresses a ON a.user_id = u.id AND a.is_primary = TRUE
   LEFT JOIN (
-    SELECT customer_id AS customerId, COUNT(*) AS orderCount, COALESCE(SUM(total_amount), 0) AS totalSpent
-    FROM bookings GROUP BY customer_id
+    SELECT bookings.customer_id AS customerId, COUNT(*) AS orderCount,
+      COALESCE(SUM(bookings.total_amount), 0) AS totalSpent
+    FROM bookings
+    LEFT JOIN payments p ON p.booking_id = bookings.id
+    WHERE bookings.status <> 'awaiting_payment'
+      AND (p.id IS NULL OR p.method = 'cash' OR p.status = 'paid')
+    GROUP BY bookings.customer_id
   ) b ON b.customerId = u.id
   WHERE u.role = 'customer'`;
 
