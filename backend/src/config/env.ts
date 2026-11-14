@@ -17,6 +17,8 @@ export interface AppEnv {
   GROQ_MODEL: string;
   GROQ_FALLBACK_MODELS: string[];
   CHATBOT_DATABASE_ENABLED: boolean;
+  CHATBOT_VISION_ENABLED: boolean;
+  CHATBOT_VISION_MODEL: string;
   MIDTRANS_SERVER_KEY: string;
   MIDTRANS_CLIENT_KEY: string;
   MIDTRANS_IS_PRODUCTION: boolean;
@@ -83,6 +85,8 @@ export function getEnv(): AppEnv {
       process.env.OSRM_BASE_URL ?? 'https://router.project-osrm.org',
     GROQ_API_KEY: process.env.GROQ_API_KEY?.trim() ?? '',
     CHATBOT_DATABASE_ENABLED: chatDatabase === 'true',
+    CHATBOT_VISION_ENABLED: process.env.CHATBOT_VISION_ENABLED === 'true',
+    CHATBOT_VISION_MODEL: process.env.CHATBOT_VISION_MODEL?.trim() || 'qwen/qwen3.8-27b',
     MIDTRANS_SERVER_KEY: process.env.MIDTRANS_SERVER_KEY?.trim() ?? '',
     MIDTRANS_CLIENT_KEY: process.env.MIDTRANS_CLIENT_KEY?.trim() ?? '',
     MIDTRANS_IS_PRODUCTION: midtransProduction === 'true',

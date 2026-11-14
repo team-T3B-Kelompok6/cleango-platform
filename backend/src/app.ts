@@ -6,6 +6,7 @@ import { globalErrorHandler, notFoundHandler } from './middleware/error.middlewa
 import { apiRouter } from './routes/index.js';
 import { UPLOAD_DIR } from './lib/image-storage.js';
 import { postMidtransWebhook } from './controller/payment.controller.js';
+import { customerPhotoRouter } from './routes/customer/photo.routes.js';
 
 export function createApp() {
   const app = express();
@@ -17,6 +18,8 @@ export function createApp() {
     express.json({ limit: '100kb' }),
     postMidtransWebhook,
   );
+  // Keep raw photo bytes out of the JSON parser and request logger.
+  app.use('/api/customer/chat/analyze-image', customerPhotoRouter);
   app.use(express.json({ limit: '1mb' }));
   app.use(requestLogger);
   app.get('/health', (_request, response) => response.status(200).json({ message: 'CleanGo API sehat' }));
