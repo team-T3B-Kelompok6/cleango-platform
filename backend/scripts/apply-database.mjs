@@ -142,6 +142,12 @@ try {
       );
   }
 
+  // Legacy nullable column retained; photo analysis no longer reads or writes it.
+  await ensureColumn(
+    'service_categories',
+    'ai_targets',
+    "`ai_targets` JSON NULL AFTER `is_active`",
+  );
   await ensureColumn(
     'service_categories',
     'resource',

@@ -59,6 +59,8 @@ CREATE TABLE IF NOT EXISTS service_categories (
   description TEXT NULL,
   icon_url VARCHAR(500) NULL,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  -- Legacy nullable field retained; photo assessment does not use category targets.
+  ai_targets JSON NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY uq_categories_resource_name (resource, name),

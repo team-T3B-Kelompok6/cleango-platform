@@ -33,6 +33,7 @@ function load(filename) {
           throw new Error('Unexpected redirect: ' + url);
         },
       };
+    if (id === '@/types') return load(path.join(root, 'types/index.ts'));
     if (id.startsWith('.'))
       return load(path.resolve(path.dirname(filename), id + '.ts'));
     if (id.startsWith('@/')) return load(path.join(root, id.slice(2) + '.ts'));
@@ -166,7 +167,12 @@ const form = (key, value) => {
   return data;
 };
 assert.deepEqual(await api.listCategories('services'), [
-  { id: '1', name: 'Rumah', resource: 'services', icon: null },
+  {
+    id: '1',
+    name: 'Rumah',
+    resource: 'services',
+    icon: null,
+  },
   { id: '2', name: 'Sofa', resource: 'services', icon: null },
 ]);
 assert.equal(
@@ -420,6 +426,56 @@ badEditIcon.set(
   new File(['<svg/>'], 'bad.svg', { type: 'image/svg+xml' }),
 );
 assert.ok((await actions.updateCategory({}, badEditIcon)).errors.categoryIcon);
+for (const body of [...createdBodies, ...patchedBodies])
+  assert.ok(!('aiTargets' in body));
+const React = native('react');
+const { renderToStaticMarkup } = native('react-dom/server');
+const ui = { exports: {} };
+const uiCode = ts.transpileModule(
+  readFileSync(path.join(root, 'components/CategoryManager.tsx'), 'utf8') +
+    '\nexport { CategoryForm };',
+  {
+    compilerOptions: {
+      module: ts.ModuleKind.CommonJS,
+      target: ts.ScriptTarget.ES2022,
+      jsx: ts.JsxEmit.ReactJSX,
+      esModuleInterop: true,
+    },
+  },
+).outputText;
+vm.runInThisContext('(function(require,module,exports){' + uiCode + '\n})')(
+  (id) => {
+    if (id === 'react')
+      return { ...React, useActionState: () => [{}, () => {}, false] };
+    if (id === 'next/navigation') return { useRouter: () => ({}) };
+    if (id === '@/app/category-actions') return actions;
+    if (id === '@/types') return load(path.join(root, 'types/index.ts'));
+    if (id === './DialogTrigger') return { useDialogClose: () => undefined };
+    if (id === './Form')
+      return {
+        SubmitButton: ({ children }) =>
+          React.createElement('button', null, children),
+      };
+    if (id === './UiIcon') return { UiIcon: () => null };
+    return native(id);
+  },
+  ui,
+  ui.exports,
+);
+const renderForm = (props) =>
+  renderToStaticMarkup(React.createElement(ui.exports.CategoryForm, props));
+const freshForm = renderForm({ resource: 'services' });
+assert.doesNotMatch(freshForm, /aiTargets|Sasaran foto untuk Boo/);
+assert.match(freshForm, /Nama kategori/);
+assert.match(freshForm, /Ikon kategori/);
+assert.doesNotMatch(
+  renderForm({
+    resource: 'services',
+    category: { id: '1', name: 'Motor', serviceCount: 1 },
+  }),
+  /aiTargets|Sasaran foto untuk Boo/,
+);
+assert.doesNotMatch(renderForm({ resource: 'faqs' }), /aiTargets/);
 console.log(
-  'PASS category create/edit/delete, icon replacement/removal, preserved icons, rename, duplicates, no-op saves, conflicts, upload limits, and malformed responses',
+  'PASS category CRUD, icons, rename, conflicts, limits and forms without photo target mapping',
 );

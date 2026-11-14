@@ -46,13 +46,13 @@ export async function createCategoryRecord(
   icon?: string | null,
 ) {
   const result = await request<{ data: unknown }>(categoryPath(resource), {
-      method: 'POST',
-      body: JSON.stringify({
-        name:
-          categoryPath(resource) === '/admin/categories' && name === 'Sofa'
-            ? 'Sofa dan Kasur'
-            : name,
-        resource,
+    method: 'POST',
+    body: JSON.stringify({
+      name:
+        categoryPath(resource) === '/admin/categories' && name === 'Sofa'
+          ? 'Sofa dan Kasur'
+          : name,
+      resource,
       ...(resource === 'services' && icon !== undefined ? { icon } : {}),
     }),
   });
