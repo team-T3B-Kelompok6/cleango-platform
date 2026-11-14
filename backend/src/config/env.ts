@@ -17,15 +17,10 @@ export interface AppEnv {
   GROQ_MODEL: string;
   GROQ_FALLBACK_MODELS: string[];
   CHATBOT_DATABASE_ENABLED: boolean;
-  PAYMENT_WEBHOOK_SECRET?: string | undefined;
   MIDTRANS_SERVER_KEY: string;
   MIDTRANS_CLIENT_KEY: string;
   MIDTRANS_IS_PRODUCTION: boolean;
   MIDTRANS_NOTIFICATION_URL?: string | undefined;
-  XENDIT_SECRET_KEY: string;
-  XENDIT_WEBHOOK_TOKEN: string;
-  XENDIT_SUCCESS_RETURN_URL?: string | undefined;
-  XENDIT_CANCEL_RETURN_URL?: string | undefined;
 }
 
 let cachedEnv: AppEnv | undefined;
@@ -88,15 +83,10 @@ export function getEnv(): AppEnv {
       process.env.OSRM_BASE_URL ?? 'https://router.project-osrm.org',
     GROQ_API_KEY: process.env.GROQ_API_KEY?.trim() ?? '',
     CHATBOT_DATABASE_ENABLED: chatDatabase === 'true',
-    PAYMENT_WEBHOOK_SECRET: process.env.PAYMENT_WEBHOOK_SECRET?.trim() || undefined,
     MIDTRANS_SERVER_KEY: process.env.MIDTRANS_SERVER_KEY?.trim() ?? '',
     MIDTRANS_CLIENT_KEY: process.env.MIDTRANS_CLIENT_KEY?.trim() ?? '',
     MIDTRANS_IS_PRODUCTION: midtransProduction === 'true',
     MIDTRANS_NOTIFICATION_URL: httpsReturnUrl('MIDTRANS_NOTIFICATION_URL'),
-    XENDIT_SECRET_KEY: process.env.XENDIT_SECRET_KEY?.trim() ?? '',
-    XENDIT_WEBHOOK_TOKEN: process.env.XENDIT_WEBHOOK_TOKEN?.trim() ?? '',
-    XENDIT_SUCCESS_RETURN_URL: httpsReturnUrl('XENDIT_SUCCESS_RETURN_URL'),
-    XENDIT_CANCEL_RETURN_URL: httpsReturnUrl('XENDIT_CANCEL_RETURN_URL'),
     GROQ_MODEL: process.env.GROQ_MODEL?.trim() || 'openai/gpt-oss-20b',
     GROQ_FALLBACK_MODELS: (
       process.env.GROQ_FALLBACK_MODELS ?? 'openai/gpt-oss-120b,qwen/qwen3.8-27b'

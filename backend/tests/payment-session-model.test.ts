@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../src/lib/db.js', () => ({ pool: { getConnection: vi.fn(), execute: vi.fn() } }));
-vi.mock('../src/lib/xendit.js', () => ({ createSession: vi.fn(), readSession: vi.fn() }));
 vi.mock('../src/lib/midtrans.js', () => ({ createSession: vi.fn(), readSession: vi.fn() }));
 vi.mock('../src/config/env.js', () => ({ getEnv: vi.fn() }));
 vi.mock('../src/lib/firebase-push.js', () => ({ notifyCustomerNotification: vi.fn().mockResolvedValue(undefined) }));
@@ -10,9 +9,8 @@ import { pool } from '../src/lib/db.js';
 import { notifyCustomerNotification } from '../src/lib/firebase-push.js';
 import { AppError } from '../src/lib/AppError.js';
 import { getEnv } from '../src/config/env.js';
-import { createSession, readSession } from '../src/lib/xendit.js';
 import { createSession as createMidtransSession, readSession as readMidtransSession } from '../src/lib/midtrans.js';
-import { applyPaymentEvent, applyMidtransSessionEvent, applyXenditSessionEvent, startBookingPayment } from '../src/model/payment.model.js';
+import { applyPaymentEvent, applyMidtransSessionEvent, startBookingPayment } from '../src/model/payment.model.js';
 
 type Row = Record<string, unknown>;
 let booking: Row | undefined;
@@ -22,12 +20,12 @@ let inTransaction: boolean;
 let notifications: number;
 let redemptions: number;
 let statements: string[];
-const event = { sessionId: 'ps-test', referenceId: 'cg-test', status: 'paid' as const, amount: 1200 };
+const event = { sessionId: 'mid-test', referenceId: 'mid-test', status: 'paid' as const, amount: 1200 };
 
 function seed(status = 'active', paymentStatus = 'pending') {
-  session = { id: 31, booking_id: 9, reference_id: 'cg-test', session_id: 'ps-test', method: 'qris',
-    amount: '1200.00', checkout_url: 'https://checkout.xendit.co/test', expires_at: null, status };
-  payment = { id: 7, method: 'qris', gateway_reference: 'cg-test', amount: '1200.00', status: paymentStatus };
+  session = { id: 31, booking_id: 9, reference_id: 'mid-test', session_id: 'mid-test', method: 'qris',
+    amount: '1200.00', checkout_url: 'https://app.sandbox.midtrans.com/snap/test', expires_at: null, status };
+  payment = { id: 7, method: 'qris', gateway_reference: 'mid-test', amount: '1200.00', status: paymentStatus };
 }
 
 function midtransRemote(status: 'ACTIVE' | 'COMPLETED' | 'EXPIRED' | 'CANCELED' = 'ACTIVE') {
@@ -36,9 +34,7 @@ function midtransRemote(status: 'ACTIVE' | 'COMPLETED' | 'EXPIRED' | 'CANCELED' 
 }
 
 function remote(status: 'ACTIVE' | 'COMPLETED' | 'EXPIRED' | 'CANCELED' = 'COMPLETED') {
-  return { sessionId: 'ps-test', referenceId: String(session?.reference_id ?? 'cg-test'), status,
-    amount: 1200, currency: 'IDR' as const, sessionType: 'PAY' as const,
-    checkoutUrl: 'https://checkout.xendit.co/test', expiresAt: null };
+  return { ...midtransRemote(status), checkoutUrl: 'https://app.sandbox.midtrans.com/snap/test' };
 }
 
 async function execute(sql: string, values: unknown[] = []) {
@@ -79,7 +75,7 @@ beforeEach(() => {
   notifications = 0;
   redemptions = 0;
   statements = [];
-  vi.mocked(getEnv).mockReturnValue({ MIDTRANS_SERVER_KEY: 'secret', XENDIT_SECRET_KEY: 'secret', XENDIT_WEBHOOK_TOKEN: 'token' } as ReturnType<typeof getEnv>);
+  vi.mocked(getEnv).mockReturnValue({ MIDTRANS_SERVER_KEY: 'secret' } as ReturnType<typeof getEnv>);
   vi.mocked(notifyCustomerNotification).mockImplementation(async () => { expect(inTransaction).toBe(false); });
   vi.mocked(pool.execute).mockImplementation(execute as never);
   vi.mocked(pool.getConnection).mockImplementation(async () => ({
@@ -100,10 +96,6 @@ beforeEach(() => {
   });
   vi.mocked(readMidtransSession).mockImplementation(async () => {
     expect(inTransaction).toBe(false);
-    return midtransRemote();
-  });
-  vi.mocked(readSession).mockImplementation(async () => {
-    expect(inTransaction).toBe(false);
     return remote();
   });
 });
@@ -119,10 +111,10 @@ describe('durable provider reservations', () => {
   it.each(['awaiting_payment', 'cancelled', 'completed'])('paid settlement only confirms awaiting state, not %s terminal state', async (initial) => {
     seed();
     booking!.status = initial;
-    expect(await applyXenditSessionEvent(event)).toEqual({ ok: true, status: 'paid' });
+    expect(await applyMidtransSessionEvent(event)).toEqual({ ok: true, status: 'paid' });
     expect(booking?.status).toBe(initial === 'awaiting_payment' ? 'confirmed' : initial);
     expect(notifications).toBe(1);
-    await applyXenditSessionEvent(event);
+    await applyMidtransSessionEvent(event);
     expect(notifications).toBe(1);
     expect(notifyCustomerNotification).toHaveBeenCalledOnce();
   });
@@ -135,7 +127,6 @@ describe('durable provider reservations', () => {
     expect(session?.expires_at).toBeNull();
     expect(payment?.status).toBe('pending');
     expect(createMidtransSession).toHaveBeenCalledOnce();
-    expect(createSession).not.toHaveBeenCalled();
     expect(statements.findIndex((sql) => sql.includes('FROM bookings'))).toBeLessThan(statements.findIndex((sql) => sql.includes('FROM payment_sessions')));
   });
 
@@ -161,8 +152,39 @@ describe('durable provider reservations', () => {
       await expect(startBookingPayment(4, 9, 'qris')).rejects.toMatchObject({ statusCode: 409 });
       await expect(startBookingPayment(4, 9, 'cash')).rejects.toMatchObject({ statusCode: 409 });
     }
-    expect(createSession).not.toHaveBeenCalled();
     expect(createMidtransSession).not.toHaveBeenCalled();
+  });
+
+  it.each(['active', 'creating', 'unknown', 'completed'])('legacy %s blocks charge and cash without network or mutations', async (status) => {
+    seed(status);
+    Object.assign(session!, { reference_id: 'cg-test', session_id: 'ps-test' });
+    payment!.gateway_reference = 'cg-test';
+    const before = structuredClone({ session, payment });
+    for (const method of ['qris', 'cash'] as const) {
+      await expect(startBookingPayment(4, 9, method)).rejects.toMatchObject({
+        statusCode: 409, code: 'PAYMENT_SESSION_CONFLICT', message: expect.stringContaining('hubungi admin'),
+      });
+    }
+    expect({ session, payment }).toEqual(before);
+    expect(statements.every((sql) => sql.startsWith('SELECT'))).toBe(true);
+    expect(createMidtransSession).not.toHaveBeenCalled();
+    expect(readMidtransSession).not.toHaveBeenCalled();
+  });
+
+  it('older unresolved legacy session blocks new charge and cash behind newer expired session', async () => {
+    seed('expired', 'expired');
+    const connection = await pool.getConnection();
+    vi.mocked(pool.getConnection).mockResolvedValue({ ...connection,
+      execute: async (sql: string, values: unknown[]) => sql.startsWith('SELECT * FROM payment_sessions')
+        ? [[session, { ...session, id: 30, reference_id: 'cg-old', status: 'active' }], []]
+        : execute(sql, values),
+    } as never);
+    for (const method of ['qris', 'cash'] as const) {
+      await expect(startBookingPayment(4, 9, method)).rejects.toMatchObject({ code: 'PAYMENT_SESSION_CONFLICT' });
+    }
+    expect(statements.every((sql) => sql.startsWith('SELECT'))).toBe(true);
+    expect(createMidtransSession).not.toHaveBeenCalled();
+    expect(readMidtransSession).not.toHaveBeenCalled();
   });
 
   it('timeout marks unknown and never blindly creates again', async () => {
@@ -189,20 +211,18 @@ describe('durable provider reservations', () => {
 
   it('reuses verified active URL, blocks cash, creates no duplicate session', async () => {
     seed();
-    vi.mocked(readSession).mockResolvedValue(remote('ACTIVE'));
-    expect(await startBookingPayment(4, 9, 'qris')).toMatchObject({ ok: true, status: 'pending', checkoutUrl: 'https://checkout.xendit.co/test' });
+    vi.mocked(readMidtransSession).mockResolvedValue(remote('ACTIVE'));
+    expect(await startBookingPayment(4, 9, 'qris')).toMatchObject({ ok: true, status: 'pending', checkoutUrl: 'https://app.sandbox.midtrans.com/snap/test' });
     await expect(startBookingPayment(4, 9, 'cash')).rejects.toMatchObject({ statusCode: 409 });
-    expect(createSession).not.toHaveBeenCalled();
   });
 
   it('expiry reconciles payment; next explicit retry gets new reference', async () => {
     seed();
-    vi.mocked(readSession).mockImplementation(async () => { expect(inTransaction).toBe(false); return remote('EXPIRED'); });
+    vi.mocked(readMidtransSession).mockImplementation(async () => { expect(inTransaction).toBe(false); return remote('EXPIRED'); });
     expect(await startBookingPayment(4, 9, 'qris')).toMatchObject({ ok: true, status: 'expired', checkoutUrl: null });
     expect(payment?.status).toBe('expired');
-    expect(createSession).not.toHaveBeenCalled();
     expect(await startBookingPayment(4, 9, 'qris')).toMatchObject({ ok: true, status: 'pending' });
-    expect(payment?.gateway_reference).not.toBe('cg-test');
+    expect(payment?.gateway_reference).toMatch(/^mid-/);
   });
 
   it('does not overwrite completion delivered before creation response', async () => {
@@ -244,7 +264,7 @@ describe('durable provider reservations', () => {
           return execute(sql, values);
         },
       } as never);
-      return { sessionId: 'ps-test', checkoutUrl: 'https://checkout.xendit.co/test', expiresAt: null };
+      return { sessionId: String(session!.reference_id), checkoutUrl: 'https://app.sandbox.midtrans.com/snap/test', expiresAt: null };
     });
     await expect(startBookingPayment(4, 9, 'qris')).rejects.toThrow('DB unavailable');
     expect(rollback).toHaveBeenCalledOnce();
@@ -257,7 +277,6 @@ describe('durable provider reservations', () => {
     await expect(startBookingPayment(4, 9, 'qris')).rejects.toMatchObject({ code: 'INVALID_PAYMENT_AMOUNT' });
     booking = undefined;
     expect(await startBookingPayment(4, 9, 'qris')).toEqual({ ok: false, reason: 'NOT_FOUND' });
-    expect(createSession).not.toHaveBeenCalled();
   });
 });
 
@@ -268,7 +287,7 @@ describe('verified session settlement', () => {
     payment = { id: 7, method: 'qris', gateway_reference: 'mid-test', amount: '1200.00', status: 'pending' };
     vi.mocked(readMidtransSession).mockResolvedValue(midtransRemote('COMPLETED'));
     const midEvent = { sessionId: 'mid-test', referenceId: 'mid-test', status: 'paid' as const, amount: 1200 };
-    expect(await applyXenditSessionEvent(midEvent)).toEqual({ ok: false, reason: 'NOT_FOUND' });
+    expect(await applyMidtransSessionEvent({ ...midEvent, referenceId: 'cg-test' })).toEqual({ ok: false, reason: 'NOT_FOUND' });
     expect(await applyMidtransSessionEvent(midEvent)).toEqual({ ok: true, status: 'paid' });
     expect(await applyMidtransSessionEvent(midEvent)).toEqual({ ok: true, status: 'paid' });
     expect(payment?.status).toBe('paid');
@@ -289,8 +308,8 @@ describe('verified session settlement', () => {
 
   it('accepts late completion after expiry, redeems and notifies once', async () => {
     seed('expired', 'expired');
-    expect(await applyXenditSessionEvent(event)).toEqual({ ok: true, status: 'paid' });
-    expect(await applyXenditSessionEvent(event)).toEqual({ ok: true, status: 'paid' });
+    expect(await applyMidtransSessionEvent(event)).toEqual({ ok: true, status: 'paid' });
+    expect(await applyMidtransSessionEvent(event)).toEqual({ ok: true, status: 'paid' });
     expect(session?.status).toBe('completed');
     expect(payment?.status).toBe('paid');
     expect(notifications).toBe(1);
@@ -299,8 +318,8 @@ describe('verified session settlement', () => {
 
   it('ignores expiry after paid without downgrading session', async () => {
     seed('completed', 'paid');
-    vi.mocked(readSession).mockResolvedValue(remote('EXPIRED'));
-    expect(await applyXenditSessionEvent({ ...event, status: 'expired' })).toEqual({ ok: true, status: 'paid' });
+    vi.mocked(readMidtransSession).mockResolvedValue(remote('EXPIRED'));
+    expect(await applyMidtransSessionEvent({ ...event, status: 'expired' })).toEqual({ ok: true, status: 'paid' });
     expect(session?.status).toBe('completed');
     expect(payment?.status).toBe('paid');
     expect(notifications).toBe(0);
@@ -311,40 +330,50 @@ describe('verified session settlement', () => {
     { sessionId: 'ps-other' }, { currency: 'USD' }, { sessionType: 'SAVE' },
   ])('rejects remote mismatch %j', async (change) => {
     seed();
-    vi.mocked(readSession).mockResolvedValue({ ...remote(), ...change } as ReturnType<typeof remote>);
-    expect(await applyXenditSessionEvent(event)).toEqual({ ok: false, reason: 'AMOUNT_MISMATCH' });
+    vi.mocked(readMidtransSession).mockResolvedValue({ ...remote(), ...change } as ReturnType<typeof remote>);
+    expect(await applyMidtransSessionEvent(event)).toEqual({ ok: false, reason: 'AMOUNT_MISMATCH' });
     expect(payment?.status).toBe('pending');
     expect(notifications).toBe(0);
   });
 
   it('rejects wrong callback amount and session ID', async () => {
     seed();
-    expect(await applyXenditSessionEvent({ ...event, amount: 1200.01 })).toEqual({ ok: false, reason: 'AMOUNT_MISMATCH' });
-    expect(await applyXenditSessionEvent({ ...event, sessionId: 'ps-other' })).toEqual({ ok: false, reason: 'NOT_FOUND' });
+    expect(await applyMidtransSessionEvent({ ...event, amount: 1200.01 })).toEqual({ ok: false, reason: 'AMOUNT_MISMATCH' });
+    expect(await applyMidtransSessionEvent({ ...event, sessionId: 'ps-other' })).toEqual({ ok: false, reason: 'NOT_FOUND' });
     expect(notifications).toBe(0);
   });
 
   it.each([
     { method: 'cash', gateway_reference: null },
-    { method: 'qris', gateway_reference: 'cg-newer' },
+    { method: 'qris', gateway_reference: 'mid-newer' },
   ])('does not silently overwrite conflicting payment %j', async (change) => {
     seed();
     Object.assign(payment!, change);
-    await expect(applyXenditSessionEvent(event)).rejects.toMatchObject({ statusCode: 409 });
+    await expect(applyMidtransSessionEvent(event)).rejects.toMatchObject({ statusCode: 409 });
     expect(session?.status).toBe('active');
     expect(payment?.status).toBe('pending');
     expect(notifications).toBe(0);
   });
 
+  it.each(['active', 'creating', 'unknown', 'completed'])('generic cash settlement cannot bypass unresolved legacy %s session', async (status) => {
+    seed(status);
+    session!.reference_id = 'cg-test';
+    Object.assign(payment!, { method: 'cash', gateway_reference: null });
+    await expect(applyPaymentEvent({ bookingId: 9, status: 'paid', amount: 1200, reference: null })).rejects.toMatchObject({ code: 'PAYMENT_SESSION_CONFLICT' });
+    expect(payment?.status).toBe('pending');
+    expect(session?.status).toBe(status);
+    expect(statements.every((sql) => sql.startsWith('SELECT'))).toBe(true);
+  });
+
   it('generic legacy event cannot settle digital payment', async () => {
     seed();
-    await expect(applyPaymentEvent({ bookingId: 9, status: 'paid', amount: 1200, reference: 'cg-test' })).rejects.toMatchObject({ statusCode: 409 });
+    await expect(applyPaymentEvent({ bookingId: 9, status: 'paid', amount: 1200, reference: 'mid-test' })).rejects.toMatchObject({ statusCode: 409 });
     expect(payment?.status).toBe('pending');
   });
 
   it('active polling checks failed reconciliation before reporting paid', async () => {
     seed();
-    vi.mocked(readSession).mockResolvedValueOnce(remote()).mockResolvedValueOnce({ ...remote(), amount: 1201 });
+    vi.mocked(readMidtransSession).mockResolvedValueOnce(remote()).mockResolvedValueOnce({ ...remote(), amount: 1201 });
     await expect(startBookingPayment(4, 9, 'qris')).rejects.toMatchObject({ statusCode: 409 });
     expect(payment?.status).toBe('pending');
   });

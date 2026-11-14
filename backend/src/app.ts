@@ -5,19 +5,13 @@ import { requestLogger } from './lib/logger.js';
 import { globalErrorHandler, notFoundHandler } from './middleware/error.middleware.js';
 import { apiRouter } from './routes/index.js';
 import { UPLOAD_DIR } from './lib/image-storage.js';
-import { postMidtransWebhook, postPaymentWebhook } from './controller/payment.controller.js';
+import { postMidtransWebhook } from './controller/payment.controller.js';
 
 export function createApp() {
   const app = express();
   const env = getEnv();
 
   app.use(cors({ origin: env.FRONTEND_ORIGIN }));
-  // Xendit webhook parses its bounded raw payload after callback-token verification.
-  app.post(
-    '/api/payments/webhook',
-    express.raw({ type: 'application/json', limit: '100kb' }),
-    postPaymentWebhook,
-  );
   app.post(
     '/api/payments/webhook/midtrans',
     express.json({ limit: '100kb' }),

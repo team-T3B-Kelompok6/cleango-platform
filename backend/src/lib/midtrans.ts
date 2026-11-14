@@ -23,7 +23,7 @@ function baseUrl(): string {
 async function request(path: string, body?: Record<string, unknown>): Promise<Record<string, unknown>> {
   const { MIDTRANS_SERVER_KEY, MIDTRANS_NOTIFICATION_URL } = getEnv();
   if (!MIDTRANS_SERVER_KEY) {
-    throw new AppError(503, 'Midtrans belum dikonfigurasi.', 'PAYMENT_GATEWAY_UNAVAILABLE');
+    throw new AppError(503, 'Pembayaran digital belum tersedia. Hubungi admin.', 'PAYMENT_GATEWAY_UNAVAILABLE');
   }
   let response: Response;
   try {
@@ -43,29 +43,29 @@ async function request(path: string, body?: Record<string, unknown>): Promise<Re
       redirect: 'error',
     });
   } catch {
-    throw new AppError(502, 'Midtrans belum merespons. Periksa status transaksi sebelum mencoba lagi.', 'MIDTRANS_UNAVAILABLE');
+    throw new AppError(502, 'Layanan pembayaran belum merespons. Periksa status transaksi sebelum mencoba lagi.', 'MIDTRANS_UNAVAILABLE');
   }
   if (response.status === 401 || response.status === 403) {
     throw new AppError(502,
-      'Autentikasi backend ditolak Midtrans. Admin perlu memeriksa Server Key dan mode Sandbox/Production.',
+      'Pembayaran digital belum tersedia. Hubungi admin untuk memeriksa konfigurasi pembayaran.',
       'MIDTRANS_AUTH_FAILED');
   }
   let data: unknown;
   try {
     data = await response.json();
   } catch {
-    throw new AppError(502, 'Respons Midtrans tidak valid.', 'MIDTRANS_INVALID_RESPONSE');
+    throw new AppError(502, 'Format respons penyedia pembayaran tidak valid.', 'MIDTRANS_INVALID_RESPONSE');
   }
   if (!data || typeof data !== 'object' || Array.isArray(data)) {
-    throw new AppError(502, 'Respons Midtrans tidak valid.', 'MIDTRANS_INVALID_RESPONSE');
+    throw new AppError(502, 'Format respons penyedia pembayaran tidak valid.', 'MIDTRANS_INVALID_RESPONSE');
   }
   const result = data as Record<string, unknown>;
   // Snap order has no transaction status until payer selects a method.
   if ((response.status === 404 || result.status_code === '404') && path.endsWith('/status')) {
-    throw new AppError(404, 'Transaksi Snap belum memiliki status pembayaran.', 'MIDTRANS_NOT_CHARGED');
+    throw new AppError(404, 'Transaksi belum memiliki status pembayaran.', 'MIDTRANS_NOT_CHARGED');
   }
   if (!response.ok) {
-    throw new AppError(502, 'Permintaan pembayaran ditolak Midtrans. Periksa konfigurasi dan status di Dashboard.', 'MIDTRANS_REQUEST_FAILED');
+    throw new AppError(502, 'Permintaan pembayaran ditolak. Hubungi admin jika masalah berlanjut.', 'MIDTRANS_REQUEST_FAILED');
   }
   return result;
 }
@@ -83,13 +83,13 @@ export async function createSession(input: {
 }): Promise<{ sessionId: string; checkoutUrl: string; expiresAt: string | null }> {
   const { MIDTRANS_SERVER_KEY } = getEnv();
   if (!MIDTRANS_SERVER_KEY) {
-    throw new AppError(503, 'Kunci Midtrans belum dikonfigurasi.', 'PAYMENT_GATEWAY_UNAVAILABLE');
+    throw new AppError(503, 'Pembayaran digital belum tersedia. Hubungi admin.', 'PAYMENT_GATEWAY_UNAVAILABLE');
   }
   if (!validOrderId(input.referenceId) || input.method !== 'qris' ||
       !Number.isSafeInteger(input.bookingId) || input.bookingId <= 0 ||
       !Number.isSafeInteger(input.customerId) || input.customerId <= 0 ||
       !Number.isSafeInteger(input.amount) || input.amount <= 0) {
-    throw new AppError(400, 'Tagihan pembayaran Midtrans tidak valid.', 'INVALID_PAYMENT_AMOUNT');
+    throw new AppError(400, 'Tagihan pembayaran tidak valid.', 'INVALID_PAYMENT_AMOUNT');
   }
   const allowedPayments = ['other_qris'];
   const data = await request('/snap/v1/transactions', {
@@ -99,29 +99,29 @@ export async function createSession(input: {
     enabled_payments: allowedPayments,
   });
   if (typeof data.token !== 'string' || !data.token || typeof data.redirect_url !== 'string') {
-    throw new AppError(502, 'Respons checkout Midtrans tidak lengkap.', 'MIDTRANS_INVALID_RESPONSE');
+    throw new AppError(502, 'Respons checkout pembayaran tidak lengkap.', 'MIDTRANS_INVALID_RESPONSE');
   }
   let url: URL;
   try { url = new URL(data.redirect_url); } catch {
-    throw new AppError(502, 'URL checkout Midtrans tidak valid.', 'MIDTRANS_INVALID_RESPONSE');
+    throw new AppError(502, 'URL checkout pembayaran tidak valid.', 'MIDTRANS_INVALID_RESPONSE');
   }
   const allowedHosts = getEnv().MIDTRANS_IS_PRODUCTION
     ? ['app.midtrans.com'] : ['app.sandbox.midtrans.com'];
   if (url.protocol !== 'https:' || !allowedHosts.includes(url.hostname) || url.port || url.username || url.password ||
       !url.pathname.startsWith('/snap/')) {
-    throw new AppError(502, 'URL checkout Midtrans tidak aman.', 'MIDTRANS_INVALID_RESPONSE');
+    throw new AppError(502, 'URL checkout pembayaran tidak aman.', 'MIDTRANS_INVALID_RESPONSE');
   }
   return { sessionId: input.referenceId, checkoutUrl: url.toString(), expiresAt: null };
 }
 
 export async function readSession(orderId: string): Promise<MidtransSession> {
   if (!validOrderId(orderId)) {
-    throw new AppError(400, 'ID transaksi Midtrans tidak valid.', 'INVALID_PAYMENT_SESSION');
+    throw new AppError(400, 'ID transaksi pembayaran tidak valid.', 'INVALID_PAYMENT_SESSION');
   }
   const data = await request(`/v2/${encodeURIComponent(orderId)}/status`);
   if (data.order_id !== orderId || typeof data.status_code !== 'string' || !/^\d{3}$/.test(data.status_code) ||
       typeof data.gross_amount !== 'string' || !/^\d+(\.\d{1,2})?$/.test(data.gross_amount)) {
-    throw new AppError(502, 'Status transaksi Midtrans tidak valid.', 'MIDTRANS_INVALID_RESPONSE');
+    throw new AppError(502, 'Status transaksi pembayaran tidak valid.', 'MIDTRANS_INVALID_RESPONSE');
   }
   const amount = Number(data.gross_amount);
   const currency = typeof data.currency === 'string' ? data.currency : 'IDR';
@@ -129,7 +129,7 @@ export async function readSession(orderId: string): Promise<MidtransSession> {
   const fraudStatus = String(data.fraud_status ?? '');
   if (!Number.isSafeInteger(amount) || amount <= 0 || currency !== 'IDR' ||
       !['settlement', 'capture', 'expire', 'cancel', 'pending', 'deny', 'authorize', 'failure', 'refund', 'partial_refund'].includes(transactionStatus)) {
-    throw new AppError(502, 'Data pembayaran Midtrans tidak valid.', 'MIDTRANS_INVALID_RESPONSE');
+    throw new AppError(502, 'Data pembayaran tidak valid.', 'MIDTRANS_INVALID_RESPONSE');
   }
   let status: MidtransSession['status'];
   if (transactionStatus === 'settlement' || (transactionStatus === 'capture' && fraudStatus === 'accept')) status = 'COMPLETED';
@@ -137,7 +137,7 @@ export async function readSession(orderId: string): Promise<MidtransSession> {
   else if (transactionStatus === 'cancel') status = 'CANCELED';
   else status = 'ACTIVE'; // pending, deny, and challenge remain unpaid/retryable.
   if (transactionStatus === 'refund' || transactionStatus === 'partial_refund') {
-    throw new AppError(409, 'Refund Midtrans perlu rekonsiliasi admin.', 'MIDTRANS_RECONCILIATION_REQUIRED');
+    throw new AppError(409, 'Transaksi memerlukan rekonsiliasi admin.', 'MIDTRANS_RECONCILIATION_REQUIRED');
   }
   return {
     sessionId: orderId, referenceId: orderId, status, amount, currency: currency as 'IDR',

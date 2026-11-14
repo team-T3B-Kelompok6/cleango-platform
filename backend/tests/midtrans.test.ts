@@ -34,6 +34,13 @@ describe('Midtrans Snap service', () => {
     await expect(readSession(orderId)).rejects.toMatchObject({ code: 'MIDTRANS_AUTH_FAILED' });
   });
 
+  it.each([401, 403, 500])('customer errors hide technical brands and credentials for HTTP %s', async (status) => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ message: 'Midtrans SB-server-test private data' }), { status }));
+    const error = await createSession({ referenceId: orderId, bookingId: 7, customerId: 3, amount: 150000, method: 'qris' }).catch((error: Error) => error);
+    expect(error).toBeInstanceOf(Error);
+    expect((error as Error).message).not.toMatch(/Midtrans|Xendit|Snap|SB-server-test|private data|Server Key|Sandbox|Production/i);
+  });
+
   it.each(['gopay', 'dana'] as const)('rejects non-QRIS checkout method %s', async (method) => {
     await expect(createSession({ referenceId: orderId, bookingId: 7, customerId: 3, amount: 150000, method }))
       .rejects.toMatchObject({ code: 'INVALID_PAYMENT_AMOUNT' });

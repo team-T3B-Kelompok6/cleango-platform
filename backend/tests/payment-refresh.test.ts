@@ -2,12 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../src/lib/db.js', () => ({ pool: { execute: vi.fn(), getConnection: vi.fn() } }));
 vi.mock('../src/lib/midtrans.js', () => ({ createSession: vi.fn(), readSession: vi.fn() }));
-vi.mock('../src/lib/xendit.js', () => ({ createSession: vi.fn(), readSession: vi.fn() }));
 
 import { pool } from '../src/lib/db.js';
 import { AppError } from '../src/lib/AppError.js';
 import { createSession as createMidtrans, readSession as readMidtrans } from '../src/lib/midtrans.js';
-import { createSession as createXendit, readSession as readXendit } from '../src/lib/xendit.js';
 import { refreshBookingPayment } from '../src/model/payment.model.js';
 
 type Row = Record<string, unknown>;
@@ -27,13 +25,15 @@ async function execute(sql: string, values: unknown[] = []) {
   statements.push(sql);
   if (sql.startsWith('SELECT ps.*')) {
     expect(sql).toContain('INNER JOIN bookings b ON b.id = ps.booking_id');
-    expect(sql).toContain('INNER JOIN payments p ON p.booking_id = ps.booking_id AND p.gateway_reference = ps.reference_id');
+    expect(sql).toContain('LEFT JOIN payments p ON p.booking_id = ps.booking_id');
+    expect(sql).toContain("ps.reference_id NOT LIKE 'mid-%'");
     expect(sql).toContain('b.customer_id = ?');
     expect(sql).toContain("p.status IN ('pending', 'failed', 'expired')");
     expect(sql).toContain("p.method <> 'cash'");
     expect(sql).not.toContain('FOR UPDATE');
-    const eligible = values[0] === bookingId && values[1] === owner && payment.status !== 'paid' &&
-      payment.method !== 'cash' && payment.gateway_reference === session.reference_id && session.status !== 'completed';
+    const legacy = !String(session.reference_id).startsWith('mid-') && ['active', 'creating', 'unknown', 'completed'].includes(String(session.status));
+    const eligible = values[0] === bookingId && values[1] === owner && (legacy || (payment.status !== 'paid' &&
+      payment.method !== 'cash' && payment.gateway_reference === session.reference_id && session.status !== 'completed'));
     return [eligible ? [session] : [], []];
   }
   if (sql.startsWith('SELECT') && sql.includes('FROM bookings')) {
@@ -48,7 +48,6 @@ async function execute(sql: string, values: unknown[] = []) {
 
 function expectNoCreation() {
   expect(createMidtrans).not.toHaveBeenCalled();
-  expect(createXendit).not.toHaveBeenCalled();
   expect(statements.some((sql) => /^INSERT INTO (payment_sessions|payments)/.test(sql))).toBe(false);
 }
 
@@ -74,10 +73,6 @@ beforeEach(() => {
     release: vi.fn(),
   } as never);
   vi.mocked(readMidtrans).mockImplementation(async () => {
-    expect(inTransaction).toBe(false);
-    return remote();
-  });
-  vi.mocked(readXendit).mockImplementation(async () => {
     expect(inTransaction).toBe(false);
     return remote();
   });
@@ -127,7 +122,6 @@ describe('owned booking payment refresh', () => {
     await refreshBookingPayment(customerId, id);
     expect(pool.execute).toHaveBeenCalledWith(expect.any(String), [id, customerId]);
     expect(readMidtrans).not.toHaveBeenCalled();
-    expect(readXendit).not.toHaveBeenCalled();
     expectReadOnly();
   });
 
@@ -156,29 +150,30 @@ describe('owned booking payment refresh', () => {
     expectNoCreation();
   });
 
-  it('reads legacy Xendit only with known session ID', async () => {
-    Object.assign(session, { reference_id: 'cg-test', session_id: 'ps-test' });
+  it.each(['active', 'creating', 'unknown', 'completed'])('legacy %s refresh requires admin without network or mutations', async (status) => {
+    Object.assign(session, { reference_id: 'cg-test', session_id: status === 'unknown' ? null : 'ps-test', status });
     payment.gateway_reference = 'cg-test';
-    await refreshBookingPayment(owner, bookingId);
-    expect(readXendit).toHaveBeenCalledWith('ps-test');
+    const before = structuredClone({ session, payment });
+    await expect(refreshBookingPayment(owner, bookingId)).rejects.toMatchObject({
+      statusCode: 409, code: 'PAYMENT_SESSION_CONFLICT', message: expect.stringContaining('hubungi admin'),
+    });
+    expect({ session, payment }).toEqual(before);
     expect(readMidtrans).not.toHaveBeenCalled();
-    expect(payment.status).toBe('paid');
-    expectNoCreation();
-  });
-
-  it('unknown legacy Xendit without session ID does not query reference as ID', async () => {
-    Object.assign(session, { reference_id: 'cg-test', session_id: null, status: 'unknown' });
-    payment.gateway_reference = 'cg-test';
-    await refreshBookingPayment(owner, bookingId);
-    expect(readXendit).not.toHaveBeenCalled();
     expectReadOnly();
   });
 
-  it('does not ignore not-charged error from Xendit', async () => {
-    Object.assign(session, { reference_id: 'cg-test', session_id: 'ps-test' });
-    payment.gateway_reference = 'cg-test';
-    vi.mocked(readXendit).mockRejectedValue(new AppError(502, 'not charged', 'MIDTRANS_NOT_CHARGED'));
-    await expect(refreshBookingPayment(owner, bookingId)).rejects.toMatchObject({ code: 'MIDTRANS_NOT_CHARGED' });
+  it.each([{ method: 'cash' }, { gateway_reference: 'mid-newer' }])('legacy refresh remains blocked despite conflicting payment %j', async (change) => {
+    Object.assign(session, { reference_id: 'cg-test' });
+    Object.assign(payment, change);
+    await expect(refreshBookingPayment(owner, bookingId)).rejects.toMatchObject({ code: 'PAYMENT_SESSION_CONFLICT' });
+    expect(readMidtrans).not.toHaveBeenCalled();
+    expectReadOnly();
+  });
+
+  it('legacy row behind newer session prevents refresh network or writes', async () => {
+    vi.mocked(pool.execute).mockImplementationOnce(async () => [[session, { ...session, reference_id: 'cg-old' }], []] as never);
+    await expect(refreshBookingPayment(owner, bookingId)).rejects.toMatchObject({ code: 'PAYMENT_SESSION_CONFLICT' });
+    expect(readMidtrans).not.toHaveBeenCalled();
     expectReadOnly();
   });
 

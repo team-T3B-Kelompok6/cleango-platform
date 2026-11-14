@@ -8,7 +8,7 @@ vi.mock('../src/config/env.js', () => ({ getEnv: () => ({ MIDTRANS_SERVER_KEY: '
 vi.mock('../src/lib/midtrans.js', async (original) => ({
   ...await original<typeof import('../src/lib/midtrans.js')>(), readSession: mocks.read,
 }));
-vi.mock('../src/model/payment.model.js', () => ({ applyMidtransSessionEvent: mocks.apply, applyXenditSessionEvent: vi.fn() }));
+vi.mock('../src/model/payment.model.js', () => ({ applyMidtransSessionEvent: mocks.apply }));
 import { postMidtransWebhook } from '../src/controller/payment.controller.js';
 import { globalErrorHandler } from '../src/middleware/error.middleware.js';
 const app = express();

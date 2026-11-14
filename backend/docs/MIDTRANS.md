@@ -1,6 +1,6 @@
 # Midtrans Snap Redirect
 
-Checkout digital baru memakai Midtrans Snap khusus QRIS. Backend memakai native `fetch` dan `node:crypto`; tidak menambah SDK. Flutter menampilkan checkout HTTPS dalam WebView aplikasi, dengan opsi browser manual jika diperlukan. QRIS dan cash tersedia; pembuatan checkout GoPay/DANA ditolak. Rekonsiliasi transaksi lama tetap didukung.
+Checkout digital baru memakai Midtrans Snap khusus QRIS. Backend memakai native `fetch` dan `node:crypto`; tidak menambah SDK. Flutter menampilkan checkout HTTPS dalam WebView aplikasi, dengan opsi browser manual jika diperlukan. QRIS dan cash tersedia; pembuatan checkout GoPay/DANA ditolak. Transaksi legacy non-Midtrans memerlukan rekonsiliasi manual admin; tidak ada runtime gateway lama.
 
 ## Konfigurasi backend/.env
 
@@ -24,13 +24,22 @@ Pastikan channel GoPay QRIS atau ShopeePay QRIS sudah aktif pada akun dan mode S
 - `POST /api/customer/bookings/:id/pay` dengan autentikasi pelanggan dan body `{"method":"qris"}`. Nominal berasal dari database. Respons booking di `data`; `payment` berisi `status`, `checkoutUrl`, `expiresAt` (dapat null).
 - `GET /api/customer/bookings/:id`: untuk pembayaran digital yang belum lunas, backend membaca status provider dan merekonsiliasi transaksi sebelum mengembalikan booking. Tombol Cek Status Flutter memakai endpoint ini; tidak membuat transaksi baru. Webhook tetap diperlukan untuk pembaruan saat aplikasi ditutup.
 - `POST /api/payments/webhook/midtrans`: verifikasi SHA-512 `order_id + status_code + gross_amount + ServerKey` dengan perbandingan constant-time. Baca ulang status ke Midtrans; cocokkan reference dan nominal sebelum settlement database.
-- Endpoint Xendit `/api/payments/webhook` dipertahankan hanya untuk transaksi lama. `mid-` reference untuk Midtrans; `cg-` untuk Xendit. Jangan mengganti key/mode ketika masih ada transaksi aktif yang memerlukannya.
+- Endpoint Xendit (`/api/payments/webhook`) dan modul runtime Xendit telah dihapus penuh; backend kini eksklusif Midtrans.
+- Penanganan sesi legacy (`cg-%`): Database lokal mencatat 1 sesi aktif legacy (`cg-%`). Sesi legacy tidak dimigrasi otomatis dan tidak dihapus/diubah di DB. Segala upaya charge baru, cash, atau refresh pada booking dengan sesi legacy aktif/creating/unknown/completed diblokir secara fail-closed (HTTP 409 `PAYMENT_SESSION_CONFLICT` meminta hubungi admin) untuk mencegah tagihan ganda. Sesi legacy aktif ini membutuhkan rekonsiliasi manual langsung oleh admin via dashboard sebelum ditindaklanjuti.
 
 Status `settlement` dan `capture` dengan fraud `accept` dianggap paid. Pending/deny/challenge tidak melunasi pesanan. Cancel/expire menjadi expired. Refund perlu rekonsiliasi admin; bukan auto-refund lokal. Callback duplikat tidak mengulang notifikasi/redeem promo.
 
 Snap dapat membalas status 404 sebelum pelanggan memilih metode bayar. Aplikasi memakai checkout URL tersimpan, tidak membuat tagihan kedua. Timeout pembuatan sesi meninggalkan reservation unknown agar retry tidak membuat tagihan ganda. Periksa order di Dashboard sebelum penanganan manual; jangan hapus reservation tanpa rekonsiliasi.
 
 Skema `payment_sessions` yang sudah ada tetap digunakan; migrasi ini tidak menghapus data atau menjalankan seeder. Deadline checkout ditampilkan Midtrans; `expiresAt` null sampai timestamp provider didukung eksplisit. Tidak ada auto-cancel/refund/rekonsiliasi terjadwal.
+
+## Verifikasi penghapusan gateway lama — 13 November 2026
+
+- Regresi ditulis sebelum perubahan runtime: legacy aktif dan completed terbukti belum aman (charge/cash/refresh); pengujian awal gagal sesuai harapan.
+- Suite payment akhir: **96 PASS, 3 SKIP** (7 file; DB integration sengaja tidak dijalankan). Mencakup legacy active/creating/unknown/completed, blokir cash dan charge, sesi lama di belakang sesi lebih baru, refresh tanpa jaringan/mutasi, webhook lama HTTP 404, dan verifikasi Midtrans yang tetap otoritatif.
+- `npm run typecheck` dan `npm run build`: **PASS**.
+- Checkpoint payment paralel sempat mencatat kegagalan tes foto/kategori yang sedang direvisi. Rerun parent setelah integrasi perubahan foto/admin: `npm test` **999 PASS, 61 SKIP**; typecheck/build backend PASS. Tes mock/regresi ini bukan bukti transaksi gateway nyata.
+- Tidak ada mutasi database, transaksi gateway nyata, perubahan `.env`, penghapusan reservation, atau migrasi referensi otomatis. Vault diperbarui oleh sesi induk; hasil ini bukan bukti UAT gateway/DB.
 
 ## Uji Sandbox
 

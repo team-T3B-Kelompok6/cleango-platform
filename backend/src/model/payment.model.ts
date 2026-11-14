@@ -7,7 +7,6 @@ import { insertPaymentAcceptedNotification, type CustomerNotificationEvent } fro
 import { notifyCustomerNotification } from '../lib/firebase-push.js';
 import { AppError } from '../lib/AppError.js';
 import type { PaymentMethod } from '../lib/payment-gateway.js';
-import { readSession as readXenditSession } from '../lib/xendit.js';
 import { createSession as createMidtransSession, readSession as readMidtransSession } from '../lib/midtrans.js';
 import {
   canTransitionPayment,
@@ -36,20 +35,14 @@ type Session = RowDataPacket & {
   expires_at: Date | string | null;
   status: 'creating' | 'active' | 'completed' | 'expired' | 'canceled' | 'unknown';
 };
-export type XenditSessionEvent = {
+export type MidtransSessionEvent = {
   sessionId: string;
   referenceId: string;
   status: 'paid' | 'expired';
   amount: number;
 };
 
-export type MidtransSessionEvent = XenditSessionEvent;
-type Provider = 'xendit' | 'midtrans';
-// ponytail: reference prefix distinguishes 2 providers; provider column when adding more.
-const providerFor = (referenceId: string): Provider | null =>
-  referenceId.startsWith('mid-') ? 'midtrans' : referenceId.startsWith('cg-') ? 'xendit' : null;
-const readSession = (provider: Provider, sessionId: string) =>
-  provider === 'midtrans' ? readMidtransSession(sessionId) : readXenditSession(sessionId);
+const isMidtransReference = (referenceId: string): boolean => referenceId.startsWith('mid-');
 
 const CLOSED_BOOKING_STATUSES = ['cancelled', 'completed'];
 const conflict = () => new AppError(409, 'Sesi pembayaran sebelumnya belum dapat dipastikan. Tekan Cek Status Pembayaran; jika tetap gagal, hubungi admin. Tagihan baru diblokir untuk mencegah pembayaran ganda.', 'PAYMENT_SESSION_CONFLICT');
@@ -76,7 +69,7 @@ export async function startBookingPayment(
     const booking = bookings[0];
     if (!booking) { await connection.rollback(); return { ok: false, reason: 'NOT_FOUND' }; }
     const [sessions] = await connection.execute<Session[]>(
-      'SELECT * FROM payment_sessions WHERE booking_id = ? ORDER BY id DESC LIMIT 1 FOR UPDATE', [bookingId],
+      'SELECT * FROM payment_sessions WHERE booking_id = ? ORDER BY id DESC FOR UPDATE', [bookingId],
     );
     const latest = sessions[0];
     const [payments] = await connection.execute<RowDataPacket[]>(
@@ -85,7 +78,10 @@ export async function startBookingPayment(
     const payment = payments[0];
     if (payment?.status === 'paid') { await connection.rollback(); return { ok: true, status: 'paid' }; }
     if (CLOSED_BOOKING_STATUSES.includes(String(booking.status))) { await connection.rollback(); return { ok: false, reason: 'CLOSED' }; }
-    if (latest && ['creating', 'unknown'].includes(latest.status)) throw conflict();
+    // Unreconciled legacy rows must block every new charge, even behind a newer session.
+    if (sessions.some((session) => !isMidtransReference(session.reference_id) &&
+        ['active', 'creating', 'unknown', 'completed'].includes(session.status))) throw conflict();
+    if (latest && ['creating', 'unknown', 'completed'].includes(latest.status)) throw conflict();
     if (method === 'cash') {
       if (latest?.status === 'active') throw conflict();
       await connection.execute(
@@ -98,13 +94,10 @@ export async function startBookingPayment(
       await connection.commit();
       return { ok: true, status: 'pending' };
     }
-    const provider = latest?.status === 'active' ? providerFor(latest.reference_id) : 'midtrans';
-    if (!provider) throw conflict();
-    if (provider === 'midtrans' ? !env?.MIDTRANS_SERVER_KEY : (!env?.XENDIT_SECRET_KEY || !env.XENDIT_WEBHOOK_TOKEN)) {
+    if (!env?.MIDTRANS_SERVER_KEY) {
       await connection.rollback(); return { ok: false, reason: 'GATEWAY_UNAVAILABLE' };
     }
     if (payment?.method === 'cash') throw conflict();
-    if (latest?.status === 'completed') throw conflict();
     if (latest?.status === 'active') {
       if (!latest.session_id || (payment && payment.gateway_reference !== latest.reference_id)) throw conflict();
       reservation = { ...latest, amount: Number(latest.amount) };
@@ -133,22 +126,20 @@ export async function startBookingPayment(
     throw error;
   } finally { connection.release(); }
 
-  const provider = providerFor(reservation.reference_id);
-  if (!provider) throw conflict();
+  if (!isMidtransReference(reservation.reference_id)) throw conflict();
   if (reservation.status === 'active') {
     const expiresAt = reservation.expires_at instanceof Date ? reservation.expires_at.toISOString() : reservation.expires_at;
-    let remote: Awaited<ReturnType<typeof readSession>>;
-    try { remote = await readSession(provider, reservation.session_id!); }
+    let remote: Awaited<ReturnType<typeof readMidtransSession>>;
+    try { remote = await readMidtransSession(reservation.session_id!); }
     catch (error) {
-      if (provider === 'midtrans' && error instanceof AppError && error.code === 'MIDTRANS_NOT_CHARGED') {
+      if (error instanceof AppError && error.code === 'MIDTRANS_NOT_CHARGED') {
         return { ok: true, status: 'pending', checkoutUrl: reservation.checkout_url, expiresAt };
       }
       throw error;
     }
     if (!matchesRemote(reservation, remote)) throw conflict();
     if (remote.status === 'COMPLETED' || remote.status === 'EXPIRED' || remote.status === 'CANCELED') {
-      const applyEvent = provider === 'midtrans' ? applyMidtransSessionEvent : applyXenditSessionEvent;
-      const result = await applyEvent({ sessionId: remote.sessionId, referenceId: remote.referenceId,
+      const result = await applyMidtransSessionEvent({ sessionId: remote.sessionId, referenceId: remote.referenceId,
         status: remote.status === 'COMPLETED' ? 'paid' : 'expired', amount: remote.amount });
       if (!result.ok) throw conflict();
       return { ok: true, status: result.status, checkoutUrl: null, expiresAt: remote.expiresAt };
@@ -190,28 +181,20 @@ export async function startBookingPayment(
   }
 }
 
-function matchesRemote(session: Session, remote: Awaited<ReturnType<typeof readXenditSession | typeof readMidtransSession>>): boolean {
+function matchesRemote(session: Session, remote: Awaited<ReturnType<typeof readMidtransSession>>): boolean {
   return remote.sessionId === session.session_id && remote.referenceId === session.reference_id &&
     remote.currency === 'IDR' && remote.sessionType === 'PAY' && sameAmount(Number(session.amount), remote.amount);
 }
 
 /** Authenticate webhook first. Remote read verifies identity/amount, even before response binding. */
-export async function applyXenditSessionEvent(event: XenditSessionEvent): Promise<WebhookResult> {
-  return applyProviderSessionEvent('xendit', event);
-}
-
 export async function applyMidtransSessionEvent(event: MidtransSessionEvent): Promise<WebhookResult> {
-  return applyProviderSessionEvent('midtrans', event);
-}
-
-async function applyProviderSessionEvent(provider: Provider, event: XenditSessionEvent): Promise<WebhookResult> {
-  if (providerFor(event.referenceId) !== provider) return { ok: false, reason: 'NOT_FOUND' };
+  if (!isMidtransReference(event.referenceId)) return { ok: false, reason: 'NOT_FOUND' };
   const [found] = await pool.execute<Session[]>('SELECT * FROM payment_sessions WHERE reference_id = ?', [event.referenceId]);
   const known = found[0];
-  if (!known || known.reference_id !== event.referenceId || providerFor(known.reference_id) !== provider ||
+  if (!known || known.reference_id !== event.referenceId || !isMidtransReference(known.reference_id) ||
       (known.session_id && known.session_id !== event.sessionId) ||
-      (provider === 'midtrans' && event.sessionId !== event.referenceId)) return { ok: false, reason: 'NOT_FOUND' };
-  const remote = await readSession(provider, event.sessionId);
+      event.sessionId !== event.referenceId) return { ok: false, reason: 'NOT_FOUND' };
+  const remote = await readMidtransSession(event.sessionId);
   if (!matchesRemote({ ...known, session_id: event.sessionId } as Session, remote)) return { ok: false, reason: 'AMOUNT_MISMATCH' };
   if (!sameAmount(event.amount, remote.amount)) return { ok: false, reason: 'AMOUNT_MISMATCH' };
   const paid = remote.status === 'COMPLETED';
@@ -270,7 +253,7 @@ async function applyProviderSessionEvent(provider: Provider, event: XenditSessio
 
 async function confirmAwaitingPayment(connection: PoolConnection, bookingId: number): Promise<void> {
   await connection.execute(
-    "UPDATE bookings SET status = 'confirmed' WHERE id = ? AND status = 'awaiting_payment'",
+    "UPDATE bookings SET status = 'confirmed', hold_until = CASE WHEN scheduled_date = CURRENT_DATE THEN DATE_ADD(NOW(), INTERVAL 15 SECOND) ELSE NULL END WHERE id = ? AND status = 'awaiting_payment'",
     [bookingId],
   );
 }
@@ -296,14 +279,17 @@ export async function applyPaymentEvent(event: {
     const [bookings] = await connection.execute<RowDataPacket[]>(
       'SELECT customer_id AS customerId, booking_code AS code FROM bookings WHERE id = ? FOR UPDATE', [event.bookingId],
     );
-    await connection.execute('SELECT id FROM payment_sessions WHERE booking_id = ? ORDER BY id DESC LIMIT 1 FOR UPDATE', [event.bookingId]);
+    const [sessions] = await connection.execute<Session[]>(
+      'SELECT id, reference_id, status FROM payment_sessions WHERE booking_id = ? ORDER BY id DESC FOR UPDATE', [event.bookingId],
+    );
     const [payments] = await connection.execute<RowDataPacket[]>(
       'SELECT * FROM payments WHERE booking_id = ? FOR UPDATE', [event.bookingId],
     );
     const booking = bookings[0];
     const payment = payments[0];
     if (!booking || !payment) { await connection.rollback(); return { ok: false, reason: 'NOT_FOUND' }; }
-    if (payment.method !== 'cash') throw conflict();
+    if (payment.method !== 'cash' || sessions.some((session) => !isMidtransReference(session.reference_id) &&
+        ['active', 'creating', 'unknown', 'completed'].includes(session.status))) throw conflict();
     if (!sameAmount(Number(payment.amount), event.amount)) { await connection.rollback(); return { ok: false, reason: 'AMOUNT_MISMATCH' }; }
     const current = String(payment.status) as PaymentStatus;
     if (current === event.status) { await connection.rollback(); return { ok: true, status: current }; }
@@ -329,30 +315,30 @@ export async function refreshBookingPayment(customerId: number, bookingId: numbe
   const [rows] = await pool.execute<Session[]>(
     `SELECT ps.* FROM payment_sessions ps
      INNER JOIN bookings b ON b.id = ps.booking_id
-     INNER JOIN payments p ON p.booking_id = ps.booking_id AND p.gateway_reference = ps.reference_id
-     WHERE ps.booking_id = ? AND b.customer_id = ?
-       AND ps.status IN ('active', 'creating', 'unknown', 'expired', 'canceled')
-       AND p.status IN ('pending', 'failed', 'expired') AND p.method <> 'cash'
-     ORDER BY ps.id DESC LIMIT 1`,
+     LEFT JOIN payments p ON p.booking_id = ps.booking_id
+     WHERE ps.booking_id = ? AND b.customer_id = ? AND (
+       (ps.reference_id NOT LIKE 'mid-%' AND ps.status IN ('active', 'creating', 'unknown', 'completed')) OR
+       (p.gateway_reference = ps.reference_id
+        AND ps.status IN ('active', 'creating', 'unknown', 'expired', 'canceled')
+        AND p.status IN ('pending', 'failed', 'expired') AND p.method <> 'cash'))
+     ORDER BY ps.id DESC`,
     [bookingId, customerId],
   );
+  if (rows.some((session) => !isMidtransReference(session.reference_id))) throw conflict();
   const pending = rows[0];
   if (!pending) return;
-  const provider = providerFor(pending.reference_id);
-  if (!provider) throw conflict();
-  const lookupId = pending.session_id ?? (provider === 'midtrans' ? pending.reference_id : null);
+  const lookupId = pending.session_id ?? pending.reference_id;
   if (!lookupId) return;
 
-  let remote: Awaited<ReturnType<typeof readSession>>;
-  try { remote = await readSession(provider, lookupId); }
+  let remote: Awaited<ReturnType<typeof readMidtransSession>>;
+  try { remote = await readMidtransSession(lookupId); }
   catch (error) {
-    if (provider === 'midtrans' && error instanceof AppError && error.code === 'MIDTRANS_NOT_CHARGED') return;
+    if (error instanceof AppError && error.code === 'MIDTRANS_NOT_CHARGED') return;
     throw error;
   }
   if (!matchesRemote({ ...pending, session_id: lookupId } as Session, remote)) throw conflict();
   if (remote.status === 'COMPLETED' || remote.status === 'EXPIRED' || remote.status === 'CANCELED') {
-    const applyEvent = provider === 'midtrans' ? applyMidtransSessionEvent : applyXenditSessionEvent;
-    const result = await applyEvent({ sessionId: remote.sessionId, referenceId: remote.referenceId,
+    const result = await applyMidtransSessionEvent({ sessionId: remote.sessionId, referenceId: remote.referenceId,
       status: remote.status === 'COMPLETED' ? 'paid' : 'expired', amount: remote.amount });
     if (!result.ok) throw conflict();
   }
