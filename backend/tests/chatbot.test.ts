@@ -14,15 +14,17 @@ const models = vi.hoisted(() => ({
   promos: vi.fn(),
   order: vi.fn(),
   groq: vi.fn(),
+  databaseEnabled: true,
 }));
 vi.mock('../src/config/env.js', async (original) => {
   const actual = await original<typeof import('../src/config/env.js')>();
   return {
-    getEnv: () => ({ ...actual.getEnv(), CHATBOT_DATABASE_ENABLED: true }),
+    getEnv: () => ({ ...actual.getEnv(), CHATBOT_DATABASE_ENABLED: models.databaseEnabled }),
   };
 });
 vi.mock('../src/model/faq.model.js', () => ({
   listFaqs: models.faqs,
+  findFaq: vi.fn(async (id: number) => (await models.faqs()).find((item: { id: string }) => item.id === String(id)) ?? null),
   listPublishedFaqs: vi.fn(async () =>
     (await models.faqs()).filter(
       (item: { published: boolean }) => item.published,
@@ -44,6 +46,7 @@ vi.mock('../src/lib/groq-chat.js', async (original) => ({
 import { createApp } from '../src/app.js';
 import { replyToChat } from '../src/lib/chatbot.js';
 const app = createApp();
+let requestTime = Date.now();
 const token = (id: number, role = 'customer') =>
   jwt.sign(
     { id, role, email: 'customer@example.test' },
@@ -52,7 +55,10 @@ const token = (id: number, role = 'customer') =>
 const input = (message: string) => ({ message, history: [] });
 
 beforeEach(() => {
+  requestTime += 60_001;
+  vi.spyOn(Date, 'now').mockReturnValue(requestTime);
   vi.clearAllMocks();
+  models.databaseEnabled = true;
   models.faqs.mockResolvedValue([
     {
       id: '1',
@@ -94,6 +100,79 @@ beforeEach(() => {
   models.groq.mockResolvedValue(null);
 });
 
+describe('FAQ menu HTTP contract', () => {
+  it('lists only published choices and resolves displayed IDs after reorder/edit', async () => {
+    const menu = await request(app).post('/api/customer/chat').send(input('FAQ'));
+    expect(menu.status).toBe(200);
+    expect(menu.body.data.faqChoices).toEqual([{ id: '1', question: 'Bagaimana pembayaran?' }]);
+    expect(menu.body.data.answer).toContain('1. Bagaimana pembayaran?');
+    models.faqs.mockResolvedValue([
+      { id: '9', question: 'Baru', answer: 'Bukan pilihan', published: true },
+      { id: '1', question: 'Diedit', answer: 'Jawaban resmi terbaru', published: true },
+    ]);
+    const selection = await request(app).post('/api/customer/chat').send({ ...input('1'), faqIds: ['1'] });
+    expect(selection.body.data.answer).toBe('Jawaban resmi terbaru');
+    expect(selection.body.data.sources).toEqual([{ id: 'faq:1', title: 'Diedit' }]);
+    expect(models.groq).not.toHaveBeenCalled();
+  });
+  it.each([null, {}, ['0'], ['-1'], ['1', '1'], [1], ['1.5'], ['9007199254740992'], ['01'], Array.from({ length: 6 }, (_, i) => String(i + 1)), [{ id: '1', answer: 'fake' }]].map((faqIds) => ({ faqIds })))('rejects invalid faqIds: $faqIds', async ({ faqIds }) => {
+    const response = await request(app).post('/api/customer/chat').send({ ...input('1'), faqIds });
+    expect(response.status).toBe(400);
+    expect(models.groq).not.toHaveBeenCalled();
+  });
+  it('prompts to open FAQ for bare numbers and rejects outside-menu numbers', async () => {
+    for (const body of [input('1'), { ...input('2'), faqIds: ['1'] }, { ...input('0'), faqIds: ['1'] }]) {
+      const response = await request(app).post('/api/customer/chat').send(body);
+      expect(response.body.data.answer).toMatch(/FAQ/);
+      expect(response.body.data.source).toBe('support');
+    }
+    expect(models.groq).not.toHaveBeenCalled();
+  });
+  it.each([
+    { faqs: [] },
+    { faqs: [{ id: '1', question: 'Hidden', answer: 'SECRET', published: false }] },
+  ])('handles deleted/unpublished selections safely ($#)', async ({ faqs }) => {
+    models.faqs.mockResolvedValue(faqs);
+    const response = await request(app).post('/api/customer/chat').send({ ...input('1'), faqIds: ['1'] });
+    expect(response.body.data.answer).toMatch(/tidak tersedia/);
+    expect(response.body.data.answer).not.toContain('SECRET');
+    expect(models.groq).not.toHaveBeenCalled();
+  });
+  it('paginates all published FAQ without answer payloads', async () => {
+    models.faqs.mockResolvedValue(Array.from({ length: 12 }, (_, i) => ({ id: String(i + 1), question: `Pertanyaan ${i + 1}`, answer: 'Resmi', published: true })));
+    const ids = [];
+    for (let page = 1; page <= 3; page++) {
+      const response = await request(app).post('/api/customer/chat').send(input(page === 1 ? 'FAQ' : `FAQ halaman ${page}`));
+      expect(response.body.data.faqChoices.length).toBeLessThanOrEqual(5);
+      expect(response.body.data.faqNextPage).toBe(page < 3 ? page + 1 : undefined);
+      ids.push(...response.body.data.faqChoices.map((item: { id: string }) => item.id));
+    }
+    expect(ids).toEqual(Array.from({ length: 12 }, (_, i) => String(i + 1)));
+    expect(models.groq).not.toHaveBeenCalled();
+  });
+  it('keeps FAQ visible and honest when database disabled', async () => {
+    models.databaseEnabled = false;
+    const suggestions = await request(app).get('/api/customer/chat/suggestions');
+    expect(suggestions.body.data).toContainEqual({ question: 'FAQ', source: 'faq-menu' });
+    expect((await replyToChat(input('FAQ'))).answer).toMatch(/belum terhubung/);
+    expect((await replyToChat({ ...input('1'), faqIds: ['1'] })).answer).toMatch(/belum terhubung/);
+    expect(models.faqs).not.toHaveBeenCalled();
+    expect(models.groq).not.toHaveBeenCalled();
+  });
+  it('reports empty and unreachable FAQ honestly', async () => {
+    models.faqs.mockResolvedValue([]);
+    expect((await replyToChat(input('FAQ'))).answer).toMatch(/Belum ada FAQ/);
+    models.faqs.mockRejectedValue(new Error('private DB detail'));
+    expect((await replyToChat(input('FAQ'))).answer).toMatch(/tidak dapat dihubungi/);
+    expect(models.groq).not.toHaveBeenCalled();
+  });
+  it('does not use menu IDs instead of an explicit private order reference', async () => {
+    const response = await request(app).post('/api/customer/chat').send({ ...input('1'), faqIds: ['1'], orderReference: 'CG-123' });
+    expect(response.body.data.answer).toMatch(/masuk/i);
+    expect(response.body.data.sources).toEqual([]);
+  });
+});
+
 describe('chatbot grounding and access', () => {
   it('returns dynamic suggestions from published FAQ and active database services', async () => {
     const response = await request(app).get('/api/customer/chat/suggestions');
@@ -101,8 +180,8 @@ describe('chatbot grounding and access', () => {
     expect(response.body.data).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          question: 'Bagaimana pembayaran?',
-          source: 'faq',
+          question: 'FAQ',
+          source: 'faq-menu',
         }),
         expect.objectContaining({
           question: expect.stringContaining('Deep Cleaning'),
@@ -115,6 +194,14 @@ describe('chatbot grounding and access', () => {
         item.question.includes('Rahasia internal'),
       ),
     ).toBe(false);
+  });
+
+  it('offers one FAQ menu chip within suggestion limit', async () => {
+    const response = await request(app).get('/api/customer/chat/suggestions');
+    expect(response.body.data).toEqual(expect.arrayContaining([
+      expect.objectContaining({ question: 'FAQ', source: 'faq-menu' }),
+    ]));
+    expect(response.body.data.filter((item: { source: string }) => item.source === 'faq')).toHaveLength(0);
   });
 
   it('adds order suggestion only for authenticated customer with database enabled', async () => {

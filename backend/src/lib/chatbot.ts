@@ -1,4 +1,4 @@
-import { listFaqs } from '../model/faq.model.js';
+import { findFaq, listFaqs, listPublishedFaqs } from '../model/faq.model.js';
 import { findServiceInclusions, findServices } from '../model/service.model.js';
 import { findChatOrder, listChatPromos } from '../model/chatbot.model.js';
 import { askGroq, minimizeChatText, type ChatSource } from './groq-chat.js';
@@ -23,9 +23,12 @@ export interface ChatInput {
   message: string;
   history: { role: 'user' | 'assistant'; content: string }[];
   orderReference?: string;
+  faqIds?: string[];
 }
 export interface ChatReply {
   answer: string;
+  faqChoices?: { id: string; question: string }[];
+  faqNextPage?: number;
   source: 'groq' | 'faq' | 'order' | 'support';
   sources: { id: string; title: string }[];
   model: string | null;
@@ -100,6 +103,42 @@ export async function replyToChat(
   const safetyReply =
     chatSafetyReply(originalQuestion) ?? chatSafetyReply(question);
   if (safetyReply) return reply(safetyReply);
+  // Menu numbering belongs to the displayed IDs, never the latest database order.
+  const faqMenu = /^faq(?:\s+halaman\s+(\d+))?[?!. ]*$/i.exec(originalQuestion);
+  const faqNumber = /^-?\d+(?:\.\d+)?$/.test(originalQuestion);
+  if (!input.orderReference && (faqMenu || faqNumber || /^faq lainnya$/i.test(originalQuestion))) {
+    if (faqNumber && !input.faqIds?.length)
+      return reply('Buka FAQ terlebih dahulu, lalu ketik nomor dari daftar yang ditampilkan.');
+    const index = Number(originalQuestion) - 1;
+    if (faqNumber && (!Number.isInteger(index) || index < 0 || index >= input.faqIds!.length))
+      return reply(`Nomor di luar daftar FAQ. Pilih 1–${input.faqIds!.length}, atau buka FAQ kembali.`);
+    if (!getEnv().CHATBOT_DATABASE_ENABLED)
+      return reply('FAQ resmi belum terhubung ke Boo. Silakan buka Pusat Bantuan atau coba lagi nanti.');
+    if (!faqMenu && !faqNumber)
+      return reply('Buka FAQ kembali untuk melihat daftar terbaru.');
+    try {
+      if (faqNumber) {
+        const faq = await findFaq(Number(input.faqIds![index]));
+        return faq?.published
+          ? reply(faq.answer, 'faq', [{ id: `faq:${faq.id}`, title: faq.question, text: faq.answer }])
+          : reply('FAQ pilihan tidak tersedia lagi. Buka FAQ untuk melihat daftar terbaru.');
+      }
+      const faqs = (await listPublishedFaqs()).filter((faq) => faq.published);
+      if (!faqs.length) return reply('Belum ada FAQ yang dipublikasikan. Silakan buka Pusat Bantuan.');
+      const page = Number(faqMenu![1] ?? 1);
+      if (!Number.isSafeInteger(page) || page < 1 || page > Math.ceil(faqs.length / 5))
+        return reply('Halaman FAQ tidak tersedia. Ketik FAQ untuk membuka daftar terbaru.');
+      const choices = faqs.slice((page - 1) * 5, page * 5).map(({ id, question }) => ({ id, question }));
+      const nextPage = page * 5 < faqs.length ? page + 1 : undefined;
+      return {
+        ...reply(`FAQ — halaman ${page}\n${choices.map((faq, i) => `${i + 1}. ${faq.question}`).join('\n')}\n\nKetik nomor 1–${choices.length} untuk membaca jawaban.${nextPage ? ` Ketik FAQ halaman ${nextPage} untuk FAQ lainnya.` : ''}`, 'faq'),
+        faqChoices: choices,
+        ...(nextPage ? { faqNextPage: nextPage } : {}),
+      };
+    } catch {
+      return reply('FAQ resmi sedang tidak dapat dihubungi. Coba lagi nanti atau buka Pusat Bantuan.');
+    }
+  }
   const socialReply = smallTalkReply(originalQuestion);
   if (socialReply) return reply(socialReply);
   if (isOffTopicChat(question)) return reply(offTopicReply);

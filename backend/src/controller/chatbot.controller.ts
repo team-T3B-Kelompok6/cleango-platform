@@ -3,7 +3,6 @@ import { AppError } from '../lib/AppError.js';
 import { replyToChat, type ChatInput } from '../lib/chatbot.js';
 import { normalizeChatText } from '../lib/chatbot-text.js';
 import { getEnv } from '../config/env.js';
-import { listPublishedFaqs } from '../model/faq.model.js';
 import { findServices } from '../model/service.model.js';
 import { listChatPromos } from '../model/chatbot.model.js';
 import { knowledgeSuggestions } from '../lib/chatbot-knowledge.js';
@@ -14,23 +13,16 @@ export async function suggestions(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const data = knowledgeSuggestions().map((question) => ({
-      question,
-      source: 'knowledge',
-    }));
+    const data = [
+      { question: 'FAQ', source: 'faq-menu' },
+      ...knowledgeSuggestions().map((question) => ({ question, source: 'knowledge' })),
+    ];
     const env = getEnv();
     if (env.CHATBOT_DATABASE_ENABLED) {
-      const [faqs, services, promos] = await Promise.allSettled([
-        listPublishedFaqs(),
+      const [services, promos] = await Promise.allSettled([
         findServices({ search: null, categoryId: null, activeOnly: true }),
         listChatPromos(),
       ]);
-      if (faqs.status === 'fulfilled')
-        data.push(
-          ...faqs.value
-            .slice(0, 3)
-            .map(({ question }) => ({ question, source: 'faq' })),
-        );
       if (services.status === 'fulfilled')
         data.push(
           ...services.value
@@ -76,7 +68,7 @@ export async function chat(
       throw new AppError(400, 'Pesan harus berisi 1–2000 karakter.');
     if (
       Object.keys(body).some(
-        (key) => !['message', 'history', 'orderReference'].includes(key),
+        (key) => !['message', 'history', 'orderReference', 'faqIds'].includes(key),
       )
     )
       throw new AppError(400, 'Field percakapan tidak dikenal.');
@@ -109,7 +101,18 @@ export async function chat(
         !/^[a-zA-Z0-9][a-zA-Z0-9/-]{0,49}$/.test(body.orderReference))
     )
       throw new AppError(400, 'Nomor pesanan tidak valid.');
+    if (
+      body.faqIds !== undefined &&
+      (!Array.isArray(body.faqIds) ||
+        body.faqIds.length > 5 ||
+        new Set(body.faqIds).size !== body.faqIds.length ||
+        !body.faqIds.every((id: unknown) =>
+          typeof id === 'string' && /^[1-9]\d*$/.test(id) && Number.isSafeInteger(Number(id)),
+        ))
+    )
+      throw new AppError(400, 'FAQ maksimal 5 ID positif unik.');
     const input: ChatInput = { message: body.message.trim(), history };
+    if (body.faqIds !== undefined) input.faqIds = body.faqIds;
     if (body.orderReference !== undefined)
       input.orderReference = body.orderReference;
     const customerId =
