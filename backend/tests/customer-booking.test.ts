@@ -21,6 +21,7 @@ const bookingModel = vi.hoisted(() => ({
   cancelCustomerBooking: vi.fn(),
   rescheduleCustomerBooking: vi.fn(),
   listCustomerBookings: vi.fn(),
+  expireExpiredAwaitingBookings: vi.fn().mockResolvedValue(0),
   createBooking: vi.fn(),
   findBookableService: vi.fn(),
   findCustomerBooking: vi.fn(),
