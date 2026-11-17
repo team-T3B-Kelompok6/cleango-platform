@@ -1,9 +1,11 @@
-import { MetricCard } from './MetricCard';
+import { MetricCard, MetricGrid } from '@/components/shared/ui';
 import { rupiah } from '@/lib/resources';
 import type { Resource, RecordData } from '@/types';
 import { needsAssignment } from '@/lib/order-flow';
 import { promoListState } from '@/lib/promos';
 import { promoStatus } from '@/lib/promo-rules';
+import { faqSummary } from '@/lib/faq';
+import { staffSummary } from '@/lib/staff';
 export async function Summary({
   resource,
   records,
@@ -20,17 +22,9 @@ export async function Summary({
       item.status === 'Tersedia',
   ).length;
   if (resource === 'faqs') {
-    const categories = [
-      ...new Set([
-        ...categoryNames,
-        ...records.map((record) => String(record.category)),
-      ]),
-    ];
-    const mostRead = [...records]
-      .filter((item) => typeof item.viewCount === 'number')
-      .sort((a, b) => Number(b.viewCount) - Number(a.viewCount))[0];
+    const { categories, mostRead } = faqSummary(records, categoryNames);
     return (
-      <div className="metrics-grid order-metrics faq-summary-grid">
+      <MetricGrid columns={3} className="mt-22">
         <MetricCard
           label="FAQ aktif"
           value={active}
@@ -59,12 +53,12 @@ export async function Summary({
           icon="package"
           tone="blue"
         />
-      </div>
+      </MetricGrid>
     );
   }
   if (resource === 'orders')
     return (
-      <div className="metrics-grid order-metrics">
+      <MetricGrid columns={3} className="mt-22">
         <MetricCard
           label="Perlu ditugaskan"
           value={records.filter(needsAssignment).length}
@@ -105,7 +99,7 @@ export async function Summary({
           note="Pesanan selesai"
           icon="check"
         />
-      </div>
+      </MetricGrid>
     );
   if (resource === 'schedules') {
     const assigned = records.filter(
@@ -121,7 +115,7 @@ export async function Summary({
       ['Terjadwal', 'Berlangsung'].includes(String(item.status)),
     );
     return (
-      <div className="metrics-grid order-metrics">
+      <MetricGrid columns={3} className="mt-22">
         <MetricCard
           label="Total jadwal"
           value={records.length}
@@ -145,7 +139,7 @@ export async function Summary({
           icon="clock"
           tone="amber"
         />
-      </div>
+      </MetricGrid>
     );
   }
   if (resource === 'services') {
@@ -158,7 +152,7 @@ export async function Summary({
       ...records.map((item) => String(item.category)),
     ]);
     return (
-      <div className="metrics-grid order-metrics">
+      <MetricGrid columns={3} className="mt-22">
         <MetricCard
           label="Layanan aktif"
           value={active}
@@ -191,33 +185,21 @@ export async function Summary({
           icon="services"
           uiIcon="wallet"
         />
-      </div>
+      </MetricGrid>
     );
   }
   const isStaff = resource === 'staff';
-  const available = records.filter(
-    (item) => item.operationalStatus === 'Siaga & Tersedia',
-  ).length;
-  const working = records.filter((item) =>
-    ['Menuju Lokasi', 'Sedang Bekerja', 'Bertugas'].includes(
-      String(item.operationalStatus),
-    ),
-  ).length;
+  const staffCounts = staffSummary(records);
+  const available = staffCounts.available;
+  const working = staffCounts.working;
   const repeat = records.filter(
     (item) => Number(item.orderCount ?? 0) >= 2,
   ).length;
   return (
-    <div className="metrics-grid order-metrics">
+    <MetricGrid columns={3} className="mt-22">
       <MetricCard
         label={isStaff ? 'Petugas aktif' : 'Total pelanggan'}
-        value={
-          isStaff
-            ? records.filter(
-                (item) =>
-                  !['Masa Training', 'Nonaktif'].includes(String(item.status)),
-              ).length
-            : records.length
-        }
+        value={isStaff ? staffCounts.active : records.length}
         unit={isStaff ? 'Petugas' : 'Customer'}
         note={
           isStaff
@@ -262,6 +244,6 @@ export async function Summary({
         icon="working"
         tone="amber"
       />
-    </div>
+    </MetricGrid>
   );
 }

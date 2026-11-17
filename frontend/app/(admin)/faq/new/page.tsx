@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { ResourceNewPage } from '@/components/ResourcePages';
+import { ResourceNewPage } from '@/components/resource/ResourcePages';
 import { resources } from '@/lib/resources';
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {

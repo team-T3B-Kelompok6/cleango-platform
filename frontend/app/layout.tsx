@@ -5,16 +5,9 @@ import './globals.css';
 import './admin.css';
 import './overrides.css';
 import './design.css';
-import 'leaflet/dist/leaflet.css';
-import './tracking.css';
 import './management.css';
-import './service-editor.css';
-import './promo-editor.css';
-import './staff-profile.css';
 import './record-dialogs.css';
-import './cleaner.css';
 import './refinement.css';
-import './audit.css';
 const body = DM_Sans({
   subsets: ['latin'],
   variable: '--font-body',

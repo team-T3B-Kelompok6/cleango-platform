@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { ResourceNewPage } from '@/components/ResourcePages';
+import { ResourceNewPage } from '@/components/resource/ResourcePages';
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Tambah Jadwal Petugas' };
 export default async function Page() {

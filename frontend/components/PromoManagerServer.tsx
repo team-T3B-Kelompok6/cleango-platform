@@ -1,6 +1,6 @@
 import { promoListState } from '@/lib/promos';
 import type { Service } from '@/types';
-import { PromoManager } from './PromoManager';
+import { PromoManager } from '@/components/promos';
 
 export async function PromoManagerServer({
   services,

@@ -44,6 +44,8 @@ function load(filename) {
       if (target.endsWith('.tsx') && !target.endsWith('ResourceFormServer.tsx'))
         return {
           ResourceForm: 'ResourceForm',
+          StaffForm: 'StaffForm',
+          StaffSkills: 'StaffSkills',
           Badge: 'Badge',
           ServiceForm: 'ServiceForm',
           OrderEditor: 'OrderEditor',
@@ -131,13 +133,11 @@ const record = {
   status: 'Tersedia',
   skills: ['Sanitasi'],
 };
-const field = (
-  await ResourceFormServer({ resource: 'staff', record })
-).props.fields.find((field) => field.name === 'skills');
-assert.equal(field.kind, 'multiselect');
-assert.equal(field.required, false);
-assert.deepEqual(field.options, ['Cuci AC', 'Deep Cleaning Rumah']);
-assert.match(field.hint, /Sanitasi/);
+const staffFormProps = async (args) => (await ResourceFormServer(args)).props;
+const props = await staffFormProps({ resource: 'staff', record });
+assert.deepEqual(props.skillOptions, ['Cuci AC', 'Deep Cleaning Rumah']);
+assert.deepEqual(props.previousSkills, ['Sanitasi']);
+assert.deepEqual(props.mentors, [{ id: '2', name: 'Mentor Aktif' }]);
 const form = (skills) => {
   const data = new FormData();
   for (const name of ['name', 'phone', 'status']) data.set(name, record[name]);
@@ -169,20 +169,15 @@ const failed = await saveAction(
 assert.deepEqual(failed.values.skills, ['Cuci AC', 'Deep Cleaning Rumah']);
 assert.ok(failed.errors.skills);
 services = [{ id: '4', name: 'Layanan baru', active: true }];
-const updated = (
-  await ResourceFormServer({ resource: 'staff', record })
-).props.fields.find((field) => field.name === 'skills');
-assert.deepEqual(updated.options, ['Layanan baru']);
+const updated = await staffFormProps({ resource: 'staff', record });
+assert.deepEqual(updated.skillOptions, ['Layanan baru']);
 assert.ok(
   (await saveAction('staff', '1', {}, form(['Cuci AC']))).errors.skills,
 );
 assert.equal(writes, 3);
 services = [];
-const empty = (
-  await ResourceFormServer({ resource: 'staff' })
-).props.fields.find((field) => field.name === 'skills');
-assert.deepEqual(empty.options, []);
-assert.match(empty.emptyMessage, /Kelola Layanan/);
+const empty = await staffFormProps({ resource: 'staff' });
+assert.deepEqual(empty.skillOptions, []);
 fail = false;
 const training = form([]);
 training.set('status', 'Masa Training');
@@ -236,12 +231,12 @@ await assert.rejects(saveAction('staff', '1', {}, removePhoto), {
 assert.equal(persistedPhoto, null);
 omitPhoto = true;
 assert.ok((await saveAction('staff', '1', {}, photoForm())).errors.staffPhoto);
-const photoRecord = await ResourceFormServer({
+const photoRecord = await staffFormProps({
   resource: 'staff',
   record: { ...record, photoUrl: '/uploads/staff.png' },
 });
 assert.equal(
-  photoRecord.props.staffPhoto,
+  photoRecord.photoUrl,
   'http://staff-skill-test.invalid/uploads/staff.png',
 );
 console.log(

@@ -432,8 +432,10 @@ const React = native('react');
 const { renderToStaticMarkup } = native('react-dom/server');
 const ui = { exports: {} };
 const uiCode = ts.transpileModule(
-  readFileSync(path.join(root, 'components/CategoryManager.tsx'), 'utf8') +
-    '\nexport { CategoryForm };',
+  readFileSync(
+    path.join(root, 'components/categories/CategoryForm.tsx'),
+    'utf8',
+  ),
   {
     compilerOptions: {
       module: ts.ModuleKind.CommonJS,
@@ -450,13 +452,54 @@ vm.runInThisContext('(function(require,module,exports){' + uiCode + '\n})')(
     if (id === 'next/navigation') return { useRouter: () => ({}) };
     if (id === '@/app/category-actions') return actions;
     if (id === '@/types') return load(path.join(root, 'types/index.ts'));
-    if (id === './DialogTrigger') return { useDialogClose: () => undefined };
-    if (id === './Form')
+    // Cocokkan berdasarkan nama modul, bukan path, supaya pemindahan file
+    // di components/ tidak memutus harness ini.
+    if (/(^|\/)DialogTrigger$/.test(id))
+      return { useDialogClose: () => undefined };
+    if (/(^|\/)Form$/.test(id))
       return {
         SubmitButton: ({ children }) =>
           React.createElement('button', null, children),
       };
-    if (id === './UiIcon') return { UiIcon: () => null };
+    if (/(^|\/)UiIcon$/.test(id)) return { UiIcon: () => null };
+    if (id === '@/components/shared/ui')
+      return new Proxy(
+        {},
+        {
+          get:
+            () =>
+            ({ children }) =>
+              React.createElement('div', null, children),
+        },
+      );
+    if (id === '@/hooks/useCategoryForm')
+      return {
+        useCategoryForm: () => ({
+          name: '',
+          setName: () => {},
+          deleting: false,
+          setDeleting: () => {},
+          iconFile: null,
+          iconPreview: '',
+          iconRemoved: false,
+          iconError: '',
+          iconInput: { current: null },
+          selectIcon: () => {},
+          removeIcon: () => {},
+        }),
+      };
+    if (id === '@/lib/category-form') return { categoryFormHelp: () => '' };
+    if (id === './CategoryIconUpload')
+      return {
+        CategoryIconUpload: () =>
+          React.createElement('div', null, 'Ikon kategori'),
+      };
+    if (id === './CategoryDeleteForm')
+      return { CategoryDeleteForm: () => null };
+    if (id === './data') return new Proxy({}, { get: () => '' });
+    // Barrel/folder `shared/ui` berikutnya: tirukan komponen berdasarkan nama file.
+    if (id.startsWith('@/components/shared/ui'))
+      return { [id.split('/').at(-1)]: () => null };
     return native(id);
   },
   ui,

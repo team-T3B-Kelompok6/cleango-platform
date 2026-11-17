@@ -1,41 +1,29 @@
-import { list } from '@/lib/api';
-import { ApiError } from '@/lib/api';
+import { ApiError, list } from '@/lib/api';
 import type { Order } from '@/types';
+import {
+  completedOrders,
+  parseReportMonth,
+  reportCsv,
+  reportFilename,
+} from '@/lib/reports';
+
 export const dynamic = 'force-dynamic';
-function cell(value: unknown) {
-  let text = String(value ?? '');
-  if (/^[\s\u0000-\u001f]*[=+@-]/.test(text)) text = "'" + text;
-  return '"' + text.replace(/"/g, '""') + '"';
-}
+
+/** Unduh laporan pesanan selesai sebagai CSV. */
 export async function GET(request: Request) {
   try {
-    const month = new URL(request.url).searchParams.get('month');
-    if (month && !/^\d{4}-(0[1-9]|1[0-2])$/.test(month))
+    const value = new URL(request.url).searchParams.get('month');
+    const month = parseReportMonth(value);
+    if (value && !month)
       return Response.json({ message: 'Bulan tidak valid.' }, { status: 400 });
-    const orders = (await list<Order>('orders')).filter(
-      (order) =>
-        order.status === 'Selesai' && (!month || order.date.startsWith(month)),
-    );
-    const rows = [
-      ['ID', 'Pelanggan', 'Layanan', 'Tanggal', 'Status', 'Harga'],
-      ...orders.map((order) => [
-        order.id,
-        order.customer,
-        order.service,
-        order.date,
-        order.status,
-        order.price,
-      ]),
-    ];
-    return new Response(
-      '\uFEFF' + rows.map((row) => row.map(cell).join(',')).join('\r\n'),
-      {
-        headers: {
-          'Content-Type': 'text/csv;charset=utf-8',
-          'Content-Disposition': 'attachment; filename="laporan-cleango.csv"',
-        },
+    const orders = completedOrders(await list<Order>('orders'), month);
+    return new Response(reportCsv(orders), {
+      headers: {
+        'Content-Type': 'text/csv;charset=utf-8',
+        'Content-Disposition':
+          'attachment; filename="' + reportFilename(month) + '"',
       },
-    );
+    });
   } catch (error) {
     if (!(error instanceof ApiError)) throw error;
     return Response.json({ message: error.message }, { status: error.status });

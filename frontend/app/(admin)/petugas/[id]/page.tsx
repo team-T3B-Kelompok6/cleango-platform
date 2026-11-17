@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-import { ResourceListPage } from '@/components/ResourcePages';
-import { StaffDetailServer } from '@/components/StaffDetailServer';
+import { ResourceListPage } from '@/components/resource/ResourcePages';
+import { StaffDetailServer } from '@/components/staff';
 import { detailReturn } from '@/lib/detail-return';
 import { detail } from '@/lib/api';
 import { resources, valueText } from '@/lib/resources';

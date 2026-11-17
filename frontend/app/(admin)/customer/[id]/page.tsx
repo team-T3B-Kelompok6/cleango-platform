@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { ResourceDetailPage } from '@/components/ResourcePages';
+import { ResourceDetailPage } from '@/components/resource/ResourcePages';
 import { detail } from '@/lib/api';
 import { resources, valueText } from '@/lib/resources';
 import type { Search } from '@/types';

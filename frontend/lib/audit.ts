@@ -28,6 +28,92 @@ export function auditEntityName(entityType: string) {
     : entityType;
 }
 
+const auditFieldLabels: Record<string, string> = {
+  name: 'Nama',
+  price: 'Harga',
+  active: 'Status aktif',
+  category: 'Kategori',
+  description: 'Deskripsi',
+  duration: 'Durasi',
+  features: 'Fasilitas',
+  staff: 'Petugas',
+  status: 'Status',
+  published: 'Publikasi',
+  question: 'Pertanyaan',
+  answer: 'Jawaban',
+  date: 'Tanggal',
+  time: 'Waktu',
+  area: 'Wilayah',
+  resource: 'Jenis data',
+  code: 'Kode promo',
+  phone: 'Nomor telepon',
+  email: 'Email',
+  address: 'Alamat',
+  updatedAt: 'Diperbarui pada',
+};
+
+/** Label kolom pada tabel perubahan; kunci asing ditampilkan apa adanya. */
+export function auditFieldLabel(key: string) {
+  return Object.hasOwn(auditFieldLabels, key) ? auditFieldLabels[key] : key;
+}
+
+/** Nilai sebelum/sesudah untuk tabel perubahan. */
+export function auditValueText(value: unknown): string {
+  if (value === undefined || value === null) return '—';
+  if (typeof value === 'boolean') return value ? 'Ya' : 'Tidak';
+  if (Array.isArray(value))
+    return value.length ? value.map(auditValueText).join(', ') : 'Tidak ada';
+  if (typeof value === 'object') return JSON.stringify(value, null, 2);
+  return String(value);
+}
+
+/** Jumlah halaman riwayat; minimal satu meski kosong. */
+export function auditPageCount({
+  total,
+  pageSize,
+}: {
+  total: number;
+  pageSize: number;
+}) {
+  return Math.max(1, Math.ceil(total / pageSize));
+}
+
+/** Rentang baris pada halaman aktif, mis. "1–8 dari 40 aktivitas". */
+export function auditPageRange(
+  page: number,
+  { total, pageSize }: { total: number; pageSize: number },
+) {
+  const from = (page - 1) * pageSize + 1;
+  const to = Math.min(page * pageSize, total);
+  return from + '–' + to + ' dari ' + total + ' aktivitas · Terbaru dahulu';
+}
+
+/** Apakah pengguna sedang memakai filter apa pun. */
+export function auditHasFilter(filters: AuditFilters) {
+  return !!(
+    filters.q ||
+    filters.adminId ||
+    filters.action ||
+    filters.from ||
+    filters.to
+  );
+}
+
+/** Admin terpilih yang tidak lagi ada di daftar admin backend. */
+export function auditSelectedAdminMissing(
+  filters: AuditFilters,
+  admins: { id: string }[],
+) {
+  return (
+    !!filters.adminId && !admins.some((admin) => admin.id === filters.adminId)
+  );
+}
+
+/** Status kegagalan muat: riwayat belum tersedia atau error sementara. */
+export function auditIssue(status: number): 'unavailable' | 'error' {
+  return status === 404 || status === 501 ? 'unavailable' : 'error';
+}
+
 export function auditDate(value: string, time = false) {
   return new Intl.DateTimeFormat('id-ID', {
     timeZone: 'Asia/Jakarta',
@@ -93,6 +179,7 @@ export function auditQuery(filters: AuditFilters, page = filters.page) {
 
 const sensitive =
   /password|passwd|token|secret|authorization|cookie|credential|api[_-]?key/i;
+
 export function auditSnapshot(value: unknown, depth = 0): unknown {
   if (depth > 6) return '[Data terlalu dalam]';
   if (value === null || typeof value === 'number' || typeof value === 'boolean')

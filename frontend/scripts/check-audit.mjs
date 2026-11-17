@@ -359,4 +359,49 @@ await check(
     process.env.NODE_ENV = previousEnv;
   },
 );
+await check(
+  'Pagination, filter summary and change labels are derived in lib/audit',
+  async () => {
+    assert.equal(audit.auditPageCount({ total: 0, pageSize: 8 }), 1);
+    assert.equal(audit.auditPageCount({ total: 9, pageSize: 8 }), 2);
+    assert.equal(audit.auditPageCount({ total: 17, pageSize: 8 }), 3);
+    assert.equal(
+      audit.auditPageRange(1, { total: 9, pageSize: 8 }),
+      '1–8 dari 9 aktivitas · Terbaru dahulu',
+    );
+    assert.equal(
+      audit.auditPageRange(2, { total: 9, pageSize: 8 }),
+      '9–9 dari 9 aktivitas · Terbaru dahulu',
+    );
+    const empty = audit.auditFilters({}).filters;
+    assert.equal(audit.auditHasFilter(empty), false);
+    assert.equal(audit.auditHasFilter({ ...empty, page: 3 }), false);
+    assert.equal(audit.auditHasFilter({ ...empty, q: 'harga' }), true);
+    assert.equal(audit.auditHasFilter({ ...empty, from: '2026-10-01' }), true);
+    assert.equal(audit.auditSelectedAdminMissing(empty, []), false);
+    assert.equal(
+      audit.auditSelectedAdminMissing({ ...empty, adminId: 'admin-1' }, [
+        { id: 'admin-2' },
+      ]),
+      true,
+    );
+    assert.equal(
+      audit.auditSelectedAdminMissing({ ...empty, adminId: 'admin-1' }, [
+        { id: 'admin-1' },
+      ]),
+      false,
+    );
+    assert.equal(audit.auditFieldLabel('price'), 'Harga');
+    assert.equal(audit.auditFieldLabel('unknownField'), 'unknownField');
+    assert.equal(audit.auditValueText(null), '—');
+    assert.equal(audit.auditValueText(true), 'Ya');
+    assert.equal(audit.auditValueText([]), 'Tidak ada');
+    assert.equal(audit.auditValueText(['a', 'b']), 'a, b');
+    assert.match(audit.auditValueText({ a: 1 }), /"a": 1/);
+    assert.equal(audit.auditIssue(404), 'unavailable');
+    assert.equal(audit.auditIssue(501), 'unavailable');
+    assert.equal(audit.auditIssue(403), 'error');
+    assert.equal(audit.auditIssue(500), 'error');
+  },
+);
 console.log(checks.length + ' audit groups passed.');

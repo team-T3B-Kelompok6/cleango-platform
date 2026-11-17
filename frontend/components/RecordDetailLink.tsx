@@ -4,6 +4,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { resources } from '@/lib/resources';
 import { detailFilterKeys } from '@/lib/detail-return';
 import type { Resource } from '@/types';
+import { buttonVariants } from '@/components/shared/ui';
 export function RecordDetailLink({
   resource,
   id,
@@ -30,7 +31,7 @@ export function RecordDetailLink({
     (query.size ? '?' + query.toString() : '');
   return (
     <Link
-      className="button"
+      className={buttonVariants({ variant: 'ghost' })}
       aria-label={'Detail ' + config.singular + ' ' + id}
       href={href}
       scroll={false}

@@ -5,9 +5,16 @@ import { useRouter } from 'next/navigation';
 import { resources } from '@/lib/resources';
 import type { Resource } from '@/types';
 import { displayId } from '@/lib/display';
-import { Modal } from './Modal';
-import { DialogCloseContext, useDialogClose } from './DialogContext';
-import { UiIcon, type UiIconName } from './UiIcon';
+import { Modal } from '@/components/shared/ui/Modal';
+import { DialogBody } from '@/components/shared/ui/DialogBody';
+import { DialogFooter } from '@/components/shared/ui/DialogFooter';
+import { Button, buttonVariants } from '@/components/shared/ui';
+import { cn } from '@/lib/cn';
+import {
+  DialogCloseContext,
+  useDialogClose,
+} from '@/components/shared/ui/DialogContext';
+import { UiIcon, type UiIconName } from '@/components/shared/ui/UiIcon';
 
 const titles: Record<Resource, string> = {
   orders: 'Detail Pesanan',
@@ -29,11 +36,14 @@ function DetailFooter({
 }) {
   const close = useDialogClose();
   return (
-    <div className="modal-footer detail-dialog-footer">
+    <DialogFooter className="items-center gap-10 max-sm:flex-wrap">
       {resource === 'customers' &&
         (href ? (
           <a
-            className="button detail-contact-action"
+            className={cn(
+              buttonVariants({ variant: 'ghost' }),
+              'mr-auto border-line-strong bg-accent-soft text-accent max-sm:mr-0 max-sm:basis-full',
+            )}
             href={href}
             target="_blank"
             rel="noopener noreferrer"
@@ -42,7 +52,10 @@ function DetailFooter({
           </a>
         ) : (
           <button
-            className="button detail-contact-action"
+            className={cn(
+              buttonVariants({ variant: 'ghost' }),
+              'mr-auto border-line-strong bg-accent-soft text-accent max-sm:mr-0 max-sm:basis-full',
+            )}
             type="button"
             disabled
             title="WhatsApp belum terhubung untuk kontak ini"
@@ -52,19 +65,15 @@ function DetailFooter({
           </button>
         ))}
       <>
-        <button className="button" type="button" onClick={() => close?.()}>
+        <Button variant="ghost" onClick={() => close?.()}>
           Tutup
-        </button>
-        <button
-          className="button primary detail-edit-button"
-          type="button"
-          onClick={onEdit}
-        >
+        </Button>
+        <Button type="button" onClick={onEdit}>
           <UiIcon name="edit" />
           {'Ubah ' + resources[resource].singular}
-        </button>
+        </Button>
       </>
-    </div>
+    </DialogFooter>
   );
 }
 
@@ -120,12 +129,14 @@ export function RecordDetailModal({
       }
       subtitle={editing ? '#' + displayId(id) : subtitle}
       icon={icon}
-      className={
-        'record-detail-dialog ' +
-        resource +
-        '-detail-dialog' +
-        (resource === 'services' && editing ? ' service-form-dialog' : '')
+      width={
+        resource === 'services' && editing
+          ? 1000
+          : resource === 'faqs'
+            ? 540
+            : undefined
       }
+      className={'record-detail-dialog ' + resource + '-detail-dialog'}
       onClose={() => router.replace(closeHref, { scroll: false })}
     >
       {editing ? (
@@ -134,7 +145,9 @@ export function RecordDetailModal({
         </DialogCloseContext.Provider>
       ) : (
         <>
-          <div className="modal-body detail-preview-body">{children}</div>
+          <DialogBody className="flex flex-col gap-20 p-24">
+            {children}
+          </DialogBody>
           <DetailFooter
             resource={resource}
             href={href}

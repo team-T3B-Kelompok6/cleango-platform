@@ -22,19 +22,36 @@ vm.runInThisContext('(function(require,module,exports){' + code + '\n})')(
 );
 const serviceMediaUrl = module.exports.serviceMediaUrl;
 const origin = 'http://127.0.0.1:3101';
-assert.equal(serviceMediaUrl('/uploads/service.png', origin), 'http://127.0.0.1:3101/uploads/service.png');
-assert.equal(serviceMediaUrl('https://cdn.example.com/a.png', origin), 'https://cdn.example.com/a.png');
-assert.equal(serviceMediaUrl('/uploads/service.png', ''), '/uploads/service.png');
-assert.equal(serviceMediaUrl('/assets/images/x.png', origin), '/assets/images/x.png');
+assert.equal(
+  serviceMediaUrl('/uploads/service.png', origin),
+  'http://127.0.0.1:3101/uploads/service.png',
+);
+assert.equal(
+  serviceMediaUrl('https://cdn.example.com/a.png', origin),
+  'https://cdn.example.com/a.png',
+);
+assert.equal(
+  serviceMediaUrl('/uploads/service.png', ''),
+  '/uploads/service.png',
+);
+assert.equal(
+  serviceMediaUrl('/assets/images/x.png', origin),
+  '/assets/images/x.png',
+);
 assert.equal(serviceMediaUrl('', origin), '');
 
 const sourceFiles = [
   'components/ResourceFormServer.tsx',
-  'components/ServiceList.tsx',
-  'components/RecordDetailServer.tsx',
+  'components/services/ServiceCard.tsx',
+  'components/services/ServicePreview.tsx',
 ];
 for (const file of sourceFiles) {
   const source = readFileSync(new URL('../' + file, import.meta.url), 'utf8');
-  assert.ok(source.includes('serviceMediaUrl'), file + ' must transform service image URLs');
+  assert.ok(
+    source.includes('serviceMediaUrl'),
+    file + ' must transform service image URLs',
+  );
 }
-console.log('PASS service image preview: Express upload paths resolve to backend origin');
+console.log(
+  'PASS service image preview: Express upload paths resolve to backend origin',
+);

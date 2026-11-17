@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, type KeyboardEvent } from 'react';
-import { Icon } from './Icon';
-import { UiIcon } from './UiIcon';
+import { Icon } from '@/components/shared/ui/Icon';
+import { UiIcon } from '@/components/shared/ui/UiIcon';
 
 const weekdays = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
 const dateKey = (date: Date) => date.toISOString().slice(0, 10);

@@ -244,24 +244,6 @@ export const valueText = (value: unknown) =>
         ? 'Aktif'
         : 'Nonaktif'
       : String(value ?? '');
-export const tone = (status: string) =>
-  status === 'Batal'
-    ? 'red'
-    : status === 'Nonaktif'
-      ? 'neutral'
-      : status === 'Aktif' ||
-          status === 'Selesai' ||
-          status === 'Tersedia' ||
-          status === 'Siaga & Tersedia'
-        ? 'green'
-        : status === 'Menunggu Lokasi' ||
-            status === 'Menuju Lokasi' ||
-            status === 'Sedang Dikerjakan' ||
-            status === 'Berlangsung' ||
-            status === 'Bertugas' ||
-            status === 'Sedang Bekerja'
-          ? 'blue'
-          : 'amber';
 // Jam mulai shift mengikuti slot booking mobile/backend (BOOKING_SLOTS).
 export const bookingStartSlots = [
   '08:00',
@@ -282,8 +264,7 @@ export const scheduleShifts = [
 export const shiftOf = (time: string) => {
   const hour = Number(time.match(/^(\d{1,2})[:.]/)?.[1] ?? 8);
   return (
-    scheduleShifts.findLast((shift) => hour >= shift.from) ??
-    scheduleShifts[0]
+    scheduleShifts.findLast((shift) => hour >= shift.from) ?? scheduleShifts[0]
   ).name;
 };
 export const shiftEndOf = (time: string) => {

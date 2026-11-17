@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { ResourceListPage } from '@/components/ResourcePages';
+import { ResourceListPage } from '@/components/resource/ResourcePages';
 import { resources } from '@/lib/resources';
 import type { Search } from '@/types';
 export const dynamic = 'force-dynamic';

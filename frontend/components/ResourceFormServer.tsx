@@ -1,8 +1,5 @@
-import { displayId } from '@/lib/display';
 import { ApiError, list } from '@/lib/api';
-import { resources } from '@/lib/resources';
 import { saveAction } from '@/app/actions';
-import { ResourceForm } from './Form';
 import type {
   Resource,
   RecordData,
@@ -11,17 +8,19 @@ import type {
   Schedule,
   Service,
   Customer,
-  Field,
 } from '@/types';
-import { Badge } from './StatusBadge';
 import { listCategories } from '@/lib/categories';
-import { ServiceForm } from './ServiceForm';
-import { OrderEditor, ScheduleEditor } from './BookingEditors';
-import { isDemoId } from '@/lib/cleaner/demo-store';
+import { ServiceForm } from '@/components/services';
+import { FaqForm } from '@/components/faq';
+import { CustomerForm } from '@/components/customers';
+import { StaffForm } from '@/components/staff/StaffForm';
+import { OrderEditor, ScheduleEditor } from '@/components/booking/editors';
 import { withOrderWorkTimes } from '@/lib/order-work-times';
 import { serviceMediaUrl } from '@/lib/service-media';
-import { serviceSkillOptions } from '@/lib/staff-skills';
 import { staffPhotoSource } from '@/lib/staff-photo';
+import { staffFormOptions } from '@/lib/staff';
+import { isDemoId } from '@/lib/cleaner/demo-store';
+
 async function optionalLookup<T extends RecordData>(
   resource: Resource,
 ): Promise<T[]> {
@@ -32,99 +31,90 @@ async function optionalLookup<T extends RecordData>(
     throw error;
   }
 }
-async function fieldsFor(resource: Resource, record?: RecordData) {
-  const fields = resources[resource].fields;
-  if (resource === 'staff') {
-    const [staff, services] = await Promise.all([
-      list<Staff>('staff'),
-      list<Service>('services'),
-    ]);
-    const options = serviceSkillOptions(services);
-    const previous = Array.isArray(record?.skills)
-      ? record.skills.filter(
-          (skill): skill is string =>
-            typeof skill === 'string' && !options.includes(skill),
-        )
-      : [];
-    const trainee = record?.status === 'Masa Training';
-    const mentors = staff.filter(
-      (person) =>
-        person.id !== record?.id &&
-        ['Tersedia', 'Bertugas'].includes(person.status),
-    );
-    return fields.flatMap((field): Field[] => {
-      if (field.name === 'skills')
-        return trainee
-          ? []
-          : [
-              {
-                ...field,
-                options,
-                hint: previous.length
-                  ? 'Pilih layanan yang dikuasai. Keahlian sebelumnya: ' +
-                    previous.join(', ') +
-                    '.'
-                  : field.hint,
-              },
-            ];
-      if (field.name === 'status')
-        return [
-          {
-            ...field,
-            hint: trainee
-              ? 'Saat keluar dari training, pilih keahlian aktual trainee sebelum menyimpan.'
-              : field.hint,
-          },
-          {
-            name: 'trainerId',
-            label: 'Mentor senior',
-            kind: 'select' as const,
-            required: false,
-            options: ['', ...mentors.map((person) => person.id)],
-            optionLabels: {
-              '': 'Tanpa mentor',
-              ...Object.fromEntries(
-                mentors.map((person) => [person.id, person.name]),
-              ),
-            },
-            hint: 'Opsional. Hanya petugas aktif non-training. Keahliannya tampil sebagai materi pendampingan, bukan keahlian trainee.',
-          },
-        ];
-      return [field];
-    });
-  }
-  if (resource === 'services' || resource === 'faqs') {
-    const categories = await listCategories(resource);
-    const existing = categories.length ? [] : await list(resource);
-    const names = [
-      ...new Set([
-        ...categories.map((category) => category.name),
-        ...existing.map((item) => String(item.category)),
-        ...(record?.category ? [String(record.category)] : []),
-      ]),
-    ];
-    return fields.map((field) =>
-      field.name === 'category' ? { ...field, options: names } : field,
-    );
-  }
-  if (resource !== 'orders') return fields;
-  const staff = await list<Staff>('staff');
-  const assigned = Array.isArray(record?.staff) ? record.staff : [];
-  return fields.map((field) =>
-    field.name === 'staff'
-      ? {
-          ...field,
-          options: staff
-            .filter(
-              (person) =>
-                ['Tersedia', 'Bertugas'].includes(person.status) ||
-                assigned.includes(person.name),
-            )
-            .map((person) => person.name),
-        }
-      : field,
+
+/** Pilihan kategori untuk layanan/FAQ: gabungan tabel kategori dan data lama. */
+async function categoryNames(
+  resource: 'services' | 'faqs',
+  record?: RecordData,
+) {
+  const categories = await listCategories(resource);
+  const existing = categories.length ? [] : await list(resource);
+  return [
+    ...new Set([
+      ...categories.map((category) => category.name),
+      ...existing.map((item) => String(item.category)),
+      ...(record?.category ? [String(record.category)] : []),
+    ]),
+  ];
+}
+
+async function OrdersForm({ record }: { record: RecordData }) {
+  const [staff, services, customers, schedules, orders] = await Promise.all([
+    list<Staff>('staff'),
+    optionalLookup<Service>('services'),
+    optionalLookup<Customer>('customers'),
+    list<Schedule>('schedules'),
+    list<Order>('orders'),
+  ]);
+  const customer = customers.find((item) =>
+    record.customerId
+      ? item.id === record.customerId
+      : item.name === record.customer,
+  );
+  return (
+    <OrderEditor
+      order={record as Order}
+      staff={staff
+        .filter((person) => isDemoId(person.id) === isDemoId(String(record.id)))
+        .map((person) => ({
+          ...person,
+          photoUrl: staffPhotoSource(person.photoUrl),
+        }))}
+      services={services}
+      schedules={schedules}
+      orders={await withOrderWorkTimes(orders)}
+      phone={String(customer?.phone ?? record.phone ?? '')}
+      action={saveAction.bind(null, 'orders', record.id)}
+    />
   );
 }
+
+async function SchedulesForm({ record }: { record?: RecordData }) {
+  const staff = await list<Staff>('staff');
+  return (
+    <ScheduleEditor
+      schedule={record as Schedule | undefined}
+      staff={staff.map((person) => ({
+        ...person,
+        photoUrl: staffPhotoSource(person.photoUrl),
+      }))}
+      action={saveAction.bind(null, 'schedules', record?.id ?? null)}
+    />
+  );
+}
+
+/** Data yang dibutuhkan form petugas. */
+async function staffFormData(record?: RecordData) {
+  const [staff, services] = await Promise.all([
+    list<Staff>('staff'),
+    list<Service>('services'),
+  ]);
+  const { skillOptions, previousSkills, mentors } = staffFormOptions({
+    staff,
+    services,
+    record,
+  });
+  return {
+    initial: record,
+    skillOptions,
+    previousSkills,
+    mentors,
+    photoUrl: staffPhotoSource(record?.photoUrl),
+    action: saveAction.bind(null, 'staff', record?.id ?? null),
+  };
+}
+
+/** Render form/gambar untuk satu resource; data server diambil di sini. */
 export async function ResourceFormServer({
   resource,
   record,
@@ -134,99 +124,50 @@ export async function ResourceFormServer({
   record?: RecordData;
   focusPromo?: boolean;
 }) {
-  if (resource === 'orders' && record) {
-    const [staff, services, customers, schedules, orders] = await Promise.all([
-      list<Staff>('staff'),
-      optionalLookup<Service>('services'),
-      optionalLookup<Customer>('customers'),
-      list<Schedule>('schedules'),
-      list<Order>('orders'),
-    ]);
-    const customer = customers.find((customer) =>
-      record.customerId
-        ? customer.id === record.customerId
-        : customer.name === record.customer,
-    );
-    return (
-      <OrderEditor
-        order={record as Order}
-        staff={staff
-          .filter((person) => isDemoId(person.id) === isDemoId(record.id))
-          .map((person) => ({
-            ...person,
-            photoUrl: staffPhotoSource(person.photoUrl),
-          }))}
-        services={services}
-        schedules={schedules}
-        orders={await withOrderWorkTimes(orders)}
-        phone={String(customer?.phone ?? record.phone ?? '')}
-        action={saveAction.bind(null, resource, record.id)}
-      />
-    );
+  switch (resource) {
+    case 'orders':
+      if (!record)
+        throw new Error('Pesanan baru dibuat dari halaman pesanan masuk.');
+      return <OrdersForm record={record} />;
+    case 'schedules':
+      return <SchedulesForm record={record} />;
+    case 'staff':
+      return <StaffForm {...await staffFormData(record)} />;
+    case 'services': {
+      const origin = process.env.API_URL
+        ? new URL(process.env.API_URL).origin
+        : '';
+      const initialRecord = record
+        ? {
+            ...record,
+            imageUrl: record.imageUrl
+              ? serviceMediaUrl(String(record.imageUrl), origin)
+              : record.imageUrl,
+          }
+        : undefined;
+      return (
+        <ServiceForm
+          focusPromo={focusPromo}
+          initial={initialRecord}
+          categories={await categoryNames('services', record)}
+          action={saveAction.bind(null, 'services', record?.id ?? null)}
+        />
+      );
+    }
+    case 'customers':
+      return (
+        <CustomerForm
+          initial={record}
+          action={saveAction.bind(null, 'customers', record?.id ?? null)}
+        />
+      );
+    case 'faqs':
+      return (
+        <FaqForm
+          initial={record}
+          categories={await categoryNames('faqs', record)}
+          action={saveAction.bind(null, 'faqs', record?.id ?? null)}
+        />
+      );
   }
-  if (resource === 'schedules') {
-    const staff = await list<Staff>('staff');
-    return (
-      <ScheduleEditor
-        schedule={record as Schedule | undefined}
-        staff={staff.map((person) => ({
-          ...person,
-          photoUrl: staffPhotoSource(person.photoUrl),
-        }))}
-        action={saveAction.bind(null, resource, record?.id ?? null)}
-      />
-    );
-  }
-  const fields = await fieldsFor(resource, record);
-  if (resource === 'services') {
-    const origin = process.env.API_URL
-      ? new URL(process.env.API_URL).origin
-      : '';
-    const initialRecord = record
-      ? {
-          ...record,
-          imageUrl: record.imageUrl
-            ? serviceMediaUrl(String(record.imageUrl), origin)
-            : record.imageUrl,
-        }
-      : undefined;
-    return (
-      <ServiceForm
-        focusPromo={focusPromo}
-        initial={initialRecord}
-        categories={
-          fields.find((field) => field.name === 'category')?.options ?? []
-        }
-        action={saveAction.bind(null, resource, record?.id ?? null)}
-      />
-    );
-  }
-  return (
-    <ResourceForm
-      fields={fields}
-      staffPhoto={
-        resource === 'staff' ? staffPhotoSource(record?.photoUrl) : undefined
-      }
-      initial={record}
-      action={saveAction.bind(null, resource, record?.id ?? null)}
-      cancelHref={resources[resource].path}
-      submitLabel={
-        record
-          ? 'Simpan perubahan'
-          : 'Simpan ' +
-            resources[resource].singular.toLowerCase().replace(/^faq$/, 'FAQ')
-      }
-      intro={
-        resource === 'orders' && record ? (
-          <div className="order-edit-summary">
-            <div>
-              <small>Pelanggan · #{displayId(record.id)}</small>
-              <strong>{String(record.customer)}</strong>
-            </div>
-            <Badge status={String(record.status)} />
-          </div>
-        ) : undefined
-      }
-    />
-  );
 }

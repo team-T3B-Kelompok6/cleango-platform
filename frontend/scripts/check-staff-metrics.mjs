@@ -11,7 +11,10 @@ const component = (name) => ({ [name]: (props) => ({ type: name, props }) });
 function load(file) {
   const module = { exports: {} };
   const code = ts.transpileModule(readFileSync(path.join(root, file), 'utf8'), {
-    compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX },
+    compilerOptions: {
+      module: ts.ModuleKind.CommonJS,
+      jsx: ts.JsxEmit.ReactJSX,
+    },
   }).outputText;
   const resolve = (id) => {
     if (id === 'react/jsx-runtime') return require(id);
@@ -20,18 +23,48 @@ function load(file) {
     if (id === '@/lib/resources') return { valueText: String, rupiah: String };
     if (id === '@/lib/whatsapp') return { whatsappLink: () => null };
     if (id === '@/lib/staff-photo') return { staffPhotoSource: () => null };
-    if (id === '@/lib/order-work-times') return { withOrderWorkTimes: async (orders) => orders };
-    if (id === '@/lib/staff-availability') return {
-      activeOrderForStaff: () => undefined, staffOperationalStatus: () => 'Tersedia',
-    };
+    if (id === '@/lib/staff')
+      return {
+        shortDate: () => '',
+        staffStatusLabel: (item) => item.operationalStatus ?? item.status ?? '',
+      };
+    if (id === '@/lib/order-work-times')
+      return { withOrderWorkTimes: async (orders) => orders };
+    if (id === '@/lib/staff-availability')
+      return {
+        activeOrderForStaff: () => undefined,
+        staffOperationalStatus: () => 'Tersedia',
+      };
     if (id === '@/lib/order-flow') return { orderTimeText: () => '' };
     if (id === 'next/link') return { default: 'a' };
-    if (id.endsWith('StaffDetailModal')) return { ...component('StaffDetailModal'), ...component('StaffPhone') };
+    if (id === '@/components/tracking') return component('TrackingButton');
+    if (id === '@/components/staff/StaffAvatar')
+      return component('StaffAvatar');
+    if (id === '@/components/staff/StaffPhone') return component('StaffPhone');
+    if (id === '@/components/RecordActions')
+      return {
+        RecordActions: ({ children }) => ({
+          type: 'RecordActions',
+          props: { children },
+        }),
+      };
+    // Barrel `shared/ui`: kembalikan komponen tiruan untuk nama apa pun.
+    if (id.startsWith('@/components/shared/ui/'))
+      return component(id.split('/').at(-1));
+    if (id === '@/components/shared/ui')
+      return new Proxy(
+        {},
+        { get: (_, name) => (props) => ({ type: String(name), props }) },
+      );
+    if (id.endsWith('StaffDetailModal'))
+      return { ...component('StaffDetailModal'), ...component('StaffPhone') };
     if (id.endsWith('StatusBadge')) return component('Badge');
     if (id.startsWith('./')) return component(id.split('/').at(-1));
     throw Error('Unexpected import: ' + id);
   };
-  vm.runInThisContext('(function(require,module,exports){' + code + '\n})', { filename: file })(resolve, module, module.exports);
+  vm.runInThisContext('(function(require,module,exports){' + code + '\n})', {
+    filename: file,
+  })(resolve, module, module.exports);
   return module.exports;
 }
 function text(node) {
@@ -40,13 +73,39 @@ function text(node) {
   if (Array.isArray(node)) return node.map(text).join('');
   return text(node.props?.children);
 }
-const staff = { id: '1', name: 'Sari', phone: '', skills: [], status: 'Tersedia', rating: 4.9, completedBookings: 2 };
-const { PeopleList } = load('components/PeopleList.tsx');
-const list = text(PeopleList({ shown: [staff], resource: 'staff' }));
-assert.ok(!list.includes('4.9'), 'Staff list must not display legacy person rating');
-const { StaffDetailServer } = load('components/StaffDetailServer.tsx');
-const detail = await StaffDetailServer({ staff });
-const profile = text(detail.props.profile);
-assert.ok(!profile.includes('4.9'), 'Staff profile must not display person rating');
-assert.ok(profile.includes('2 pesanan selesai tercatat'), 'Use server completed unique booking count, not fetched order list length');
+const staff = {
+  id: '1',
+  name: 'Sari',
+  phone: '',
+  skills: [],
+  status: 'Tersedia',
+  rating: 4.9,
+  completedBookings: 2,
+};
+const { StaffRow } = load('components/people/StaffRow.tsx');
+const list = text(StaffRow({ item: staff, edit: () => null }));
+assert.ok(
+  !list.includes('4.9'),
+  'Staff list must not display legacy person rating',
+);
+const { StaffDetail } = load('components/staff/StaffDetail.tsx');
+const profile = text(
+  StaffDetail({
+    staff,
+    skills: [],
+    status: 'Tersedia',
+    phone: '',
+    href: null,
+    scheduleCount: 0,
+    dataAvailable: true,
+  }),
+);
+assert.ok(
+  !profile.includes('4.9'),
+  'Staff profile must not display person rating',
+);
+assert.ok(
+  profile.includes('2 pesanan selesai tercatat'),
+  'Use server completed unique booking count, not fetched order list length',
+);
 console.log('Staff metrics UI: PASS');

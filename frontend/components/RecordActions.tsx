@@ -15,7 +15,7 @@ export function RecordActions({
   children?: ReactNode;
 }) {
   return (
-    <div className="figma-row-actions record-rud">
+    <div className="flex flex-wrap items-center justify-end gap-8">
       {children}
       {edit(record, 'Ubah')}
       <RecordDetailLink resource={resource} id={record.id} />

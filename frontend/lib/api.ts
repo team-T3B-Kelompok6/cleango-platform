@@ -31,8 +31,9 @@ export async function upstreamRequest<T>(
   const token = (await cookies()).get('cleango-session')?.value;
   if (!anonymous && !token) redirect('/login');
   let response: Response;
+  const target = base.replace(/\/$/, '') + path;
   try {
-    response = await fetch(base.replace(/\/$/, '') + path, {
+    response = await fetch(target, {
       ...options,
       cache: 'no-store',
       signal: AbortSignal.timeout(10000),
@@ -44,9 +45,21 @@ export async function upstreamRequest<T>(
         ...options.headers,
       },
     });
-  } catch {
+  } catch (error) {
+    // Tanpa log ini, 503 terlihat seperti bug aplikasi padahal backend mati
+    // atau API_URL menunjuk port yang salah. Pesan ke pengguna tetap ramah.
+    const reason =
+      error instanceof Error
+        ? `${error.name}: ${error.message}`
+        : String(error);
+    console.error(`[api] gagal menghubungi ${target} (${reason})`);
+    const timeout =
+      error instanceof Error &&
+      (error.name === 'TimeoutError' || error.name === 'AbortError');
     throw new ApiError(
-      'Layanan data belum dapat dihubungi. Silakan coba lagi.',
+      timeout
+        ? 'Layanan data tidak merespons. Coba lagi sebentar.'
+        : 'Layanan data belum dapat dihubungi. Silakan coba lagi.',
       503,
     );
   }

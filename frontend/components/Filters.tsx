@@ -1,6 +1,7 @@
 'use client';
-import { UiIcon } from './UiIcon';
-import { CategoryIcon } from './CategoryIcon';
+import { UiIcon } from '@/components/shared/ui/UiIcon';
+import { Button } from '@/components/shared/ui';
+import { CategoryIcon } from '@/components/categories';
 import {
   useState,
   useRef,
@@ -8,10 +9,13 @@ import {
   useEffect,
   type CSSProperties,
 } from 'react';
-import Form from 'next/form';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Icon } from './Icon';
-import { useOutsideDismiss } from './useOutsideDismiss';
+import { Icon } from '@/components/shared/ui/Icon';
+import { useOutsideDismiss } from '@/hooks/useOutsideDismiss';
+import { DialogFooter } from '@/components/shared/ui/DialogFooter';
+import { DialogHeader } from '@/components/shared/ui/DialogHeader';
+import { TabButton } from '@/components/shared/ui/TabButton';
+import { Tabs } from '@/components/shared/ui/Tabs';
 import { DateCalendar } from './DateCalendar';
 const validDate = (value: string | null) =>
   value &&
@@ -53,7 +57,9 @@ export function Filters({
     const measure = () => {
       const anchor = ref.current?.getBoundingClientRect();
       if (!anchor) return;
-      const header = document.querySelector('.header')?.getBoundingClientRect();
+      const header = document
+        .querySelector('[data-topbar]')
+        ?.getBoundingClientRect();
       const top = Math.max(16, (header?.bottom ?? 0) + 12);
       if (
         anchor.top < (header?.bottom ?? 0) ||
@@ -107,22 +113,19 @@ export function Filters({
   }
   return (
     <div
-      className={tabs.length ? 'next-filter' : 'next-date-filter'}
+      className={
+        tabs.length ? 'flex min-w-0 flex-1 flex-col gap-14' : 'next-date-filter'
+      }
       aria-busy={pending}
     >
       {date && (
         <div className="date-filter-anchor" ref={ref}>
-          <button
-            className="button date-filter"
-            type="button"
-            onClick={toggle}
-            aria-expanded={open}
-          >
+          <Button variant="ghost" onClick={toggle} aria-expanded={open}>
             <Icon name="calendar" />
             {params.get('from') || params.get('to')
               ? 'Tanggal difilter'
               : 'Filter Tanggal'}
-          </button>
+          </Button>
           <div
             className="date-popover"
             data-placement={
@@ -142,28 +145,18 @@ export function Filters({
             role="dialog"
             aria-label="Filter tanggal"
           >
-            <div className="modal-header">
-              <div className="calendar-title">
-                <span className="calendar-summary-icon">
+            <DialogHeader
+              title={`Pilih Tanggal ${
+                pathname === '/jadwal' ? 'Jadwal' : 'Pesanan'
+              }`}
+              subtitle="Kalender & reservasi Cleango"
+              onClose={() => setOpen(false)}
+              icon={
+                <span className="calendar-summary-icon grid size-[36px] shrink-0 place-items-center rounded-md bg-surface-tint text-success">
                   <Icon name="calendar" />
                 </span>
-                <div>
-                  <h2>
-                    Pilih Tanggal{' '}
-                    {pathname === '/jadwal' ? 'Jadwal' : 'Pesanan'}
-                  </h2>
-                  <p>Kalender &amp; reservasi Cleango</p>
-                </div>
-              </div>
-              <button
-                className="close-button"
-                aria-label="Tutup filter tanggal"
-                type="button"
-                onClick={() => setOpen(false)}
-              >
-                <UiIcon name="close" />
-              </button>
-            </div>
+              }
+            />
             <form
               onSubmit={(event) => {
                 event.preventDefault();
@@ -189,10 +182,9 @@ export function Filters({
                   }}
                 />
               )}
-              <div className="modal-footer">
-                <button
-                  className="button"
-                  type="button"
+              <DialogFooter>
+                <Button
+                  variant="ghost"
                   onClick={() => {
                     setFrom('');
                     setTo('');
@@ -201,34 +193,22 @@ export function Filters({
                   }}
                 >
                   Semua tanggal
-                </button>
-                <button
-                  className="button primary"
-                  type="submit"
-                  disabled={!!(from && to && from > to)}
-                >
+                </Button>
+                <Button type="submit" disabled={!!(from && to && from > to)}>
                   <UiIcon name="tick" />
                   Pilih tanggal
-                </button>
-              </div>
+                </Button>
+              </DialogFooter>
             </form>
           </div>
         </div>
       )}
       {tabs.length > 0 && (
-        <div
-          className="order-tabs manage-tabs"
-          role="group"
-          aria-label="Filter daftar"
-        >
+        <Tabs label="Filter daftar">
           {tabs.map((tab, index) => (
-            <button
+            <TabButton
               key={tab}
-              type="button"
-              aria-pressed={(params.get('tab') ?? tabs[0]) === tab}
-              className={
-                (params.get('tab') ?? tabs[0]) === tab ? 'selected' : ''
-              }
+              active={(params.get('tab') ?? tabs[0]) === tab}
               onClick={() => apply({ tab: index ? tab : '' })}
             >
               <CategoryIcon src={tabIcons[tab] ?? ''} />
@@ -241,66 +221,10 @@ export function Filters({
                 : tab === 'Menunggu Lokasi'
                   ? 'Siap Berangkat'
                   : tab}
-            </button>
+            </TabButton>
           ))}
-        </div>
+        </Tabs>
       )}
     </div>
-  );
-}
-export function SearchInput({
-  mobile = false,
-  faq = false,
-}: {
-  mobile?: boolean;
-  faq?: boolean;
-}) {
-  const params = useSearchParams(),
-    pathname = usePathname();
-  const section = '/' + (pathname.split('/')[1] ?? '');
-  const action = ['/', '/laporan'].includes(section) ? '/pesanan' : section;
-  const pageLabels: Record<string, string> = {
-    '/': 'Dashboard Utama',
-    '/pesanan': 'Kelola Pesanan',
-    '/jadwal': 'Kelola Jadwal',
-    '/layanan': 'Kelola Layanan',
-    '/petugas': 'Kelola Data Petugas',
-    '/customer': 'Kelola Data Customer',
-    '/laporan': 'Laporan',
-    '/faq': 'Kelola FAQ',
-    '/audit-log': 'Audit Log Admin',
-  };
-  return (
-    <Form
-      action={action}
-      className={
-        faq
-          ? 'faq-in-page-search'
-          : mobile
-            ? 'mobile-search global-search'
-            : 'global-search'
-      }
-      key={params.get('q')}
-    >
-      <Icon name="search" />
-      <input
-        name="q"
-        aria-label="Cari data"
-        placeholder={
-          faq
-            ? 'Cari pertanyaan…'
-            : `Cari di ${pageLabels[section] ?? 'Cleango'}…`
-        }
-        defaultValue={params.get('q') ?? ''}
-      />
-      {Array.from(params.entries())
-        .filter(([key]) => !['q', 'page', 'saved', 'deleted'].includes(key))
-        .map(([key, value]) => (
-          <input key={key} name={key} type="hidden" value={value} />
-        ))}
-      <button aria-label="Jalankan pencarian" type="submit">
-        <Icon name="arrow" />
-      </button>
-    </Form>
   );
 }

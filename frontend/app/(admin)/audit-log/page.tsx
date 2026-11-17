@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { AuditLogView } from '@/components/AuditLogView';
+import { AuditLogView } from '@/components/audit';
 import type { Search } from '@/types';
 
 export const dynamic = 'force-dynamic';
