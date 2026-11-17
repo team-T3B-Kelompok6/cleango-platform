@@ -47,3 +47,33 @@ Pilih **Keluar akun** setelah selesai menggunakan aplikasi.
 ## Saat mencoba demo
 
 Gunakan akun `admin` / `admin` pada mode demo. Riwayat aktivitas dan pengiriman WhatsApp pada mode ini masih berupa simulasi. Untuk memakai data backend, jalankan API tim dan gunakan akun backend; riwayat audit server baru tersedia setelah API audit disiapkan.
+
+## Menjalankan frontend dan backend
+
+Halaman admin mengambil semua data dari API Express, jadi **backend harus hidup** sebelum
+membuka dashboard. Kalau tidak, halaman gagal dengan 503
+_"Layanan data belum dapat dihubungi"_ — itu artinya API tidak berjalan atau port-nya beda,
+bukan bug tampilan.
+
+```bash
+# dari root repo: menyalakan backend + frontend sekaligus
+npm run dev
+
+# atau terpisah di dua terminal
+npm run dev:backend     # backend, port dari backend/.env (contoh: 3101)
+npm run dev:frontend    # frontend, http://127.0.0.1:3000
+```
+
+**Port harus cocok.** `frontend/.env.local` → `API_URL`, dan `backend/.env` → `PORT`.
+Kalau `API_URL=http://127.0.0.1:3101/api`, backend harus `PORT=3101`. Setelah mengubah
+salah satunya, restart proses yang bersangkutan (Next hanya membaca `.env.local` saat start).
+
+Untuk memastikan cepat:
+
+```bash
+# apakah API hidup di port yang dipanggil frontend?
+curl http://127.0.0.1:3101/api/services
+```
+
+Kalau 503 tetap muncul, cek log terminal Next: sekarang ada baris
+`[api] gagal menghubungi <url> (<penyebab>)` yang menunjukkan URL dan alasan aslinya.
