@@ -16,7 +16,9 @@ function check(name, fn) {
 
 const app = join(dirname(fileURLToPath(import.meta.url)), '..', 'app');
 const layout = readFileSync(join(app, 'layout.tsx'), 'utf8');
-const cssFiles = [...layout.matchAll(/import\s+['"](\.\/[^'"]*\.css)['"]/g)].map((match) => match[1]);
+const cssFiles = [
+  ...layout.matchAll(/import\s+['"](\.\/[^'"]*\.css)['"]/g),
+].map((match) => match[1]);
 
 const sizes = [
   [1920, 1080],

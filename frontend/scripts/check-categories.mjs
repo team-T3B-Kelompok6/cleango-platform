@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 
@@ -34,9 +34,22 @@ function load(filename) {
         },
       };
     if (id === '@/types') return load(path.join(root, 'types/index.ts'));
-    if (id.startsWith('.'))
-      return load(path.resolve(path.dirname(filename), id + '.ts'));
-    if (id.startsWith('@/')) return load(path.join(root, id.slice(2) + '.ts'));
+    if (id.startsWith('.')) {
+      const base = path.resolve(path.dirname(filename), id);
+      return load(
+        existsSync(base + '.ts')
+          ? base + '.ts'
+          : existsSync(path.join(base, 'index.ts'))
+            ? path.join(base, 'index.ts')
+            : base + '.tsx',
+      );
+    }
+    if (id.startsWith('@/')) {
+      const base = path.join(root, id.slice(2));
+      return load(
+        existsSync(base + '.ts') ? base + '.ts' : path.join(base, 'index.ts'),
+      );
+    }
     return require(id);
   };
   const code = ts.transpileModule(readFileSync(filename, 'utf8'), {
@@ -159,8 +172,10 @@ globalThis.fetch = async (input, options) => {
   throw new Error('Unexpected request: ' + method + ' ' + url.pathname);
 };
 
-const api = load(path.join(root, 'lib/categories.ts'));
-const actions = load(path.join(root, 'app/category-actions.ts'));
+const api = load(path.join(root, 'features/categories/api/categoriesApi.ts'));
+const actions = load(
+  path.join(root, 'features/categories/api/categoryActions.ts'),
+);
 const form = (key, value) => {
   const data = new FormData();
   data.set(key, value);
@@ -433,7 +448,7 @@ const { renderToStaticMarkup } = native('react-dom/server');
 const ui = { exports: {} };
 const uiCode = ts.transpileModule(
   readFileSync(
-    path.join(root, 'components/categories/CategoryForm.tsx'),
+    path.join(root, 'features/categories/components/CategoryForm.tsx'),
     'utf8',
   ),
   {
@@ -450,7 +465,11 @@ vm.runInThisContext('(function(require,module,exports){' + uiCode + '\n})')(
     if (id === 'react')
       return { ...React, useActionState: () => [{}, () => {}, false] };
     if (id === 'next/navigation') return { useRouter: () => ({}) };
-    if (id === '@/app/category-actions') return actions;
+    if (
+      id === '../api/categoryActions' ||
+      id === '@/features/categories/api/categoryActions'
+    )
+      return actions;
     if (id === '@/types') return load(path.join(root, 'types/index.ts'));
     // Cocokkan berdasarkan nama modul, bukan path, supaya pemindahan file
     // di components/ tidak memutus harness ini.
@@ -462,7 +481,7 @@ vm.runInThisContext('(function(require,module,exports){' + uiCode + '\n})')(
           React.createElement('button', null, children),
       };
     if (/(^|\/)UiIcon$/.test(id)) return { UiIcon: () => null };
-    if (id === '@/components/shared/ui')
+    if (id === '@/components/ui')
       return new Proxy(
         {},
         {
@@ -472,7 +491,7 @@ vm.runInThisContext('(function(require,module,exports){' + uiCode + '\n})')(
               React.createElement('div', null, children),
         },
       );
-    if (id === '@/hooks/useCategoryForm')
+    if (id === '../hooks/useCategoryForm')
       return {
         useCategoryForm: () => ({
           name: '',
@@ -488,7 +507,8 @@ vm.runInThisContext('(function(require,module,exports){' + uiCode + '\n})')(
           removeIcon: () => {},
         }),
       };
-    if (id === '@/lib/category-form') return { categoryFormHelp: () => '' };
+    if (id === '../data/categoryValidation')
+      return { categoryFormHelp: () => '' };
     if (id === './CategoryIconUpload')
       return {
         CategoryIconUpload: () =>
@@ -496,9 +516,10 @@ vm.runInThisContext('(function(require,module,exports){' + uiCode + '\n})')(
       };
     if (id === './CategoryDeleteForm')
       return { CategoryDeleteForm: () => null };
-    if (id === './data') return new Proxy({}, { get: () => '' });
-    // Barrel/folder `shared/ui` berikutnya: tirukan komponen berdasarkan nama file.
-    if (id.startsWith('@/components/shared/ui'))
+    if (id === '../data/categoryStyles')
+      return new Proxy({}, { get: () => '' });
+    // Barrel/folder `components/ui` berikutnya: tirukan komponen berdasarkan nama file.
+    if (id.startsWith('@/components/ui'))
       return { [id.split('/').at(-1)]: () => null };
     return native(id);
   },

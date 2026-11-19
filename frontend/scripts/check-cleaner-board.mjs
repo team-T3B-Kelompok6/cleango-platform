@@ -1,6 +1,6 @@
 // Isolated contract checks: no cookies, real API, files, or database mutations.
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -71,9 +71,22 @@ function load(filename) {
       };
     if (id === '@/lib/demo/mode') return { adminDemoEnabled: () => false };
     if (id === '@/lib/whatsapp') return { whatsappLink: () => undefined };
-    if (id.startsWith('@/')) return load(path.join(root, id.slice(2) + '.ts'));
-    if (id.startsWith('.'))
-      return load(path.resolve(path.dirname(filename), id + '.ts'));
+    if (id.startsWith('@/')) {
+      const base = path.join(root, id.slice(2));
+      return load(
+        existsSync(base + '.ts') ? base + '.ts' : path.join(base, 'index.ts'),
+      );
+    }
+    if (id.startsWith('.')) {
+      const base = path.resolve(path.dirname(filename), id);
+      return load(
+        existsSync(base + '.ts')
+          ? base + '.ts'
+          : existsSync(path.join(base, 'index.ts'))
+            ? path.join(base, 'index.ts')
+            : base + '.tsx',
+      );
+    }
     return native(id);
   };
   const code = ts.transpileModule(readFileSync(filename, 'utf8'), {
@@ -101,7 +114,13 @@ for (const [expected, statuses] of Object.entries({
     'Bertugas',
     'Sedang Bekerja',
   ],
-  amber: ['Menunggu Assign', 'Siap Berangkat', 'Masa Training', 'Terjadwal', ''],
+  amber: [
+    'Menunggu Assign',
+    'Siap Berangkat',
+    'Masa Training',
+    'Terjadwal',
+    '',
+  ],
 })) {
   for (const status of statuses) assert.equal(tone(status), expected, status);
 }

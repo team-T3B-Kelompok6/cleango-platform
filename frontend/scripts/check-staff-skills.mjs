@@ -40,7 +40,9 @@ function load(filename) {
       const base = id.startsWith('@/')
         ? path.join(root, id.slice(2))
         : path.resolve(path.dirname(filename), id);
-      const target = base + (existsSync(base + '.ts') ? '.ts' : '.tsx');
+      const target = existsSync(base + '/index.ts')
+        ? path.join(base, 'index.ts')
+        : base + (existsSync(base + '.ts') ? '.ts' : '.tsx');
       if (target.endsWith('.tsx') && !target.endsWith('ResourceFormServer.tsx'))
         return {
           ResourceForm: 'ResourceForm',

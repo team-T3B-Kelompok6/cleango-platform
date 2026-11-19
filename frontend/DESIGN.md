@@ -335,12 +335,12 @@ sekarang; setelah migrasi kolom itu menjadi komponen Tailwind.
 > **Pembaruan 16 November 2026 (setelah R1–R2).** Tabel di atas adalah kondisi _sebelum_
 > migrasi. Komponen reusable sudah dikonversi ke utility Tailwind dan dipindah:
 >
-> - `components/shared/ui/`: `Icon`, `UiIcon`, `CleanGoLogo`, `Modal`, `DialogTrigger`,
+> - `components/ui/`: `Icon`, `UiIcon`, `CleanGoLogo`, `Modal`, `DialogTrigger`,
 >   `DialogContext`, `DialogNote`, `DialogHeader/Body/Footer/CloseButton`, `Avatar`,
 >   `BrandLogo`, `Button` (+ `buttonVariants`), `ButtonLink`, `Card`, `Input`, `Label`,
 >   `Select`, `IconButton`, `EmptyState`, `MetricCard`, `MetricGrid`, `PageHeader`,
 >   `SectionHeading`, `StatusBadge`, `TextLink`, `statusTone`.
-> - `components/shared/layout/`: `AdminShell`, `AuthLayout`, `Sidebar`, `SidebarNav`,
+> - `components/layouts/`: `AdminShell`, `AuthLayout`, `Sidebar`, `SidebarNav`,
 >   `Topbar`, `TopbarDate`, `SearchField`, `UserMenu`, `NotificationsMenu`,
 >   `NotificationItem`, `MobileNav`, `Footer`, `LiveSync`, `data.ts`.
 > - Dashboard: `app/(admin)/page.tsx` → `components/dashboard/` (`DashboardView`,
@@ -611,22 +611,22 @@ Migrasi dikerjakan per halaman sambil 13 file CSS lama tetap aktif. Urutan yang 
 
 Jebakan yang benar-benar terjadi dan cara menanganinya:
 
-| Jebakan                                             | Gejala                                                                                                                   | Penanganan                                                                                                          |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| Token legacy bernama sama dengan namespace Tailwind | `--text-sm` (0.875rem) dan `--text-base` (1rem) di `:root` legacy menimpa nilai `@theme`, sehingga `text-base` jadi 12px | nama legacy diganti `--legacy-text-sm`; dua pemakaiannya di `globals.css` ikut diganti                              |
-| Reset elemen legacy menang atas utility             | `main { padding: 28px 34px }` membuat halaman login ber-padding walau pakai `p-0`                                        | selector diubah menjadi `main:not(.login-page)`; class `login-page` **tetap** dipertahankan sebagai opt-out         |
-| Preflight menghapus `margin: auto` pada `<dialog>`  | modal menempel di kiri atas, tidak ada backdrop                                                                          | tambah `dialog { margin: auto }` di `@layer base`                                                                   |
-| Kelas komponen legacy mengunci ukuran               | `.cleango-logo { width:40px; height:40px }` menahan `size-[52px]`                                                        | utility `size-[52px]!` (important) sampai `.cleango-logo` dimigrasi                                                 |
-| `::backdrop`                                        | masih benar setelah preflight                                                                                            | tidak perlu tindakan                                                                                                |
-| Format CSS hasil skrip                              | baris campuran CRLF/LF membuat `format:check` gagal                                                                      | normalkan ke CRLF setelah pengeditan skrip                                                                          |
-| Breakpoint `max-*` eksklusif                        | `max-sm:` tidak aktif di lebar tepat 700px, padahal CSS lama `max-width:700px` aktif                                     | nilai breakpoint di `@theme` ditulis +1px (701/981/1151/1441)                                                       |
-| `querySelector` ke kelas shell                      | `AdminSidebar` mencari `.app-shell`, `Filters` mencari `.header`                                                         | state collapse jadi React di `AdminShell`; topbar memakai `data-topbar`                                             |
-| Frame `main` milik halaman, bukan shell             | `main:not(.login-page)` membuat halaman login harus memakai class `login-page` sebagai opt-out                           | frame (1480 / 28-34 / 24 / 24-18) dipindah ke utility `AdminShell`; 5 aturan `main` dihapus                         |
-| Kelas komponen sebagai pengunci ukuran              | `.cleango-logo` 40px menahan `size-[52px]` sampai dipaksa `!`                                                            | ukuran jadi prop `size` pada `CleanGoLogo`; `!` dihapus                                                             |
-| Chrome dialog tersebar di 8 file                    | `.modal*`, `.close-button` 207 aturan; header/body/footer dipakai manual di 5 komponen                                   | `DialogHeader/Body/Footer/CloseButton` di `shared/ui`, base CSS dihapus, kelas lama tetap sebagai hook untuk varian |
-| Utility bernomor vs `--spacing` 1px                 | `size-4` = **4px** (bukan 16px) sehingga ikon jadi titik; `size-3` = 3px                                                 | ukuran ikon ditulis px eksplisit: `size-[10px]`, `size-[14px]`, `size-20`                                           |
-| Harness `scripts/check-*` mengimpor komponen nyata  | pemindahan file atau import barrel membuat resolver melempar `Unexpected import`                                         | resolusi berbasis nama modul + stub untuk `@/components/shared/ui(/*)`                                              |
-| Kelas layout dipakai lintas halaman                 | `.metrics-grid`/`.order-metrics` menempel di 9 tempat; menghapusnya mengubah semua                                       | `MetricGrid` dengan prop `columns`; normalisasi padding kartu 13→20px (DESIGN §4)                                   |
+| Jebakan                                             | Gejala                                                                                                                   | Penanganan                                                                                                                |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| Token legacy bernama sama dengan namespace Tailwind | `--text-sm` (0.875rem) dan `--text-base` (1rem) di `:root` legacy menimpa nilai `@theme`, sehingga `text-base` jadi 12px | nama legacy diganti `--legacy-text-sm`; dua pemakaiannya di `globals.css` ikut diganti                                    |
+| Reset elemen legacy menang atas utility             | `main { padding: 28px 34px }` membuat halaman login ber-padding walau pakai `p-0`                                        | selector diubah menjadi `main:not(.login-page)`; class `login-page` **tetap** dipertahankan sebagai opt-out               |
+| Preflight menghapus `margin: auto` pada `<dialog>`  | modal menempel di kiri atas, tidak ada backdrop                                                                          | tambah `dialog { margin: auto }` di `@layer base`                                                                         |
+| Kelas komponen legacy mengunci ukuran               | `.cleango-logo { width:40px; height:40px }` menahan `size-[52px]`                                                        | utility `size-[52px]!` (important) sampai `.cleango-logo` dimigrasi                                                       |
+| `::backdrop`                                        | masih benar setelah preflight                                                                                            | tidak perlu tindakan                                                                                                      |
+| Format CSS hasil skrip                              | baris campuran CRLF/LF membuat `format:check` gagal                                                                      | normalkan ke CRLF setelah pengeditan skrip                                                                                |
+| Breakpoint `max-*` eksklusif                        | `max-sm:` tidak aktif di lebar tepat 700px, padahal CSS lama `max-width:700px` aktif                                     | nilai breakpoint di `@theme` ditulis +1px (701/981/1151/1441)                                                             |
+| `querySelector` ke kelas shell                      | `AdminSidebar` mencari `.app-shell`, `Filters` mencari `.header`                                                         | state collapse jadi React di `AdminShell`; topbar memakai `data-topbar`                                                   |
+| Frame `main` milik halaman, bukan shell             | `main:not(.login-page)` membuat halaman login harus memakai class `login-page` sebagai opt-out                           | frame (1480 / 28-34 / 24 / 24-18) dipindah ke utility `AdminShell`; 5 aturan `main` dihapus                               |
+| Kelas komponen sebagai pengunci ukuran              | `.cleango-logo` 40px menahan `size-[52px]` sampai dipaksa `!`                                                            | ukuran jadi prop `size` pada `CleanGoLogo`; `!` dihapus                                                                   |
+| Chrome dialog tersebar di 8 file                    | `.modal*`, `.close-button` 207 aturan; header/body/footer dipakai manual di 5 komponen                                   | `DialogHeader/Body/Footer/CloseButton` di `components/ui`, base CSS dihapus, kelas lama tetap sebagai hook untuk varian   |
+| Utility bernomor vs `--spacing` 1px                 | `size-4` = **4px** (bukan 16px) sehingga ikon jadi titik; `size-3` = 3px                                                 | ukuran ikon ditulis px eksplisit: `size-[10px]`, `size-[14px]`, `size-20`                                                 |
+| Harness `scripts/check-*` mengimpor komponen nyata  | pemindahan file atau import barrel membuat resolver melempar `Unexpected import`                                         | resolusi berbasis nama modul + stub untuk `@/components/ui(/*)`; resolver kini mencoba `<base>.ts` lalu `<base>/index.ts` |
+| Kelas layout dipakai lintas halaman                 | `.metrics-grid`/`.order-metrics` menempel di 9 tempat; menghapusnya mengubah semua                                       | `MetricGrid` dengan prop `columns`; normalisasi padding kartu 13→20px (DESIGN §4)                                         |
 
 Hasil L1: `admin.css` −94 blok, `design.css` −20, `management.css` −25, `overrides.css` −2
 (total 752 baris, −12,2 KB CSS sumber); tidak ada lagi kelas `.login-*` yang dirender, dan
@@ -634,3 +634,132 @@ Hasil L1: `admin.css` −94 blok, `design.css` −20, `management.css` −25, `o
 
 Untuk halaman berikutnya, ulangi pola yang sama: baca nilai efektif dari cascade → tulis
 utility → hapus blok CSS halaman itu → screenshot sebelum/sesudah.
+
+## Pembaruan 19 November 2026 — audit kode tidak terpakai
+
+- **File tanpa pemanggil: 0 dari 331 file** setelah pembersihan. Satu-satunya temuan file
+  sebelumnya adalah `lib/api/clientApi.ts` (klien axios tanpa konsumen). File itu dihapus,
+  begitu pula dependensi `axios`. Transport browser sekarang hanya lewat transport per fitur
+  (`features/cleaner/api/cleanerClientApi.ts`, `components/tracking/trackingClientApi.ts`)
+  yang memakai `fetch` menuju Route Handler Next.
+- **Dependensi tak terpakai dihapus:** `axios`, `leaflet`, `@types/leaflet`. `leaflet` tidak
+  lagi dipakai sejak peta diganti tautan Google Maps/ETA. `@types/node/react/react-dom`
+  dipertahankan karena dipakai implisit oleh TypeScript.
+- **Export berlebih dikurangi:** 24 simbol yang hanya dipakai di dalam filenya sendiri tidak
+  lagi `export` (mis. `makeQueryClient`, `PAGE_SIZE`, `customerOrders`, `staffAssignedSchedules`,
+  `summarize`, `shiftSlotDefaults`, `featureDrafts`, `whatsappNumber`, `TaskPhoto`).
+- **CSS mati dipangkas 84 blok** (design 16, management 23, overrides 15, record-dialogs 19,
+  refinement 11) — 459 baris, tanpa menambah aturan baru. Empat blok `@media` kosong ikut
+  dihapus. Aturan yang masih dipakai (`.modal*`, `.date-popover`, `.calendar-*`, `.sop-*`,
+  `.notification-popover`, `.figma-list`, `.order-list`) tidak disentuh.
+- Bukti: `npm run typecheck` PASS; `npm run build` PASS; `npm run format:check` PASS; seluruh
+  `check:*` PASS. Browser (backend aktif): dialog Ubah Pesanan, Tambah Jadwal, popover
+  notifikasi, daftar layanan + kelola kategori/promo, dan login tetap tampil normal.
+- Batas: pemangkasan CSS hanya untuk selector yang tidak muncul di source; aturan yang dipakai
+  lewat kelas dinamis dari library pihak ketiga tidak ada di proyek ini. Pemeriksaan visual
+  dilakukan pada halaman utama dan dialog, bukan seluruh 31 rute.
+
+## Pembaruan 19 November 2026 — audit log dan struktur layout
+
+- `features/audit/`: `components/*` (8 komponen), `data/auditCopy.ts`,
+  `api/auditApi.ts` (dulu `lib/audit-api.ts`), `pages/AuditPage.tsx` (dulu
+  `components/audit/AuditLogView.tsx`). Halaman `/audit-log` kini hanya metadata + pembungkus.
+  `lib/audit.ts` **tetap di `lib/`** karena dipakai `lib/demo/audit-store.ts` dan
+  `lib/audit-api`.
+- `components/layouts/` dirapikan per area: `admin/` (`AdminShell`, `LiveSync`, `MobileNav`),
+  `auth/` (`AuthLayout`), `sidebar/` (`Sidebar`, `SidebarNav`), `topbar/` (`Topbar`,
+  `TopbarDate`, `SearchField`, `UserMenu`, `NotificationsMenu`, `NotificationItem`), dan
+  `Footer.tsx` di akar. `data.ts` dipecah menjadi `data/navItems.ts`, `data/search.ts`, dan
+  `data/shellCopy.ts`.
+- Barrel `@/components/layouts` tetap menjadi satu-satunya pintu masuk, sehingga pemanggil
+  (`app/(admin)/layout.tsx`, `features/auth/pages/LoginPage.tsx`, `ResourcePages`) tidak
+  berubah kecuali satu import `AuthLayout`.
+- Bukti: `npm run typecheck` PASS, `npm run build` PASS, `format:check` PASS, `check:audit`
+  (11 grup) PASS, dan seluruh `check:*` lain PASS.
+
+- `features/staff/`: `components/*` (list/row/detail/form/photo/skills/mentor),
+  `data/staffStyles.ts`, `data/staffFormPayload.ts` (dulu `lib/staff-form.ts`),
+  `hooks/useStaffForm.ts`, `api/staffApi.ts`. `StaffAvatar` pindah ke
+  `components/ui/StaffAvatar.tsx` karena dipakai pesanan dan jadwal.
+- `features/customers/`: `components/*` (list/row/detail/form/info),
+  `data/customerStyles.ts`, `data/customerValidation.ts` (dulu `lib/customer-form.ts`),
+  `hooks/useCustomerForm.ts`, `api/customersApi.ts`.
+- `features/reports/`: `components/*`, `data/reportRules.ts` (dulu `lib/reports.ts`),
+  `data/reportCopy.ts`, `pages/ReportPage.tsx` (dulu `ReportView`).
+  `app/(admin)/laporan/page.tsx` dan `laporan/export/route.ts` memakai modul fitur.
+- `components/people/` dihapus; `ResourcePages` merender `StaffList` dan `CustomerList`
+  dari fitur masing-masing.
+- **Pantau Petugas bukan halaman CRUD.** Panel dipakai baris pesanan, baris petugas, dan
+  header `/petugas`, jadi tetap di `components/tracking/` (plus `hooks/useTrackingPanel.ts`
+  dan `lib/tracking.ts`). Transport browser dipusatkan di
+  `components/tracking/trackingClientApi.ts` (`fetchTaskBoard`, `resendTaskLink`,
+  `requestRisk`), menggantikan tiga `fetch` inline di hook.
+- Composition root `ResourcePages`/`ResourceFormServer`/`RecordDetailServer`/`ResourceSummary`
+  boleh mengimpor `features/*`; pengecualian ini dicatat di `components/AGENTS.md`.
+- Bukti: `npm run typecheck` PASS, `npm run build` PASS, `format:check` PASS, seluruh
+  `check:*` PASS (termasuk `check:reports` dan `check:staff-metrics` setelah path diperbarui).
+
+- `features/categories/`: `api/categoriesApi.ts` (dulu `lib/categories.ts`),
+  `api/categoryActions.ts` (dulu `app/category-actions.ts`), `data/categoryTypes.ts`,
+  `data/categoryStyles.ts`, `data/categoryValidation.ts` (dulu `lib/category-form.ts`),
+  `hooks/useCategoryForm.ts`, `components/*`. `CategoryIcon` pindah ke
+  `components/ui/CategoryIcon.tsx` karena dipakai `components/Filters`.
+- `features/services/`: `components/*`, `data/serviceStyles.ts`, `data/serviceFormRules.ts`
+  (dulu `lib/service-form.ts`), `hooks/useServiceForm.ts`, `api/servicesApi.ts`.
+- `features/schedules/`: `components/*` + `ScheduleEditor` (dulu di `components/booking/editors`),
+  `data/scheduleRules.ts` (dulu `lib/schedules.ts`), `data/scheduleStyles.ts`,
+  `hooks/useScheduleEditor.ts`, `api/schedulesApi.ts`.
+- `features/promos/`: `components/*` + `PromoManagerServer`, `data/promoEditor.ts` (dulu
+  `lib/promo-editor.ts`), `data/promoStyles.ts`, `hooks/usePromoForm|usePromoList.ts`,
+  `api/promoActions.ts` (dulu `app/promo-actions.ts`). `lib/promo-rules.ts` tetap di `lib/`
+  karena mengatur harga dan diuji `check:promo`.
+- `features/faqs/`: `components/*`, `data/faqDisplay.ts` (dulu `lib/faq.ts`),
+  `data/faqValidation.ts` (dulu `lib/faq-form.ts`), `data/faqStyles.ts`,
+  `hooks/useFaqForm.ts`, `api/faqsApi.ts`.
+- `ResourcePages`, `ResourceFormServer`, `RecordDetailServer`, `ResourceSummary`, dan
+  `Filters` diperbarui ke barrel fitur. `hooks/` kini hanya berisi hook lintas fitur.
+- Bukti: `npm run typecheck` PASS, `npm run build` PASS, `format:check` PASS, dan seluruh
+  `check:*` PASS (termasuk `check:categories` setelah path harness diperbarui).
+
+- `features/dashboard/`: `data/dashboardSummary.ts` (dulu `lib/dashboard-summary.ts`),
+  `data/dashboardCopy.ts`, `api/dashboardApi.ts`, `components/*`, `pages/DashboardPage.tsx`.
+  `app/(admin)/page.tsx` kini hanya metadata + pembungkus.
+- `features/orders/`: `components/` (`OrderList`, `OrderRow`, `OrderActions`,
+  `AssignmentForm`, `AssignmentFormServer`, `BookingPreview`), `data/orderConstants.ts`,
+  `api/ordersApi.ts` (`getOrders`, `getOrder`, `getAssignmentLookups`), dan
+  `api/ordersActions.ts` (`assignOrderAction`, dulu `assignAction` di `app/actions.ts`).
+  Ubah/hapus masih memakai `saveAction`/`deleteAction` lintas resource — pengecualian yang
+  disengaja agar aturan validasi tidak terduplikasi.
+- `features/cleaner/`: `components/` + `components/portal/`, `hooks/useCleanerTask.ts`,
+  `hooks/locationWatch.ts`, `data/portalStyles.ts`, `api/cleanerClientApi.ts` (transport
+  bertipe: `fetchCleanerTask`, `sendCleanerEvent`, `uploadCleanerPhoto`, `taskGone`), dan
+  `pages/CleanerPage.tsx`. `app/tugas/[token]/page.tsx` hanya metadata + parameter.
+- `components/DeliveryBadge.tsx` dipindah ke akar `components/` karena dipakai portal
+  petugas dan panel tracking.
+- Polling portal petugas **tetap memakai interval 5 detik**, bukan TanStack Query, agar
+  single-flight, urutan drain GPS, dan idempotency key tidak berubah; transport-nya dipusatkan
+  di `api/cleanerClientApi.ts`. Ini penyimpangan sadar dari rencana awal.
+- Bukti: `npm run typecheck` PASS, `npm run build` PASS, `format:check` PASS, seluruh
+  `check:*` (demo, kategori, audit, promo, laporan, paginasi, petugas) PASS, dan smoke browser
+  dengan backend aktif: login demo → dashboard tampil, `/pesanan` menampilkan 13 baris +
+  filter tab + dialog Ubah, logout kembali ke `/login`; `/tugas/<token-tidak-valid>`
+  menampilkan "Link tugas tidak tersedia". Assign belum terbukti karena tidak ada pesanan
+  berstatus `Menunggu Assign`.
+
+## Pembaruan 19 November 2026 — struktur fitur dan sisa CSS
+
+- `components/shared/ui/` → `components/ui/`; `components/shared/layout/` →
+  `components/layouts/`; `components/shared/` dihapus.
+- `app/admin.css` dihapus (55 dari 61 rule-nya tidak lagi dipakai sumber). Satu rule yang
+  masih hidup, `.figma-list` (`display:flex; flex-direction:column; gap:12px`), dipindah ke
+  `app/management.css`; `@keyframes admin-content-in` tidak pernah dipakai dan ikut hilang.
+- `features/auth/` menjadi pilot struktur baru (`api/`, `components/`, `data/`, `hooks/`,
+  `pages/`). `app/login/page.tsx` kini hanya pembungkus.
+- Login memakai TanStack `useMutation` + Server Action `loginAction` (cookie tetap
+  HTTP-only). Submit tanpa JavaScript tidak lagi bekerja dan diganti `<noscript>`.
+- State sidebar pindah dari `hooks/useSidebarCollapse.ts` (dihapus) ke `store/uiStore.ts`.
+- `lib/api.ts` dipecah menjadi `lib/api/` (`serverApi`, `resourceApi`, `clientApi`,
+  `session`, `logoutAction`, `queryClient`).
+- Sisa CSS legacy: `tokens.css`, `globals.css`, `design.css`, `overrides.css`,
+  `management.css`, `record-dialogs.css`, `refinement.css`. Rule mati di dalamnya belum
+  dihapus — perlu verifikasi visual sebelum dipangkas.

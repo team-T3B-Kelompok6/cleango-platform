@@ -1,10 +1,10 @@
-import { MetricCard, MetricGrid } from '@/components/shared/ui';
+import { MetricCard, MetricGrid } from '@/components/ui';
 import { rupiah } from '@/lib/resources';
 import type { Resource, RecordData } from '@/types';
 import { needsAssignment } from '@/lib/order-flow';
 import { promoListState } from '@/lib/promos';
 import { promoStatus } from '@/lib/promo-rules';
-import { faqSummary } from '@/lib/faq';
+import { faqSummary } from '@/features/faqs';
 import { staffSummary } from '@/lib/staff';
 export async function Summary({
   resource,

@@ -2,9 +2,9 @@ import type { Customer, Order } from '@/types';
 import { newestOrderFirst } from './order-flow';
 
 /** Pesanan milik customer (id bila order punya customerId, jika tidak nama). */
-export type CustomerKey = { id: unknown; name?: unknown };
+type CustomerKey = { id: unknown; name?: unknown };
 
-export function customerOrders(orders: Order[], customer: CustomerKey) {
+function customerOrders(orders: Order[], customer: CustomerKey) {
   return orders.filter((order) =>
     order.customerId
       ? order.customerId === customer.id
@@ -13,7 +13,7 @@ export function customerOrders(orders: Order[], customer: CustomerKey) {
 }
 
 /** Nilai yang paling sering muncul (layanan favorit, kru langganan). */
-export function frequent(values: string[]) {
+function frequent(values: string[]) {
   const counts = new Map<string, number>();
   values
     .filter(Boolean)

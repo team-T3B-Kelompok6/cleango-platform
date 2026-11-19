@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { auditSnapshot, auditEntityName } from '../audit';
 import type { AuditAction, AuditLog } from '@/types/audit';
 
-export interface DemoAuditStore {
+interface DemoAuditStore {
   auditLogs?: AuditLog[];
   auditSeeded?: boolean;
 }

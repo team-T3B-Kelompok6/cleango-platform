@@ -24,7 +24,7 @@ function load(relative, require = () => ({}), globals = {}) {
   })(require, mod, mod.exports);
   return mod.exports;
 }
-const { watchLocation } = load('components/cleaner/location-watch.ts');
+const { watchLocation } = load('features/cleaner/hooks/locationWatch.ts');
 let success,
   failure,
   cleared = 0,
@@ -177,7 +177,7 @@ const task = {
   orderId: '1',
 };
 const { CleanerPortal } = load(
-  'components/cleaner/CleanerPortal.tsx',
+  'features/cleaner/components/CleanerPortal.tsx',
   (id) => {
     if (id === 'react') return hooks;
     if (id === 'react/jsx-runtime') return { jsx, jsxs: jsx };

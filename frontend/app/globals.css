@@ -455,7 +455,8 @@
   font-size: var(--text-11);
   font-weight: 700;
   color: var(--color-017);
-}.form-grid input,
+}
+.form-grid input,
 .form-grid select,
 .form-grid textarea {
   border: 1px solid var(--color-054);

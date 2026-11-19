@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { list } from '@/lib/api';
 import type { Order } from '@/types';
-import { AdminShell, NotificationsMenu } from '@/components/shared/layout';
+import { AdminShell, NotificationsMenu } from '@/components/layouts';
 import { getAdminNotificationsRead } from '@/app/admin-notification-actions';
 import { newestOrderFirst } from '@/lib/order-flow';
 

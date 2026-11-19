@@ -1,7 +1,7 @@
 // Exercise the real server data layer against the isolated HTTP fixture.
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 const native = createRequire(import.meta.url),
@@ -52,7 +52,11 @@ function load(filename) {
             : id.startsWith('.')
               ? load(path.resolve(path.dirname(filename), id + '.ts'))
               : id.startsWith('@/')
-                ? load(path.join(root, id.slice(2) + '.ts'))
+                ? load(
+                    existsSync(path.join(root, id.slice(2)) + '.ts')
+                      ? path.join(root, id.slice(2) + '.ts')
+                      : path.join(root, id.slice(2), 'index.ts'),
+                  )
                 : require(id);
   const code = ts.transpileModule(readFileSync(filename, 'utf8'), {
     compilerOptions: {
@@ -66,7 +70,7 @@ function load(filename) {
   })(resolve, module, module.exports);
   return module.exports;
 }
-const api = load(path.join(root, 'lib/api.ts'));
+const api = load(path.join(root, 'lib/api/index.ts'));
 const request = (route, method = 'GET', body, anonymous = false) =>
   api.request(
     route,

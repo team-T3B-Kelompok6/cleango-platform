@@ -3,15 +3,9 @@
   height: fit-content;
   max-height: calc(100dvh - 40px);
 }
-.modal.record-detail-dialog.customers-detail-dialog {
-  width: min(660px, calc(100vw - 32px));
-}
 .record-detail-dialog > .modal-header {
   background: var(--surface);
   padding: 24px;
-}
-.record-detail-dialog .modal-heading {
-  align-items: center;
 }
 .record-detail-dialog .modal-heading-icon {
   width: 42px;
@@ -27,134 +21,16 @@
 }
 .record-detail-dialog .modal-header p {
   line-height: 1.6;
-}.record-detail-dialog .close-button {
+}
+.record-detail-dialog .close-button {
   width: 32px;
   height: 32px;
   border-radius: 50%;
   background: var(--surface-soft);
-}
-.detail-initials {
-  display: grid;
-  place-items: center;
-  flex: 0 0 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: var(--ui-accent-soft);
-  color: var(--ui-accent);
-  font-weight: 700;
-  text-transform: uppercase;
-}
-.dialog-note {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 16px;
-  border: 1px solid var(--color-053);
-  border-radius: 12px;
-  background: var(--ui-accent-soft);
-  line-height: 1.7;
-  font-size: var(--ui-text-meta);
-}
-.dialog-note > img {
-  flex-shrink: 0;
-}
-.dialog-note > div {
-  min-width: 0;
-}
-.dialog-note strong {
-  display: block;
-  color: var(--ui-accent-hover);
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-.dialog-note p {
-  color: var(--ui-muted);
-  overflow-wrap: anywhere;
-}
-.dialog-note-symbol {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  background: var(--surface);
-  border-radius: 8px;
-  color: var(--ui-accent);
-  flex-shrink: 0;
-}
-.schedule-linked-orders > div {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  align-items: baseline;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
-}
-.schedule-linked-orders h3 {
-  font-size: var(--ui-text-control);
-  line-height: 1.6;
-}
-.schedule-linked-orders h3 span {
-  color: var(--ui-muted);
-  background: var(--surface-soft);
-  padding: 2px 6px;
-  border-radius: 6px;
-  font-size: var(--ui-text-small);
-  font-weight: 400;
-  margin-left: 5px;
-}
-.schedule-linked-orders small {
-  color: var(--ui-muted);
-  font-size: var(--ui-text-small);
-  line-height: 1.6;
-}
-.schedule-linked-orders > a {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px;
-  border-radius: 10px;
-  background: var(--surface-soft);
-  margin-top: 8px;
-  border: 1px solid var(--ui-border);
-}
-.schedule-linked-orders > a > .ui-icon {
-  color: var(--ui-accent);
-  flex-shrink: 0;
-}
-.schedule-linked-orders > a > div {
-  flex: 1;
-  min-width: 0;
-}
-.schedule-linked-orders strong {
-  display: block;
-  font-size: var(--ui-text-meta);
-  line-height: 1.6;
-  overflow-wrap: anywhere;
-}
-.schedule-linked-orders > a small {
-  display: block;
-}
-.schedule-linked-orders > p {
-  color: var(--ui-muted);
-  background: var(--surface-soft);
-  border-radius: 10px;
-  padding: 14px;
-  font-size: var(--ui-text-meta);
-  line-height: 1.65;
 }
 @media (max-width: 560px) {
   .record-detail-dialog .modal-heading-icon {
     width: 36px;
     height: 36px;
   }
-  .record-detail-dialog .modal-heading {
-    gap: 10px;
-  }
-  .schedule-linked-orders > a {
-    flex-wrap: wrap;
-  }
-  .schedule-linked-orders > a .status-badge {
-    margin-left: 28px;
-  }
 }
-

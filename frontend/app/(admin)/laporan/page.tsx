@@ -1,12 +1,14 @@
 import type { Metadata } from 'next';
 import type { Search } from '@/types';
-import { ReportView } from '@/components/reports';
+import { ReportPage } from '@/features/reports';
+
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Laporan Keuangan & Operasional' };
+
 export default async function Reports({
   searchParams,
 }: {
   searchParams: Promise<Search>;
 }) {
-  return <ReportView params={await searchParams} />;
+  return <ReportPage params={await searchParams} />;
 }

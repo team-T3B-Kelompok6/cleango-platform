@@ -1,7 +1,7 @@
 import type { AdminCleanerTask, TaskBoard } from '@/types/cleaner';
 import type { StaffGroup } from '@/lib/tracking';
 import { displayId } from '@/lib/display';
-import { Button, UiIcon } from '@/components/shared/ui';
+import { Button, UiIcon } from '@/components/ui';
 import { StaffMonitorCard } from './StaffMonitorCard';
 import {
   boardHeadingClass,

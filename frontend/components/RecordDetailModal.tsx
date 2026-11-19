@@ -5,16 +5,16 @@ import { useRouter } from 'next/navigation';
 import { resources } from '@/lib/resources';
 import type { Resource } from '@/types';
 import { displayId } from '@/lib/display';
-import { Modal } from '@/components/shared/ui/Modal';
-import { DialogBody } from '@/components/shared/ui/DialogBody';
-import { DialogFooter } from '@/components/shared/ui/DialogFooter';
-import { Button, buttonVariants } from '@/components/shared/ui';
+import { Modal } from '@/components/ui/Modal';
+import { DialogBody } from '@/components/ui/DialogBody';
+import { DialogFooter } from '@/components/ui/DialogFooter';
+import { Button, buttonVariants } from '@/components/ui';
 import { cn } from '@/lib/cn';
 import {
   DialogCloseContext,
   useDialogClose,
-} from '@/components/shared/ui/DialogContext';
-import { UiIcon, type UiIconName } from '@/components/shared/ui/UiIcon';
+} from '@/components/ui/DialogContext';
+import { UiIcon, type UiIconName } from '@/components/ui/UiIcon';
 
 const titles: Record<Resource, string> = {
   orders: 'Detail Pesanan',

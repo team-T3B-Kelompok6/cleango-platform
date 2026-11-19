@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
-import { Button, buttonVariants } from '@/components/shared/ui';
-import { useDialogClose } from '@/components/shared/ui/DialogContext';
+import { Button, buttonVariants } from '@/components/ui';
+import { useDialogClose } from '@/components/ui/DialogContext';
 import { cn } from '@/lib/cn';
 
 /** Tombol batal: menutup dialog bila ada, atau menuju halaman daftar. */

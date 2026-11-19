@@ -1,5 +1,5 @@
 export type TaskStage = 'assigned' | 'en_route' | 'working' | 'completed';
-export type DeliveryStatus =
+type DeliveryStatus =
   'not_sent' | 'sending' | 'sent' | 'failed' | 'simulated' | 'manual_ready';
 export interface Delivery {
   status: DeliveryStatus;
@@ -10,7 +10,7 @@ export interface Delivery {
   providerMessageId?: string;
   draftUrl?: string;
 }
-export interface TaskPhoto {
+interface TaskPhoto {
   id: string;
   type: string;
 }

@@ -1,1 +1,0 @@
-export { BookingPreview } from './BookingPreview';

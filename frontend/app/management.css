@@ -1,47 +1,7 @@
-/* Shared management views and readable controls. */
-.banner-add {
-  color: var(--ui-accent);
-  border-color: var(--ui-border);
-  background: var(--surface);
-}
-.banner-form-hint {
-  color: var(--muted);
-  line-height: 1.6;
-  margin-bottom: 20px;
-}
-.resource-services .admin-heading > div:first-child {
-  min-width: 0;
-}
-@media (max-width: 900px) {
-  .resource-services .admin-heading {
-    flex-wrap: wrap;
-  }
-}
 /* The supplied source includes margins; show its logo region without modifying the image. */
 body {
   font-size: var(--ui-text-body);
 }
-.manage-form input,
-.manage-form select,
-.manage-form textarea {
-  font-size: var(--text-14);
-}
-.manage-form input[type='file'] {
-  padding: 10px;
-  width: 100%;
-  font-size: var(--text-12);
-}
-.manage-form input[type='file']::file-selector-button {
-  border: 0;
-  background: var(--ui-accent-soft);
-  color: var(--ui-accent);
-  padding: 8px 12px;
-  border-radius: 6px;
-  margin-right: 10px;
-  cursor: pointer;
-}
-
-
 
 /* Shared visual rhythm: readable controls, restrained emphasis, and compact records. */
 .date-popover {
@@ -99,16 +59,9 @@ body {
 .button.primary:hover {
   background: var(--ui-accent-hover);
   border-color: var(--ui-accent-hover);
-}.edit-action {
-  color: var(--ui-accent);
 }
 .modal-footer .button {
   min-height: var(--ui-control-height);
-}
-@media (max-width: 980px) and (min-width: 601px) {
-  .admin-heading {
-    flex-wrap: wrap;
-  }
 }
 
 /* Typography uses proportional line heights so larger text keeps its breathing room. */
@@ -124,59 +77,40 @@ h3 {
   font-family: var(--font-body), sans-serif;
   font-weight: 600;
   letter-spacing: normal;
-}.sop-step h3 {
+}
+.sop-step h3 {
   line-height: 1.5;
   font-weight: 600;
-}
-.manage-form label,
-.manage-form input,
-.manage-form textarea,
-.manage-form select {
-  line-height: 1.6;
 }
 .sop-content.summary {
   padding-bottom: var(--space-16);
 }
-
-/* One set of surfaces and control sizes across the operational screens. */
-.admin-heading > div:first-child {
-  min-width: 0;
-}
-.figma-feature-list > span {
-  color: var(--ui-muted);
-  background: var(--surface-soft);
-  font-size: var(--ui-text-meta);
-  line-height: 1.5;
-}.order-list,
+.order-list,
 .figma-list {
   animation: content-fade var(--motion-fast) ease backwards;
-}.form-grid input,
+}
+/* `.figma-list` masih dipakai `ResourcePages`; dulu aturannya di `admin.css`. */
+.figma-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+.form-grid input,
 .form-grid select,
 .form-grid textarea,
 .global-search {
   border-color: var(--ui-border);
   border-radius: var(--space-8);
-}.form-grid input:not([type='checkbox']),
-.form-grid select {
-  min-height: var(--ui-control-primary);
-}.form-grid input,
-.form-grid select,
-.form-grid textarea {
-  transition:
-    border-color var(--motion-fast) ease,
-    box-shadow var(--motion-fast) ease;
-}.form-grid input:focus,
-.form-grid select:focus,
-.form-grid textarea:focus {
-  border-color: var(--ui-focus);
 }
 .modal.sop-dialog {
   border-radius: var(--ui-radius-dialog);
-}.sop-dialog .modal-header h2,
+}
+.sop-dialog .modal-header h2,
 .notification-popover .modal-header h2,
 .date-popover .modal-header h2 {
   font-size: var(--text-18);
-}.sop-dialog .modal-header p,
+}
+.sop-dialog .modal-header p,
 .notification-popover .modal-header p,
 .date-popover .modal-header p {
   font-size: var(--ui-text-meta);
@@ -202,16 +136,6 @@ h3 {
 }
 .sop-dialog .dialog-tabs button:active {
   transform: none;
-}
-.record-detail dt {
-  font-size: var(--ui-text-meta);
-}
-.record-detail dd {
-  font-size: var(--ui-text-body);
-}.form-grid input:not([type='checkbox']),
-.form-grid select,
-.form-grid textarea {
-  font-size: var(--text-14);
 }
 @media (max-width: 700px) {
   .notification-popover .modal-header h2,

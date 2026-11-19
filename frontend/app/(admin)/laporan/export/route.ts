@@ -5,7 +5,7 @@ import {
   parseReportMonth,
   reportCsv,
   reportFilename,
-} from '@/lib/reports';
+} from '@/features/reports/data/reportRules';
 
 export const dynamic = 'force-dynamic';
 

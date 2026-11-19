@@ -9,7 +9,7 @@ import { serviceSkillOptions } from './staff-skills';
 import { whatsappLink } from './whatsapp';
 
 /** Nilai jadi untuk profil petugas di dialog detail. */
-export type StaffDetailView = {
+type StaffDetailView = {
   status: string;
   phone: string;
   href: string | null;
@@ -20,13 +20,13 @@ export type StaffDetailView = {
 
 export type StaffMentor = { id: string; name: string };
 
-export type StaffFormOptions = {
+type StaffFormOptions = {
   skillOptions: string[];
   previousSkills: string[];
   mentors: StaffMentor[];
 };
 
-export type StaffAssignment = {
+type StaffAssignment = {
   candidates: { name: string; skills: string[]; photoUrl: unknown }[];
   recommended: string[];
 };
@@ -53,7 +53,7 @@ export function staffStatusLabel(item: RecordData) {
 }
 
 /** Jadwal milik satu petugas (kolom `staff` bisa berisi beberapa nama). */
-export function staffAssignedSchedules(schedules: Schedule[], name: string) {
+function staffAssignedSchedules(schedules: Schedule[], name: string) {
   return schedules.filter(
     (schedule) =>
       typeof schedule.staff === 'string' &&

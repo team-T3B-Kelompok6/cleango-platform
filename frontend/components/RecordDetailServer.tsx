@@ -11,10 +11,10 @@ import type {
 import { displayId } from '@/lib/display';
 import { RecordDetailModal } from './RecordDetailModal';
 import { ResourceFormServer } from './ResourceFormServer';
-import { ServicePreview } from '@/components/services';
-import { FaqDetail } from '@/components/faq';
-import { CustomerDetail } from '@/components/customers';
-import { BookingPreview } from '@/components/orders/detail';
+import { ServicePreview } from '@/features/services';
+import { FaqDetail } from '@/features/faqs';
+import { CustomerDetail } from '@/features/customers';
+import { BookingPreview } from '@/features/orders';
 import { withOrderWorkTimes } from '@/lib/order-work-times';
 
 export async function RecordDetailServer({

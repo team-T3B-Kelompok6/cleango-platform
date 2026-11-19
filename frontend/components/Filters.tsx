@@ -1,7 +1,7 @@
 'use client';
-import { UiIcon } from '@/components/shared/ui/UiIcon';
-import { Button } from '@/components/shared/ui';
-import { CategoryIcon } from '@/components/categories';
+import { UiIcon } from '@/components/ui/UiIcon';
+import { Button } from '@/components/ui';
+import { CategoryIcon } from '@/components/ui/CategoryIcon';
 import {
   useState,
   useRef,
@@ -10,12 +10,12 @@ import {
   type CSSProperties,
 } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Icon } from '@/components/shared/ui/Icon';
+import { Icon } from '@/components/ui/Icon';
 import { useOutsideDismiss } from '@/hooks/useOutsideDismiss';
-import { DialogFooter } from '@/components/shared/ui/DialogFooter';
-import { DialogHeader } from '@/components/shared/ui/DialogHeader';
-import { TabButton } from '@/components/shared/ui/TabButton';
-import { Tabs } from '@/components/shared/ui/Tabs';
+import { DialogFooter } from '@/components/ui/DialogFooter';
+import { DialogHeader } from '@/components/ui/DialogHeader';
+import { TabButton } from '@/components/ui/TabButton';
+import { Tabs } from '@/components/ui/Tabs';
 import { DateCalendar } from './DateCalendar';
 const validDate = (value: string | null) =>
   value &&

@@ -9,7 +9,7 @@ export const auditActions: Record<AuditAction, string> = {
   login: 'Login',
 };
 
-export const auditEntities: Record<string, string> = {
+const auditEntities: Record<string, string> = {
   services: 'Layanan',
   categories: 'Kategori',
   orders: 'Pesanan',
@@ -123,7 +123,7 @@ export function auditDate(value: string, time = false) {
   }).format(new Date(value));
 }
 
-export function auditDay(value: string) {
+function auditDay(value: string) {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(
     new Date(value),
   );

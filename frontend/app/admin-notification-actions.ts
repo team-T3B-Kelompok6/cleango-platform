@@ -4,7 +4,10 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { ApiError } from '@/lib/api';
 
-async function adminFetch(path: string, options: RequestInit = {}): Promise<Response> {
+async function adminFetch(
+  path: string,
+  options: RequestInit = {},
+): Promise<Response> {
   const token = (await cookies()).get('cleango-session')?.value;
   if (!token) redirect('/login');
   const base = process.env.API_URL;
@@ -13,7 +16,9 @@ async function adminFetch(path: string, options: RequestInit = {}): Promise<Resp
     ...options,
     cache: 'no-store',
     headers: {
-      ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
+      ...(options.body instanceof FormData
+        ? {}
+        : { 'Content-Type': 'application/json' }),
       Authorization: 'Bearer ' + token,
       ...options.headers,
     },
@@ -44,7 +49,9 @@ export async function getAdminNotificationsRead(): Promise<string[]> {
   return ids.map((id) => String(id));
 }
 
-export async function markAdminNotificationsRead(bookingIds: string[]): Promise<{ success: boolean; marked: number }> {
+export async function markAdminNotificationsRead(
+  bookingIds: string[],
+): Promise<{ success: boolean; marked: number }> {
   const response = await adminFetch('/admin/notifications/read', {
     method: 'POST',
     body: JSON.stringify({ bookingIds: bookingIds.map((id) => Number(id)) }),

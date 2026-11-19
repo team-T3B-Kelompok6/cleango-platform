@@ -41,12 +41,6 @@
   opacity: 1;
   width: var(--space-20);
 }
-.modal-heading {
-  display: flex;
-  align-items: center;
-  gap: var(--space-12);
-  min-width: 0;
-}
 .modal-heading-icon,
 .calendar-summary-icon {
   display: grid;
@@ -84,11 +78,6 @@
 }
 .date-popover .modal-header {
   flex-shrink: 0;
-}
-.calendar-title {
-  display: flex;
-  align-items: center;
-  gap: var(--space-10);
 }
 .date-popover > form {
   display: flex;
@@ -295,118 +284,7 @@
     transition: none;
   }
 }
-.order-more {
-  margin-left: auto;
-  display: grid;
-  place-items: center;
-  min-width: var(--space-28);
-  min-height: var(--space-28);
-  border-radius: var(--space-6);
-}
-.order-more:hover {
-  background: var(--color-010);
-}
-.order-more-menu {
-  border: 1px solid var(--design-border);
-  border-radius: var(--design-radius);
-  padding: var(--space-12);
-  background: var(--color-007);
-  color: var(--design-text);
-  box-shadow: 0 var(--space-10) var(--space-32) var(--color-031);
-}
-
-/* 04 — Schedule: two-column shift sections with an actionable spare card. */
-
-/* 05 — Services: single-line chips and a compact price/action footer. */
-.figma-feature-list {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-8);
-}
-.figma-feature-list > span {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-5);
-  min-height: var(--space-24);
-  padding: var(--space-4) var(--space-8);
-  border: 1px solid var(--design-border);
-  border-radius: var(--space-7);
-  color: var(--design-muted);
-  background: var(--color-002);
-  font-size: var(--text-9);
-  line-height: 1.4;
-}
-.figma-feature-list .ui-icon {
-  width: var(--space-12);
-  height: var(--space-12);
-  color: var(--color-023);
-}
-.figma-kicker {
-  font-size: var(--text-9);
-  color: var(--design-muted);
-}
-.edit-action {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-6);
-  color: var(--color-023);
-  font-size: var(--text-16);
-  font-weight: 700;
-  padding: var(--space-6) 0;
-}
-.edit-action .ui-icon {
-  width: var(--space-16);
-  height: var(--space-16);
-}
-.edit-action:hover {
-  color: var(--design-green);
-}
 
 /* 09 — FAQ: actions remain available while the answer is collapsed. */
-@media (prefers-reduced-motion: reduce) {
-  .order-more-menu:popover-open {
-    animation: none;
-  }
-}
-.order-more-menu:popover-open {
-  opacity: 1;
-  transform: translateY(0);
-}
-.order-more-menu {
-  opacity: 0;
-  transform: translateY(-6px);
-  transition:
-    opacity var(--motion-base) ease,
-    transform var(--motion-panel) var(--motion-ease),
-    display var(--motion-panel) allow-discrete,
-    overlay var(--motion-panel) allow-discrete;
-}
 @starting-style {
-  .order-more-menu:popover-open {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-}
-
-@media (max-width: 700px) {
-  .edit-action {
-    font-size: var(--text-13);
-  }
-}
-
-/* Actions shared by resource lists and detail pages. */
-.button.destructive {
-  color: var(--color-007);
-  background: var(--danger);
-  border-color: var(--danger);
-}
-.button.destructive:hover {
-  background: var(--danger);
-  filter: brightness(0.92);
-}.record-actions {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-10);
 }

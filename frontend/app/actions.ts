@@ -1,13 +1,11 @@
 'use server';
-import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { ApiError, request, list, detail } from '@/lib/api';
 import { resources, isResource } from '@/lib/resources';
-import { listCategories } from '@/lib/categories';
+import { listCategories } from '@/features/categories';
 import { uploadServiceImage, uploadImage } from '@/lib/service-image';
 import { unsavedFields } from '@/lib/saved-fields';
-import { needsAssignment } from '@/lib/order-flow';
 import { withOrderWorkTimes } from '@/lib/order-work-times';
 import { dispatchAssignment } from '@/lib/cleaner/service';
 import { isDemoId } from '@/lib/cleaner/demo-store';
@@ -26,61 +24,6 @@ import type {
   Schedule,
   Service,
 } from '@/types';
-export async function loginAction(
-  _previous: FormState,
-  form: FormData,
-): Promise<FormState> {
-  const username = String(form.get('username') ?? '').trim(),
-    password = String(form.get('password') ?? '');
-  const errors: Record<string, string> = {};
-  if (!username) errors.username = 'Isi username.';
-  if (!password) errors.password = 'Isi kata sandi.';
-  if (Object.keys(errors).length) return { errors, values: { username } };
-  let data: { accessToken: string; expiresIn: number };
-  try {
-    data = await request(
-      '/auth/login',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          username,
-          password,
-          remember: form.get('remember') === 'on',
-        }),
-      },
-      true,
-    );
-    if (
-      typeof data.accessToken !== 'string' ||
-      !data.accessToken.trim() ||
-      /[\s\u0000-\u001f\u007f;]/.test(data.accessToken) ||
-      !Number.isSafeInteger(data.expiresIn) ||
-      data.expiresIn <= 0
-    )
-      throw new ApiError('Respons masuk tidak valid.', 502);
-  } catch (error) {
-    if (!(error instanceof ApiError)) throw error;
-    return {
-      message: error.message,
-      errors: error.errors,
-      values: { username },
-    };
-  }
-  (await cookies()).set('cleango-session', data.accessToken, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    path: '/',
-    ...(form.get('remember') === 'on'
-      ? { maxAge: Math.min(data.expiresIn, 604800) }
-      : {}),
-  });
-  redirect('/');
-}
-export async function logoutAction() {
-  (await cookies()).delete('cleango-session');
-  redirect('/login');
-}
 export async function saveAction(
   resource: Resource,
   id: string | null,
@@ -428,102 +371,4 @@ export async function deleteAction(
   revalidatePath('/petugas');
   revalidatePath(resources[resource].path + '/' + encodeURIComponent(id));
   redirect(resources[resource].path + '?deleted=1');
-}
-
-export async function assignAction(
-  id: string,
-  _previous: FormState,
-  form: FormData,
-): Promise<FormState> {
-  const selected = [...new Set(form.getAll('staff').map(String))];
-  if (!selected.length)
-    return {
-      errors: { staff: 'Pilih minimal satu petugas.' },
-      values: { staff: selected },
-    };
-  try {
-    const [staff, order, schedules, orders] = await Promise.all([
-      list<Staff>('staff'),
-      detail<Order>('orders', id),
-      list<Schedule>('schedules'),
-      list<Order>('orders'),
-    ]);
-    if (
-      selected.some((name) => {
-        const person = staff.find((item) => item.name === name);
-        return !person || isDemoId(person.id) !== isDemoId(id);
-      })
-    )
-      return {
-        errors: {
-          staff:
-            'Petugas tidak tersedia untuk pesanan ini. Perbarui pilihan petugas.',
-        },
-        values: { staff: selected },
-      };
-    if (!['Menunggu Assign', 'Menunggu Lokasi'].includes(order.status))
-      return { message: 'Status pesanan sudah berubah. Muat ulang daftar.' };
-    if (!needsAssignment(order))
-      return {
-        message:
-          'Pesanan sudah memiliki petugas. Ubah penugasan melalui detail pesanan.',
-      };
-    const liveOrders = await withOrderWorkTimes(orders);
-    if (
-      selected.some(
-        (name) =>
-          !staff.some(
-            (person) =>
-              person.name === name &&
-              !assignmentIssue(person, order, schedules, liveOrders),
-          ),
-      )
-    )
-      return {
-        errors: {
-          staff:
-            'Jadwal petugas tidak sesuai atau sudah terisi. Perbarui pilihan dan periksa Kelola Jadwal.',
-        },
-        values: { staff: selected },
-      };
-    const result = await request<{ data: RecordData }>(
-      '/orders/' + encodeURIComponent(id),
-      {
-        method: 'PATCH',
-        body: JSON.stringify({ staff: selected, status: 'Menunggu Lokasi' }),
-      },
-    );
-    revalidatePath('/pesanan');
-    if (
-      !result.data ||
-      result.data.id !== id ||
-      result.data.status !== 'Menunggu Lokasi' ||
-      !Array.isArray(result.data.staff) ||
-      JSON.stringify([...result.data.staff].sort()) !==
-        JSON.stringify([...selected].sort())
-    )
-      throw new ApiError(
-        'Penugasan belum tersimpan dengan benar. Periksa pesanan sebelum mencoba lagi.',
-        502,
-      );
-  } catch (error) {
-    if (!(error instanceof ApiError)) throw error;
-    return {
-      message: error.message,
-      errors: error.errors,
-      values: { staff: selected },
-    };
-  }
-  revalidatePath('/');
-  revalidatePath('/pesanan');
-  revalidatePath('/petugas');
-  revalidatePath('/jadwal');
-  revalidatePath('/pesanan/' + id);
-  const assigned = await detail<Order>('orders', id);
-  const taskDispatch = await dispatchAssignment({
-    ...assigned,
-    staff: selected,
-    status: 'Menunggu Lokasi',
-  });
-  redirect('/pesanan?saved=1&taskDispatch=' + taskDispatch);
 }

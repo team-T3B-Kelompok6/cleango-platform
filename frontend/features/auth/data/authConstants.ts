@@ -1,0 +1,37 @@
+import type { LoginField } from './authTypes';
+
+/** Urutan field menentukan urutan render form login. */
+export const LOGIN_FIELDS: readonly LoginField[] = [
+  {
+    name: 'username',
+    label: 'Email atau username',
+    placeholder: 'admin@cleango.id',
+    autoComplete: 'username',
+    icon: 'mail',
+  },
+  {
+    name: 'password',
+    label: 'Kata sandi',
+    placeholder: 'Masukkan kata sandi',
+    autoComplete: 'current-password',
+    icon: 'lock',
+  },
+];
+
+export const LOGIN_COPY = {
+  title: 'Masuk ke Akun Admin',
+  description: 'Masuk untuk mengelola pesanan dan layanan CleanGo.',
+  submit: 'Masuk Sekarang',
+  pending: 'Memeriksa akun…',
+  remember: 'Ingat saya',
+  showPassword: 'Tampilkan kata sandi',
+  hidePassword: 'Sembunyikan kata sandi',
+  noScript: 'Aktifkan JavaScript untuk masuk ke dashboard admin.',
+  help: {
+    trigger: 'Butuh Bantuan?',
+    title: 'Bantuan masuk',
+    demo: 'Mode demo frontend: gunakan username admin dan kata sandi admin. Seluruh data adalah data uji lokal.',
+    live: 'Gunakan akun admin yang diberikan pengelola. Akun demo backend tim: admin@cleango.id dengan kata sandi 321321.',
+    logout: 'Hapus sesi dan masuk ulang',
+  },
+} as const;

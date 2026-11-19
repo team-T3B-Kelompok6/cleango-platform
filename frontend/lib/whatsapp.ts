@@ -1,5 +1,5 @@
 /** Convert local Indonesian or explicit international numbers to click-to-chat format. */
-export function whatsappNumber(phone: string): string | null {
+function whatsappNumber(phone: string): string | null {
   const value = phone.trim();
   if (!value || !/^\+?[\d\s().-]+$/.test(value)) return null;
   let digits = value.replace(/\D/g, '');

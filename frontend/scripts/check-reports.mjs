@@ -24,7 +24,7 @@ function load(file) {
   return module.exports;
 }
 
-const reports = load('lib/reports.ts');
+const reports = load('features/reports/data/reportRules.ts');
 
 // Periode
 assert.equal(reports.parseReportMonth('2026-11'), '2026-11');

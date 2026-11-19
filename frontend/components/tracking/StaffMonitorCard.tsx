@@ -8,8 +8,8 @@ import {
 } from '@/lib/tracking';
 import { displayId } from '@/lib/display';
 import { orderStatusLabel, orderTimeText } from '@/lib/order-flow';
-import { Button, Initials, UiIcon } from '@/components/shared/ui';
-import { DeliveryBadge } from '@/components/cleaner/DeliveryBadge';
+import { Button, Initials, UiIcon } from '@/components/ui';
+import { DeliveryBadge } from '@/components/DeliveryBadge';
 import {
   actionsClass,
   cardClass,

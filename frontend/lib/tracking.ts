@@ -1,6 +1,6 @@
 import type { AdminCleanerTask, TaskBoard } from '@/types/cleaner';
 
-export type BoardStaff = NonNullable<TaskBoard['staff']>[number];
+type BoardStaff = NonNullable<TaskBoard['staff']>[number];
 
 export type StaffGroup = {
   key: string;

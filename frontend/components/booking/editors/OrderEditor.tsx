@@ -10,10 +10,10 @@ import {
   UiIcon,
   buttonVariants,
   SubmitButton,
-} from '@/components/shared/ui';
+} from '@/components/ui';
 import { assignmentIssue } from '@/lib/staff-schedules';
 import { orderStatusLabel } from '@/lib/order-flow';
-import { StaffAvatar } from '@/components/staff/StaffAvatar';
+import { StaffAvatar } from '@/components/ui/StaffAvatar';
 import { CancelButton } from './CancelButton';
 import { Field } from './Field';
 import { FormFeedback } from './FormFeedback';

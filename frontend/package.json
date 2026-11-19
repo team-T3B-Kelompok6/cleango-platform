@@ -18,23 +18,23 @@
     "check:promo": "node scripts/check-promo-pricing.mjs",
     "qa:api": "node scripts/uts-qa-api.mjs",
     "check:uts:http": "node scripts/check-uts-http.mjs",
-    "format": "prettier --write app components lib types next.config.ts package.json tsconfig.json",
-    "format:check": "prettier --check app components lib types next.config.ts package.json tsconfig.json",
+    "format": "prettier --write app components features hooks lib store types scripts next.config.ts package.json tsconfig.json",
+    "format:check": "prettier --check app components features hooks lib store types scripts next.config.ts package.json tsconfig.json",
     "check:reports": "node scripts/check-reports.mjs",
     "check:pagination": "node scripts/check-pagination.mjs"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.108.0",
     "clsx": "^2.1.1",
-    "leaflet": "^1.9.4",
     "next": "16.4.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "server-only": "^0.0.1",
-    "tailwind-merge": "^3.7.0"
+    "tailwind-merge": "^3.7.0",
+    "zustand": "^5.1.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.5",
-    "@types/leaflet": "^1.9.22",
     "@types/node": "^24.0.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { DM_Sans, Plus_Jakarta_Sans } from 'next/font/google';
+import { Providers } from './providers';
 import './tokens.css';
 import './globals.css';
-import './admin.css';
 import './overrides.css';
 import './design.css';
 import './management.css';
@@ -29,7 +29,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id" className={body.variable + ' ' + heading.variable}>
-      <body>{children}</body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

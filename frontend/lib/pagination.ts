@@ -1,4 +1,4 @@
-export const PAGE_SIZE = 10;
+const PAGE_SIZE = 10;
 
 /** Nomor halaman dari query string; nilai aneh jatuh ke halaman 1. */
 export function parsePage(value: unknown) {

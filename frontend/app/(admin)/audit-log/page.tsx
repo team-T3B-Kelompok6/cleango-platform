@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-import { AuditLogView } from '@/components/audit';
 import type { Search } from '@/types';
+import { AuditPage } from '@/features/audit';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Audit Log Admin' };
@@ -10,5 +10,5 @@ export default async function Page({
 }: {
   searchParams: Promise<Search>;
 }) {
-  return <AuditLogView search={await searchParams} />;
+  return <AuditPage search={await searchParams} />;
 }

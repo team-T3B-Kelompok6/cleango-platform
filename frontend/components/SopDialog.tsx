@@ -1,8 +1,8 @@
 'use client';
 import { useState } from 'react';
-import { Modal } from '@/components/shared/ui/Modal';
-import { DialogFooter } from '@/components/shared/ui/DialogFooter';
-import { useDialogClose } from '@/components/shared/ui/DialogContext';
+import { Modal } from '@/components/ui/Modal';
+import { DialogFooter } from '@/components/ui/DialogFooter';
+import { useDialogClose } from '@/components/ui/DialogContext';
 
 type Step = 'Ringkasan' | 'Persiapan' | 'Pengerjaan' | 'Serah terima';
 const steps: Step[] = ['Ringkasan', 'Persiapan', 'Pengerjaan', 'Serah terima'];

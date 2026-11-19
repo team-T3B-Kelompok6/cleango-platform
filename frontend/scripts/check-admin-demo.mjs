@@ -1,7 +1,7 @@
 // Isolated frontend demo checks. Never reads/writes the user's demo directory.
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-import { readFileSync, mkdtempSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -21,9 +21,22 @@ function load(filename) {
   const require = createRequire(filename);
   const resolve = (id) => {
     if (id === 'server-only') return {};
-    if (id.startsWith('.'))
-      return load(path.resolve(path.dirname(filename), id + '.ts'));
-    if (id.startsWith('@/')) return load(path.join(root, id.slice(2) + '.ts'));
+    if (id.startsWith('.')) {
+      const base = path.resolve(path.dirname(filename), id);
+      return load(
+        existsSync(base + '.ts')
+          ? base + '.ts'
+          : existsSync(path.join(base, 'index.ts'))
+            ? path.join(base, 'index.ts')
+            : base + '.tsx',
+      );
+    }
+    if (id.startsWith('@/')) {
+      const base = path.join(root, id.slice(2));
+      return load(
+        existsSync(base + '.ts') ? base + '.ts' : path.join(base, 'index.ts'),
+      );
+    }
     return require(id);
   };
   const code = ts.transpileModule(readFileSync(filename, 'utf8'), {
@@ -119,7 +132,11 @@ await check(
       ),
     );
     assert.ok(datasets.faqs.every((item) => Number.isFinite(item.viewCount)));
-    assert.ok(datasets.staff.every((item) => item.joined && item.rating));
+    assert.ok(
+      datasets.staff.every(
+        (item) => item.joined && Array.isArray(item.skills) && item.phone,
+      ),
+    );
     assert.ok(
       datasets.services.every((item) => item.imageUrl && item.features.length),
     );

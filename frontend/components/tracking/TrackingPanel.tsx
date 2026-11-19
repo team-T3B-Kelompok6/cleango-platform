@@ -1,6 +1,6 @@
 'use client';
 import type { AdminCleanerTask } from '@/types/cleaner';
-import { Button } from '@/components/shared/ui';
+import { Button } from '@/components/ui';
 import { useTrackingPanel } from '@/hooks/useTrackingPanel';
 import { MonitorBoard } from './MonitorBoard';
 import { PreviewPane } from './PreviewPane';

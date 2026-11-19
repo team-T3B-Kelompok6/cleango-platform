@@ -1,1 +1,0 @@
-export { AuditLogView } from './AuditLogView';

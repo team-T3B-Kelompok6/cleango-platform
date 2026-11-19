@@ -4,7 +4,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { resources } from '@/lib/resources';
 import { detailFilterKeys } from '@/lib/detail-return';
 import type { Resource } from '@/types';
-import { buttonVariants } from '@/components/shared/ui';
+import { buttonVariants } from '@/components/ui';
 export function RecordDetailLink({
   resource,
   id,

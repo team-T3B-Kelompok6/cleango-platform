@@ -2,34 +2,35 @@ import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { list, detail } from '@/lib/api';
 import { resources, valueText, shiftOf } from '@/lib/resources';
-import { normalizeScheduleRows } from '@/lib/schedules';
-import { faqTabs } from '@/lib/faq';
+import { normalizeScheduleRows } from '@/features/schedules/data/scheduleRules';
+import { faqTabs } from '@/features/faqs';
 import { customerStats } from '@/lib/customers';
 import { pageHref, paginate, parsePage } from '@/lib/pagination';
 import { Filters } from '@/components/Filters';
-import { SearchField } from '@/components/shared/layout';
+import { SearchField } from '@/components/layouts';
 import {
   ButtonLink,
   EmptyState,
   PageHeader,
   Pagination,
   buttonVariants,
-} from '@/components/shared/ui';
-import { DialogTrigger } from '@/components/shared/ui/DialogTrigger';
+} from '@/components/ui';
+import { DialogTrigger } from '@/components/ui/DialogTrigger';
 import { ResourceFormServer } from '@/components/ResourceFormServer';
 import { Summary } from '@/components/ResourceSummary';
-import { OrderList } from '@/components/orders';
-import { ServiceList } from '@/components/services';
-import { PeopleList } from '@/components/people';
-import { FaqList } from '@/components/faq';
-import { ScheduleBoard } from '@/components/schedules';
+import { OrderList } from '@/features/orders';
+import { ServiceList } from '@/features/services';
+import { StaffList } from '@/features/staff';
+import { CustomerList } from '@/features/customers';
+import { FaqList } from '@/features/faqs';
+import { ScheduleBoard } from '@/features/schedules';
 import { TrackingButton } from '@/components/tracking';
 import { RecordDetailServer } from '@/components/RecordDetailServer';
 import { detailReturn } from '@/lib/detail-return';
-import { listCategories } from '@/lib/categories';
-import { CategoryManager } from '@/components/categories';
-import { PromoManagerServer } from '@/components/PromoManagerServer';
-import { UiIcon } from '@/components/shared/ui/UiIcon';
+import { listCategories } from '@/features/categories';
+import { CategoryManager } from '@/features/categories';
+import { PromoManagerServer } from '@/features/promos';
+import { UiIcon } from '@/components/ui/UiIcon';
 import { displayId } from '@/lib/display';
 import { newestOrderFirst } from '@/lib/order-flow';
 import { withOrderWorkTimes } from '@/lib/order-work-times';
@@ -362,7 +363,14 @@ export async function ResourceListPage({
           config={config}
           edit={edit}
         />
-        <PeopleList
+        <StaffList
+          shown={shown}
+          resource={resource}
+          tab={tab}
+          config={config}
+          edit={edit}
+        />
+        <CustomerList
           shown={shown}
           resource={resource}
           tab={tab}

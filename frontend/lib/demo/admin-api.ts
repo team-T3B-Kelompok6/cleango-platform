@@ -268,7 +268,8 @@ async function initialize() {
     store.entities.staff.forEach((person, index) => {
       person.joined ??= seed.date(-90 - index * 30);
       person.completedBookings ??= store.entities.orders.filter(
-        (order) => order.status === 'Selesai' && order.staff?.includes(person.name),
+        (order) =>
+          order.status === 'Selesai' && order.staff?.includes(person.name),
       ).length;
     });
     store.entities.customers.forEach((person, index) => {
@@ -416,8 +417,7 @@ export async function adminDemoRequest(
   if (url.pathname === '/uploads' && method === 'POST') {
     let file: File | null = null;
     if (options.body instanceof FormData) {
-      const entry =
-        options.body.get('file') ?? options.body.get('bannerImage');
+      const entry = options.body.get('file') ?? options.body.get('bannerImage');
       if (entry instanceof File) file = entry;
     } else if (options.body instanceof File) {
       file = options.body;

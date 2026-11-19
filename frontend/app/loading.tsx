@@ -1,4 +1,4 @@
-import { MetricGrid } from '@/components/shared/ui';
+import { MetricGrid } from '@/components/ui';
 
 export default function Loading() {
   return (

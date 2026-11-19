@@ -6,7 +6,7 @@ import {
   Modal,
   buttonVariants,
   UiIcon,
-} from '@/components/shared/ui';
+} from '@/components/ui';
 import { footerClass } from './data';
 
 type Location = NonNullable<CleanerTask['location']>;

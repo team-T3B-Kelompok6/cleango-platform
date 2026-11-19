@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Button, Modal, UiIcon } from '@/components/shared/ui';
+import { Button, Modal, UiIcon } from '@/components/ui';
 import { cn } from '@/lib/cn';
 import { TrackingPanel } from './TrackingPanel';
 

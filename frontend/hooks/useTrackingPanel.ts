@@ -4,7 +4,12 @@ import { useRouter } from 'next/navigation';
 import type { AdminCleanerTask, TaskBoard } from '@/types/cleaner';
 import type { RiskSnapshot } from '@/types/tracking';
 import { groupTasks, scheduledAt } from '@/lib/tracking';
-import { useDialogClose } from '@/components/shared/ui/DialogContext';
+import { useDialogClose } from '@/components/ui/DialogContext';
+import {
+  fetchTaskBoard,
+  requestRisk,
+  resendTaskLink,
+} from '@/components/tracking/trackingClientApi';
 
 /**
  * Kendali panel Pantau Petugas: memuat board, polling 5 detik, kirim ulang
@@ -45,15 +50,10 @@ export function useTrackingPanel({
 
   const load = useCallback(async () => {
     try {
-      const response = await fetch('/api/admin/cleaner-tasks', {
-        cache: 'no-store',
-      });
-      const result = await response.json();
-      if (!response.ok)
-        throw new Error(result.message || 'Data tugas belum dapat dimuat.');
-      setBoard(result.data);
+      const nextBoard = await fetchTaskBoard();
+      setBoard(nextBoard);
       setError('');
-      const next = result.data.revision || JSON.stringify(result.data.items);
+      const next = nextBoard.revision || JSON.stringify(nextBoard.items);
       if (signature.current !== next) router.refresh();
       signature.current = next;
     } catch (error) {
@@ -110,20 +110,12 @@ export function useTrackingPanel({
         : previous,
     );
     try {
-      const response = await fetch('/api/admin/cleaner-tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          intent: 'resend',
-          orderId: item.orderId,
-          staffName: item.staffName,
-        }),
+      const nextBoard = await resendTaskLink({
+        orderId: item.orderId,
+        staffName: item.staffName,
       });
-      const result = await response.json();
-      if (!response.ok)
-        throw new Error(result.message || 'Pengiriman belum berhasil.');
-      setBoard(result.data);
-      const record = result.data.items.find(
+      setBoard(nextBoard);
+      const record = nextBoard.items.find(
         (row: AdminCleanerTask) =>
           row.orderId === item.orderId && row.staffName === item.staffName,
       );
@@ -223,10 +215,8 @@ export function useTrackingPanel({
       return () => controller.abort();
     }
     setPredictionBusy(true);
-    void fetch('/api/tracking/risk', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    void requestRisk(
+      {
         cleanerLatitude: trackedLocation.latitude,
         cleanerLongitude: trackedLocation.longitude,
         destinationLatitude: destination.latitude,
@@ -240,17 +230,11 @@ export function useTrackingPanel({
           ? Math.max(0, (predictionAt.getTime() - locationUpdatedAt) / 1000)
           : 0,
         hasDeparted: true,
-      }),
-      signal: controller.signal,
-    })
-      .then(async (response) => {
-        const payload = (await response.json()) as {
-          data?: RiskSnapshot;
-          message?: string;
-        };
-        if (!response.ok || !payload.data)
-          throw new Error(payload.message ?? 'Prediksi belum tersedia.');
-        if (!controller.signal.aborted) setPrediction(payload.data);
+      },
+      controller.signal,
+    )
+      .then((data) => {
+        if (!controller.signal.aborted) setPrediction(data);
       })
       .catch((error: unknown) => {
         if (controller.signal.aborted) return;

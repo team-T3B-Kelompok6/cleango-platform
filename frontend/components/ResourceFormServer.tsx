@@ -9,12 +9,13 @@ import type {
   Service,
   Customer,
 } from '@/types';
-import { listCategories } from '@/lib/categories';
-import { ServiceForm } from '@/components/services';
-import { FaqForm } from '@/components/faq';
-import { CustomerForm } from '@/components/customers';
-import { StaffForm } from '@/components/staff/StaffForm';
-import { OrderEditor, ScheduleEditor } from '@/components/booking/editors';
+import { listCategories } from '@/features/categories';
+import { ServiceForm } from '@/features/services';
+import { FaqForm } from '@/features/faqs';
+import { CustomerForm } from '@/features/customers';
+import { StaffForm } from '@/features/staff';
+import { OrderEditor } from '@/components/booking/editors';
+import { ScheduleEditor } from '@/features/schedules';
 import { withOrderWorkTimes } from '@/lib/order-work-times';
 import { serviceMediaUrl } from '@/lib/service-media';
 import { staffPhotoSource } from '@/lib/staff-photo';

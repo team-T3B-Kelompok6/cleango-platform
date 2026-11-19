@@ -38,9 +38,8 @@ function load(file) {
     if (id === '@/lib/order-flow') return { orderTimeText: () => '' };
     if (id === 'next/link') return { default: 'a' };
     if (id === '@/components/tracking') return component('TrackingButton');
-    if (id === '@/components/staff/StaffAvatar')
-      return component('StaffAvatar');
-    if (id === '@/components/staff/StaffPhone') return component('StaffPhone');
+    if (id === '@/components/ui/StaffAvatar') return component('StaffAvatar');
+    if (id === '@/features/staff') return component('StaffPhone');
     if (id === '@/components/RecordActions')
       return {
         RecordActions: ({ children }) => ({
@@ -48,10 +47,10 @@ function load(file) {
           props: { children },
         }),
       };
-    // Barrel `shared/ui`: kembalikan komponen tiruan untuk nama apa pun.
-    if (id.startsWith('@/components/shared/ui/'))
+    // Barrel `components/ui`: kembalikan komponen tiruan untuk nama apa pun.
+    if (id.startsWith('@/components/ui/'))
       return component(id.split('/').at(-1));
-    if (id === '@/components/shared/ui')
+    if (id === '@/components/ui')
       return new Proxy(
         {},
         { get: (_, name) => (props) => ({ type: String(name), props }) },
@@ -82,13 +81,13 @@ const staff = {
   rating: 4.9,
   completedBookings: 2,
 };
-const { StaffRow } = load('components/people/StaffRow.tsx');
+const { StaffRow } = load('features/staff/components/StaffRow.tsx');
 const list = text(StaffRow({ item: staff, edit: () => null }));
 assert.ok(
   !list.includes('4.9'),
   'Staff list must not display legacy person rating',
 );
-const { StaffDetail } = load('components/staff/StaffDetail.tsx');
+const { StaffDetail } = load('features/staff/components/StaffDetail.tsx');
 const profile = text(
   StaffDetail({
     staff,

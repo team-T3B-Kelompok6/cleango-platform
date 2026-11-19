@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-import { readFileSync, mkdtempSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -30,9 +30,22 @@ function load(filename) {
           throw Object.assign(new Error('Redirect'), { redirect: url });
         },
       };
-    if (id.startsWith('.'))
-      return load(path.resolve(path.dirname(filename), id + '.ts'));
-    if (id.startsWith('@/')) return load(path.join(root, id.slice(2) + '.ts'));
+    if (id.startsWith('.')) {
+      const base = path.resolve(path.dirname(filename), id);
+      return load(
+        existsSync(base + '.ts')
+          ? base + '.ts'
+          : existsSync(path.join(base, 'index.ts'))
+            ? path.join(base, 'index.ts')
+            : base + '.tsx',
+      );
+    }
+    if (id.startsWith('@/')) {
+      const base = path.join(root, id.slice(2));
+      return load(
+        existsSync(base + '.ts') ? base + '.ts' : path.join(base, 'index.ts'),
+      );
+    }
     return require(id);
   };
   const code = ts.transpileModule(readFileSync(filename, 'utf8'), {
@@ -55,7 +68,7 @@ process.env.CLEANER_DEMO_DATA_DIR = mkdtempSync(
 );
 const audit = load(path.join(root, 'lib/audit.ts'));
 const demo = load(path.join(root, 'lib/demo/admin-api.ts'));
-const api = load(path.join(root, 'lib/audit-api.ts'));
+const api = load(path.join(root, 'features/audit/api/auditApi.ts'));
 globalThis.fetch = () => {
   throw new Error('Demo must not contact an upstream API');
 };

@@ -4,40 +4,9 @@
   flex-direction: column;
   max-height: calc(100dvh - 7rem);
 }
-.notification-body {
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-.notification-item {
-  padding: var(--space-15) var(--space-21);
-  border-bottom: 1px solid var(--border);
-  line-height: 1.6;
-}
-.notification-item:hover {
-  background: var(--color-156);
-}
 .notification-popover > .modal-footer {
   flex-shrink: 0;
   background: var(--surface);
-}
-.next-form .form-grid > div {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-7-2);
-  min-width: 0;
-}
-.next-form .form-grid > div > label {
-  color: var(--color-126);
-  font-weight: 600;
-}
-.next-form .form-grid > .full-width {
-  grid-column: 1/-1;
-}
-.next-form .field-hint {
-  color: var(--design-muted);
-  font-size: var(--text-10);
-  line-height: 1.5;
 }
 .modal[open]:not(.sop-dialog) {
   display: flex;
@@ -47,39 +16,9 @@
 .modal:not(.sop-dialog) > .modal-header {
   flex-shrink: 0;
 }
-.modal:not(.sop-dialog) > .next-form {
-  display: flex;
-  flex-direction: column;
-  flex-wrap: nowrap;
-  align-items: stretch;
-  gap: 0;
-  flex: 1;
-  min-height: 0;
-  min-width: 0;
-}
-.modal:not(.sop-dialog) .next-form > .modal-body {
-  flex: 1;
-  min-height: 0;
-  max-height: none;
-  overflow-y: auto;
-}
 .modal:not(.sop-dialog) > .modal-body {
   overflow-y: auto;
   min-height: 0;
-}
-.modal .next-form > .modal-footer {
-  background: var(--surface);
-  flex-shrink: 0;
-}
-.next-filter {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-18);
-  margin-top: var(--space-18);
-  margin-bottom: var(--space-18);
-}
-.next-filter .date-filter-anchor {
-  align-self: flex-end;
 }
 .global-search {
   width: min(32.5rem, 100%);
@@ -88,21 +27,9 @@
 .order-list {
   min-width: 0;
 }
-.record-detail {
-  line-height: 1.7;
-}
-.record-detail dd {
-  white-space: pre-line;
-}
 @media (max-width: 700px) {
   .global-search {
     display: none;
-  }
-  .next-filter .date-filter-anchor {
-    align-self: flex-start;
-  }
-  .order-actions {
-    flex-wrap: wrap;
   }
   .notification-popover {
     right: -5rem;
@@ -111,10 +38,6 @@
   .date-popover {
     width: min(29rem, calc(100vw - 3rem));
   }
-}
-
-.modal.order-form-dialog > .next-form {
-  flex: 1;
 }
 .mobile-search {
   display: none;

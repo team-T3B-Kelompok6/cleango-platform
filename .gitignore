@@ -15,6 +15,7 @@ Thumbs.db
 uploads/
 /backend/.local/
 /frontend/.next-*/
+.playwright-mcp/
 
 AGENTS.md
 docs/agents/

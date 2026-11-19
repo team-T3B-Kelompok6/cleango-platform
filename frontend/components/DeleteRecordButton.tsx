@@ -2,7 +2,7 @@ import { displayId } from '@/lib/display';
 import { deleteAction } from '@/app/actions';
 import { resources, valueText } from '@/lib/resources';
 import type { RecordData, Resource } from '@/types';
-import { ConfirmDialog } from '@/components/shared/ui';
+import { ConfirmDialog } from '@/components/ui';
 
 /** Tombol hapus baris daftar: dialog konfirmasi + server action. */
 export function DeleteRecordButton({

@@ -1,8 +1,8 @@
 import type { RefObject } from 'react';
 import type { AdminCleanerTask, TaskBoard } from '@/types/cleaner';
 import { displayId } from '@/lib/display';
-import { Button, buttonVariants, UiIcon } from '@/components/shared/ui';
-import { DeliveryBadge } from '@/components/cleaner/DeliveryBadge';
+import { Button, buttonVariants, UiIcon } from '@/components/ui';
+import { DeliveryBadge } from '@/components/DeliveryBadge';
 import {
   emptyClass,
   errorClass,

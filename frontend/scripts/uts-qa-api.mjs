@@ -2,7 +2,7 @@
 // All records/files use a new temporary directory and fictional contacts.
 import http from 'node:http';
 import { createRequire } from 'node:module';
-import { readFileSync, mkdtempSync } from 'node:fs';
+import { existsSync, readFileSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -26,7 +26,11 @@ function load(filename) {
       : id.startsWith('.')
         ? load(path.resolve(path.dirname(filename), id + '.ts'))
         : id.startsWith('@/')
-          ? load(path.join(root, id.slice(2) + '.ts'))
+          ? load(
+              existsSync(path.join(root, id.slice(2)) + '.ts')
+                ? path.join(root, id.slice(2) + '.ts')
+                : path.join(root, id.slice(2), 'index.ts'),
+            )
           : require(id);
   const code = ts.transpileModule(readFileSync(filename, 'utf8'), {
     compilerOptions: {

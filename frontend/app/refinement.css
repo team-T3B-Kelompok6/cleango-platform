@@ -1,7 +1,8 @@
 /* Shared operational surfaces: quiet color, clear hierarchy, compact forms. */
 .modal {
   --dialog-width: 560px;
-}.modal,
+}
+.modal,
 .modal.wide,
 .modal.order-form-dialog,
 .modal.sop-dialog,
@@ -17,12 +18,9 @@
 }
 .modal.wide {
   --dialog-width: 740px;
-}.modal.record-detail-dialog {
-  --dialog-width: 660px;
 }
-.modal.compact-dialog,
-.modal.confirmation-dialog {
-  --dialog-width: 480px;
+.modal.record-detail-dialog {
+  --dialog-width: 660px;
 }
 .modal.sop-dialog {
   --dialog-width: 800px;
@@ -47,10 +45,6 @@
   border-radius: 10px;
   background: #f3f5f4;
   color: #4b6257;
-}
-.modal.confirmation-dialog .modal-heading-icon {
-  background: #fbf0ef;
-  color: #b23730;
 }
 .modal .modal-header p {
   font-size: 13px;
@@ -83,12 +77,6 @@
 .modal .close-button:focus-visible {
   outline: 2px solid #087f60;
   outline-offset: 2px;
-}.modal .form-grid input:not([type='checkbox']):not([type='radio']),
-.modal .form-grid textarea,
-.modal .form-grid select {
-  background: #fff;
-  border-radius: 8px;
-  font-size: 14px;
 }
 .modal :is(input, textarea):read-only {
   background: #f6f8f7;
@@ -112,24 +100,6 @@
   min-height: 42px;
   box-shadow: none;
 }
-.modal .button.destructive,
-.modal .button.destructive:enabled {
-  background: #c23f38;
-  border-color: #c23f38;
-  color: #fff;
-  opacity: 1;
-}
-.modal .button.destructive:hover:enabled {
-  background: #a92e28;
-  border-color: #a92e28;
-  filter: none;
-}
-.modal .button.destructive:disabled {
-  background: #e8b4b0;
-  color: #fff;
-  border-color: #e8b4b0;
-  opacity: 1;
-}
 .modal .button.primary {
   background: #087f60;
   border-color: #087f60;
@@ -139,18 +109,10 @@
   background: #056d51;
   border-color: #056d51;
 }
-.modal .next-form {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
 .modal .modal-body {
   overflow-y: auto;
   overscroll-behavior: contain;
   min-height: 0;
-}
-.modal .next-form .modal-body {
-  flex: 1;
 }
 .modal .modal-header,
 .modal .modal-footer {
@@ -170,7 +132,8 @@
   line-height: 1.7;
 }
 
-@media (max-width: 760px) {.modal,
+@media (max-width: 760px) {
+  .modal,
   .modal.record-detail-dialog,
   .modal.wide {
     width: calc(100vw - 20px);

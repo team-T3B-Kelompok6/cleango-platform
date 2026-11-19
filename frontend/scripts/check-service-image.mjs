@@ -42,8 +42,8 @@ assert.equal(serviceMediaUrl('', origin), '');
 
 const sourceFiles = [
   'components/ResourceFormServer.tsx',
-  'components/services/ServiceCard.tsx',
-  'components/services/ServicePreview.tsx',
+  'features/services/components/ServiceCard.tsx',
+  'features/services/components/ServicePreview.tsx',
 ];
 for (const file of sourceFiles) {
   const source = readFileSync(new URL('../' + file, import.meta.url), 'utf8');
